@@ -229,6 +229,8 @@ on this controller.
 design, allowing higher throughput and a greater number of devices to be
 connected. You can connect up to 6 devices on this controller.
 
+* the *NVME* controller, You can connect up to 6 devices on this controller.
+
 * the *SCSI* controller, designed in 1985, is commonly found on server grade
 hardware, and can connect up to 14 storage devices. {pve} emulates by default a
 LSI 53C895A controller.
@@ -931,6 +933,8 @@ necessary footnote:[https://www.kraxel.org/blog/2014/10/qemu-using-cirrus-consid
 qemu: using cirrus considered harmful], for example, if using Windows XP or
 earlier
 * *vmware*, is a VMWare SVGA-II compatible adapter.
+* *ramfb*, is a qemu ramfb adapter.
+* *mdev*, is a vga display function by vfio-pci.Selecting this will enable vgpu device display theri fb.Support nvidia & mthreads vgpu.
 * *qxl*, is the QXL paravirtualized graphics card. Selecting this also
 enables https://www.spice-space.org/[SPICE] (a remote viewer protocol) for the
 VM.
@@ -1037,6 +1041,8 @@ standard setups.
 Some operating systems (such as Windows 11) may require use of an UEFI
 compatible implementation. In such cases, you must use *OVMF* instead,
 which is an open-source UEFI implementation. footnote:[See the OVMF Project https://github.com/tianocore/tianocore.github.io/wiki/OVMF]
+
+For arm64/riscv64/loongarch64 device , must use *OVMF* to boot os.
 
 There are other scenarios in which the SeaBIOS may not be the ideal firmware to
 boot from, for example if you want to do VGA passthrough. footnote:[Alex
@@ -1593,6 +1599,8 @@ Virtual Machine Templates
 
 One can convert a VM into a Template. Such templates are read-only,
 and you can use them to create linked clones.
+
+PXVIRT has two templates. pxvditemplate && template. The Pxvditemplate type can be started. This is often used in vdi scenarios.
 
 NOTE: It is not possible to start templates, because this would modify
 the disk images. If you want to change the template, create a linked

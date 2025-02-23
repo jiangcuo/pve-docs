@@ -90,6 +90,12 @@ hardware IOMMU. To enable these options, add:
 
 to the xref:sysboot_edit_kernel_cmdline[kernel commandline].
 
+ON arm64/loongarch64 platforms.IOMMU passthrough has enabled by default.IF you not use pve-port-kernel,to enable these options, add:
+
+----
+ iommu.passthrough=1
+----
+
 .Kernel Modules
 
 You have to make sure the following modules are loaded. This can be achieved by
@@ -131,11 +137,10 @@ Finally reboot to bring the changes into effect and check that it is indeed
 enabled.
 
 ----
-# dmesg | grep -e DMAR -e IOMMU -e AMD-Vi
+# dmesg |grep iommu
 ----
 
-should display that `IOMMU`, `Directed I/O` or `Interrupt Remapping` is
-enabled, depending on hardware and kernel the exact message can vary.
+should display that `Adding to iommu group X`,  depending on hardware and kernel the exact message can vary.
 
 For notes on how to troubleshoot or verify if IOMMU is working as intended, please
 see the https://pve.proxmox.com/wiki/PCI_Passthrough#Verifying_IOMMU_parameters[Verifying IOMMU Parameters]
@@ -163,7 +168,7 @@ desired `IOMMU` group separation.
 .Unsafe interrupts
 [NOTE]
 ====
-For some platforms, it may be necessary to allow unsafe interrupts.
+For some platforms(arm64/loongarch64), it may be necessary to allow unsafe interrupts.
 For this add  the following line in a file ending with `.conf' file in
 */etc/modprobe.d/*:
 
@@ -344,6 +349,8 @@ machine types.
 
 * *rombar=on|off* makes the firmware ROM visible for the guest. Default is on.
 Some PCI(e) devices need this disabled.
+
+* *ramfb=on|off* show ramfb device for vgpu device.default is on.
 
 * *romfile=<path>*, is an optional path to a ROM file for the device to use.
 This is a relative path under */usr/share/kvm/*.

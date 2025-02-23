@@ -106,3 +106,34 @@ https://en.wikipedia.org/wiki/List_of_AMD_processors[AMD processors]
 '+stibp-always-on', '+amd-psfd', '+no-nested-data-bp',
 '+lfence-always-serializing', '+null-sel-clr-base')
 
+ARM64 CPU Types
+-------------
+* 'cortex-a35' : qemu arm64 tcg supported
++
+* 'cortex-a53' : qemu arm64 tcg supported
++
+* 'cortex-a57' : qemu arm64 tcg supported
++
+* 'cortex-a72' : qemu arm64 tcg supported
++
+* 'cortex-a76' : qemu arm64 tcg supported
++
+* 'neoverse-n1' : qemu arm64 tcg supported
++
+* 'neoverse-n2' : qemu arm64 tcg supported
++
+* 'neoverse-v1' : qemu arm64 tcg supported
++
+* 'Kunpeng-920' : qemu tcg or kvm supported
+
+
+riscv64 CPU Types
+-------------
+
+* 'rv64' : qemu rv64 tcg support
+
+loongarch64 CPU Types
+-------------
+
+* 'la464' : qemu loongarch la464 tcg  or kvm support
+
