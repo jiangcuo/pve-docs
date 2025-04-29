@@ -82,7 +82,7 @@ NFS export path.
 
 Certificate SHA 256 fingerprint.
 
-`--format` `<string>` ::
+`--format` `<qcow2 | raw | subvol | vmdk>` ::
 
 Default image format.
 
@@ -106,7 +106,7 @@ iscsi provider
 
 Client keyring contents (for external clusters).
 
-`--krbd` `<boolean>` ::
+`--krbd` `<boolean>` ('default =' `0`)::
 
 Always access rbd through krbd kernel module.
 
@@ -276,9 +276,9 @@ The name of the file to create.
 
 Size in kilobyte (1024 bytes). Optional suffixes 'M' (megabyte, 1024K) and 'G' (gigabyte, 1024M)
 
-`--format` `<qcow2 | raw | subvol>` ::
+`--format` `<qcow2 | raw | subvol | vmdk>` ::
 
-no description available
+Format of the image.
 +
 NOTE: Requires option(s): `size`
 
@@ -650,7 +650,7 @@ Encryption key. Use 'autogen' to generate one automatically without passphrase.
 
 Certificate SHA 256 fingerprint.
 
-`--format` `<string>` ::
+`--format` `<qcow2 | raw | subvol | vmdk>` ::
 
 Default image format.
 
@@ -670,7 +670,7 @@ Assume the given path is an externally managed mountpoint and consider the stora
 
 Client keyring contents (for external clusters).
 
-`--krbd` `<boolean>` ::
+`--krbd` `<boolean>` ('default =' `0`)::
 
 Always access rbd through krbd kernel module.
 

@@ -84,6 +84,10 @@ backup, in which data blocks are copied while the VM is running. If the
 guest agent is enabled (`agent: 1`) and running, it calls
 `guest-fsfreeze-freeze` and `guest-fsfreeze-thaw` to improve
 consistency.
++
+NOTE: On Windows guests it is necessary to configure the guest agent if another
+backup software is used within the guest. See xref:qm_qga_fsfreeze[Freeze & Thaw]
+in the guest agent section for more details.
 
 A technical overview of the {pve} live backup for QemuServer can
 be found online
@@ -617,6 +621,12 @@ You can also manually specify (additional) exclude paths, for example:
 
 excludes the directory `/tmp/` and any file or directory named `/var/foo`,
 `/var/foobar`, and so on.
+
+WARNING: For backups to Proxmox Backup Server (PBS) and `suspend` mode backups,
+patterns with a trailing slash will match directories, but not files. On the
+other hand, for non-PBS `snapshot` mode and `stop` mode backups, patterns with a
+trailing slash currently do not match at all, because the `tar` command does not
+support that.
 
 Paths that do not start with a `/` are not anchored to the container's root,
 but will match relative to any subdirectory. For example:

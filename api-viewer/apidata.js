@@ -1148,31 +1148,29 @@ const apiSchema = [
                                     },
                                     "permissions" : {
                                        "check" : [
+                                          "and",
                                           [
-                                             "and",
+                                             "perm",
+                                             "/mapping/notifications",
+                                             [
+                                                "Mapping.Modify"
+                                             ]
+                                          ],
+                                          [
+                                             "or",
                                              [
                                                 "perm",
-                                                "/mapping/notifications",
+                                                "/",
                                                 [
-                                                   "Mapping.Modify"
+                                                   "Sys.Audit",
+                                                   "Sys.Modify"
                                                 ]
                                              ],
                                              [
-                                                "or",
+                                                "perm",
+                                                "/",
                                                 [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.Audit",
-                                                      "Sys.Modify"
-                                                   ]
-                                                ],
-                                                [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.AccessNetwork"
-                                                   ]
+                                                   "Sys.AccessNetwork"
                                                 ]
                                              ]
                                           ]
@@ -1349,31 +1347,29 @@ const apiSchema = [
                               },
                               "permissions" : {
                                  "check" : [
+                                    "and",
                                     [
-                                       "and",
+                                       "perm",
+                                       "/mapping/notifications",
+                                       [
+                                          "Mapping.Modify"
+                                       ]
+                                    ],
+                                    [
+                                       "or",
                                        [
                                           "perm",
-                                          "/mapping/notifications",
+                                          "/",
                                           [
-                                             "Mapping.Modify"
+                                             "Sys.Audit",
+                                             "Sys.Modify"
                                           ]
                                        ],
                                        [
-                                          "or",
+                                          "perm",
+                                          "/",
                                           [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.Audit",
-                                                "Sys.Modify"
-                                             ]
-                                          ],
-                                          [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.AccessNetwork"
-                                             ]
+                                             "Sys.AccessNetwork"
                                           ]
                                        ]
                                     ]
@@ -1550,31 +1546,29 @@ const apiSchema = [
                                     },
                                     "permissions" : {
                                        "check" : [
+                                          "and",
                                           [
-                                             "and",
+                                             "perm",
+                                             "/mapping/notifications",
+                                             [
+                                                "Mapping.Modify"
+                                             ]
+                                          ],
+                                          [
+                                             "or",
                                              [
                                                 "perm",
-                                                "/mapping/notifications",
+                                                "/",
                                                 [
-                                                   "Mapping.Modify"
+                                                   "Sys.Audit",
+                                                   "Sys.Modify"
                                                 ]
                                              ],
                                              [
-                                                "or",
+                                                "perm",
+                                                "/",
                                                 [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.Audit",
-                                                      "Sys.Modify"
-                                                   ]
-                                                ],
-                                                [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.AccessNetwork"
-                                                   ]
+                                                   "Sys.AccessNetwork"
                                                 ]
                                              ]
                                           ]
@@ -1695,31 +1689,29 @@ const apiSchema = [
                               },
                               "permissions" : {
                                  "check" : [
+                                    "and",
                                     [
-                                       "and",
+                                       "perm",
+                                       "/mapping/notifications",
+                                       [
+                                          "Mapping.Modify"
+                                       ]
+                                    ],
+                                    [
+                                       "or",
                                        [
                                           "perm",
-                                          "/mapping/notifications",
+                                          "/",
                                           [
-                                             "Mapping.Modify"
+                                             "Sys.Audit",
+                                             "Sys.Modify"
                                           ]
                                        ],
                                        [
-                                          "or",
+                                          "perm",
+                                          "/",
                                           [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.Audit",
-                                                "Sys.Modify"
-                                             ]
-                                          ],
-                                          [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.AccessNetwork"
-                                             ]
+                                             "Sys.AccessNetwork"
                                           ]
                                        ]
                                     ]
@@ -1998,31 +1990,29 @@ const apiSchema = [
                                     },
                                     "permissions" : {
                                        "check" : [
+                                          "and",
                                           [
-                                             "and",
+                                             "perm",
+                                             "/mapping/notifications",
+                                             [
+                                                "Mapping.Modify"
+                                             ]
+                                          ],
+                                          [
+                                             "or",
                                              [
                                                 "perm",
-                                                "/mapping/notifications",
+                                                "/",
                                                 [
-                                                   "Mapping.Modify"
+                                                   "Sys.Audit",
+                                                   "Sys.Modify"
                                                 ]
                                              ],
                                              [
-                                                "or",
+                                                "perm",
+                                                "/",
                                                 [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.Audit",
-                                                      "Sys.Modify"
-                                                   ]
-                                                ],
-                                                [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.AccessNetwork"
-                                                   ]
+                                                   "Sys.AccessNetwork"
                                                 ]
                                              ]
                                           ]
@@ -2256,31 +2246,29 @@ const apiSchema = [
                               },
                               "permissions" : {
                                  "check" : [
+                                    "and",
                                     [
-                                       "and",
+                                       "perm",
+                                       "/mapping/notifications",
+                                       [
+                                          "Mapping.Modify"
+                                       ]
+                                    ],
+                                    [
+                                       "or",
                                        [
                                           "perm",
-                                          "/mapping/notifications",
+                                          "/",
                                           [
-                                             "Mapping.Modify"
+                                             "Sys.Audit",
+                                             "Sys.Modify"
                                           ]
                                        ],
                                        [
-                                          "or",
+                                          "perm",
+                                          "/",
                                           [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.Audit",
-                                                "Sys.Modify"
-                                             ]
-                                          ],
-                                          [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.AccessNetwork"
-                                             ]
+                                             "Sys.AccessNetwork"
                                           ]
                                        ]
                                     ]
@@ -2515,31 +2503,29 @@ const apiSchema = [
                                     },
                                     "permissions" : {
                                        "check" : [
+                                          "and",
                                           [
-                                             "and",
+                                             "perm",
+                                             "/mapping/notifications",
+                                             [
+                                                "Mapping.Modify"
+                                             ]
+                                          ],
+                                          [
+                                             "or",
                                              [
                                                 "perm",
-                                                "/mapping/notifications",
+                                                "/",
                                                 [
-                                                   "Mapping.Modify"
+                                                   "Sys.Audit",
+                                                   "Sys.Modify"
                                                 ]
                                              ],
                                              [
-                                                "or",
+                                                "perm",
+                                                "/",
                                                 [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.Audit",
-                                                      "Sys.Modify"
-                                                   ]
-                                                ],
-                                                [
-                                                   "perm",
-                                                   "/",
-                                                   [
-                                                      "Sys.AccessNetwork"
-                                                   ]
+                                                   "Sys.AccessNetwork"
                                                 ]
                                              ]
                                           ]
@@ -2718,31 +2704,29 @@ const apiSchema = [
                               },
                               "permissions" : {
                                  "check" : [
+                                    "and",
                                     [
-                                       "and",
+                                       "perm",
+                                       "/mapping/notifications",
+                                       [
+                                          "Mapping.Modify"
+                                       ]
+                                    ],
+                                    [
+                                       "or",
                                        [
                                           "perm",
-                                          "/mapping/notifications",
+                                          "/",
                                           [
-                                             "Mapping.Modify"
+                                             "Sys.Audit",
+                                             "Sys.Modify"
                                           ]
                                        ],
                                        [
-                                          "or",
+                                          "perm",
+                                          "/",
                                           [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.Audit",
-                                                "Sys.Modify"
-                                             ]
-                                          ],
-                                          [
-                                             "perm",
-                                             "/",
-                                             [
-                                                "Sys.AccessNetwork"
-                                             ]
+                                             "Sys.AccessNetwork"
                                           ]
                                        ]
                                     ]
@@ -7671,7 +7655,7 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string",
                                        "typetext" : "<node>[:<pri>]{,<node>[:<pri>]}*",
-                                       "verbose_description" : "List of cluster node members, where a priority can be given to each node. A resource bound to a group will run on the available nodes with the highest priority. If there are more nodes in the highest priority class, the services will get distributed to those nodes. The priorities have a relative meaning only."
+                                       "verbose_description" : "List of cluster node members, where a priority can be given to each node. A resource bound to a group will run on the available nodes with the highest priority. If there are more nodes in the highest priority class, the services will get distributed to those nodes. The priorities have a relative meaning only. The higher the number, the higher the priority."
                                     },
                                     "nofailback" : {
                                        "default" : 0,
@@ -7774,7 +7758,7 @@ const apiSchema = [
                                  "optional" : 0,
                                  "type" : "string",
                                  "typetext" : "<node>[:<pri>]{,<node>[:<pri>]}*",
-                                 "verbose_description" : "List of cluster node members, where a priority can be given to each node. A resource bound to a group will run on the available nodes with the highest priority. If there are more nodes in the highest priority class, the services will get distributed to those nodes. The priorities have a relative meaning only."
+                                 "verbose_description" : "List of cluster node members, where a priority can be given to each node. A resource bound to a group will run on the available nodes with the highest priority. If there are more nodes in the highest priority class, the services will get distributed to those nodes. The priorities have a relative meaning only. The higher the number, the higher the priority."
                               },
                               "nofailback" : {
                                  "default" : 0,
@@ -8102,6 +8086,7 @@ const apiSchema = [
                                           "active24",
                                           "ad",
                                           "ali",
+                                          "alviy",
                                           "anx",
                                           "artfiles",
                                           "arvan",
@@ -8130,7 +8115,6 @@ const apiSchema = [
                                           "dnshome",
                                           "dnsimple",
                                           "dnsservices",
-                                          "do",
                                           "doapi",
                                           "domeneshop",
                                           "dp",
@@ -8163,6 +8147,7 @@ const apiSchema = [
                                           "internetbs",
                                           "inwx",
                                           "ionos",
+                                          "ionos_cloud",
                                           "ipv64",
                                           "ispconfig",
                                           "jd",
@@ -8174,6 +8159,7 @@ const apiSchema = [
                                           "la",
                                           "leaseweb",
                                           "lexicon",
+                                          "limacity",
                                           "linode",
                                           "linode_v4",
                                           "loopia",
@@ -8202,6 +8188,7 @@ const apiSchema = [
                                           "nsupdate",
                                           "nw",
                                           "oci",
+                                          "omglol",
                                           "one",
                                           "online",
                                           "openprovider",
@@ -8223,8 +8210,10 @@ const apiSchema = [
                                           "selfhost",
                                           "servercow",
                                           "simply",
+                                          "technitium",
                                           "tele3",
                                           "tencent",
+                                          "timeweb",
                                           "transip",
                                           "udr",
                                           "ultra",
@@ -8235,11 +8224,13 @@ const apiSchema = [
                                           "vscale",
                                           "vultr",
                                           "websupport",
+                                          "west_cn",
                                           "world4you",
-                                          "yandex",
+                                          "yandex360",
                                           "yc",
                                           "zilore",
                                           "zone",
+                                          "zoneedit",
                                           "zonomi"
                                        ],
                                        "optional" : 1,
@@ -8384,6 +8375,7 @@ const apiSchema = [
                                     "active24",
                                     "ad",
                                     "ali",
+                                    "alviy",
                                     "anx",
                                     "artfiles",
                                     "arvan",
@@ -8412,7 +8404,6 @@ const apiSchema = [
                                     "dnshome",
                                     "dnsimple",
                                     "dnsservices",
-                                    "do",
                                     "doapi",
                                     "domeneshop",
                                     "dp",
@@ -8445,6 +8436,7 @@ const apiSchema = [
                                     "internetbs",
                                     "inwx",
                                     "ionos",
+                                    "ionos_cloud",
                                     "ipv64",
                                     "ispconfig",
                                     "jd",
@@ -8456,6 +8448,7 @@ const apiSchema = [
                                     "la",
                                     "leaseweb",
                                     "lexicon",
+                                    "limacity",
                                     "linode",
                                     "linode_v4",
                                     "loopia",
@@ -8484,6 +8477,7 @@ const apiSchema = [
                                     "nsupdate",
                                     "nw",
                                     "oci",
+                                    "omglol",
                                     "one",
                                     "online",
                                     "openprovider",
@@ -8505,8 +8499,10 @@ const apiSchema = [
                                     "selfhost",
                                     "servercow",
                                     "simply",
+                                    "technitium",
                                     "tele3",
                                     "tencent",
+                                    "timeweb",
                                     "transip",
                                     "udr",
                                     "ultra",
@@ -8517,11 +8513,13 @@ const apiSchema = [
                                     "vscale",
                                     "vultr",
                                     "websupport",
+                                    "west_cn",
                                     "world4you",
-                                    "yandex",
+                                    "yandex360",
                                     "yc",
                                     "zilore",
                                     "zone",
+                                    "zoneedit",
                                     "zonomi"
                                  ],
                                  "optional" : 1,
@@ -9690,7 +9688,7 @@ const apiSchema = [
                                     },
                                     "remove-vanished" : {
                                        "default" : "none",
-                                       "description" : "A semicolon-seperated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
+                                       "description" : "A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
                                        "optional" : 1,
                                        "pattern" : "(?:(?:(?:acl|properties|entry);)*(?:acl|properties|entry))|none",
                                        "type" : "string",
@@ -9787,7 +9785,7 @@ const apiSchema = [
                                     },
                                     "remove-vanished" : {
                                        "default" : "none",
-                                       "description" : "A semicolon-seperated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
+                                       "description" : "A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
                                        "optional" : 1,
                                        "pattern" : "(?:(?:(?:acl|properties|entry);)*(?:acl|properties|entry))|none",
                                        "type" : "string",
@@ -9896,7 +9894,7 @@ const apiSchema = [
                                  },
                                  "remove-vanished" : {
                                     "default" : "none",
-                                    "description" : "A semicolon-seperated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
+                                    "description" : "A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
                                     "optional" : "1",
                                     "pattern" : "(?:(?:(?:acl|properties|entry);)*(?:acl|properties|entry))|none",
                                     "type" : "string",
@@ -10039,6 +10037,304 @@ const apiSchema = [
                         "info" : {
                            "DELETE" : {
                               "allowtoken" : 1,
+                              "description" : "Remove directory mapping.",
+                              "method" : "DELETE",
+                              "name" : "delete",
+                              "parameters" : {
+                                 "additionalProperties" : 0,
+                                 "properties" : {
+                                    "id" : {
+                                       "format" : "pve-configid",
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "perm",
+                                    "/mapping/dir",
+                                    [
+                                       "Mapping.Modify"
+                                    ]
+                                 ]
+                              },
+                              "protected" : 1,
+                              "returns" : {
+                                 "type" : "null"
+                              }
+                           },
+                           "GET" : {
+                              "allowtoken" : 1,
+                              "description" : "Get directory mapping.",
+                              "method" : "GET",
+                              "name" : "get",
+                              "parameters" : {
+                                 "additionalProperties" : 0,
+                                 "properties" : {
+                                    "id" : {
+                                       "format" : "pve-configid",
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "or",
+                                    [
+                                       "perm",
+                                       "/mapping/dir/{id}",
+                                       [
+                                          "Mapping.Use"
+                                       ]
+                                    ],
+                                    [
+                                       "perm",
+                                       "/mapping/dir/{id}",
+                                       [
+                                          "Mapping.Modify"
+                                       ]
+                                    ],
+                                    [
+                                       "perm",
+                                       "/mapping/dir/{id}",
+                                       [
+                                          "Mapping.Audit"
+                                       ]
+                                    ]
+                                 ]
+                              },
+                              "protected" : 1,
+                              "returns" : {
+                                 "type" : "object"
+                              }
+                           },
+                           "PUT" : {
+                              "allowtoken" : 1,
+                              "description" : "Update a directory mapping.",
+                              "method" : "PUT",
+                              "name" : "update",
+                              "parameters" : {
+                                 "additionalProperties" : 0,
+                                 "properties" : {
+                                    "delete" : {
+                                       "description" : "A list of settings you want to delete.",
+                                       "format" : "pve-configid-list",
+                                       "maxLength" : 4096,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "description" : {
+                                       "description" : "Description of the directory mapping",
+                                       "maxLength" : 4096,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "digest" : {
+                                       "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                       "maxLength" : 64,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "id" : {
+                                       "description" : "The ID of the directory mapping",
+                                       "format" : "pve-configid",
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "map" : {
+                                       "description" : "A list of maps for the cluster nodes.",
+                                       "items" : {
+                                          "format" : {
+                                             "node" : {
+                                                "description" : "The cluster node name.",
+                                                "format" : "pve-node",
+                                                "type" : "string"
+                                             },
+                                             "path" : {
+                                                "description" : "Absolute directory path that should be shared with the guest.",
+                                                "format" : "pve-storage-path-in-property-string",
+                                                "type" : "string"
+                                             }
+                                          },
+                                          "type" : "string"
+                                       },
+                                       "optional" : 1,
+                                       "type" : "array",
+                                       "typetext" : "<array>"
+                                    }
+                                 },
+                                 "type" : "object"
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "perm",
+                                    "/mapping/dir/{id}",
+                                    [
+                                       "Mapping.Modify"
+                                    ]
+                                 ]
+                              },
+                              "protected" : 1,
+                              "returns" : {
+                                 "type" : "null"
+                              }
+                           }
+                        },
+                        "leaf" : 1,
+                        "path" : "/cluster/mapping/dir/{id}",
+                        "text" : "{id}"
+                     }
+                  ],
+                  "info" : {
+                     "GET" : {
+                        "allowtoken" : 1,
+                        "description" : "List directory mapping",
+                        "method" : "GET",
+                        "name" : "index",
+                        "parameters" : {
+                           "additionalProperties" : 0,
+                           "properties" : {
+                              "check-node" : {
+                                 "description" : "If given, checks the configurations on the given node for correctness, and adds relevant diagnostics for the directory to the response.",
+                                 "format" : "pve-node",
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              }
+                           }
+                        },
+                        "permissions" : {
+                           "description" : "Only lists entries where you have 'Mapping.Modify', 'Mapping.Use' or 'Mapping.Audit' permissions on '/mapping/dir/<id>'.",
+                           "user" : "all"
+                        },
+                        "returns" : {
+                           "items" : {
+                              "properties" : {
+                                 "checks" : {
+                                    "description" : "A list of checks, only present if 'check-node' is set.",
+                                    "items" : {
+                                       "properties" : {
+                                          "message" : {
+                                             "description" : "The message of the error",
+                                             "type" : "string"
+                                          },
+                                          "severity" : {
+                                             "description" : "The severity of the error",
+                                             "enum" : [
+                                                "warning",
+                                                "error"
+                                             ],
+                                             "type" : "string"
+                                          }
+                                       },
+                                       "type" : "object"
+                                    },
+                                    "optional" : 1,
+                                    "type" : "array"
+                                 },
+                                 "description" : {
+                                    "description" : "A description of the logical mapping.",
+                                    "type" : "string"
+                                 },
+                                 "id" : {
+                                    "description" : "The logical ID of the mapping.",
+                                    "type" : "string"
+                                 },
+                                 "map" : {
+                                    "description" : "The entries of the mapping.",
+                                    "items" : {
+                                       "description" : "A mapping for a node.",
+                                       "type" : "string"
+                                    },
+                                    "type" : "array"
+                                 }
+                              },
+                              "type" : "object"
+                           },
+                           "links" : [
+                              {
+                                 "href" : "{id}",
+                                 "rel" : "child"
+                              }
+                           ],
+                           "type" : "array"
+                        }
+                     },
+                     "POST" : {
+                        "allowtoken" : 1,
+                        "description" : "Create a new directory mapping.",
+                        "method" : "POST",
+                        "name" : "create",
+                        "parameters" : {
+                           "additionalProperties" : 0,
+                           "properties" : {
+                              "description" : {
+                                 "description" : "Description of the directory mapping",
+                                 "maxLength" : 4096,
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              },
+                              "id" : {
+                                 "description" : "The ID of the directory mapping",
+                                 "format" : "pve-configid",
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              },
+                              "map" : {
+                                 "description" : "A list of maps for the cluster nodes.",
+                                 "items" : {
+                                    "format" : {
+                                       "node" : {
+                                          "description" : "The cluster node name.",
+                                          "format" : "pve-node",
+                                          "type" : "string"
+                                       },
+                                       "path" : {
+                                          "description" : "Absolute directory path that should be shared with the guest.",
+                                          "format" : "pve-storage-path-in-property-string",
+                                          "type" : "string"
+                                       }
+                                    },
+                                    "type" : "string"
+                                 },
+                                 "optional" : 0,
+                                 "type" : "array",
+                                 "typetext" : "<array>"
+                              }
+                           },
+                           "type" : "object"
+                        },
+                        "permissions" : {
+                           "check" : [
+                              "perm",
+                              "/mapping/dir",
+                              [
+                                 "Mapping.Modify"
+                              ]
+                           ]
+                        },
+                        "protected" : 1,
+                        "returns" : {
+                           "type" : "null"
+                        }
+                     }
+                  },
+                  "leaf" : 0,
+                  "path" : "/cluster/mapping/dir",
+                  "text" : "dir"
+               },
+               {
+                  "children" : [
+                     {
+                        "info" : {
+                           "DELETE" : {
+                              "allowtoken" : 1,
                               "description" : "Remove Hardware Mapping.",
                               "method" : "DELETE",
                               "name" : "delete",
@@ -10147,6 +10443,13 @@ const apiSchema = [
                                        "format" : "pve-configid",
                                        "type" : "string",
                                        "typetext" : "<string>"
+                                    },
+                                    "live-migration-capable" : {
+                                       "default" : 0,
+                                       "description" : "Marks the device(s) as being able to be live-migrated (Experimental). This needs hardware and driver support to work.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
                                     },
                                     "map" : {
                                        "description" : "A list of maps for the cluster nodes.",
@@ -10316,6 +10619,13 @@ const apiSchema = [
                                  "format" : "pve-configid",
                                  "type" : "string",
                                  "typetext" : "<string>"
+                              },
+                              "live-migration-capable" : {
+                                 "default" : 0,
+                                 "description" : "Marks the device(s) as being able to be live-migrated (Experimental). This needs hardware and driver support to work.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
                               },
                               "map" : {
                                  "description" : "A list of maps for the cluster nodes.",
@@ -13208,6 +13518,12 @@ const apiSchema = [
                                        "type" : "string",
                                        "typetext" : "<string>"
                                     },
+                                    "fingerprint" : {
+                                       "description" : "Certificate SHA 256 fingerprint.",
+                                       "optional" : 1,
+                                       "pattern" : "([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}",
+                                       "type" : "string"
+                                    },
                                     "ipam" : {
                                        "description" : "The SDN ipam object identifier.",
                                        "format" : "pve-sdn-ipam-id",
@@ -13306,6 +13622,12 @@ const apiSchema = [
                         "parameters" : {
                            "additionalProperties" : 0,
                            "properties" : {
+                              "fingerprint" : {
+                                 "description" : "Certificate SHA 256 fingerprint.",
+                                 "optional" : 1,
+                                 "pattern" : "([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}",
+                                 "type" : "string"
+                              },
                               "ipam" : {
                                  "description" : "The SDN ipam object identifier.",
                                  "format" : "pve-sdn-ipam-id",
@@ -13451,6 +13773,12 @@ const apiSchema = [
                                        "type" : "string",
                                        "typetext" : "<string>"
                                     },
+                                    "fingerprint" : {
+                                       "description" : "Certificate SHA 256 fingerprint.",
+                                       "optional" : 1,
+                                       "pattern" : "([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}",
+                                       "type" : "string"
+                                    },
                                     "key" : {
                                        "optional" : 1,
                                        "type" : "string",
@@ -13551,6 +13879,12 @@ const apiSchema = [
                                  "format" : "pve-sdn-dns-id",
                                  "type" : "string",
                                  "typetext" : "<string>"
+                              },
+                              "fingerprint" : {
+                                 "description" : "Certificate SHA 256 fingerprint.",
+                                 "optional" : 1,
+                                 "pattern" : "([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}",
+                                 "type" : "string"
                               },
                               "key" : {
                                  "optional" : 0,
@@ -14030,6 +14364,13 @@ const apiSchema = [
                            "optional" : 1,
                            "type" : "string",
                            "typetext" : "[clone=<LIMIT>] [,default=<LIMIT>] [,migration=<LIMIT>] [,move=<LIMIT>] [,restore=<LIMIT>]"
+                        },
+                        "consent-text" : {
+                           "description" : "Consent text that is displayed before logging in.",
+                           "maxLength" : 65536,
+                           "optional" : 1,
+                           "type" : "string",
+                           "typetext" : "<string>"
                         },
                         "console" : {
                            "description" : "Select the default Console viewer. You can either use the builtin java applet (VNC; deprecated and maps to html5), an external virt-viewer comtatible application (SPICE), an HTML5 based vnc viewer (noVNC), or an HTML5 based console client (xtermjs). If the selected viewer is not available (e.g. SPICE not activated for the VM), the fallback is noVNC.",
@@ -18354,7 +18695,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -18524,7 +18864,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -18838,6 +19177,16 @@ const apiSchema = [
                                           "machine" : {
                                              "description" : "Specify the QEMU machine.",
                                              "format" : {
+                                                "enable-s3" : {
+                                                   "description" : "Enables S3 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "enable-s4" : {
+                                                   "description" : "Enables S4 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
                                                 "type" : {
                                                    "default_key" : 1,
                                                    "description" : "Specifies the QEMU machine type.",
@@ -19132,30 +19481,7 @@ const apiSchema = [
                                           },
                                           "rng0" : {
                                              "description" : "Configure a VirtIO-based Random Number Generator.",
-                                             "format" : {
-                                                "max_bytes" : {
-                                                   "default" : 1024,
-                                                   "description" : "Maximum bytes of entropy allowed to get injected into the guest every 'period' milliseconds. Prefer a lower value when using '/dev/random' as source. Use `0` to disable limiting (potentially dangerous!).",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
-                                                "period" : {
-                                                   "default" : 1000,
-                                                   "description" : "Every 'period' milliseconds the entropy-injection quota is reset, allowing the guest to retrieve another 'max_bytes' of entropy.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
-                                                "source" : {
-                                                   "default_key" : 1,
-                                                   "description" : "The file on the host to gather entropy from. In most cases '/dev/urandom' should be preferred over '/dev/random' to avoid entropy-starvation issues on the host. Using urandom does *not* decrease security in any meaningful way, as it's still seeded from real entropy, and the bytes provided will most likely be mixed with real entropy on the guest as well. '/dev/hwrng' can be used to pass through a hardware RNG from the host.",
-                                                   "enum" : [
-                                                      "/dev/urandom",
-                                                      "/dev/random",
-                                                      "/dev/hwrng"
-                                                   ],
-                                                   "type" : "string"
-                                                }
-                                             },
+                                             "format" : "pve-qm-rng",
                                              "optional" : 1,
                                              "type" : "string"
                                           },
@@ -19264,7 +19590,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -19846,7 +20171,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -20462,7 +20786,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -20672,6 +20995,50 @@ const apiSchema = [
                                              "optional" : 1,
                                              "type" : "string"
                                           },
+                                          "virtiofs[n]" : {
+                                             "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
+                                             "format" : {
+                                                "cache" : {
+                                                   "default" : "auto",
+                                                   "description" : "The caching policy the file system should use (auto, always, metadata, never).",
+                                                   "enum" : [
+                                                      "auto",
+                                                      "always",
+                                                      "metadata",
+                                                      "never"
+                                                   ],
+                                                   "optional" : 1,
+                                                   "type" : "string"
+                                                },
+                                                "direct-io" : {
+                                                   "default" : 0,
+                                                   "description" : "Honor the O_DIRECT flag passed down by guest applications.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "dirid" : {
+                                                   "default_key" : 1,
+                                                   "description" : "Mapping identifier of the directory mapping to be shared with the guest. Also used as a mount tag inside the VM.",
+                                                   "format" : "pve-configid",
+                                                   "format_description" : "mapping-id",
+                                                   "type" : "string"
+                                                },
+                                                "expose-acl" : {
+                                                   "default" : 0,
+                                                   "description" : "Enable support for POSIX ACLs (enabled ACL implies xattr) for this mount.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "expose-xattr" : {
+                                                   "default" : 0,
+                                                   "description" : "Enable support for extended attributes for this mount.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                }
+                                             },
+                                             "optional" : 1,
+                                             "type" : "string"
+                                          },
                                           "vmgenid" : {
                                              "default" : "1 (autogenerated)",
                                              "description" : "Set VM Generation ID. Use '1' to autogenerate on create or update, pass '0' to disable explicitly.",
@@ -20771,7 +21138,7 @@ const apiSchema = [
                                              "format" : "pve-qemu-sev-fmt",
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[type=]<sev-type> [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
+                                             "typetext" : "[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
                                           },
                                           "arch" : {
                                              "description" : "Virtual processor architecture. Defaults to the host.",
@@ -20987,7 +21354,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -21176,7 +21542,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -21511,6 +21876,16 @@ const apiSchema = [
                                           "machine" : {
                                              "description" : "Specify the QEMU machine.",
                                              "format" : {
+                                                "enable-s3" : {
+                                                   "description" : "Enables S3 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "enable-s4" : {
+                                                   "description" : "Enables S4 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
                                                 "type" : {
                                                    "default_key" : 1,
                                                    "description" : "Specifies the QEMU machine type.",
@@ -21532,7 +21907,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[[type=]<machine type>] [,viommu=<intel|virtio>]"
+                                             "typetext" : "[[type=]<machine type>] [,enable-s3=<1|0>] [,enable-s4=<1|0>] [,viommu=<intel|virtio>]"
                                           },
                                           "memory" : {
                                              "description" : "Memory properties.",
@@ -21830,30 +22205,7 @@ const apiSchema = [
                                           },
                                           "rng0" : {
                                              "description" : "Configure a VirtIO-based Random Number Generator.",
-                                             "format" : {
-                                                "max_bytes" : {
-                                                   "default" : 1024,
-                                                   "description" : "Maximum bytes of entropy allowed to get injected into the guest every 'period' milliseconds. Prefer a lower value when using '/dev/random' as source. Use `0` to disable limiting (potentially dangerous!).",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
-                                                "period" : {
-                                                   "default" : 1000,
-                                                   "description" : "Every 'period' milliseconds the entropy-injection quota is reset, allowing the guest to retrieve another 'max_bytes' of entropy.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
-                                                "source" : {
-                                                   "default_key" : 1,
-                                                   "description" : "The file on the host to gather entropy from. In most cases '/dev/urandom' should be preferred over '/dev/random' to avoid entropy-starvation issues on the host. Using urandom does *not* decrease security in any meaningful way, as it's still seeded from real entropy, and the bytes provided will most likely be mixed with real entropy on the guest as well. '/dev/hwrng' can be used to pass through a hardware RNG from the host.",
-                                                   "enum" : [
-                                                      "/dev/urandom",
-                                                      "/dev/random",
-                                                      "/dev/hwrng"
-                                                   ],
-                                                   "type" : "string"
-                                                }
-                                             },
+                                             "format" : "pve-qm-rng",
                                              "optional" : 1,
                                              "type" : "string",
                                              "typetext" : "[source=]</dev/urandom|/dev/random|/dev/hwrng> [,max_bytes=<integer>] [,period=<integer>]"
@@ -21963,7 +22315,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -22553,7 +22904,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -23207,7 +23557,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -23425,6 +23774,51 @@ const apiSchema = [
                                              "type" : "string",
                                              "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]"
                                           },
+                                          "virtiofs[n]" : {
+                                             "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
+                                             "format" : {
+                                                "cache" : {
+                                                   "default" : "auto",
+                                                   "description" : "The caching policy the file system should use (auto, always, metadata, never).",
+                                                   "enum" : [
+                                                      "auto",
+                                                      "always",
+                                                      "metadata",
+                                                      "never"
+                                                   ],
+                                                   "optional" : 1,
+                                                   "type" : "string"
+                                                },
+                                                "direct-io" : {
+                                                   "default" : 0,
+                                                   "description" : "Honor the O_DIRECT flag passed down by guest applications.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "dirid" : {
+                                                   "default_key" : 1,
+                                                   "description" : "Mapping identifier of the directory mapping to be shared with the guest. Also used as a mount tag inside the VM.",
+                                                   "format" : "pve-configid",
+                                                   "format_description" : "mapping-id",
+                                                   "type" : "string"
+                                                },
+                                                "expose-acl" : {
+                                                   "default" : 0,
+                                                   "description" : "Enable support for POSIX ACLs (enabled ACL implies xattr) for this mount.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "expose-xattr" : {
+                                                   "default" : 0,
+                                                   "description" : "Enable support for extended attributes for this mount.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                }
+                                             },
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "[dirid=]<mapping-id> [,cache=<enum>] [,direct-io=<1|0>] [,expose-acl=<1|0>] [,expose-xattr=<1|0>]"
+                                          },
                                           "vmgenid" : {
                                              "default" : "1 (autogenerated)",
                                              "description" : "Set VM Generation ID. Use '1' to autogenerate on create or update, pass '0' to disable explicitly.",
@@ -23557,7 +23951,7 @@ const apiSchema = [
                                              "format" : "pve-qemu-sev-fmt",
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[type=]<sev-type> [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
+                                             "typetext" : "[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
                                           },
                                           "arch" : {
                                              "description" : "Virtual processor architecture. Defaults to the host.",
@@ -23765,7 +24159,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -23954,7 +24347,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -24281,6 +24673,16 @@ const apiSchema = [
                                           "machine" : {
                                              "description" : "Specify the QEMU machine.",
                                              "format" : {
+                                                "enable-s3" : {
+                                                   "description" : "Enables S3 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "enable-s4" : {
+                                                   "description" : "Enables S4 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
                                                 "type" : {
                                                    "default_key" : 1,
                                                    "description" : "Specifies the QEMU machine type.",
@@ -24302,7 +24704,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[[type=]<machine type>] [,viommu=<intel|virtio>]"
+                                             "typetext" : "[[type=]<machine type>] [,enable-s3=<1|0>] [,enable-s4=<1|0>] [,viommu=<intel|virtio>]"
                                           },
                                           "memory" : {
                                              "description" : "Memory properties.",
@@ -24600,30 +25002,7 @@ const apiSchema = [
                                           },
                                           "rng0" : {
                                              "description" : "Configure a VirtIO-based Random Number Generator.",
-                                             "format" : {
-                                                "max_bytes" : {
-                                                   "default" : 1024,
-                                                   "description" : "Maximum bytes of entropy allowed to get injected into the guest every 'period' milliseconds. Prefer a lower value when using '/dev/random' as source. Use `0` to disable limiting (potentially dangerous!).",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
-                                                "period" : {
-                                                   "default" : 1000,
-                                                   "description" : "Every 'period' milliseconds the entropy-injection quota is reset, allowing the guest to retrieve another 'max_bytes' of entropy.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
-                                                "source" : {
-                                                   "default_key" : 1,
-                                                   "description" : "The file on the host to gather entropy from. In most cases '/dev/urandom' should be preferred over '/dev/random' to avoid entropy-starvation issues on the host. Using urandom does *not* decrease security in any meaningful way, as it's still seeded from real entropy, and the bytes provided will most likely be mixed with real entropy on the guest as well. '/dev/hwrng' can be used to pass through a hardware RNG from the host.",
-                                                   "enum" : [
-                                                      "/dev/urandom",
-                                                      "/dev/random",
-                                                      "/dev/hwrng"
-                                                   ],
-                                                   "type" : "string"
-                                                }
-                                             },
+                                             "format" : "pve-qm-rng",
                                              "optional" : 1,
                                              "type" : "string",
                                              "typetext" : "[source=]</dev/urandom|/dev/random|/dev/hwrng> [,max_bytes=<integer>] [,period=<integer>]"
@@ -24733,7 +25112,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -25323,7 +25701,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -25977,7 +26354,6 @@ const apiSchema = [
                                                    "description" : "The drive's backing file's data format.",
                                                    "enum" : [
                                                       "raw",
-                                                      "cow",
                                                       "qcow",
                                                       "qed",
                                                       "qcow2",
@@ -26194,6 +26570,51 @@ const apiSchema = [
                                              "optional" : 1,
                                              "type" : "string",
                                              "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]"
+                                          },
+                                          "virtiofs[n]" : {
+                                             "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
+                                             "format" : {
+                                                "cache" : {
+                                                   "default" : "auto",
+                                                   "description" : "The caching policy the file system should use (auto, always, metadata, never).",
+                                                   "enum" : [
+                                                      "auto",
+                                                      "always",
+                                                      "metadata",
+                                                      "never"
+                                                   ],
+                                                   "optional" : 1,
+                                                   "type" : "string"
+                                                },
+                                                "direct-io" : {
+                                                   "default" : 0,
+                                                   "description" : "Honor the O_DIRECT flag passed down by guest applications.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "dirid" : {
+                                                   "default_key" : 1,
+                                                   "description" : "Mapping identifier of the directory mapping to be shared with the guest. Also used as a mount tag inside the VM.",
+                                                   "format" : "pve-configid",
+                                                   "format_description" : "mapping-id",
+                                                   "type" : "string"
+                                                },
+                                                "expose-acl" : {
+                                                   "default" : 0,
+                                                   "description" : "Enable support for POSIX ACLs (enabled ACL implies xattr) for this mount.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                },
+                                                "expose-xattr" : {
+                                                   "default" : 0,
+                                                   "description" : "Enable support for extended attributes for this mount.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
+                                                }
+                                             },
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "[dirid=]<mapping-id> [,cache=<enum>] [,direct-io=<1|0>] [,expose-acl=<1|0>] [,expose-xattr=<1|0>]"
                                           },
                                           "vmgenid" : {
                                              "default" : "1 (autogenerated)",
@@ -26901,6 +27322,11 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
+                                                "cpu" : {
+                                                   "description" : "Current CPU usage.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
                                                 "cpus" : {
                                                    "description" : "Maximum usable CPUs.",
                                                    "optional" : 1,
@@ -26935,6 +27361,12 @@ const apiSchema = [
                                                 },
                                                 "maxmem" : {
                                                    "description" : "Maximum memory in bytes.",
+                                                   "optional" : 1,
+                                                   "renderer" : "bytes",
+                                                   "type" : "integer"
+                                                },
+                                                "mem" : {
+                                                   "description" : "Currently used memory in bytes.",
                                                    "optional" : 1,
                                                    "renderer" : "bytes",
                                                    "type" : "integer"
@@ -26975,6 +27407,11 @@ const apiSchema = [
                                                    "description" : "The QEMU version the VM is currently using (if running).",
                                                    "optional" : 1,
                                                    "type" : "string"
+                                                },
+                                                "serial" : {
+                                                   "description" : "Guest has serial device configured.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean"
                                                 },
                                                 "spice" : {
                                                    "description" : "QEMU VGA configuration supports spice.",
@@ -27047,6 +27484,16 @@ const apiSchema = [
                                                 "machine" : {
                                                    "description" : "Specify the QEMU machine.",
                                                    "format" : {
+                                                      "enable-s3" : {
+                                                         "description" : "Enables S3 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                         "optional" : 1,
+                                                         "type" : "boolean"
+                                                      },
+                                                      "enable-s4" : {
+                                                         "description" : "Enables S4 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                                         "optional" : 1,
+                                                         "type" : "boolean"
+                                                      },
                                                       "type" : {
                                                          "default_key" : 1,
                                                          "description" : "Specifies the QEMU machine type.",
@@ -27068,7 +27515,7 @@ const apiSchema = [
                                                    },
                                                    "optional" : 1,
                                                    "type" : "string",
-                                                   "typetext" : "[[type=]<machine type>] [,viommu=<intel|virtio>]"
+                                                   "typetext" : "[[type=]<machine type>] [,enable-s3=<1|0>] [,enable-s4=<1|0>] [,viommu=<intel|virtio>]"
                                                 },
                                                 "migratedfrom" : {
                                                    "description" : "The cluster node name.",
@@ -29368,28 +29815,77 @@ const apiSchema = [
                                     "returns" : {
                                        "properties" : {
                                           "allowed_nodes" : {
-                                             "description" : "List nodes allowed for offline migration, only passed if VM is offline",
+                                             "description" : "List of nodes allowed for migration.",
+                                             "items" : {
+                                                "description" : "An allowed node",
+                                                "type" : "string"
+                                             },
                                              "optional" : 1,
                                              "type" : "array"
                                           },
                                           "local_disks" : {
                                              "description" : "List local disks including CD-Rom, unused and not referenced disks",
+                                             "items" : {
+                                                "properties" : {
+                                                   "cdrom" : {
+                                                      "description" : "True if the disk is a cdrom.",
+                                                      "type" : "boolean"
+                                                   },
+                                                   "is_unused" : {
+                                                      "description" : "True if the disk is unused.",
+                                                      "type" : "boolean"
+                                                   },
+                                                   "size" : {
+                                                      "description" : "The size of the disk in bytes.",
+                                                      "type" : "integer"
+                                                   },
+                                                   "volid" : {
+                                                      "description" : "The volid of the disk.",
+                                                      "type" : "string"
+                                                   }
+                                                },
+                                                "type" : "object"
+                                             },
                                              "type" : "array"
                                           },
                                           "local_resources" : {
-                                             "description" : "List local resources e.g. pci, usb",
+                                             "description" : "List local resources (e.g. pci, usb) that block migration.",
+                                             "items" : {
+                                                "description" : "A local resource",
+                                                "type" : "string"
+                                             },
                                              "type" : "array"
                                           },
+                                          "mapped-resource-info" : {
+                                             "description" : "Object of mapped resources with additional information such if they're live migratable.",
+                                             "type" : "object"
+                                          },
                                           "mapped-resources" : {
-                                             "description" : "List of mapped resources e.g. pci, usb",
+                                             "description" : "List of mapped resources e.g. pci, usb. Deprecated, use 'mapped-resource-info' instead.",
+                                             "items" : {
+                                                "description" : "A mapped resource",
+                                                "type" : "string"
+                                             },
                                              "type" : "array"
                                           },
                                           "not_allowed_nodes" : {
-                                             "description" : "List not allowed nodes with additional information, only passed if VM is offline",
+                                             "description" : "List of not allowed nodes with additional information.",
                                              "optional" : 1,
+                                             "properties" : {
+                                                "unavailable_storages" : {
+                                                   "description" : "A list of not available storages.",
+                                                   "items" : {
+                                                      "description" : "A storage",
+                                                      "type" : "string"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                }
+                                             },
                                              "type" : "object"
                                           },
                                           "running" : {
+                                             "description" : "Determines if the VM is running.",
                                              "type" : "boolean"
                                           }
                                        },
@@ -30596,6 +31092,11 @@ const apiSchema = [
                         "returns" : {
                            "items" : {
                               "properties" : {
+                                 "cpu" : {
+                                    "description" : "Current CPU usage.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
                                  "cpus" : {
                                     "description" : "Maximum usable CPUs.",
                                     "optional" : 1,
@@ -30626,6 +31127,12 @@ const apiSchema = [
                                  },
                                  "maxmem" : {
                                     "description" : "Maximum memory in bytes.",
+                                    "optional" : 1,
+                                    "renderer" : "bytes",
+                                    "type" : "integer"
+                                 },
+                                 "mem" : {
+                                    "description" : "Currently used memory in bytes.",
                                     "optional" : 1,
                                     "renderer" : "bytes",
                                     "type" : "integer"
@@ -30666,6 +31173,11 @@ const apiSchema = [
                                     "description" : "The QEMU version the VM is currently using (if running).",
                                     "optional" : 1,
                                     "type" : "string"
+                                 },
+                                 "serial" : {
+                                    "description" : "Guest has serial device configured.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
                                  },
                                  "status" : {
                                     "description" : "QEMU process status.",
@@ -30796,7 +31308,7 @@ const apiSchema = [
                                  "format" : "pve-qemu-sev-fmt",
                                  "optional" : 1,
                                  "type" : "string",
-                                 "typetext" : "[type=]<sev-type> [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
+                                 "typetext" : "[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
                               },
                               "arch" : {
                                  "description" : "Virtual processor architecture. Defaults to the host.",
@@ -31005,7 +31517,6 @@ const apiSchema = [
                                        "description" : "The drive's backing file's data format.",
                                        "enum" : [
                                           "raw",
-                                          "cow",
                                           "qcow",
                                           "qed",
                                           "qcow2",
@@ -31194,7 +31705,6 @@ const apiSchema = [
                                        "description" : "The drive's backing file's data format.",
                                        "enum" : [
                                           "raw",
-                                          "cow",
                                           "qcow",
                                           "qed",
                                           "qcow2",
@@ -31535,6 +32045,16 @@ const apiSchema = [
                               "machine" : {
                                  "description" : "Specify the QEMU machine.",
                                  "format" : {
+                                    "enable-s3" : {
+                                       "description" : "Enables S3 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                       "optional" : 1,
+                                       "type" : "boolean"
+                                    },
+                                    "enable-s4" : {
+                                       "description" : "Enables S4 power state. Defaults to false beginning with machine types 9.2+pve1, true before.",
+                                       "optional" : 1,
+                                       "type" : "boolean"
+                                    },
                                     "type" : {
                                        "default_key" : 1,
                                        "description" : "Specifies the QEMU machine type.",
@@ -31556,7 +32076,7 @@ const apiSchema = [
                                  },
                                  "optional" : 1,
                                  "type" : "string",
-                                 "typetext" : "[[type=]<machine type>] [,viommu=<intel|virtio>]"
+                                 "typetext" : "[[type=]<machine type>] [,enable-s3=<1|0>] [,enable-s4=<1|0>] [,viommu=<intel|virtio>]"
                               },
                               "memory" : {
                                  "description" : "Memory properties.",
@@ -31854,30 +32374,7 @@ const apiSchema = [
                               },
                               "rng0" : {
                                  "description" : "Configure a VirtIO-based Random Number Generator.",
-                                 "format" : {
-                                    "max_bytes" : {
-                                       "default" : 1024,
-                                       "description" : "Maximum bytes of entropy allowed to get injected into the guest every 'period' milliseconds. Prefer a lower value when using '/dev/random' as source. Use `0` to disable limiting (potentially dangerous!).",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
-                                    "period" : {
-                                       "default" : 1000,
-                                       "description" : "Every 'period' milliseconds the entropy-injection quota is reset, allowing the guest to retrieve another 'max_bytes' of entropy.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
-                                    "source" : {
-                                       "default_key" : 1,
-                                       "description" : "The file on the host to gather entropy from. In most cases '/dev/urandom' should be preferred over '/dev/random' to avoid entropy-starvation issues on the host. Using urandom does *not* decrease security in any meaningful way, as it's still seeded from real entropy, and the bytes provided will most likely be mixed with real entropy on the guest as well. '/dev/hwrng' can be used to pass through a hardware RNG from the host.",
-                                       "enum" : [
-                                          "/dev/urandom",
-                                          "/dev/random",
-                                          "/dev/hwrng"
-                                       ],
-                                       "type" : "string"
-                                    }
-                                 },
+                                 "format" : "pve-qm-rng",
                                  "optional" : 1,
                                  "type" : "string",
                                  "typetext" : "[source=]</dev/urandom|/dev/random|/dev/hwrng> [,max_bytes=<integer>] [,period=<integer>]"
@@ -31987,7 +32484,6 @@ const apiSchema = [
                                        "description" : "The drive's backing file's data format.",
                                        "enum" : [
                                           "raw",
-                                          "cow",
                                           "qcow",
                                           "qed",
                                           "qcow2",
@@ -32577,7 +33073,6 @@ const apiSchema = [
                                        "description" : "The drive's backing file's data format.",
                                        "enum" : [
                                           "raw",
-                                          "cow",
                                           "qcow",
                                           "qed",
                                           "qcow2",
@@ -33246,7 +33741,6 @@ const apiSchema = [
                                        "description" : "The drive's backing file's data format.",
                                        "enum" : [
                                           "raw",
-                                          "cow",
                                           "qcow",
                                           "qed",
                                           "qcow2",
@@ -33463,6 +33957,51 @@ const apiSchema = [
                                  "optional" : 1,
                                  "type" : "string",
                                  "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]"
+                              },
+                              "virtiofs[n]" : {
+                                 "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
+                                 "format" : {
+                                    "cache" : {
+                                       "default" : "auto",
+                                       "description" : "The caching policy the file system should use (auto, always, metadata, never).",
+                                       "enum" : [
+                                          "auto",
+                                          "always",
+                                          "metadata",
+                                          "never"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string"
+                                    },
+                                    "direct-io" : {
+                                       "default" : 0,
+                                       "description" : "Honor the O_DIRECT flag passed down by guest applications.",
+                                       "optional" : 1,
+                                       "type" : "boolean"
+                                    },
+                                    "dirid" : {
+                                       "default_key" : 1,
+                                       "description" : "Mapping identifier of the directory mapping to be shared with the guest. Also used as a mount tag inside the VM.",
+                                       "format" : "pve-configid",
+                                       "format_description" : "mapping-id",
+                                       "type" : "string"
+                                    },
+                                    "expose-acl" : {
+                                       "default" : 0,
+                                       "description" : "Enable support for POSIX ACLs (enabled ACL implies xattr) for this mount.",
+                                       "optional" : 1,
+                                       "type" : "boolean"
+                                    },
+                                    "expose-xattr" : {
+                                       "default" : 0,
+                                       "description" : "Enable support for extended attributes for this mount.",
+                                       "optional" : 1,
+                                       "type" : "boolean"
+                                    }
+                                 },
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "[dirid=]<mapping-id> [,cache=<enum>] [,direct-io=<1|0>] [,expose-acl=<1|0>] [,expose-xattr=<1|0>]"
                               },
                               "vmgenid" : {
                                  "default" : "1 (autogenerated)",
@@ -34784,6 +35323,11 @@ const apiSchema = [
                                           "proxyto" : "node",
                                           "returns" : {
                                              "properties" : {
+                                                "cpu" : {
+                                                   "description" : "Current CPU usage.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
                                                 "cpus" : {
                                                    "description" : "Maximum usable CPUs.",
                                                    "optional" : 1,
@@ -34831,6 +35375,12 @@ const apiSchema = [
                                                 },
                                                 "maxswap" : {
                                                    "description" : "Maximum SWAP memory in bytes.",
+                                                   "optional" : 1,
+                                                   "renderer" : "bytes",
+                                                   "type" : "integer"
+                                                },
+                                                "mem" : {
+                                                   "description" : "Currently used memory in bytes.",
                                                    "optional" : 1,
                                                    "renderer" : "bytes",
                                                    "type" : "integer"
@@ -40006,6 +40556,11 @@ const apiSchema = [
                                     "returns" : {
                                        "items" : {
                                           "properties" : {
+                                             "hardware-address" : {
+                                                "description" : "The MAC address of the interface",
+                                                "optional" : 0,
+                                                "type" : "string"
+                                             },
                                              "hwaddr" : {
                                                 "description" : "The MAC address of the interface",
                                                 "optional" : 0,
@@ -40020,6 +40575,31 @@ const apiSchema = [
                                                 "description" : "The IPv6 address of the interface",
                                                 "optional" : 1,
                                                 "type" : "string"
+                                             },
+                                             "ip-addresses" : {
+                                                "description" : "The addresses of the interface",
+                                                "items" : {
+                                                   "properties" : {
+                                                      "ip-address" : {
+                                                         "description" : "IP-Address",
+                                                         "optional" : 1,
+                                                         "type" : "string"
+                                                      },
+                                                      "ip-address-type" : {
+                                                         "description" : "IP-Family",
+                                                         "optional" : 1,
+                                                         "type" : "string"
+                                                      },
+                                                      "prefix" : {
+                                                         "description" : "IP-Prefix",
+                                                         "optional" : 1,
+                                                         "type" : "integer"
+                                                      }
+                                                   },
+                                                   "type" : "object"
+                                                },
+                                                "optional" : 0,
+                                                "type" : "array"
                                              },
                                              "name" : {
                                                 "description" : "The name of the interface",
@@ -40316,6 +40896,11 @@ const apiSchema = [
                         "returns" : {
                            "items" : {
                               "properties" : {
+                                 "cpu" : {
+                                    "description" : "Current CPU usage.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
                                  "cpus" : {
                                     "description" : "Maximum usable CPUs.",
                                     "optional" : 1,
@@ -40359,6 +40944,12 @@ const apiSchema = [
                                  },
                                  "maxswap" : {
                                     "description" : "Maximum SWAP memory in bytes.",
+                                    "optional" : 1,
+                                    "renderer" : "bytes",
+                                    "type" : "integer"
+                                 },
+                                 "mem" : {
+                                    "description" : "Currently used memory in bytes.",
                                     "optional" : 1,
                                     "renderer" : "bytes",
                                     "type" : "integer"
@@ -42368,8 +42959,8 @@ const apiSchema = [
                                              "default" : "cephfs",
                                              "description" : "The ceph filesystem name.",
                                              "optional" : 1,
-                                             "type" : "string",
-                                             "typetext" : "<string>"
+                                             "pattern" : "(?^:^[^:/\\s]+$)",
+                                             "type" : "string"
                                           },
                                           "node" : {
                                              "description" : "The cluster node name.",
@@ -42573,6 +43164,7 @@ const apiSchema = [
                                                 },
                                                 "name" : {
                                                    "description" : "The name of the pool. It must be unique.",
+                                                   "pattern" : "(?^:^[^:/\\s]+$)",
                                                    "title" : "Name",
                                                    "type" : "string"
                                                 },
@@ -42815,9 +43407,9 @@ const apiSchema = [
                                           },
                                           "name" : {
                                              "description" : "The name of the pool. It must be unique.",
+                                             "pattern" : "(?^:^[^:/\\s]+$)",
                                              "title" : "Name",
-                                             "type" : "string",
-                                             "typetext" : "<string>"
+                                             "type" : "string"
                                           },
                                           "node" : {
                                              "description" : "The cluster node name.",
@@ -43108,9 +43700,9 @@ const apiSchema = [
                                     },
                                     "name" : {
                                        "description" : "The name of the pool. It must be unique.",
+                                       "pattern" : "(?^:^[^:/\\s]+$)",
                                        "title" : "Name",
-                                       "type" : "string",
-                                       "typetext" : "<string>"
+                                       "type" : "string"
                                     },
                                     "node" : {
                                        "description" : "The cluster node name.",
@@ -45333,6 +45925,7 @@ const apiSchema = [
                                           "OVSBond",
                                           "OVSPort",
                                           "OVSIntPort",
+                                          "vnet",
                                           "unknown"
                                        ],
                                        "type" : "string"
@@ -45433,6 +46026,7 @@ const apiSchema = [
                                     "OVSBond",
                                     "OVSPort",
                                     "OVSIntPort",
+                                    "vnet",
                                     "any_bridge",
                                     "any_local_bridge"
                                  ],
@@ -45447,7 +46041,341 @@ const apiSchema = [
                         "proxyto" : "node",
                         "returns" : {
                            "items" : {
-                              "properties" : {},
+                              "properties" : {
+                                 "active" : {
+                                    "description" : "Set to true if the interface is active.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "address" : {
+                                    "description" : "IP address.",
+                                    "format" : "ipv4",
+                                    "optional" : 1,
+                                    "requires" : "netmask",
+                                    "type" : "string"
+                                 },
+                                 "address6" : {
+                                    "description" : "IP address.",
+                                    "format" : "ipv6",
+                                    "optional" : 1,
+                                    "requires" : "netmask6",
+                                    "type" : "string"
+                                 },
+                                 "autostart" : {
+                                    "description" : "Automatically start interface on boot.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "bond-primary" : {
+                                    "description" : "Specify the primary interface for active-backup bond.",
+                                    "format" : "pve-iface",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "bond_mode" : {
+                                    "description" : "Bonding mode.",
+                                    "enum" : [
+                                       "balance-rr",
+                                       "active-backup",
+                                       "balance-xor",
+                                       "broadcast",
+                                       "802.3ad",
+                                       "balance-tlb",
+                                       "balance-alb",
+                                       "balance-slb",
+                                       "lacp-balance-slb",
+                                       "lacp-balance-tcp"
+                                    ],
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "bond_xmit_hash_policy" : {
+                                    "description" : "Selects the transmit hash policy to use for slave selection in balance-xor and 802.3ad modes.",
+                                    "enum" : [
+                                       "layer2",
+                                       "layer2+3",
+                                       "layer3+4"
+                                    ],
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "bridge-access" : {
+                                    "description" : "The bridge port access VLAN.",
+                                    "optional" : 1,
+                                    "type" : "integer"
+                                 },
+                                 "bridge-arp-nd-suppress" : {
+                                    "description" : "Bridge port ARP/ND suppress flag.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "bridge-learning" : {
+                                    "description" : "Bridge port learning flag.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "bridge-multicast-flood" : {
+                                    "description" : "Bridge port multicast flood flag.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "bridge-unicast-flood" : {
+                                    "description" : "Bridge port unicast flood flag.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "bridge_ports" : {
+                                    "description" : "Specify the interfaces you want to add to your bridge.",
+                                    "format" : "pve-iface-list",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "bridge_vids" : {
+                                    "description" : "Specify the allowed VLANs. For example: '2 4 100-200'. Only used if the bridge is VLAN aware.",
+                                    "format" : "pve-vlan-id-or-range-list",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "bridge_vlan_aware" : {
+                                    "description" : "Enable bridge vlan support.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "cidr" : {
+                                    "description" : "IPv4 CIDR.",
+                                    "format" : "CIDRv4",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "cidr6" : {
+                                    "description" : "IPv6 CIDR.",
+                                    "format" : "CIDRv6",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "comments" : {
+                                    "description" : "Comments",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "comments6" : {
+                                    "description" : "Comments",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "exists" : {
+                                    "description" : "Set to true if the interface physically exists.",
+                                    "optional" : 1,
+                                    "type" : "boolean"
+                                 },
+                                 "families" : {
+                                    "description" : "The network families.",
+                                    "items" : {
+                                       "description" : "A network family.",
+                                       "enum" : [
+                                          "inet",
+                                          "inet6"
+                                       ],
+                                       "type" : "string"
+                                    },
+                                    "optional" : 1,
+                                    "type" : "array"
+                                 },
+                                 "gateway" : {
+                                    "description" : "Default gateway address.",
+                                    "format" : "ipv4",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "gateway6" : {
+                                    "description" : "Default ipv6 gateway address.",
+                                    "format" : "ipv6",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "iface" : {
+                                    "description" : "Network interface name.",
+                                    "format" : "pve-iface",
+                                    "maxLength" : 20,
+                                    "minLength" : 2,
+                                    "type" : "string"
+                                 },
+                                 "link-type" : {
+                                    "description" : "The link type.",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "method" : {
+                                    "description" : "The network configuration method for IPv4.",
+                                    "enum" : [
+                                       "loopback",
+                                       "dhcp",
+                                       "manual",
+                                       "static",
+                                       "auto"
+                                    ],
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "method6" : {
+                                    "description" : "The network configuration method for IPv6.",
+                                    "enum" : [
+                                       "loopback",
+                                       "dhcp",
+                                       "manual",
+                                       "static",
+                                       "auto"
+                                    ],
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "mtu" : {
+                                    "description" : "MTU.",
+                                    "maximum" : 65520,
+                                    "minimum" : 1280,
+                                    "optional" : 1,
+                                    "type" : "integer"
+                                 },
+                                 "netmask" : {
+                                    "description" : "Network mask.",
+                                    "format" : "ipv4mask",
+                                    "optional" : 1,
+                                    "requires" : "address",
+                                    "type" : "string"
+                                 },
+                                 "netmask6" : {
+                                    "description" : "Network mask.",
+                                    "maximum" : 128,
+                                    "minimum" : 0,
+                                    "optional" : 1,
+                                    "requires" : "address6",
+                                    "type" : "integer"
+                                 },
+                                 "options" : {
+                                    "description" : "A list of additional interface options for IPv4.",
+                                    "items" : {
+                                       "description" : "An interface property.",
+                                       "type" : "string"
+                                    },
+                                    "optional" : 1,
+                                    "type" : "array"
+                                 },
+                                 "options6" : {
+                                    "description" : "A list of additional interface options for IPv6.",
+                                    "items" : {
+                                       "description" : "An interface property.",
+                                       "type" : "string"
+                                    },
+                                    "optional" : 1,
+                                    "type" : "array"
+                                 },
+                                 "ovs_bonds" : {
+                                    "description" : "Specify the interfaces used by the bonding device.",
+                                    "format" : "pve-iface-list",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "ovs_bridge" : {
+                                    "description" : "The OVS bridge associated with a OVS port. This is required when you create an OVS port.",
+                                    "format" : "pve-iface",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "ovs_options" : {
+                                    "description" : "OVS interface options.",
+                                    "maxLength" : 1024,
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "ovs_ports" : {
+                                    "description" : "Specify the interfaces you want to add to your bridge.",
+                                    "format" : "pve-iface-list",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "ovs_tag" : {
+                                    "description" : "Specify a VLan tag (used by OVSPort, OVSIntPort, OVSBond)",
+                                    "maximum" : 4094,
+                                    "minimum" : 1,
+                                    "optional" : 1,
+                                    "type" : "integer"
+                                 },
+                                 "priority" : {
+                                    "description" : "The order of the interface.",
+                                    "optional" : 1,
+                                    "type" : "integer"
+                                 },
+                                 "slaves" : {
+                                    "description" : "Specify the interfaces used by the bonding device.",
+                                    "format" : "pve-iface-list",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "type" : {
+                                    "description" : "Network interface type",
+                                    "enum" : [
+                                       "bridge",
+                                       "bond",
+                                       "eth",
+                                       "alias",
+                                       "vlan",
+                                       "OVSBridge",
+                                       "OVSBond",
+                                       "OVSPort",
+                                       "OVSIntPort",
+                                       "vnet",
+                                       "unknown"
+                                    ],
+                                    "type" : "string"
+                                 },
+                                 "uplink-id" : {
+                                    "description" : "The uplink ID.",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "vlan-id" : {
+                                    "description" : "vlan-id for a custom named vlan interface (ifupdown2 only).",
+                                    "maximum" : 4094,
+                                    "minimum" : 1,
+                                    "optional" : 1,
+                                    "type" : "integer"
+                                 },
+                                 "vlan-protocol" : {
+                                    "description" : "The VLAN protocol.",
+                                    "enum" : [
+                                       "802.1ad",
+                                       "802.1q"
+                                    ],
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "vlan-raw-device" : {
+                                    "description" : "Specify the raw interface for the vlan interface.",
+                                    "format" : "pve-iface",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "vxlan-id" : {
+                                    "description" : "The VXLAN ID.",
+                                    "optional" : 1,
+                                    "type" : "integer"
+                                 },
+                                 "vxlan-local-tunnelip" : {
+                                    "description" : "The VXLAN local tunnel IP.",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "vxlan-physdev" : {
+                                    "description" : "The physical device for the VXLAN tunnel.",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 },
+                                 "vxlan-svcnodeip" : {
+                                    "description" : "The VXLAN SVC node IP.",
+                                    "optional" : 1,
+                                    "type" : "string"
+                                 }
+                              },
                               "type" : "object"
                            },
                            "links" : [
@@ -45677,6 +46605,7 @@ const apiSchema = [
                                     "OVSBond",
                                     "OVSPort",
                                     "OVSIntPort",
+                                    "vnet",
                                     "unknown"
                                  ],
                                  "type" : "string"
@@ -47102,6 +48031,11 @@ const apiSchema = [
                                        "items" : {
                                           "additionalProperties" : 1,
                                           "properties" : {
+                                             "changes" : {
+                                                "description" : "Notable changes of a version, currently only set for +pveX versions.",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
                                              "id" : {
                                                 "description" : "Full name of machine type and version.",
                                                 "type" : "string"
@@ -47749,10 +48683,12 @@ const apiSchema = [
                                              "typetext" : "<string>"
                                           },
                                           "format" : {
+                                             "description" : "Format of the image.",
                                              "enum" : [
                                                 "raw",
                                                 "qcow2",
-                                                "subvol"
+                                                "subvol",
+                                                "vmdk"
                                              ],
                                              "optional" : 1,
                                              "requires" : "size",
@@ -48156,7 +49092,7 @@ const apiSchema = [
                               "info" : {
                                  "POST" : {
                                     "allowtoken" : 1,
-                                    "description" : "Upload templates, ISO images and OVAs.",
+                                    "description" : "Upload templates, ISO images, OVAs and VM images.",
                                     "method" : "POST",
                                     "name" : "upload",
                                     "parameters" : {
@@ -48243,7 +49179,7 @@ const apiSchema = [
                               "info" : {
                                  "POST" : {
                                     "allowtoken" : 1,
-                                    "description" : "Download templates, ISO images and OVAs by using an URL.",
+                                    "description" : "Download templates, ISO images, OVAs and VM images by using an URL.",
                                     "method" : "POST",
                                     "name" : "download_url",
                                     "parameters" : {
@@ -52270,6 +53206,7 @@ const apiSchema = [
                                     "acmedomain3",
                                     "acmedomain4",
                                     "acmedomain5",
+                                    "ballooning-target",
                                     "description",
                                     "startall-onboot-delay",
                                     "wakeonlan"
@@ -52341,6 +53278,14 @@ const apiSchema = [
                                  },
                                  "optional" : 1,
                                  "type" : "string"
+                              },
+                              "ballooning-target" : {
+                                 "default" : 80,
+                                 "description" : "RAM usage target for ballooning (in percent of total memory)",
+                                 "maximum" : 100,
+                                 "minimum" : 0,
+                                 "optional" : 1,
+                                 "type" : "integer"
                               },
                               "description" : {
                                  "description" : "Description for the Node. Shown in the web-interface node notes panel. This is saved as comment inside the configuration file.",
@@ -52456,6 +53401,15 @@ const apiSchema = [
                                  "optional" : 1,
                                  "type" : "string",
                                  "typetext" : "[domain=]<domain> [,alias=<domain>] [,plugin=<name of the plugin configuration>]"
+                              },
+                              "ballooning-target" : {
+                                 "default" : 80,
+                                 "description" : "RAM usage target for ballooning (in percent of total memory)",
+                                 "maximum" : 100,
+                                 "minimum" : 0,
+                                 "optional" : 1,
+                                 "type" : "integer",
+                                 "typetext" : "<integer> (0 - 100)"
                               },
                               "delete" : {
                                  "description" : "A list of settings you want to delete.",
@@ -52874,6 +53828,31 @@ const apiSchema = [
                                  },
                                  "type" : "object"
                               },
+                              "cpu" : {
+                                 "description" : "The current cpu usage.",
+                                 "type" : "number"
+                              },
+                              "cpuinfo" : {
+                                 "properties" : {
+                                    "cores" : {
+                                       "description" : "The number of physical cores of the CPU.",
+                                       "type" : "integer"
+                                    },
+                                    "cpus" : {
+                                       "description" : "The number of logical threads of the CPU.",
+                                       "type" : "integer"
+                                    },
+                                    "model" : {
+                                       "description" : "The CPU model",
+                                       "type" : "string"
+                                    },
+                                    "sockets" : {
+                                       "description" : "The number of logical threads of the CPU.",
+                                       "type" : "integer"
+                                    }
+                                 },
+                                 "type" : "object"
+                              },
                               "current-kernel" : {
                                  "description" : "Meta-information about the currently booted kernel of this node.",
                                  "properties" : {
@@ -52892,6 +53871,56 @@ const apiSchema = [
                                     "version" : {
                                        "description" : "OS kernel version with build info",
                                        "type" : "string"
+                                    }
+                                 },
+                                 "type" : "object"
+                              },
+                              "loadavg" : {
+                                 "description" : "An array of load avg for 1, 5 and 15 minutes respectively.",
+                                 "items" : {
+                                    "description" : "The value of the load.",
+                                    "type" : "string"
+                                 },
+                                 "type" : "array"
+                              },
+                              "memory" : {
+                                 "properties" : {
+                                    "free" : {
+                                       "description" : "The free memory in bytes.",
+                                       "type" : "integer"
+                                    },
+                                    "total" : {
+                                       "description" : "The total memory in bytes.",
+                                       "type" : "integer"
+                                    },
+                                    "used" : {
+                                       "description" : "The used memory in bytes.",
+                                       "type" : "integer"
+                                    }
+                                 },
+                                 "type" : "object"
+                              },
+                              "pveversion" : {
+                                 "description" : "The PVE version string.",
+                                 "type" : "string"
+                              },
+                              "rootfs" : {
+                                 "properties" : {
+                                    "avail" : {
+                                       "description" : "The available bytes in the root filesystem.",
+                                       "type" : "integer"
+                                    },
+                                    "free" : {
+                                       "description" : "The free bytes on the root filesystem.",
+                                       "type" : "integer"
+                                    },
+                                    "total" : {
+                                       "description" : "The total size of the root filesystem in bytes.",
+                                       "type" : "integer"
+                                    },
+                                    "used" : {
+                                       "description" : "The used bytes in the root filesystem.",
+                                       "type" : "integer"
                                     }
                                  },
                                  "type" : "object"
@@ -53364,8 +54393,8 @@ const apiSchema = [
                                  "default" : "login",
                                  "description" : "Run specific command or default to login (requires 'root@pam')",
                                  "enum" : [
-                                    "upgrade",
                                     "ceph_install",
+                                    "upgrade",
                                     "login"
                                  ],
                                  "optional" : 1,
@@ -53459,8 +54488,8 @@ const apiSchema = [
                                  "default" : "login",
                                  "description" : "Run specific command or default to login (requires 'root@pam')",
                                  "enum" : [
-                                    "upgrade",
                                     "ceph_install",
+                                    "upgrade",
                                     "login"
                                  ],
                                  "optional" : 1,
@@ -53584,8 +54613,8 @@ const apiSchema = [
                                  "default" : "login",
                                  "description" : "Run specific command or default to login (requires 'root@pam')",
                                  "enum" : [
-                                    "upgrade",
                                     "ceph_install",
+                                    "upgrade",
                                     "login"
                                  ],
                                  "optional" : 1,
@@ -54684,10 +55713,14 @@ const apiSchema = [
                         },
                         "format" : {
                            "description" : "Default image format.",
-                           "format" : "pve-storage-format",
+                           "enum" : [
+                              "raw",
+                              "qcow2",
+                              "subvol",
+                              "vmdk"
+                           ],
                            "optional" : 1,
-                           "type" : "string",
-                           "typetext" : "<string>"
+                           "type" : "string"
                         },
                         "fs-name" : {
                            "description" : "The Ceph filesystem name.",
@@ -54716,6 +55749,7 @@ const apiSchema = [
                            "typetext" : "<string>"
                         },
                         "krbd" : {
+                           "default" : 0,
                            "description" : "Always access rbd through krbd kernel module.",
                            "optional" : 1,
                            "type" : "boolean",
@@ -55212,10 +56246,14 @@ const apiSchema = [
                   },
                   "format" : {
                      "description" : "Default image format.",
-                     "format" : "pve-storage-format",
+                     "enum" : [
+                        "raw",
+                        "qcow2",
+                        "subvol",
+                        "vmdk"
+                     ],
                      "optional" : 1,
-                     "type" : "string",
-                     "typetext" : "<string>"
+                     "type" : "string"
                   },
                   "fs-name" : {
                      "description" : "The Ceph filesystem name.",
@@ -55250,6 +56288,7 @@ const apiSchema = [
                      "typetext" : "<string>"
                   },
                   "krbd" : {
+                     "default" : 0,
                      "description" : "Always access rbd through krbd kernel module.",
                      "optional" : 1,
                      "type" : "boolean",
@@ -57306,7 +58345,7 @@ const apiSchema = [
                                     },
                                     "remove-vanished" : {
                                        "default" : "none",
-                                       "description" : "A semicolon-seperated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
+                                       "description" : "A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).",
                                        "optional" : "1",
                                        "pattern" : "(?:(?:(?:acl|properties|entry);)*(?:acl|properties|entry))|none",
                                        "type" : "string",
@@ -57573,6 +58612,27 @@ const apiSchema = [
                                  "type" : "string",
                                  "typetext" : "<string>"
                               },
+                              "groups-autocreate" : {
+                                 "default" : 0,
+                                 "description" : "Automatically create groups if they do not exist.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
+                              },
+                              "groups-claim" : {
+                                 "description" : "OpenID claim used to retrieve groups with.",
+                                 "maxLength" : 256,
+                                 "optional" : 1,
+                                 "pattern" : "(?^:[A-Za-z0-9\\.\\-_]+)",
+                                 "type" : "string"
+                              },
+                              "groups-overwrite" : {
+                                 "default" : 0,
+                                 "description" : "All groups will be overwritten for the user on login.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
+                              },
                               "issuer-url" : {
                                  "description" : "OpenID Issuer Url",
                                  "maxLength" : 256,
@@ -57610,6 +58670,13 @@ const apiSchema = [
                                  "optional" : 1,
                                  "pattern" : "(?:none|login|consent|select_account|\\S+)",
                                  "type" : "string"
+                              },
+                              "query-userinfo" : {
+                                 "default" : 1,
+                                 "description" : "Enables querying the userinfo endpoint for claims values.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
                               },
                               "realm" : {
                                  "description" : "Authentication domain ID",
@@ -57911,6 +58978,27 @@ const apiSchema = [
                            "type" : "string",
                            "typetext" : "<string>"
                         },
+                        "groups-autocreate" : {
+                           "default" : 0,
+                           "description" : "Automatically create groups if they do not exist.",
+                           "optional" : 1,
+                           "type" : "boolean",
+                           "typetext" : "<boolean>"
+                        },
+                        "groups-claim" : {
+                           "description" : "OpenID claim used to retrieve groups with.",
+                           "maxLength" : 256,
+                           "optional" : 1,
+                           "pattern" : "(?^:[A-Za-z0-9\\.\\-_]+)",
+                           "type" : "string"
+                        },
+                        "groups-overwrite" : {
+                           "default" : 0,
+                           "description" : "All groups will be overwritten for the user on login.",
+                           "optional" : 1,
+                           "type" : "boolean",
+                           "typetext" : "<boolean>"
+                        },
                         "issuer-url" : {
                            "description" : "OpenID Issuer Url",
                            "maxLength" : 256,
@@ -57948,6 +59036,13 @@ const apiSchema = [
                            "optional" : 1,
                            "pattern" : "(?:none|login|consent|select_account|\\S+)",
                            "type" : "string"
+                        },
+                        "query-userinfo" : {
+                           "default" : 1,
+                           "description" : "Enables querying the userinfo endpoint for claims values.",
+                           "optional" : 1,
+                           "type" : "boolean",
+                           "typetext" : "<boolean>"
                         },
                         "realm" : {
                            "description" : "Authentication domain ID",
@@ -58751,7 +59846,7 @@ const apiSchema = [
                            "typetext" : "<string>"
                         },
                         "realm" : {
-                           "description" : "You can optionally pass the realm using this parameter. Normally the realm is simply added to the username <username>@<relam>.",
+                           "description" : "You can optionally pass the realm using this parameter. Normally the realm is simply added to the username <username>@<realm>.",
                            "format" : "pve-realm",
                            "maxLength" : 32,
                            "optional" : 1,
@@ -58858,7 +59953,7 @@ const apiSchema = [
                            ]
                         ]
                      ],
-                     "description" : "Each user is allowed to change his own password. A user can change the password of another user if he has 'Realm.AllocateUser' (on the realm of user <userid>) and 'User.Modify' permission on /access/groups/<group> on a group where user <userid> is member of."
+                     "description" : "Each user is allowed to change their own password. A user can change the password of another user if they have 'Realm.AllocateUser' (on the realm of user <userid>) and 'User.Modify' permission on /access/groups/<group> on a group where user <userid> is member of. For the PAM realm, a password change does not take  effect cluster-wide, but only applies to the local node."
                   },
                   "protected" : 1,
                   "returns" : {
