@@ -1,3 +1,143 @@
+pve-docs (9.0.6) trixie; urgency=medium
+
+  * ha: add documentation about ha resource affinity rules
+
+  * update static/schema information.
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 31 Jul 2025 11:48:55 +0200
+
+pve-docs (9.0.5) trixie; urgency=medium
+
+  * lvm storage: fix spelling of Fibre Channel
+
+  * sdn: fabrics: remove duplicate paragraph in OSPF section
+
+  * LVM storage: reword and update to current capabilities
+
+  * remove GlusterFS plugin documentation, see libpve-storage-perl changelog
+    for some more detail.
+
+  * notifications: adapt to latest notification system UI changes-
+
+  * qmeventd: do not make a top-level chapter.
+
+  * make introduction chapter a first-class chapter.
+
+  * css: prefer Open Sans, sans-serif for general text font.
+
+  * css: do not differentiate visited links.
+
+  * css: ensure index image doesn't overflows ovoer the screen.
+
+  * html: make table overflow the x-axis automatically to avoid that whole
+    documentation gets a horizontal scroll-bar just due to one or two wider
+    tables, rather make those tables scrollable.
+
+  * html/css: add toggle menu for TOC on narrow (mobile) screens to have more
+    useable space for reading the actual documentation.
+
+  * html: rework index to order chapters and avoid visual noise from to many
+    table and table columns.
+
+  * package repos, software updates: revise Ceph section.
+
+  * asciidoc-pve scan-exjts: add allow-missing option to make bootstrapping
+    easier.
+
+  * ha: add documentation about ha rules and ha node affinity rules.
+
+  * ha: crs: document effects of HA node affinity rule on the CRS scheduler.
+
+  * update static/schema information
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 31 Jul 2025 08:34:19 +0200
+
+pve-docs (9.0.4) trixie; urgency=medium
+
+  * lvm storage: improve wording for snapshot-as-volume-chain option
+
+  * local-zfs: document raidz extension for PVE 9/ZFS 2.3.3
+
+  * package-repos: update key file path and hashes
+
+  * fabrics: fix IPv6 section
+
+ -- Proxmox Support Team <support@proxmox.com>  Fri, 18 Jul 2025 14:41:14 +0200
+
+pve-docs (9.0.3) trixie; urgency=medium
+
+  * docs: add screenshots for SDN Fabrics.
+
+  * storage, lvm: add basic documentation for new snapshot-as-volume-chain
+    option.
+
+  * virtual machines: document new default behavior for mtu setting.
+
+  * user management: privileges:
+    - document new VM guest agent privileges.
+    - remove reference to dropped VM.Monitor privilege.
+
+  * update static/schema information
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 17 Jul 2025 23:02:46 +0200
+
+pve-docs (9.0.2) trixie; urgency=medium
+
+  * fix #6388: disk health: sync list of scanned devices
+
+  * pveceph/package-repos: adapt further to new deb822 format
+
+  * ha-manager: remove hardware fencing from requirements
+
+  * qm: cpu types: list that Haswell supports x86-64-v3 ABI
+
+  * calendar-events: add a note about `systemd-analyze calendar`
+
+  * pvecm: extend cluster requirements
+
+  * pvecm: drop notes about old version incompatibilities
+
+  * pveceph: update cluster shutdown procedure
+
+  * sdn: mention fingerprint option to the NetBox IPAM plugin
+
+  * VM VNC clipboard: add hint that live-migration does not work
+
+  * fabrics: add initial documentation for sdn fabrics
+
+  * network: add documentation for proxmox-network-interface-pinning
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 17 Jul 2025 01:12:54 +0200
+
+pve-docs (9.0.1) trixie; urgency=medium
+
+  * firewall: nftables: document new firewall bridge behavior.
+
+  * installation: remove maxroot size requirement and mention default instead.
+
+  * installation: reword explanation for maxroot and swap a bit.
+
+  * asciidoc conf: update ceph base url for PVE 9 baseline Ceph 19.2 Squid.
+
+  * faq: mention PVE 9 and add preliminary EOL for PVE 8 (can still be subject
+    to change).
+
+  * apt repositories: initial update for PVE 9 / Debian Trixie based repos.
+
+  * wiki: apt repositories: drop full repository list for PVE 5 and older.
+
+  * pvecm: update reference to votequorum qedvic manual page.
+
+  * update static/schema information.
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 16 Jul 2025 02:37:42 +0200
+
+pve-docs (9.0.0) trixie; urgency=medium
+
+  * re-build for Debian 13 "Trixie" based Proxmox releases.
+
+ -- Proxmox Support Team <support@proxmox.com>  Mon, 02 Jun 2025 18:59:56 +0200
+
 pve-docs (8.4.0) bookworm; urgency=medium
 
   * qemu: consistently use virtiofs term

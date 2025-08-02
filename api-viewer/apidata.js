@@ -36,13 +36,8 @@ const apiSchema = [
                            }
                         },
                         "permissions" : {
-                           "check" : [
-                              "perm",
-                              "/storage",
-                              [
-                                 "Datastore.Allocate"
-                              ]
-                           ]
+                           "description" : "Requires the VM.Replicate permission on /vms/<vmid>.",
+                           "user" : "all"
                         },
                         "protected" : 1,
                         "returns" : {
@@ -151,13 +146,8 @@ const apiSchema = [
                            "type" : "object"
                         },
                         "permissions" : {
-                           "check" : [
-                              "perm",
-                              "/storage",
-                              [
-                                 "Datastore.Allocate"
-                              ]
-                           ]
+                           "description" : "Requires the VM.Replicate permission on /vms/<vmid>.",
+                           "user" : "all"
                         },
                         "protected" : 1,
                         "returns" : {
@@ -274,13 +264,8 @@ const apiSchema = [
                      "type" : "object"
                   },
                   "permissions" : {
-                     "check" : [
-                        "perm",
-                        "/storage",
-                        [
-                           "Datastore.Allocate"
-                        ]
-                     ]
+                     "description" : "Requires the VM.Replicate permission on /vms/<vmid>.",
+                     "user" : "all"
                   },
                   "protected" : 1,
                   "returns" : {
@@ -420,6 +405,71 @@ const apiSchema = [
                                        "type" : "string",
                                        "typetext" : "<string>"
                                     },
+                                    "otel-compression" : {
+                                       "default" : "gzip",
+                                       "description" : "Compression algorithm for requests",
+                                       "enum" : [
+                                          "none",
+                                          "gzip"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string"
+                                    },
+                                    "otel-headers" : {
+                                       "description" : "Custom HTTP headers (JSON format, base64 encoded)",
+                                       "maxLength" : 1024,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "otel-max-body-size" : {
+                                       "default" : 10000000,
+                                       "description" : "Maximum request body size in bytes",
+                                       "minimum" : 1024,
+                                       "optional" : 1,
+                                       "type" : "integer",
+                                       "typetext" : "<integer> (1024 - N)"
+                                    },
+                                    "otel-path" : {
+                                       "default" : "/v1/metrics",
+                                       "description" : "OTLP endpoint path",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "otel-protocol" : {
+                                       "default" : "https",
+                                       "description" : "HTTP protocol",
+                                       "enum" : [
+                                          "http",
+                                          "https"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string"
+                                    },
+                                    "otel-resource-attributes" : {
+                                       "description" : "Additional resource attributes as JSON, base64 encoded",
+                                       "maxLength" : 1024,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "otel-timeout" : {
+                                       "default" : 5,
+                                       "description" : "HTTP request timeout in seconds",
+                                       "maximum" : 10,
+                                       "minimum" : 1,
+                                       "optional" : 1,
+                                       "type" : "integer",
+                                       "typetext" : "<integer> (1 - 10)"
+                                    },
+                                    "otel-verify-ssl" : {
+                                       "default" : 1,
+                                       "description" : "Verify SSL certificates",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    },
                                     "path" : {
                                        "description" : "root graphite path (ex: proxmox.mycluster.mykey)",
                                        "format" : "graphite-path",
@@ -467,7 +517,8 @@ const apiSchema = [
                                        "description" : "Plugin type.",
                                        "enum" : [
                                           "graphite",
-                                          "influxdb"
+                                          "influxdb",
+                                          "opentelemetry"
                                        ],
                                        "format" : "pve-configid",
                                        "type" : "string"
@@ -575,6 +626,71 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string",
                                        "typetext" : "<string>"
+                                    },
+                                    "otel-compression" : {
+                                       "default" : "gzip",
+                                       "description" : "Compression algorithm for requests",
+                                       "enum" : [
+                                          "none",
+                                          "gzip"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string"
+                                    },
+                                    "otel-headers" : {
+                                       "description" : "Custom HTTP headers (JSON format, base64 encoded)",
+                                       "maxLength" : 1024,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "otel-max-body-size" : {
+                                       "default" : 10000000,
+                                       "description" : "Maximum request body size in bytes",
+                                       "minimum" : 1024,
+                                       "optional" : 1,
+                                       "type" : "integer",
+                                       "typetext" : "<integer> (1024 - N)"
+                                    },
+                                    "otel-path" : {
+                                       "default" : "/v1/metrics",
+                                       "description" : "OTLP endpoint path",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "otel-protocol" : {
+                                       "default" : "https",
+                                       "description" : "HTTP protocol",
+                                       "enum" : [
+                                          "http",
+                                          "https"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string"
+                                    },
+                                    "otel-resource-attributes" : {
+                                       "description" : "Additional resource attributes as JSON, base64 encoded",
+                                       "maxLength" : 1024,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "otel-timeout" : {
+                                       "default" : 5,
+                                       "description" : "HTTP request timeout in seconds",
+                                       "maximum" : 10,
+                                       "minimum" : 1,
+                                       "optional" : 1,
+                                       "type" : "integer",
+                                       "typetext" : "<integer> (1 - 10)"
+                                    },
+                                    "otel-verify-ssl" : {
+                                       "default" : 1,
+                                       "description" : "Verify SSL certificates",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
                                     },
                                     "path" : {
                                        "description" : "root graphite path (ex: proxmox.mycluster.mykey)",
@@ -6462,24 +6578,6 @@ const apiSchema = [
                                  "optional" : 1,
                                  "type" : "string"
                               },
-                              "notification-policy" : {
-                                 "default" : "always",
-                                 "description" : "Deprecated: Do not use",
-                                 "enum" : [
-                                    "always",
-                                    "failure",
-                                    "never"
-                                 ],
-                                 "optional" : 1,
-                                 "type" : "string"
-                              },
-                              "notification-target" : {
-                                 "description" : "Deprecated: Do not use",
-                                 "format" : "pve-configid",
-                                 "optional" : 1,
-                                 "type" : "string",
-                                 "typetext" : "<string>"
-                              },
                               "pbs-change-detection-mode" : {
                                  "description" : "PBS mode used to detect file changes and switch encoding format for container backups.",
                                  "enum" : [
@@ -6852,24 +6950,6 @@ const apiSchema = [
                            "optional" : 1,
                            "type" : "string"
                         },
-                        "notification-policy" : {
-                           "default" : "always",
-                           "description" : "Deprecated: Do not use",
-                           "enum" : [
-                              "always",
-                              "failure",
-                              "never"
-                           ],
-                           "optional" : 1,
-                           "type" : "string"
-                        },
-                        "notification-target" : {
-                           "description" : "Deprecated: Do not use",
-                           "format" : "pve-configid",
-                           "optional" : 1,
-                           "type" : "string",
-                           "typetext" : "<string>"
-                        },
                         "pbs-change-detection-mode" : {
                            "description" : "PBS mode used to detect file changes and switch encoding format for container backups.",
                            "enum" : [
@@ -7159,7 +7239,46 @@ const apiSchema = [
                                     },
                                     "protected" : 1,
                                     "returns" : {
-                                       "type" : "null"
+                                       "properties" : {
+                                          "blocking-resources" : {
+                                             "description" : "HA resources, which are blocking the given HA resource from being migrated to the requested target node.",
+                                             "items" : {
+                                                "description" : "A blocking HA resource",
+                                                "properties" : {
+                                                   "cause" : {
+                                                      "description" : "The reason why the HA resource is blocking the migration.",
+                                                      "enum" : [
+                                                         "resource-affinity"
+                                                      ],
+                                                      "type" : "string"
+                                                   },
+                                                   "sid" : {
+                                                      "description" : "The blocking HA resource id",
+                                                      "type" : "string"
+                                                   }
+                                                },
+                                                "type" : "object"
+                                             },
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "comigrated-resources" : {
+                                             "description" : "HA resources, which are migrated to the same requested target node as the given HA resource, because these are in positive affinity with the HA resource.",
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "requested-node" : {
+                                             "description" : "Node, which was requested to be migrated to.",
+                                             "optional" : 0,
+                                             "type" : "string"
+                                          },
+                                          "sid" : {
+                                             "description" : "HA resource, which is requested to be migrated.",
+                                             "optional" : 0,
+                                             "type" : "string"
+                                          }
+                                       },
+                                       "type" : "object"
                                     }
                                  }
                               },
@@ -7202,7 +7321,50 @@ const apiSchema = [
                                     },
                                     "protected" : 1,
                                     "returns" : {
-                                       "type" : "null"
+                                       "properties" : {
+                                          "blocking-resources" : {
+                                             "description" : "HA resources, which are blocking the given HA resource from being relocated to the requested target node.",
+                                             "items" : {
+                                                "description" : "A blocking HA resource",
+                                                "properties" : {
+                                                   "cause" : {
+                                                      "description" : "The reason why the HA resource is blocking the relocation.",
+                                                      "enum" : [
+                                                         "resource-affinity"
+                                                      ],
+                                                      "type" : "string"
+                                                   },
+                                                   "sid" : {
+                                                      "description" : "The blocking HA resource id",
+                                                      "type" : "string"
+                                                   }
+                                                },
+                                                "type" : "object"
+                                             },
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "comigrated-resources" : {
+                                             "description" : "HA resources, which are relocated to the same requested target node as the given HA resource, because these are in positive affinity with the HA resource.",
+                                             "items" : {
+                                                "description" : "A comigrated HA resource",
+                                                "type" : "string"
+                                             },
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "requested-node" : {
+                                             "description" : "Node, which was requested to be relocated to.",
+                                             "optional" : 0,
+                                             "type" : "string"
+                                          },
+                                          "sid" : {
+                                             "description" : "HA resource, which is requested to be relocated.",
+                                             "optional" : 0,
+                                             "type" : "string"
+                                          }
+                                       },
+                                       "type" : "object"
                                     }
                                  }
                               },
@@ -7278,6 +7440,12 @@ const apiSchema = [
                                        "description" : "Can be used to prevent concurrent modifications.",
                                        "type" : "string"
                                     },
+                                    "failback" : {
+                                       "default" : 1,
+                                       "description" : "The HA resource is automatically migrated to the node with the highest priority according to their node affinity rule, if a node with a higher priority than the current node comes online.",
+                                       "optional" : 1,
+                                       "type" : "boolean"
+                                    },
                                     "group" : {
                                        "description" : "The HA group identifier.",
                                        "format" : "pve-configid",
@@ -7349,6 +7517,13 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string",
                                        "typetext" : "<string>"
+                                    },
+                                    "failback" : {
+                                       "default" : 1,
+                                       "description" : "Automatically migrate HA resource to the node with the highest priority according to their node affinity  rules, if a node with a higher priority than the current node comes online.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
                                     },
                                     "group" : {
                                        "description" : "The HA group identifier.",
@@ -7478,6 +7653,13 @@ const apiSchema = [
                                  "type" : "string",
                                  "typetext" : "<string>"
                               },
+                              "failback" : {
+                                 "default" : 1,
+                                 "description" : "Automatically migrate HA resource to the node with the highest priority according to their node affinity  rules, if a node with a higher priority than the current node comes online.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
+                              },
                               "group" : {
                                  "description" : "The HA group identifier.",
                                  "format" : "pve-configid",
@@ -7558,7 +7740,7 @@ const apiSchema = [
                         "info" : {
                            "DELETE" : {
                               "allowtoken" : 1,
-                              "description" : "Delete ha group configuration.",
+                              "description" : "Delete ha group configuration. (deprecated in favor of HA rules)",
                               "method" : "DELETE",
                               "name" : "delete",
                               "parameters" : {
@@ -7588,7 +7770,7 @@ const apiSchema = [
                            },
                            "GET" : {
                               "allowtoken" : 1,
-                              "description" : "Read ha group configuration.",
+                              "description" : "Read ha group configuration. (deprecated in favor of HA rules)",
                               "method" : "GET",
                               "name" : "read",
                               "parameters" : {
@@ -7615,7 +7797,7 @@ const apiSchema = [
                            },
                            "PUT" : {
                               "allowtoken" : 1,
-                              "description" : "Update ha group configuration.",
+                              "description" : "Update ha group configuration. (deprecated in favor of HA rules)",
                               "method" : "PUT",
                               "name" : "update",
                               "parameters" : {
@@ -7698,7 +7880,7 @@ const apiSchema = [
                   "info" : {
                      "GET" : {
                         "allowtoken" : 1,
-                        "description" : "Get HA groups.",
+                        "description" : "Get HA groups. (deprecated in favor of HA rules)",
                         "method" : "GET",
                         "name" : "index",
                         "parameters" : {
@@ -7733,7 +7915,7 @@ const apiSchema = [
                      },
                      "POST" : {
                         "allowtoken" : 1,
-                        "description" : "Create a new HA group.",
+                        "description" : "Create a new HA group. (deprecated in favor of HA rules)",
                         "method" : "POST",
                         "name" : "create",
                         "parameters" : {
@@ -7809,6 +7991,352 @@ const apiSchema = [
                   "children" : [
                      {
                         "info" : {
+                           "DELETE" : {
+                              "allowtoken" : 1,
+                              "description" : "Delete HA rule.",
+                              "method" : "DELETE",
+                              "name" : "delete_rule",
+                              "parameters" : {
+                                 "additionalProperties" : 0,
+                                 "properties" : {
+                                    "rule" : {
+                                       "description" : "HA rule identifier.",
+                                       "format" : "pve-configid",
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "perm",
+                                    "/",
+                                    [
+                                       "Sys.Console"
+                                    ]
+                                 ]
+                              },
+                              "protected" : 1,
+                              "returns" : {
+                                 "type" : "null"
+                              }
+                           },
+                           "GET" : {
+                              "allowtoken" : 1,
+                              "description" : "Read HA rule.",
+                              "method" : "GET",
+                              "name" : "read_rule",
+                              "parameters" : {
+                                 "additionalProperties" : 0,
+                                 "properties" : {
+                                    "rule" : {
+                                       "description" : "HA rule identifier.",
+                                       "format" : "pve-configid",
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "perm",
+                                    "/",
+                                    [
+                                       "Sys.Audit"
+                                    ]
+                                 ]
+                              },
+                              "returns" : {
+                                 "properties" : {
+                                    "rule" : {
+                                       "description" : "HA rule identifier.",
+                                       "format" : "pve-configid",
+                                       "type" : "string"
+                                    },
+                                    "type" : {
+                                       "type" : "string"
+                                    }
+                                 },
+                                 "type" : "object"
+                              }
+                           },
+                           "PUT" : {
+                              "allowtoken" : 1,
+                              "description" : "Update HA rule.",
+                              "method" : "PUT",
+                              "name" : "update_rule",
+                              "parameters" : {
+                                 "additionalProperties" : 0,
+                                 "properties" : {
+                                    "affinity" : {
+                                       "description" : "Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').",
+                                       "enum" : [
+                                          "positive",
+                                          "negative"
+                                       ],
+                                       "instance-types" : [
+                                          "resource-affinity"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "type-property" : "type"
+                                    },
+                                    "comment" : {
+                                       "description" : "HA rule description.",
+                                       "maxLength" : 4096,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "delete" : {
+                                       "description" : "A list of settings you want to delete.",
+                                       "format" : "pve-configid-list",
+                                       "maxLength" : 4096,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "digest" : {
+                                       "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                       "maxLength" : 64,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "disable" : {
+                                       "description" : "Whether the HA rule is disabled.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    },
+                                    "nodes" : {
+                                       "description" : "List of cluster node names with optional priority.",
+                                       "format" : "pve-ha-group-node-list",
+                                       "instance-types" : [
+                                          "node-affinity"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "type-property" : "type",
+                                       "typetext" : "<node>[:<pri>]{,<node>[:<pri>]}*",
+                                       "verbose_description" : "List of cluster node members, where a priority can be given to each node. A resource bound to a group will run on the available nodes with the highest priority. If there are more nodes in the highest priority class, the services will get distributed to those nodes. The priorities have a relative meaning only. The higher the number, the higher the priority."
+                                    },
+                                    "resources" : {
+                                       "description" : "List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).",
+                                       "format" : "pve-ha-resource-id-list",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<type>:<name>{,<type>:<name>}*"
+                                    },
+                                    "rule" : {
+                                       "description" : "HA rule identifier.",
+                                       "format" : "pve-configid",
+                                       "optional" : 0,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "strict" : {
+                                       "default" : 0,
+                                       "description" : "Describes whether the node affinity rule is strict or non-strict.",
+                                       "instance-types" : [
+                                          "node-affinity"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "type-property" : "type",
+                                       "typetext" : "<boolean>",
+                                       "verbose_description" : "Describes whether the node affinity rule is strict or non-strict.\n\nA non-strict node affinity rule makes resources prefer to be on the defined nodes.\nIf none of the defined nodes are available, the resource may run on any other node.\n\nA strict node affinity rule makes resources be restricted to the defined nodes. If\nnone of the defined nodes are available, the resource will be stopped.\n"
+                                    },
+                                    "type" : {
+                                       "description" : "HA rule type.",
+                                       "enum" : [
+                                          "node-affinity",
+                                          "resource-affinity"
+                                       ],
+                                       "type" : "string"
+                                    }
+                                 },
+                                 "type" : "object"
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "perm",
+                                    "/",
+                                    [
+                                       "Sys.Console"
+                                    ]
+                                 ]
+                              },
+                              "protected" : 1,
+                              "returns" : {
+                                 "type" : "null"
+                              }
+                           }
+                        },
+                        "leaf" : 1,
+                        "path" : "/cluster/ha/rules/{rule}",
+                        "text" : "{rule}"
+                     }
+                  ],
+                  "info" : {
+                     "GET" : {
+                        "allowtoken" : 1,
+                        "description" : "Get HA rules.",
+                        "method" : "GET",
+                        "name" : "index",
+                        "parameters" : {
+                           "additionalProperties" : 0,
+                           "properties" : {
+                              "resource" : {
+                                 "description" : "Limit the returned list to rules affecting the specified resource.",
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              },
+                              "type" : {
+                                 "description" : "Limit the returned list to the specified rule type.",
+                                 "enum" : [
+                                    "node-affinity",
+                                    "resource-affinity"
+                                 ],
+                                 "optional" : 1,
+                                 "type" : "string"
+                              }
+                           }
+                        },
+                        "permissions" : {
+                           "check" : [
+                              "perm",
+                              "/",
+                              [
+                                 "Sys.Audit"
+                              ]
+                           ]
+                        },
+                        "returns" : {
+                           "items" : {
+                              "links" : [
+                                 {
+                                    "href" : "{rule}",
+                                    "rel" : "child"
+                                 }
+                              ],
+                              "properties" : {
+                                 "rule" : {
+                                    "type" : "string"
+                                 }
+                              },
+                              "type" : "object"
+                           },
+                           "type" : "array"
+                        }
+                     },
+                     "POST" : {
+                        "allowtoken" : 1,
+                        "description" : "Create HA rule.",
+                        "method" : "POST",
+                        "name" : "create_rule",
+                        "parameters" : {
+                           "additionalProperties" : 0,
+                           "properties" : {
+                              "affinity" : {
+                                 "description" : "Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').",
+                                 "enum" : [
+                                    "positive",
+                                    "negative"
+                                 ],
+                                 "instance-types" : [
+                                    "resource-affinity"
+                                 ],
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "type-property" : "type"
+                              },
+                              "comment" : {
+                                 "description" : "HA rule description.",
+                                 "maxLength" : 4096,
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              },
+                              "disable" : {
+                                 "description" : "Whether the HA rule is disabled.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
+                              },
+                              "nodes" : {
+                                 "description" : "List of cluster node names with optional priority.",
+                                 "format" : "pve-ha-group-node-list",
+                                 "instance-types" : [
+                                    "node-affinity"
+                                 ],
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "type-property" : "type",
+                                 "typetext" : "<node>[:<pri>]{,<node>[:<pri>]}*",
+                                 "verbose_description" : "List of cluster node members, where a priority can be given to each node. A resource bound to a group will run on the available nodes with the highest priority. If there are more nodes in the highest priority class, the services will get distributed to those nodes. The priorities have a relative meaning only. The higher the number, the higher the priority."
+                              },
+                              "resources" : {
+                                 "description" : "List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).",
+                                 "format" : "pve-ha-resource-id-list",
+                                 "optional" : 0,
+                                 "type" : "string",
+                                 "typetext" : "<type>:<name>{,<type>:<name>}*"
+                              },
+                              "rule" : {
+                                 "description" : "HA rule identifier.",
+                                 "format" : "pve-configid",
+                                 "optional" : 0,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              },
+                              "strict" : {
+                                 "default" : 0,
+                                 "description" : "Describes whether the node affinity rule is strict or non-strict.",
+                                 "instance-types" : [
+                                    "node-affinity"
+                                 ],
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "type-property" : "type",
+                                 "typetext" : "<boolean>",
+                                 "verbose_description" : "Describes whether the node affinity rule is strict or non-strict.\n\nA non-strict node affinity rule makes resources prefer to be on the defined nodes.\nIf none of the defined nodes are available, the resource may run on any other node.\n\nA strict node affinity rule makes resources be restricted to the defined nodes. If\nnone of the defined nodes are available, the resource will be stopped.\n"
+                              },
+                              "type" : {
+                                 "description" : "HA rule type.",
+                                 "enum" : [
+                                    "node-affinity",
+                                    "resource-affinity"
+                                 ],
+                                 "type" : "string"
+                              }
+                           },
+                           "type" : "object"
+                        },
+                        "permissions" : {
+                           "check" : [
+                              "perm",
+                              "/",
+                              [
+                                 "Sys.Console"
+                              ]
+                           ]
+                        },
+                        "protected" : 1,
+                        "returns" : {
+                           "type" : "null"
+                        }
+                     }
+                  },
+                  "leaf" : 0,
+                  "path" : "/cluster/ha/rules",
+                  "text" : "rules"
+               },
+               {
+                  "children" : [
+                     {
+                        "info" : {
                            "GET" : {
                               "allowtoken" : 1,
                               "description" : "Get HA manger status.",
@@ -7833,6 +8361,12 @@ const apiSchema = [
                                           "description" : "For type 'service'. Service state as seen by the CRM.",
                                           "optional" : 1,
                                           "type" : "string"
+                                       },
+                                       "failback" : {
+                                          "default" : 1,
+                                          "description" : "The HA resource is automatically migrated to the node with the highest priority according to their node affinity rule, if a node with a higher priority than the current node comes online.",
+                                          "optional" : 1,
+                                          "type" : "boolean"
                                        },
                                        "id" : {
                                           "description" : "Status entry ID (quorum, master, lrm:<node>, service:<sid>).",
@@ -8095,6 +8629,7 @@ const apiSchema = [
                                           "aws",
                                           "azion",
                                           "azure",
+                                          "beget",
                                           "bookmyname",
                                           "bunny",
                                           "cf",
@@ -8126,11 +8661,13 @@ const apiSchema = [
                                           "dynu",
                                           "dynv6",
                                           "easydns",
+                                          "edgecenter",
                                           "edgedns",
                                           "euserv",
                                           "exoscale",
                                           "fornex",
                                           "freedns",
+                                          "freemyip",
                                           "gandi_livedns",
                                           "gcloud",
                                           "gcore",
@@ -8138,6 +8675,7 @@ const apiSchema = [
                                           "geoscaling",
                                           "googledomains",
                                           "he",
+                                          "he_ddns",
                                           "hetzner",
                                           "hexonet",
                                           "hostingde",
@@ -8167,6 +8705,7 @@ const apiSchema = [
                                           "maradns",
                                           "me",
                                           "miab",
+                                          "mijnhost",
                                           "misaka",
                                           "myapi",
                                           "mydevil",
@@ -8384,6 +8923,7 @@ const apiSchema = [
                                     "aws",
                                     "azion",
                                     "azure",
+                                    "beget",
                                     "bookmyname",
                                     "bunny",
                                     "cf",
@@ -8415,11 +8955,13 @@ const apiSchema = [
                                     "dynu",
                                     "dynv6",
                                     "easydns",
+                                    "edgecenter",
                                     "edgedns",
                                     "euserv",
                                     "exoscale",
                                     "fornex",
                                     "freedns",
+                                    "freemyip",
                                     "gandi_livedns",
                                     "gcloud",
                                     "gcore",
@@ -8427,6 +8969,7 @@ const apiSchema = [
                                     "geoscaling",
                                     "googledomains",
                                     "he",
+                                    "he_ddns",
                                     "hetzner",
                                     "hexonet",
                                     "hostingde",
@@ -8456,6 +8999,7 @@ const apiSchema = [
                                     "maradns",
                                     "me",
                                     "miab",
+                                    "mijnhost",
                                     "misaka",
                                     "myapi",
                                     "mydevil",
@@ -12626,6 +13170,13 @@ const apiSchema = [
                                        "type" : "string",
                                        "typetext" : "<string>"
                                     },
+                                    "fabric" : {
+                                       "description" : "SDN fabric to use as underlay for this VXLAN zone.",
+                                       "format" : "pve-sdn-fabric-id",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
                                     "ipam" : {
                                        "description" : "use a specific ipam",
                                        "optional" : 1,
@@ -12912,6 +13463,13 @@ const apiSchema = [
                                  "type" : "string",
                                  "typetext" : "<string>"
                               },
+                              "fabric" : {
+                                 "description" : "SDN fabric to use as underlay for this VXLAN zone.",
+                                 "format" : "pve-sdn-fabric-id",
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
+                              },
                               "ipam" : {
                                  "description" : "use a specific ipam",
                                  "optional" : 1,
@@ -13157,6 +13715,13 @@ const apiSchema = [
                                        "type" : "integer",
                                        "typetext" : "<integer>"
                                     },
+                                    "fabric" : {
+                                       "description" : "SDN fabric to use as underlay for this EVPN controller.",
+                                       "format" : "pve-sdn-fabric-id",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
                                     "isis-domain" : {
                                        "description" : "ISIS domain.",
                                        "optional" : 1,
@@ -13324,6 +13889,13 @@ const apiSchema = [
                                  "optional" : 1,
                                  "type" : "integer",
                                  "typetext" : "<integer>"
+                              },
+                              "fabric" : {
+                                 "description" : "SDN fabric to use as underlay for this EVPN controller.",
+                                 "format" : "pve-sdn-fabric-id",
+                                 "optional" : 1,
+                                 "type" : "string",
+                                 "typetext" : "<string>"
                               },
                               "isis-domain" : {
                                  "description" : "ISIS domain.",
@@ -13940,6 +14512,1546 @@ const apiSchema = [
                   "leaf" : 0,
                   "path" : "/cluster/sdn/dns",
                   "text" : "dns"
+               },
+               {
+                  "children" : [
+                     {
+                        "children" : [
+                           {
+                              "info" : {
+                                 "DELETE" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Add a fabric",
+                                    "method" : "DELETE",
+                                    "name" : "delete_fabric",
+                                    "parameters" : {
+                                       "properties" : {
+                                          "id" : {
+                                             "description" : "Identifier for SDN fabrics",
+                                             "format" : "pve-sdn-fabric-id",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/sdn/fabrics/{id}",
+                                          [
+                                             "SDN.Allocate"
+                                          ]
+                                       ]
+                                    },
+                                    "protected" : 1,
+                                    "returns" : {
+                                       "type" : "null"
+                                    }
+                                 },
+                                 "GET" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Update a fabric",
+                                    "method" : "GET",
+                                    "name" : "get_fabric",
+                                    "parameters" : {
+                                       "properties" : {
+                                          "id" : {
+                                             "description" : "Identifier for SDN fabrics",
+                                             "format" : "pve-sdn-fabric-id",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/sdn/fabrics/{id}",
+                                          [
+                                             "SDN.Audit",
+                                             "SDN.Allocate"
+                                          ],
+                                          "any",
+                                          1
+                                       ]
+                                    },
+                                    "returns" : {
+                                       "properties" : {
+                                          "area" : {
+                                             "description" : "OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.",
+                                             "instance-types" : [
+                                                "ospf"
+                                             ],
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "type-property" : "protocol"
+                                          },
+                                          "csnp_interval" : {
+                                             "description" : "The csnp_interval property for Openfabric",
+                                             "instance-types" : [
+                                                "openfabric"
+                                             ],
+                                             "maximum" : 600,
+                                             "minimum" : 1,
+                                             "optional" : 1,
+                                             "type" : "number",
+                                             "type-property" : "protocol"
+                                          },
+                                          "digest" : {
+                                             "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                             "maxLength" : 64,
+                                             "optional" : 1,
+                                             "type" : "string"
+                                          },
+                                          "hello_interval" : {
+                                             "description" : "The hello_interval property for Openfabric",
+                                             "instance-types" : [
+                                                "openfabric"
+                                             ],
+                                             "maximum" : 600,
+                                             "minimum" : 1,
+                                             "optional" : 1,
+                                             "type" : "number",
+                                             "type-property" : "protocol"
+                                          },
+                                          "id" : {
+                                             "description" : "Identifier for SDN fabrics",
+                                             "format" : "pve-sdn-fabric-id",
+                                             "type" : "string"
+                                          },
+                                          "ip6_prefix" : {
+                                             "description" : "The IP prefix for Node IPs",
+                                             "format" : "CIDR",
+                                             "optional" : 1,
+                                             "type" : "string"
+                                          },
+                                          "ip_prefix" : {
+                                             "description" : "The IP prefix for Node IPs",
+                                             "format" : "CIDR",
+                                             "optional" : 1,
+                                             "type" : "string"
+                                          },
+                                          "protocol" : {
+                                             "description" : "Type of configuration entry in an SDN Fabric section config",
+                                             "enum" : [
+                                                "openfabric",
+                                                "ospf"
+                                             ],
+                                             "type" : "string"
+                                          }
+                                       },
+                                       "type" : "object"
+                                    }
+                                 },
+                                 "PUT" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Update a fabric",
+                                    "method" : "PUT",
+                                    "name" : "update_fabric",
+                                    "parameters" : {
+                                       "properties" : {
+                                          "area" : {
+                                             "description" : "OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.",
+                                             "instance-types" : [
+                                                "ospf"
+                                             ],
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "type-property" : "protocol",
+                                             "typetext" : "<string>"
+                                          },
+                                          "csnp_interval" : {
+                                             "description" : "The csnp_interval property for Openfabric",
+                                             "instance-types" : [
+                                                "openfabric"
+                                             ],
+                                             "maximum" : 600,
+                                             "minimum" : 1,
+                                             "optional" : 1,
+                                             "type" : "number",
+                                             "type-property" : "protocol",
+                                             "typetext" : "<number> (1 - 600)"
+                                          },
+                                          "delete" : {
+                                             "oneOf" : [
+                                                {
+                                                   "instance-types" : [
+                                                      "openfabric"
+                                                   ],
+                                                   "items" : {
+                                                      "enum" : [
+                                                         "hello_interval",
+                                                         "csnp_interval"
+                                                      ],
+                                                      "type" : "string"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                },
+                                                {
+                                                   "instance-types" : [
+                                                      "ospf"
+                                                   ],
+                                                   "items" : {
+                                                      "enum" : [
+                                                         "area"
+                                                      ],
+                                                      "type" : "string"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                }
+                                             ],
+                                             "type" : "array",
+                                             "type-property" : "protocol",
+                                             "typetext" : "<array>"
+                                          },
+                                          "digest" : {
+                                             "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                             "maxLength" : 64,
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "hello_interval" : {
+                                             "description" : "The hello_interval property for Openfabric",
+                                             "instance-types" : [
+                                                "openfabric"
+                                             ],
+                                             "maximum" : 600,
+                                             "minimum" : 1,
+                                             "optional" : 1,
+                                             "type" : "number",
+                                             "type-property" : "protocol",
+                                             "typetext" : "<number> (1 - 600)"
+                                          },
+                                          "id" : {
+                                             "description" : "Identifier for SDN fabrics",
+                                             "format" : "pve-sdn-fabric-id",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "ip6_prefix" : {
+                                             "description" : "The IP prefix for Node IPs",
+                                             "format" : "CIDR",
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "ip_prefix" : {
+                                             "description" : "The IP prefix for Node IPs",
+                                             "format" : "CIDR",
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "protocol" : {
+                                             "description" : "Type of configuration entry in an SDN Fabric section config",
+                                             "enum" : [
+                                                "openfabric",
+                                                "ospf"
+                                             ],
+                                             "type" : "string"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/sdn/fabrics/{id}",
+                                          [
+                                             "SDN.Allocate"
+                                          ]
+                                       ]
+                                    },
+                                    "protected" : 1,
+                                    "returns" : {
+                                       "type" : "null"
+                                    }
+                                 }
+                              },
+                              "leaf" : 1,
+                              "path" : "/cluster/sdn/fabrics/fabric/{id}",
+                              "text" : "{id}"
+                           }
+                        ],
+                        "info" : {
+                           "GET" : {
+                              "allowtoken" : 1,
+                              "description" : "SDN Fabrics Index",
+                              "method" : "GET",
+                              "name" : "index",
+                              "parameters" : {
+                                 "properties" : {
+                                    "pending" : {
+                                       "description" : "Display pending config.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    },
+                                    "running" : {
+                                       "description" : "Display running config.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "description" : "Only list entries where you have 'SDN.Audit' or 'SDN.Allocate' permissions on '/sdn/fabrics/<fabric>'",
+                                 "user" : "all"
+                              },
+                              "returns" : {
+                                 "items" : {
+                                    "properties" : {
+                                       "area" : {
+                                          "description" : "OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.",
+                                          "instance-types" : [
+                                             "ospf"
+                                          ],
+                                          "optional" : 1,
+                                          "type" : "string",
+                                          "type-property" : "protocol"
+                                       },
+                                       "csnp_interval" : {
+                                          "description" : "The csnp_interval property for Openfabric",
+                                          "instance-types" : [
+                                             "openfabric"
+                                          ],
+                                          "maximum" : 600,
+                                          "minimum" : 1,
+                                          "optional" : 1,
+                                          "type" : "number",
+                                          "type-property" : "protocol"
+                                       },
+                                       "digest" : {
+                                          "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                          "maxLength" : 64,
+                                          "optional" : 1,
+                                          "type" : "string"
+                                       },
+                                       "hello_interval" : {
+                                          "description" : "The hello_interval property for Openfabric",
+                                          "instance-types" : [
+                                             "openfabric"
+                                          ],
+                                          "maximum" : 600,
+                                          "minimum" : 1,
+                                          "optional" : 1,
+                                          "type" : "number",
+                                          "type-property" : "protocol"
+                                       },
+                                       "id" : {
+                                          "description" : "Identifier for SDN fabrics",
+                                          "format" : "pve-sdn-fabric-id",
+                                          "type" : "string"
+                                       },
+                                       "ip6_prefix" : {
+                                          "description" : "The IP prefix for Node IPs",
+                                          "format" : "CIDR",
+                                          "optional" : 1,
+                                          "type" : "string"
+                                       },
+                                       "ip_prefix" : {
+                                          "description" : "The IP prefix for Node IPs",
+                                          "format" : "CIDR",
+                                          "optional" : 1,
+                                          "type" : "string"
+                                       },
+                                       "protocol" : {
+                                          "description" : "Type of configuration entry in an SDN Fabric section config",
+                                          "enum" : [
+                                             "openfabric",
+                                             "ospf"
+                                          ],
+                                          "type" : "string"
+                                       }
+                                    },
+                                    "type" : "object"
+                                 },
+                                 "links" : [
+                                    {
+                                       "href" : "{id}",
+                                       "rel" : "child"
+                                    }
+                                 ],
+                                 "type" : "array"
+                              }
+                           },
+                           "POST" : {
+                              "allowtoken" : 1,
+                              "description" : "Add a fabric",
+                              "method" : "POST",
+                              "name" : "add_fabric",
+                              "parameters" : {
+                                 "properties" : {
+                                    "area" : {
+                                       "description" : "OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.",
+                                       "instance-types" : [
+                                          "ospf"
+                                       ],
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "type-property" : "protocol",
+                                       "typetext" : "<string>"
+                                    },
+                                    "csnp_interval" : {
+                                       "description" : "The csnp_interval property for Openfabric",
+                                       "instance-types" : [
+                                          "openfabric"
+                                       ],
+                                       "maximum" : 600,
+                                       "minimum" : 1,
+                                       "optional" : 1,
+                                       "type" : "number",
+                                       "type-property" : "protocol",
+                                       "typetext" : "<number> (1 - 600)"
+                                    },
+                                    "digest" : {
+                                       "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                       "maxLength" : 64,
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "hello_interval" : {
+                                       "description" : "The hello_interval property for Openfabric",
+                                       "instance-types" : [
+                                          "openfabric"
+                                       ],
+                                       "maximum" : 600,
+                                       "minimum" : 1,
+                                       "optional" : 1,
+                                       "type" : "number",
+                                       "type-property" : "protocol",
+                                       "typetext" : "<number> (1 - 600)"
+                                    },
+                                    "id" : {
+                                       "description" : "Identifier for SDN fabrics",
+                                       "format" : "pve-sdn-fabric-id",
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "ip6_prefix" : {
+                                       "description" : "The IP prefix for Node IPs",
+                                       "format" : "CIDR",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "ip_prefix" : {
+                                       "description" : "The IP prefix for Node IPs",
+                                       "format" : "CIDR",
+                                       "optional" : 1,
+                                       "type" : "string",
+                                       "typetext" : "<string>"
+                                    },
+                                    "protocol" : {
+                                       "description" : "Type of configuration entry in an SDN Fabric section config",
+                                       "enum" : [
+                                          "openfabric",
+                                          "ospf"
+                                       ],
+                                       "type" : "string"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "check" : [
+                                    "perm",
+                                    "/sdn/fabrics",
+                                    [
+                                       "SDN.Allocate"
+                                    ]
+                                 ]
+                              },
+                              "protected" : 1,
+                              "returns" : {
+                                 "type" : "null"
+                              }
+                           }
+                        },
+                        "leaf" : 0,
+                        "path" : "/cluster/sdn/fabrics/fabric",
+                        "text" : "fabric"
+                     },
+                     {
+                        "children" : [
+                           {
+                              "children" : [
+                                 {
+                                    "info" : {
+                                       "DELETE" : {
+                                          "allowtoken" : 1,
+                                          "description" : "Add a node",
+                                          "method" : "DELETE",
+                                          "name" : "delete_node",
+                                          "parameters" : {
+                                             "properties" : {
+                                                "fabric_id" : {
+                                                   "description" : "Identifier for SDN fabrics",
+                                                   "format" : "pve-sdn-fabric-id",
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "node_id" : {
+                                                   "description" : "Identifier for nodes in an SDN fabric",
+                                                   "format" : "pve-node",
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                }
+                                             }
+                                          },
+                                          "permissions" : {
+                                             "check" : [
+                                                "and",
+                                                [
+                                                   "perm",
+                                                   "/sdn/fabrics/{fabric_id}",
+                                                   [
+                                                      "SDN.Allocate"
+                                                   ]
+                                                ],
+                                                [
+                                                   "perm",
+                                                   "/nodes/{node_id}",
+                                                   [
+                                                      "Sys.Modify"
+                                                   ]
+                                                ]
+                                             ]
+                                          },
+                                          "protected" : 1,
+                                          "returns" : {
+                                             "type" : "null"
+                                          }
+                                       },
+                                       "GET" : {
+                                          "allowtoken" : 1,
+                                          "description" : "Get a node",
+                                          "method" : "GET",
+                                          "name" : "get_node",
+                                          "parameters" : {
+                                             "properties" : {
+                                                "fabric_id" : {
+                                                   "description" : "Identifier for SDN fabrics",
+                                                   "format" : "pve-sdn-fabric-id",
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "node_id" : {
+                                                   "description" : "Identifier for nodes in an SDN fabric",
+                                                   "format" : "pve-node",
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                }
+                                             }
+                                          },
+                                          "permissions" : {
+                                             "check" : [
+                                                "and",
+                                                [
+                                                   "perm",
+                                                   "/sdn/fabrics/{fabric_id}",
+                                                   [
+                                                      "SDN.Audit",
+                                                      "SDN.Allocate"
+                                                   ],
+                                                   "any",
+                                                   1
+                                                ],
+                                                [
+                                                   "perm",
+                                                   "/nodes/{node_id}",
+                                                   [
+                                                      "Sys.Audit",
+                                                      "Sys.Modify"
+                                                   ],
+                                                   "any",
+                                                   1
+                                                ]
+                                             ]
+                                          },
+                                          "returns" : {
+                                             "properties" : {
+                                                "digest" : {
+                                                   "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                                   "maxLength" : 64,
+                                                   "optional" : 1,
+                                                   "type" : "string"
+                                                },
+                                                "fabric_id" : {
+                                                   "description" : "Identifier for SDN fabrics",
+                                                   "format" : "pve-sdn-fabric-id",
+                                                   "type" : "string"
+                                                },
+                                                "interfaces" : {
+                                                   "oneOf" : [
+                                                      {
+                                                         "description" : "OpenFabric network interface",
+                                                         "instance-types" : [
+                                                            "openfabric"
+                                                         ],
+                                                         "items" : {
+                                                            "format" : {
+                                                               "hello_multiplier" : {
+                                                                  "description" : "The hello_multiplier property of the interface",
+                                                                  "maximum" : 100,
+                                                                  "minimum" : 2,
+                                                                  "optional" : 1,
+                                                                  "type" : "integer"
+                                                               },
+                                                               "ip" : {
+                                                                  "description" : "IPv4 address for this node",
+                                                                  "format" : "CIDRv4",
+                                                                  "optional" : 1,
+                                                                  "type" : "string"
+                                                               },
+                                                               "ip6" : {
+                                                                  "description" : "IPv6 address for this node",
+                                                                  "format" : "CIDRv6",
+                                                                  "optional" : 1,
+                                                                  "type" : "string"
+                                                               },
+                                                               "name" : {
+                                                                  "description" : "Name of the network interface",
+                                                                  "format" : "pve-iface",
+                                                                  "type" : "string"
+                                                               }
+                                                            },
+                                                            "type" : "string"
+                                                         },
+                                                         "optional" : 1,
+                                                         "type" : "array"
+                                                      },
+                                                      {
+                                                         "description" : "OSPF network interface",
+                                                         "instance-types" : [
+                                                            "ospf"
+                                                         ],
+                                                         "items" : {
+                                                            "format" : {
+                                                               "ip" : {
+                                                                  "description" : "IPv4 address for this node",
+                                                                  "format" : "CIDRv4",
+                                                                  "optional" : 1,
+                                                                  "type" : "string"
+                                                               },
+                                                               "name" : {
+                                                                  "description" : "Name of the network interface",
+                                                                  "format" : "pve-iface",
+                                                                  "type" : "string"
+                                                               }
+                                                            },
+                                                            "type" : "string"
+                                                         },
+                                                         "optional" : 1,
+                                                         "type" : "array"
+                                                      }
+                                                   ],
+                                                   "type" : "array",
+                                                   "type-property" : "protocol"
+                                                },
+                                                "ip" : {
+                                                   "description" : "IPv4 address for this node",
+                                                   "format" : "ipv4",
+                                                   "optional" : 1,
+                                                   "type" : "string"
+                                                },
+                                                "ip6" : {
+                                                   "description" : "IPv6 address for this node",
+                                                   "format" : "ipv6",
+                                                   "optional" : 1,
+                                                   "type" : "string"
+                                                },
+                                                "node_id" : {
+                                                   "description" : "Identifier for nodes in an SDN fabric",
+                                                   "format" : "pve-node",
+                                                   "type" : "string"
+                                                },
+                                                "protocol" : {
+                                                   "description" : "Type of configuration entry in an SDN Fabric section config",
+                                                   "enum" : [
+                                                      "openfabric",
+                                                      "ospf"
+                                                   ],
+                                                   "type" : "string"
+                                                }
+                                             }
+                                          }
+                                       },
+                                       "PUT" : {
+                                          "allowtoken" : 1,
+                                          "description" : "Update a node",
+                                          "method" : "PUT",
+                                          "name" : "update_node",
+                                          "parameters" : {
+                                             "properties" : {
+                                                "delete" : {
+                                                   "items" : {
+                                                      "enum" : [
+                                                         "interfaces",
+                                                         "ip",
+                                                         "ip6"
+                                                      ],
+                                                      "type" : "string"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array",
+                                                   "typetext" : "<array>"
+                                                },
+                                                "digest" : {
+                                                   "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                                   "maxLength" : 64,
+                                                   "optional" : 1,
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "fabric_id" : {
+                                                   "description" : "Identifier for SDN fabrics",
+                                                   "format" : "pve-sdn-fabric-id",
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "interfaces" : {
+                                                   "oneOf" : [
+                                                      {
+                                                         "description" : "OpenFabric network interface",
+                                                         "instance-types" : [
+                                                            "openfabric"
+                                                         ],
+                                                         "items" : {
+                                                            "format" : {
+                                                               "hello_multiplier" : {
+                                                                  "description" : "The hello_multiplier property of the interface",
+                                                                  "maximum" : 100,
+                                                                  "minimum" : 2,
+                                                                  "optional" : 1,
+                                                                  "type" : "integer"
+                                                               },
+                                                               "ip" : {
+                                                                  "description" : "IPv4 address for this node",
+                                                                  "format" : "CIDRv4",
+                                                                  "optional" : 1,
+                                                                  "type" : "string"
+                                                               },
+                                                               "ip6" : {
+                                                                  "description" : "IPv6 address for this node",
+                                                                  "format" : "CIDRv6",
+                                                                  "optional" : 1,
+                                                                  "type" : "string"
+                                                               },
+                                                               "name" : {
+                                                                  "description" : "Name of the network interface",
+                                                                  "format" : "pve-iface",
+                                                                  "type" : "string"
+                                                               }
+                                                            },
+                                                            "type" : "string"
+                                                         },
+                                                         "optional" : 1,
+                                                         "type" : "array"
+                                                      },
+                                                      {
+                                                         "description" : "OSPF network interface",
+                                                         "instance-types" : [
+                                                            "ospf"
+                                                         ],
+                                                         "items" : {
+                                                            "format" : {
+                                                               "ip" : {
+                                                                  "description" : "IPv4 address for this node",
+                                                                  "format" : "CIDRv4",
+                                                                  "optional" : 1,
+                                                                  "type" : "string"
+                                                               },
+                                                               "name" : {
+                                                                  "description" : "Name of the network interface",
+                                                                  "format" : "pve-iface",
+                                                                  "type" : "string"
+                                                               }
+                                                            },
+                                                            "type" : "string"
+                                                         },
+                                                         "optional" : 1,
+                                                         "type" : "array"
+                                                      }
+                                                   ],
+                                                   "type" : "array",
+                                                   "type-property" : "protocol",
+                                                   "typetext" : "<array>"
+                                                },
+                                                "ip" : {
+                                                   "description" : "IPv4 address for this node",
+                                                   "format" : "ipv4",
+                                                   "optional" : 1,
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "ip6" : {
+                                                   "description" : "IPv6 address for this node",
+                                                   "format" : "ipv6",
+                                                   "optional" : 1,
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "node_id" : {
+                                                   "description" : "Identifier for nodes in an SDN fabric",
+                                                   "format" : "pve-node",
+                                                   "type" : "string",
+                                                   "typetext" : "<string>"
+                                                },
+                                                "protocol" : {
+                                                   "description" : "Type of configuration entry in an SDN Fabric section config",
+                                                   "enum" : [
+                                                      "openfabric",
+                                                      "ospf"
+                                                   ],
+                                                   "type" : "string"
+                                                }
+                                             }
+                                          },
+                                          "permissions" : {
+                                             "check" : [
+                                                "and",
+                                                [
+                                                   "perm",
+                                                   "/sdn/fabrics/{fabric_id}",
+                                                   [
+                                                      "SDN.Allocate"
+                                                   ]
+                                                ],
+                                                [
+                                                   "perm",
+                                                   "/nodes/{node_id}",
+                                                   [
+                                                      "Sys.Modify"
+                                                   ]
+                                                ]
+                                             ]
+                                          },
+                                          "protected" : 1,
+                                          "returns" : {
+                                             "type" : "null"
+                                          }
+                                       }
+                                    },
+                                    "leaf" : 1,
+                                    "path" : "/cluster/sdn/fabrics/node/{fabric_id}/{node_id}",
+                                    "text" : "{node_id}"
+                                 }
+                              ],
+                              "info" : {
+                                 "GET" : {
+                                    "allowtoken" : 1,
+                                    "description" : "SDN Fabrics Index",
+                                    "method" : "GET",
+                                    "name" : "list_nodes_fabric",
+                                    "parameters" : {
+                                       "properties" : {
+                                          "fabric_id" : {
+                                             "description" : "Identifier for SDN fabrics",
+                                             "format" : "pve-sdn-fabric-id",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "pending" : {
+                                             "description" : "Display pending config.",
+                                             "optional" : 1,
+                                             "type" : "boolean",
+                                             "typetext" : "<boolean>"
+                                          },
+                                          "running" : {
+                                             "description" : "Display running config.",
+                                             "optional" : 1,
+                                             "type" : "boolean",
+                                             "typetext" : "<boolean>"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/sdn/fabrics/{fabric_id}",
+                                          [
+                                             "SDN.Audit"
+                                          ]
+                                       ],
+                                       "description" : "Only returns nodes where you have 'Sys.Audit' or 'Sys.Modify' permissions."
+                                    },
+                                    "returns" : {
+                                       "items" : {
+                                          "properties" : {
+                                             "digest" : {
+                                                "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                                "maxLength" : 64,
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "fabric_id" : {
+                                                "description" : "Identifier for SDN fabrics",
+                                                "format" : "pve-sdn-fabric-id",
+                                                "type" : "string"
+                                             },
+                                             "interfaces" : {
+                                                "oneOf" : [
+                                                   {
+                                                      "description" : "OpenFabric network interface",
+                                                      "instance-types" : [
+                                                         "openfabric"
+                                                      ],
+                                                      "items" : {
+                                                         "format" : {
+                                                            "hello_multiplier" : {
+                                                               "description" : "The hello_multiplier property of the interface",
+                                                               "maximum" : 100,
+                                                               "minimum" : 2,
+                                                               "optional" : 1,
+                                                               "type" : "integer"
+                                                            },
+                                                            "ip" : {
+                                                               "description" : "IPv4 address for this node",
+                                                               "format" : "CIDRv4",
+                                                               "optional" : 1,
+                                                               "type" : "string"
+                                                            },
+                                                            "ip6" : {
+                                                               "description" : "IPv6 address for this node",
+                                                               "format" : "CIDRv6",
+                                                               "optional" : 1,
+                                                               "type" : "string"
+                                                            },
+                                                            "name" : {
+                                                               "description" : "Name of the network interface",
+                                                               "format" : "pve-iface",
+                                                               "type" : "string"
+                                                            }
+                                                         },
+                                                         "type" : "string"
+                                                      },
+                                                      "optional" : 1,
+                                                      "type" : "array"
+                                                   },
+                                                   {
+                                                      "description" : "OSPF network interface",
+                                                      "instance-types" : [
+                                                         "ospf"
+                                                      ],
+                                                      "items" : {
+                                                         "format" : {
+                                                            "ip" : {
+                                                               "description" : "IPv4 address for this node",
+                                                               "format" : "CIDRv4",
+                                                               "optional" : 1,
+                                                               "type" : "string"
+                                                            },
+                                                            "name" : {
+                                                               "description" : "Name of the network interface",
+                                                               "format" : "pve-iface",
+                                                               "type" : "string"
+                                                            }
+                                                         },
+                                                         "type" : "string"
+                                                      },
+                                                      "optional" : 1,
+                                                      "type" : "array"
+                                                   }
+                                                ],
+                                                "type" : "array",
+                                                "type-property" : "protocol"
+                                             },
+                                             "ip" : {
+                                                "description" : "IPv4 address for this node",
+                                                "format" : "ipv4",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "ip6" : {
+                                                "description" : "IPv6 address for this node",
+                                                "format" : "ipv6",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "node_id" : {
+                                                "description" : "Identifier for nodes in an SDN fabric",
+                                                "format" : "pve-node",
+                                                "type" : "string"
+                                             },
+                                             "protocol" : {
+                                                "description" : "Type of configuration entry in an SDN Fabric section config",
+                                                "enum" : [
+                                                   "openfabric",
+                                                   "ospf"
+                                                ],
+                                                "type" : "string"
+                                             }
+                                          },
+                                          "type" : "object"
+                                       },
+                                       "links" : [
+                                          {
+                                             "href" : "{node_id}",
+                                             "rel" : "child"
+                                          }
+                                       ],
+                                       "type" : "array"
+                                    }
+                                 },
+                                 "POST" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Add a node",
+                                    "method" : "POST",
+                                    "name" : "add_node",
+                                    "parameters" : {
+                                       "properties" : {
+                                          "digest" : {
+                                             "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                             "maxLength" : 64,
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "fabric_id" : {
+                                             "description" : "Identifier for SDN fabrics",
+                                             "format" : "pve-sdn-fabric-id",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "interfaces" : {
+                                             "oneOf" : [
+                                                {
+                                                   "description" : "OpenFabric network interface",
+                                                   "instance-types" : [
+                                                      "openfabric"
+                                                   ],
+                                                   "items" : {
+                                                      "format" : {
+                                                         "hello_multiplier" : {
+                                                            "description" : "The hello_multiplier property of the interface",
+                                                            "maximum" : 100,
+                                                            "minimum" : 2,
+                                                            "optional" : 1,
+                                                            "type" : "integer"
+                                                         },
+                                                         "ip" : {
+                                                            "description" : "IPv4 address for this node",
+                                                            "format" : "CIDRv4",
+                                                            "optional" : 1,
+                                                            "type" : "string"
+                                                         },
+                                                         "ip6" : {
+                                                            "description" : "IPv6 address for this node",
+                                                            "format" : "CIDRv6",
+                                                            "optional" : 1,
+                                                            "type" : "string"
+                                                         },
+                                                         "name" : {
+                                                            "description" : "Name of the network interface",
+                                                            "format" : "pve-iface",
+                                                            "type" : "string"
+                                                         }
+                                                      },
+                                                      "type" : "string"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                },
+                                                {
+                                                   "description" : "OSPF network interface",
+                                                   "instance-types" : [
+                                                      "ospf"
+                                                   ],
+                                                   "items" : {
+                                                      "format" : {
+                                                         "ip" : {
+                                                            "description" : "IPv4 address for this node",
+                                                            "format" : "CIDRv4",
+                                                            "optional" : 1,
+                                                            "type" : "string"
+                                                         },
+                                                         "name" : {
+                                                            "description" : "Name of the network interface",
+                                                            "format" : "pve-iface",
+                                                            "type" : "string"
+                                                         }
+                                                      },
+                                                      "type" : "string"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                }
+                                             ],
+                                             "type" : "array",
+                                             "type-property" : "protocol",
+                                             "typetext" : "<array>"
+                                          },
+                                          "ip" : {
+                                             "description" : "IPv4 address for this node",
+                                             "format" : "ipv4",
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "ip6" : {
+                                             "description" : "IPv6 address for this node",
+                                             "format" : "ipv6",
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "node_id" : {
+                                             "description" : "Identifier for nodes in an SDN fabric",
+                                             "format" : "pve-node",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "protocol" : {
+                                             "description" : "Type of configuration entry in an SDN Fabric section config",
+                                             "enum" : [
+                                                "openfabric",
+                                                "ospf"
+                                             ],
+                                             "type" : "string"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "and",
+                                          [
+                                             "perm",
+                                             "/sdn/fabrics/{fabric_id}",
+                                             [
+                                                "SDN.Allocate"
+                                             ]
+                                          ],
+                                          [
+                                             "perm",
+                                             "/nodes/{node_id}",
+                                             [
+                                                "Sys.Modify"
+                                             ]
+                                          ]
+                                       ]
+                                    },
+                                    "protected" : 1,
+                                    "returns" : {
+                                       "type" : "null"
+                                    }
+                                 }
+                              },
+                              "leaf" : 0,
+                              "path" : "/cluster/sdn/fabrics/node/{fabric_id}",
+                              "text" : "{fabric_id}"
+                           }
+                        ],
+                        "info" : {
+                           "GET" : {
+                              "allowtoken" : 1,
+                              "description" : "SDN Fabrics Index",
+                              "method" : "GET",
+                              "name" : "list_nodes",
+                              "parameters" : {
+                                 "properties" : {
+                                    "pending" : {
+                                       "description" : "Display pending config.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    },
+                                    "running" : {
+                                       "description" : "Display running config.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "description" : "Only list nodes where you have 'SDN.Audit' or 'SDN.Allocate' permissions on\n'/sdn/fabrics/<fabric>' and 'Sys.Audit' or 'Sys.Modify' on /nodes/<node_id>",
+                                 "user" : "all"
+                              },
+                              "returns" : {
+                                 "items" : {
+                                    "properties" : {
+                                       "digest" : {
+                                          "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                          "maxLength" : 64,
+                                          "optional" : 1,
+                                          "type" : "string"
+                                       },
+                                       "fabric_id" : {
+                                          "description" : "Identifier for SDN fabrics",
+                                          "format" : "pve-sdn-fabric-id",
+                                          "type" : "string"
+                                       },
+                                       "interfaces" : {
+                                          "oneOf" : [
+                                             {
+                                                "description" : "OpenFabric network interface",
+                                                "instance-types" : [
+                                                   "openfabric"
+                                                ],
+                                                "items" : {
+                                                   "format" : {
+                                                      "hello_multiplier" : {
+                                                         "description" : "The hello_multiplier property of the interface",
+                                                         "maximum" : 100,
+                                                         "minimum" : 2,
+                                                         "optional" : 1,
+                                                         "type" : "integer"
+                                                      },
+                                                      "ip" : {
+                                                         "description" : "IPv4 address for this node",
+                                                         "format" : "CIDRv4",
+                                                         "optional" : 1,
+                                                         "type" : "string"
+                                                      },
+                                                      "ip6" : {
+                                                         "description" : "IPv6 address for this node",
+                                                         "format" : "CIDRv6",
+                                                         "optional" : 1,
+                                                         "type" : "string"
+                                                      },
+                                                      "name" : {
+                                                         "description" : "Name of the network interface",
+                                                         "format" : "pve-iface",
+                                                         "type" : "string"
+                                                      }
+                                                   },
+                                                   "type" : "string"
+                                                },
+                                                "optional" : 1,
+                                                "type" : "array"
+                                             },
+                                             {
+                                                "description" : "OSPF network interface",
+                                                "instance-types" : [
+                                                   "ospf"
+                                                ],
+                                                "items" : {
+                                                   "format" : {
+                                                      "ip" : {
+                                                         "description" : "IPv4 address for this node",
+                                                         "format" : "CIDRv4",
+                                                         "optional" : 1,
+                                                         "type" : "string"
+                                                      },
+                                                      "name" : {
+                                                         "description" : "Name of the network interface",
+                                                         "format" : "pve-iface",
+                                                         "type" : "string"
+                                                      }
+                                                   },
+                                                   "type" : "string"
+                                                },
+                                                "optional" : 1,
+                                                "type" : "array"
+                                             }
+                                          ],
+                                          "type" : "array",
+                                          "type-property" : "protocol"
+                                       },
+                                       "ip" : {
+                                          "description" : "IPv4 address for this node",
+                                          "format" : "ipv4",
+                                          "optional" : 1,
+                                          "type" : "string"
+                                       },
+                                       "ip6" : {
+                                          "description" : "IPv6 address for this node",
+                                          "format" : "ipv6",
+                                          "optional" : 1,
+                                          "type" : "string"
+                                       },
+                                       "node_id" : {
+                                          "description" : "Identifier for nodes in an SDN fabric",
+                                          "format" : "pve-node",
+                                          "type" : "string"
+                                       },
+                                       "protocol" : {
+                                          "description" : "Type of configuration entry in an SDN Fabric section config",
+                                          "enum" : [
+                                             "openfabric",
+                                             "ospf"
+                                          ],
+                                          "type" : "string"
+                                       }
+                                    },
+                                    "type" : "object"
+                                 },
+                                 "links" : [
+                                    {
+                                       "href" : "{fabric_id}",
+                                       "rel" : "child"
+                                    }
+                                 ],
+                                 "type" : "array"
+                              }
+                           }
+                        },
+                        "leaf" : 0,
+                        "path" : "/cluster/sdn/fabrics/node",
+                        "text" : "node"
+                     },
+                     {
+                        "info" : {
+                           "GET" : {
+                              "allowtoken" : 1,
+                              "description" : "SDN Fabrics Index",
+                              "method" : "GET",
+                              "name" : "list_all",
+                              "parameters" : {
+                                 "properties" : {
+                                    "pending" : {
+                                       "description" : "Display pending config.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    },
+                                    "running" : {
+                                       "description" : "Display running config.",
+                                       "optional" : 1,
+                                       "type" : "boolean",
+                                       "typetext" : "<boolean>"
+                                    }
+                                 }
+                              },
+                              "permissions" : {
+                                 "description" : "Only list fabrics where you have 'SDN.Audit' or 'SDN.Allocate' permissions on\n'/sdn/fabrics/<fabric>', only list nodes where you have 'Sys.Audit' or 'Sys.Modify' on /nodes/<node_id>",
+                                 "user" : "all"
+                              },
+                              "returns" : {
+                                 "properties" : {
+                                    "fabrics" : {
+                                       "items" : {
+                                          "properties" : {
+                                             "area" : {
+                                                "description" : "OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.",
+                                                "instance-types" : [
+                                                   "ospf"
+                                                ],
+                                                "optional" : 1,
+                                                "type" : "string",
+                                                "type-property" : "protocol"
+                                             },
+                                             "csnp_interval" : {
+                                                "description" : "The csnp_interval property for Openfabric",
+                                                "instance-types" : [
+                                                   "openfabric"
+                                                ],
+                                                "maximum" : 600,
+                                                "minimum" : 1,
+                                                "optional" : 1,
+                                                "type" : "number",
+                                                "type-property" : "protocol"
+                                             },
+                                             "digest" : {
+                                                "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                                "maxLength" : 64,
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "hello_interval" : {
+                                                "description" : "The hello_interval property for Openfabric",
+                                                "instance-types" : [
+                                                   "openfabric"
+                                                ],
+                                                "maximum" : 600,
+                                                "minimum" : 1,
+                                                "optional" : 1,
+                                                "type" : "number",
+                                                "type-property" : "protocol"
+                                             },
+                                             "id" : {
+                                                "description" : "Identifier for SDN fabrics",
+                                                "format" : "pve-sdn-fabric-id",
+                                                "type" : "string"
+                                             },
+                                             "ip6_prefix" : {
+                                                "description" : "The IP prefix for Node IPs",
+                                                "format" : "CIDR",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "ip_prefix" : {
+                                                "description" : "The IP prefix for Node IPs",
+                                                "format" : "CIDR",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "protocol" : {
+                                                "description" : "Type of configuration entry in an SDN Fabric section config",
+                                                "enum" : [
+                                                   "openfabric",
+                                                   "ospf"
+                                                ],
+                                                "type" : "string"
+                                             }
+                                          },
+                                          "type" : "object"
+                                       },
+                                       "type" : "array"
+                                    },
+                                    "nodes" : {
+                                       "items" : {
+                                          "properties" : {
+                                             "digest" : {
+                                                "description" : "Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.",
+                                                "maxLength" : 64,
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "fabric_id" : {
+                                                "description" : "Identifier for SDN fabrics",
+                                                "format" : "pve-sdn-fabric-id",
+                                                "type" : "string"
+                                             },
+                                             "interfaces" : {
+                                                "oneOf" : [
+                                                   {
+                                                      "description" : "OpenFabric network interface",
+                                                      "instance-types" : [
+                                                         "openfabric"
+                                                      ],
+                                                      "items" : {
+                                                         "format" : {
+                                                            "hello_multiplier" : {
+                                                               "description" : "The hello_multiplier property of the interface",
+                                                               "maximum" : 100,
+                                                               "minimum" : 2,
+                                                               "optional" : 1,
+                                                               "type" : "integer"
+                                                            },
+                                                            "ip" : {
+                                                               "description" : "IPv4 address for this node",
+                                                               "format" : "CIDRv4",
+                                                               "optional" : 1,
+                                                               "type" : "string"
+                                                            },
+                                                            "ip6" : {
+                                                               "description" : "IPv6 address for this node",
+                                                               "format" : "CIDRv6",
+                                                               "optional" : 1,
+                                                               "type" : "string"
+                                                            },
+                                                            "name" : {
+                                                               "description" : "Name of the network interface",
+                                                               "format" : "pve-iface",
+                                                               "type" : "string"
+                                                            }
+                                                         },
+                                                         "type" : "string"
+                                                      },
+                                                      "optional" : 1,
+                                                      "type" : "array"
+                                                   },
+                                                   {
+                                                      "description" : "OSPF network interface",
+                                                      "instance-types" : [
+                                                         "ospf"
+                                                      ],
+                                                      "items" : {
+                                                         "format" : {
+                                                            "ip" : {
+                                                               "description" : "IPv4 address for this node",
+                                                               "format" : "CIDRv4",
+                                                               "optional" : 1,
+                                                               "type" : "string"
+                                                            },
+                                                            "name" : {
+                                                               "description" : "Name of the network interface",
+                                                               "format" : "pve-iface",
+                                                               "type" : "string"
+                                                            }
+                                                         },
+                                                         "type" : "string"
+                                                      },
+                                                      "optional" : 1,
+                                                      "type" : "array"
+                                                   }
+                                                ],
+                                                "type" : "array",
+                                                "type-property" : "protocol"
+                                             },
+                                             "ip" : {
+                                                "description" : "IPv4 address for this node",
+                                                "format" : "ipv4",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "ip6" : {
+                                                "description" : "IPv6 address for this node",
+                                                "format" : "ipv6",
+                                                "optional" : 1,
+                                                "type" : "string"
+                                             },
+                                             "node_id" : {
+                                                "description" : "Identifier for nodes in an SDN fabric",
+                                                "format" : "pve-node",
+                                                "type" : "string"
+                                             },
+                                             "protocol" : {
+                                                "description" : "Type of configuration entry in an SDN Fabric section config",
+                                                "enum" : [
+                                                   "openfabric",
+                                                   "ospf"
+                                                ],
+                                                "type" : "string"
+                                             }
+                                          },
+                                          "type" : "object"
+                                       },
+                                       "type" : "array"
+                                    }
+                                 },
+                                 "type" : "object"
+                              }
+                           }
+                        },
+                        "leaf" : 1,
+                        "path" : "/cluster/sdn/fabrics/all",
+                        "text" : "all"
+                     }
+                  ],
+                  "info" : {
+                     "GET" : {
+                        "allowtoken" : 1,
+                        "description" : "SDN Fabrics Index",
+                        "method" : "GET",
+                        "name" : "index",
+                        "parameters" : {},
+                        "permissions" : {
+                           "check" : [
+                              "perm",
+                              "/sdn/fabrics",
+                              [
+                                 "SDN.Audit"
+                              ]
+                           ]
+                        },
+                        "returns" : {
+                           "items" : {
+                              "properties" : {
+                                 "subdir" : {
+                                    "type" : "string"
+                                 }
+                              },
+                              "type" : "object"
+                           },
+                           "links" : [
+                              {
+                                 "href" : "{subdir}",
+                                 "rel" : "child"
+                              }
+                           ],
+                           "type" : "array"
+                        }
+                     }
+                  },
+                  "leaf" : 0,
+                  "path" : "/cluster/sdn/fabrics",
+                  "text" : "fabrics"
                }
             ],
             "info" : {
@@ -14146,6 +16258,13 @@ const apiSchema = [
                            },
                            "mem" : {
                               "description" : "Used memory in bytes (for types 'node', 'qemu' and 'lxc').",
+                              "minimum" : 0,
+                              "optional" : 1,
+                              "renderer" : "bytes",
+                              "type" : "integer"
+                           },
+                           "memhost" : {
+                              "description" : "Used memory in bytes from the point of view of the host (for types 'qemu').",
                               "minimum" : 0,
                               "optional" : 1,
                               "renderer" : "bytes",
@@ -14552,7 +16671,7 @@ const apiSchema = [
                            "description" : "For cluster wide migration settings.",
                            "format" : {
                               "network" : {
-                                 "description" : "CIDR of the (sub) network that is used for migration.",
+                                 "description" : "CIDR of the (sub) network that is used for migration. Used as a fallback for replications jobs if the replication network setting is not set",
                                  "format" : "CIDR",
                                  "format_description" : "CIDR",
                                  "optional" : 1,
@@ -14665,6 +16784,31 @@ const apiSchema = [
                            "pattern" : "(?:(?^i:[a-z0-9_][a-z0-9_\\-\\+\\.]*);)*(?^i:[a-z0-9_][a-z0-9_\\-\\+\\.]*)",
                            "type" : "string",
                            "typetext" : "<tag>[;<tag>...]"
+                        },
+                        "replication" : {
+                           "description" : "For cluster wide replication settings.",
+                           "format" : {
+                              "network" : {
+                                 "description" : "CIDR of the (sub) network that is used for replication jobs.",
+                                 "format" : "CIDR",
+                                 "format_description" : "CIDR",
+                                 "optional" : 1,
+                                 "type" : "string"
+                              },
+                              "type" : {
+                                 "default" : "secure",
+                                 "default_key" : 1,
+                                 "description" : "Replication traffic is encrypted using an SSH tunnel by default. On secure, completely private networks this can be disabled to increase performance.",
+                                 "enum" : [
+                                    "secure",
+                                    "insecure"
+                                 ],
+                                 "type" : "string"
+                              }
+                           },
+                           "optional" : 1,
+                           "type" : "string",
+                           "typetext" : "[type=]<secure|insecure> [,network=<CIDR>]"
                         },
                         "tag-style" : {
                            "description" : "Tag style options.",
@@ -16888,8 +19032,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.FileSystemMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -16935,8 +19082,12 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.FileSystemMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -16982,8 +19133,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.FileSystemMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17029,8 +19183,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.FileSystemMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17076,8 +19233,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17123,8 +19283,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17170,8 +19333,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17217,8 +19383,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17264,8 +19433,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17311,8 +19483,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17358,8 +19533,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17405,8 +19583,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17452,8 +19633,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17499,8 +19683,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17546,8 +19733,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17593,8 +19783,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.Audit",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17640,8 +19833,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.PowerMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17687,8 +19883,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.PowerMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17734,8 +19933,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.PowerMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17781,8 +19983,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.PowerMgmt",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -17847,7 +20052,7 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
+                                                   "VM.GuestAgent.Unrestricted"
                                                 ]
                                              ]
                                           },
@@ -17910,7 +20115,7 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
+                                                   "VM.GuestAgent.Unrestricted"
                                                 ]
                                              ]
                                           },
@@ -17967,7 +20172,7 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
+                                                   "VM.GuestAgent.Unrestricted"
                                                 ]
                                              ]
                                           },
@@ -18054,8 +20259,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.FileRead",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -18130,8 +20338,11 @@ const apiSchema = [
                                                 "perm",
                                                 "/vms/{vmid}",
                                                 [
-                                                   "VM.Monitor"
-                                                ]
+                                                   "VM.GuestAgent.FileWrite",
+                                                   "VM.GuestAgent.Unrestricted"
+                                                ],
+                                                "any",
+                                                1
                                              ]
                                           },
                                           "protected" : 1,
@@ -18245,8 +20456,11 @@ const apiSchema = [
                                           "perm",
                                           "/vms/{vmid}",
                                           [
-                                             "VM.Monitor"
-                                          ]
+                                             "VM.GuestAgent.Unrestricted",
+                                             "VM.GuestAgent.Unrestricted"
+                                          ],
+                                          "any",
+                                          1
                                        ]
                                     },
                                     "protected" : 1,
@@ -18834,11 +21048,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -18872,11 +21081,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "iops" : {
                                                    "description" : "Maximum r/w I/O in operations per second.",
@@ -19011,11 +21215,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -19047,16 +21246,6 @@ const apiSchema = [
                                                    "description" : "Whether to expose this drive as an SSD, rather than a rotational hard disk.",
                                                    "optional" : 1,
                                                    "type" : "boolean"
-                                                },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
                                                 },
                                                 "volume" : {
                                                    "alias" : "file"
@@ -19331,7 +21520,7 @@ const apiSchema = [
                                                    "type" : "string"
                                                 },
                                                 "mtu" : {
-                                                   "description" : "Force MTU, for VirtIO only. Set to '1' to use the bridge MTU",
+                                                   "description" : "Force MTU of network device (VirtIO only). Setting to '1' or empty will use the bridge MTU",
                                                    "maximum" : 65520,
                                                    "minimum" : 1,
                                                    "optional" : 1,
@@ -19560,11 +21749,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -19598,11 +21782,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "iops" : {
                                                    "description" : "Maximum r/w I/O in operations per second.",
@@ -19729,11 +21908,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -19765,16 +21939,6 @@ const apiSchema = [
                                                    "description" : "Whether to expose this drive as an SSD, rather than a rotational hard disk.",
                                                    "optional" : 1,
                                                    "type" : "boolean"
-                                                },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
                                                 },
                                                 "volume" : {
                                                    "alias" : "file"
@@ -20141,11 +22305,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -20179,11 +22338,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "iops" : {
                                                    "description" : "Maximum r/w I/O in operations per second.",
@@ -20339,11 +22493,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -20375,16 +22524,6 @@ const apiSchema = [
                                                    "description" : "Whether to expose this drive as an SSD, rather than a rotational hard disk.",
                                                    "optional" : 1,
                                                    "type" : "boolean"
-                                                },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
                                                 },
                                                 "vendor" : {
                                                    "description" : "The drive's vendor name, up to 8 bytes long.",
@@ -20756,11 +22895,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -20794,11 +22928,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "iops" : {
                                                    "description" : "Maximum r/w I/O in operations per second.",
@@ -20935,11 +23064,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -20966,16 +23090,6 @@ const apiSchema = [
                                                    "description" : "Controls qemu's snapshot mode feature. If activated, changes made to the disk are temporary and will be discarded when the VM is shutdown.",
                                                    "optional" : 1,
                                                    "type" : "boolean"
-                                                },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
                                                 },
                                                 "volume" : {
                                                    "alias" : "file"
@@ -21512,11 +23626,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -21550,11 +23659,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -21696,11 +23800,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -21733,16 +23832,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "volume" : {
                                                    "alias" : "file"
                                                 },
@@ -21767,7 +23856,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,werror=<enum>] [,wwn=<wwn>]"
                                           },
                                           "import-working-storage" : {
                                              "description" : "A file-based storage with 'images' content-type enabled, which is used as an intermediary extraction storage during import. Defaults to the source storage.",
@@ -22036,7 +24125,7 @@ const apiSchema = [
                                                    "type" : "string"
                                                 },
                                                 "mtu" : {
-                                                   "description" : "Force MTU, for VirtIO only. Set to '1' to use the bridge MTU",
+                                                   "description" : "Force MTU of network device (VirtIO only). Setting to '1' or empty will use the bridge MTU",
                                                    "maximum" : 65520,
                                                    "minimum" : 1,
                                                    "optional" : 1,
@@ -22285,11 +24374,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -22323,11 +24407,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -22461,11 +24540,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -22498,16 +24572,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "volume" : {
                                                    "alias" : "file"
                                                 },
@@ -22532,7 +24596,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,werror=<enum>] [,wwn=<wwn>]"
                                           },
                                           "nvme[n]" : {
                                              "description" : "Use volume as NVME hard disk or CD-ROM (n is 0 to 5).",
@@ -22874,11 +24938,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -22912,11 +24971,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -23079,11 +25133,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -23116,16 +25165,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "vendor" : {
                                                    "description" : "The drive's vendor name, up to 8 bytes long.",
                                                    "format_description" : "vendor",
@@ -23157,7 +25196,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]"
                                           },
                                           "scsihw" : {
                                              "default" : "lsi",
@@ -23527,11 +25566,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -23565,11 +25599,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -23713,11 +25742,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -23745,16 +25769,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "volume" : {
                                                    "alias" : "file"
                                                 },
@@ -23772,7 +25786,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,werror=<enum>]"
                                           },
                                           "virtiofs[n]" : {
                                              "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
@@ -24317,11 +26331,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -24355,11 +26364,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -24501,11 +26505,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -24538,16 +26537,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "volume" : {
                                                    "alias" : "file"
                                                 },
@@ -24572,7 +26561,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,werror=<enum>] [,wwn=<wwn>]"
                                           },
                                           "ipconfig[n]" : {
                                              "description" : "cloud-init: Specify IP addresses and gateways for the corresponding interface.\n\nIP addresses use CIDR notation, gateways are optional but need an IP of the same type specified.\n\nThe special string 'dhcp' can be used for IP addresses to use DHCP, in which case no explicit\ngateway should be provided.\nFor IPv6 the special string 'auto' can be used to use stateless autoconfiguration. This requires\ncloud-init 19.4 or newer.\n\nIf cloud-init is enabled and neither an IPv4 nor an IPv6 address is specified, it defaults to using\ndhcp on IPv4.\n",
@@ -24833,7 +26822,7 @@ const apiSchema = [
                                                    "type" : "string"
                                                 },
                                                 "mtu" : {
-                                                   "description" : "Force MTU, for VirtIO only. Set to '1' to use the bridge MTU",
+                                                   "description" : "Force MTU of network device (VirtIO only). Setting to '1' or empty will use the bridge MTU",
                                                    "maximum" : 65520,
                                                    "minimum" : 1,
                                                    "optional" : 1,
@@ -25082,11 +27071,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -25120,11 +27104,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -25258,11 +27237,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -25295,16 +27269,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "volume" : {
                                                    "alias" : "file"
                                                 },
@@ -25329,7 +27293,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,werror=<enum>] [,wwn=<wwn>]"
                                           },
                                           "nvme[n]" : {
                                              "description" : "Use volume as NVME hard disk or CD-ROM (n is 0 to 5).",
@@ -25671,11 +27635,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -25709,11 +27668,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -25876,11 +27830,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -25913,16 +27862,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "vendor" : {
                                                    "description" : "The drive's vendor name, up to 8 bytes long.",
                                                    "format_description" : "vendor",
@@ -25954,7 +27893,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]"
                                           },
                                           "scsihw" : {
                                              "default" : "lsi",
@@ -26324,11 +28263,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "string"
                                                 },
-                                                "cyls" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "detect_zeroes" : {
                                                    "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                                    "optional" : 1,
@@ -26362,11 +28296,6 @@ const apiSchema = [
                                                    ],
                                                    "optional" : 1,
                                                    "type" : "string"
-                                                },
-                                                "heads" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific head count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
                                                 },
                                                 "import-from" : {
                                                    "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -26510,11 +28439,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "secs" : {
-                                                   "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                                   "optional" : 1,
-                                                   "type" : "integer"
-                                                },
                                                 "serial" : {
                                                    "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                                    "format" : "urlencoded",
@@ -26542,16 +28466,6 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "type" : "boolean"
                                                 },
-                                                "trans" : {
-                                                   "description" : "Force disk geometry bios translation mode.",
-                                                   "enum" : [
-                                                      "none",
-                                                      "lba",
-                                                      "auto"
-                                                   ],
-                                                   "optional" : 1,
-                                                   "type" : "string"
-                                                },
                                                 "volume" : {
                                                    "alias" : "file"
                                                 },
@@ -26569,7 +28483,7 @@ const apiSchema = [
                                              },
                                              "optional" : 1,
                                              "type" : "string",
-                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]"
+                                             "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,werror=<enum>]"
                                           },
                                           "virtiofs[n]" : {
                                              "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
@@ -27371,6 +29285,12 @@ const apiSchema = [
                                                    "renderer" : "bytes",
                                                    "type" : "integer"
                                                 },
+                                                "memhost" : {
+                                                   "description" : "Current memory usage on the host.",
+                                                   "optional" : 1,
+                                                   "renderer" : "bytes",
+                                                   "type" : "integer"
+                                                },
                                                 "name" : {
                                                    "description" : "VM (host)name.",
                                                    "optional" : 1,
@@ -27392,6 +29312,36 @@ const apiSchema = [
                                                    "description" : "PID of the QEMU process, if the VM is running.",
                                                    "optional" : 1,
                                                    "type" : "integer"
+                                                },
+                                                "pressurecpufull" : {
+                                                   "description" : "CPU Full pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressurecpusome" : {
+                                                   "description" : "CPU Some pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressureiofull" : {
+                                                   "description" : "IO Full pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressureiosome" : {
+                                                   "description" : "IO Some pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressurememoryfull" : {
+                                                   "description" : "Memory Full pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressurememorysome" : {
+                                                   "description" : "Memory Some pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
                                                 },
                                                 "qmpstatus" : {
                                                    "description" : "VM run state from the 'query-status' QMP monitor command.",
@@ -27581,6 +29531,13 @@ const apiSchema = [
                                                    "minimum" : 100,
                                                    "type" : "integer",
                                                    "typetext" : "<integer> (100 - 999999999)"
+                                                },
+                                                "with-conntrack-state" : {
+                                                   "default" : 0,
+                                                   "description" : "Whether to migrate conntrack entries for running VMs.",
+                                                   "optional" : 1,
+                                                   "type" : "boolean",
+                                                   "typetext" : "<boolean>"
                                                 }
                                              }
                                           },
@@ -29823,6 +31780,19 @@ const apiSchema = [
                                              "optional" : 1,
                                              "type" : "array"
                                           },
+                                          "comigrated-ha-resources" : {
+                                             "description" : "HA resources, which will be migrated to the same target node as the VM, because these are in positive affinity with the VM.",
+                                             "items" : {
+                                                "description" : "A comigrated HA resource",
+                                                "type" : "string"
+                                             },
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "has-dbus-vmstate" : {
+                                             "description" : "Whether the VM host supports migrating additional VM state, such as conntrack entries.",
+                                             "type" : "boolean"
+                                          },
                                           "local_disks" : {
                                              "description" : "List local disks including CD-Rom, unused and not referenced disks",
                                              "items" : {
@@ -29872,6 +31842,28 @@ const apiSchema = [
                                              "description" : "List of not allowed nodes with additional information.",
                                              "optional" : 1,
                                              "properties" : {
+                                                "blocking-ha-resources" : {
+                                                   "description" : "HA resources, which are blocking the VM from being migrated to the node.",
+                                                   "items" : {
+                                                      "description" : "A blocking HA resource",
+                                                      "properties" : {
+                                                         "cause" : {
+                                                            "description" : "The reason why the HA resource is blocking the migration.",
+                                                            "enum" : [
+                                                               "resource-affinity"
+                                                            ],
+                                                            "type" : "string"
+                                                         },
+                                                         "sid" : {
+                                                            "description" : "The blocking HA resource id",
+                                                            "type" : "string"
+                                                         }
+                                                      },
+                                                      "type" : "object"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                },
                                                 "unavailable_storages" : {
                                                    "description" : "A list of not available storages.",
                                                    "items" : {
@@ -29962,6 +31954,13 @@ const apiSchema = [
                                              "minimum" : 100,
                                              "type" : "integer",
                                              "typetext" : "<integer> (100 - 999999999)"
+                                          },
+                                          "with-conntrack-state" : {
+                                             "default" : 0,
+                                             "description" : "Whether to migrate conntrack entries for running VMs.",
+                                             "optional" : 1,
+                                             "type" : "boolean",
+                                             "typetext" : "<boolean>"
                                           },
                                           "with-local-disks" : {
                                              "description" : "Enable live storage migration for local disk",
@@ -30124,10 +32123,13 @@ const apiSchema = [
                                           "perm",
                                           "/vms/{vmid}",
                                           [
-                                             "VM.Monitor"
-                                          ]
+                                             "Sys.Audit",
+                                             "Sys.Modify"
+                                          ],
+                                          "any",
+                                          1
                                        ],
-                                       "description" : "Sys.Modify is required for (sub)commands which are not read-only ('info *' and 'help')"
+                                       "description" : "The following commands do not require any additional privilege: ?, help, info\n\nThe following commands require 'Sys.Modify': announce_self, backup_cancel, balloon, block_job_cancel, block_job_complete, block_job_pause, block_job_resume, block_job_set_speed, block_resize, block_set_io_throttle, boot_set, c, calc_dirty_rate, cancel_vcpu_dirty_limit, chardev-send-break, closefd, commit, cont, cpu, delvm, eject, exit_preconfig, expire_password, getfd, gpa2hpa, gpa2hva, gva2gpa, i, loadvm, log, migrate_cancel, migrate_continue, migrate_pause, migrate_set_capability, migrate_set_parameter, migrate_start_postcopy, mouse_button, mouse_move, mouse_set, one-insn-per-tb, p, print, q, qemu-io, qom-get, qom-list, quit, replay_break, replay_delete_break, replay_seek, ringbuf_read, ringbuf_write, s, savevm, sendkey, set_link, set_password, set_vcpu_dirty_limit, snapshot_blkdev_internal, snapshot_delete_blkdev_internal, stop, stopcapture, sum, sync-profile, system_powerdown, system_reset, system_wakeup, trace-event, x, x_colo_lost_heartbeat, xp\n\nThe following commands are root-only: backup, block_stream, change, chardev-add, chardev-change, chardev-remove, client_migrate_info, device_add, device_del, drive_add, drive_backup, drive_del, drive_mirror, dump-guest-memory, dumpdtb, gdbserver, hostfwd_add, hostfwd_remove, logfile, mce, memsave, migrate, migrate_incoming, migrate_recover, nbd_server_add, nbd_server_remove, nbd_server_start, nbd_server_stop, netdev_add, netdev_del, nmi, o, object_add, object_del, pcie_aer_inject_error, pmemsave, qom-set, savevm-end, savevm-start, screendump, snapshot_blkdev, watchdog_action, wavcapture, xen-event-inject, xen-event-list\n"
                                     },
                                     "protected" : 1,
                                     "proxyto" : "node",
@@ -30947,6 +32949,60 @@ const apiSchema = [
                               "leaf" : 1,
                               "path" : "/nodes/{node}/qemu/{vmid}/mtunnelwebsocket",
                               "text" : "mtunnelwebsocket"
+                           },
+                           {
+                              "info" : {
+                                 "POST" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Stop the dbus-vmstate helper for the given VM if running.",
+                                    "method" : "POST",
+                                    "name" : "dbus_vmstate",
+                                    "parameters" : {
+                                       "additionalProperties" : 0,
+                                       "properties" : {
+                                          "action" : {
+                                             "description" : "Action to perform on the DBus VMState helper.",
+                                             "enum" : [
+                                                "start",
+                                                "stop"
+                                             ],
+                                             "optional" : 0,
+                                             "type" : "string"
+                                          },
+                                          "node" : {
+                                             "description" : "The cluster node name.",
+                                             "format" : "pve-node",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "vmid" : {
+                                             "description" : "The (unique) ID of the VM.",
+                                             "format" : "pve-vmid",
+                                             "maximum" : 999999999,
+                                             "minimum" : 100,
+                                             "type" : "integer",
+                                             "typetext" : "<integer> (100 - 999999999)"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/vms/{vmid}",
+                                          [
+                                             "VM.Migrate"
+                                          ]
+                                       ]
+                                    },
+                                    "proxyto" : "node",
+                                    "returns" : {
+                                       "type" : "null"
+                                    }
+                                 }
+                              },
+                              "leaf" : 1,
+                              "path" : "/nodes/{node}/qemu/{vmid}/dbus-vmstate",
+                              "text" : "dbus-vmstate"
                            }
                         ],
                         "info" : {
@@ -31137,6 +33193,12 @@ const apiSchema = [
                                     "renderer" : "bytes",
                                     "type" : "integer"
                                  },
+                                 "memhost" : {
+                                    "description" : "Current memory usage on the host.",
+                                    "optional" : 1,
+                                    "renderer" : "bytes",
+                                    "type" : "integer"
+                                 },
                                  "name" : {
                                     "description" : "VM (host)name.",
                                     "optional" : 1,
@@ -31158,6 +33220,36 @@ const apiSchema = [
                                     "description" : "PID of the QEMU process, if the VM is running.",
                                     "optional" : 1,
                                     "type" : "integer"
+                                 },
+                                 "pressurecpufull" : {
+                                    "description" : "CPU Full pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressurecpusome" : {
+                                    "description" : "CPU Some pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressureiofull" : {
+                                    "description" : "IO Full pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressureiosome" : {
+                                    "description" : "IO Some pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressurememoryfull" : {
+                                    "description" : "Memory Full pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressurememorysome" : {
+                                    "description" : "Memory Some pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
                                  },
                                  "qmpstatus" : {
                                     "description" : "VM run state from the 'query-status' QMP monitor command.",
@@ -31675,11 +33767,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "cyls" : {
-                                       "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "detect_zeroes" : {
                                        "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                        "optional" : 1,
@@ -31713,11 +33800,6 @@ const apiSchema = [
                                        ],
                                        "optional" : 1,
                                        "type" : "string"
-                                    },
-                                    "heads" : {
-                                       "description" : "Force the drive's physical geometry to have a specific head count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
                                     },
                                     "import-from" : {
                                        "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -31859,11 +33941,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "secs" : {
-                                       "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "serial" : {
                                        "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                        "format" : "urlencoded",
@@ -31896,16 +33973,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "boolean"
                                     },
-                                    "trans" : {
-                                       "description" : "Force disk geometry bios translation mode.",
-                                       "enum" : [
-                                          "none",
-                                          "lba",
-                                          "auto"
-                                       ],
-                                       "optional" : 1,
-                                       "type" : "string"
-                                    },
                                     "volume" : {
                                        "alias" : "file"
                                     },
@@ -31930,7 +33997,7 @@ const apiSchema = [
                                  },
                                  "optional" : 1,
                                  "type" : "string",
-                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]"
+                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,werror=<enum>] [,wwn=<wwn>]"
                               },
                               "import-working-storage" : {
                                  "description" : "A file-based storage with 'images' content-type enabled, which is used as an intermediary extraction storage during import. Defaults to the source storage.",
@@ -32205,7 +34272,7 @@ const apiSchema = [
                                        "type" : "string"
                                     },
                                     "mtu" : {
-                                       "description" : "Force MTU, for VirtIO only. Set to '1' to use the bridge MTU",
+                                       "description" : "Force MTU of network device (VirtIO only). Setting to '1' or empty will use the bridge MTU",
                                        "maximum" : 65520,
                                        "minimum" : 1,
                                        "optional" : 1,
@@ -32454,11 +34521,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "cyls" : {
-                                       "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "detect_zeroes" : {
                                        "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                        "optional" : 1,
@@ -32492,11 +34554,6 @@ const apiSchema = [
                                        ],
                                        "optional" : 1,
                                        "type" : "string"
-                                    },
-                                    "heads" : {
-                                       "description" : "Force the drive's physical geometry to have a specific head count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
                                     },
                                     "import-from" : {
                                        "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -32630,11 +34687,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "secs" : {
-                                       "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "serial" : {
                                        "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                        "format" : "urlencoded",
@@ -32667,16 +34719,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "boolean"
                                     },
-                                    "trans" : {
-                                       "description" : "Force disk geometry bios translation mode.",
-                                       "enum" : [
-                                          "none",
-                                          "lba",
-                                          "auto"
-                                       ],
-                                       "optional" : 1,
-                                       "type" : "string"
-                                    },
                                     "volume" : {
                                        "alias" : "file"
                                     },
@@ -32701,7 +34743,7 @@ const apiSchema = [
                                  },
                                  "optional" : 1,
                                  "type" : "string",
-                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]"
+                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,werror=<enum>] [,wwn=<wwn>]"
                               },
                               "nvme[n]" : {
                                              "description" : "Use volume as NVME hard disk or CD-ROM (n is 0 to 5).",
@@ -33043,11 +35085,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "cyls" : {
-                                       "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "detect_zeroes" : {
                                        "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                        "optional" : 1,
@@ -33081,11 +35118,6 @@ const apiSchema = [
                                        ],
                                        "optional" : 1,
                                        "type" : "string"
-                                    },
-                                    "heads" : {
-                                       "description" : "Force the drive's physical geometry to have a specific head count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
                                     },
                                     "import-from" : {
                                        "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -33248,11 +35280,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "boolean"
                                     },
-                                    "secs" : {
-                                       "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "serial" : {
                                        "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                        "format" : "urlencoded",
@@ -33285,16 +35312,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "boolean"
                                     },
-                                    "trans" : {
-                                       "description" : "Force disk geometry bios translation mode.",
-                                       "enum" : [
-                                          "none",
-                                          "lba",
-                                          "auto"
-                                       ],
-                                       "optional" : 1,
-                                       "type" : "string"
-                                    },
                                     "vendor" : {
                                        "description" : "The drive's vendor name, up to 8 bytes long.",
                                        "format_description" : "vendor",
@@ -33326,7 +35343,7 @@ const apiSchema = [
                                  },
                                  "optional" : 1,
                                  "type" : "string",
-                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]"
+                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]"
                               },
                               "scsihw" : {
                                  "default" : "lsi",
@@ -33711,11 +35728,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "cyls" : {
-                                       "description" : "Force the drive's physical geometry to have a specific cylinder count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "detect_zeroes" : {
                                        "description" : "Controls whether to detect and try to optimize writes of zeroes.",
                                        "optional" : 1,
@@ -33749,11 +35761,6 @@ const apiSchema = [
                                        ],
                                        "optional" : 1,
                                        "type" : "string"
-                                    },
-                                    "heads" : {
-                                       "description" : "Force the drive's physical geometry to have a specific head count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
                                     },
                                     "import-from" : {
                                        "description" : "Create a new disk, importing from this source (volume ID or absolute path). When an absolute path is specified, it's up to you to ensure that the source is not actively used by another process during the import!",
@@ -33897,11 +35904,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "boolean"
                                     },
-                                    "secs" : {
-                                       "description" : "Force the drive's physical geometry to have a specific sector count.",
-                                       "optional" : 1,
-                                       "type" : "integer"
-                                    },
                                     "serial" : {
                                        "description" : "The drive's reported serial number, url-encoded, up to 20 bytes long.",
                                        "format" : "urlencoded",
@@ -33929,16 +35931,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "boolean"
                                     },
-                                    "trans" : {
-                                       "description" : "Force disk geometry bios translation mode.",
-                                       "enum" : [
-                                          "none",
-                                          "lba",
-                                          "auto"
-                                       ],
-                                       "optional" : 1,
-                                       "type" : "string"
-                                    },
                                     "volume" : {
                                        "alias" : "file"
                                     },
@@ -33956,7 +35948,7 @@ const apiSchema = [
                                  },
                                  "optional" : 1,
                                  "type" : "string",
-                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]"
+                                 "typetext" : "[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,werror=<enum>]"
                               },
                               "virtiofs[n]" : {
                                  "description" : "Configuration for sharing a directory between host and guest using Virtio-fs.",
@@ -35401,6 +37393,31 @@ const apiSchema = [
                                                    "optional" : 1,
                                                    "renderer" : "bytes",
                                                    "type" : "integer"
+                                                },
+                                                "pressurecpusome" : {
+                                                   "description" : "CPU Some pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressureiofull" : {
+                                                   "description" : "IO Full pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressureiosome" : {
+                                                   "description" : "IO Some pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressurememoryfull" : {
+                                                   "description" : "Memory Full pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
+                                                },
+                                                "pressurememorysome" : {
+                                                   "description" : "Memory Some pressure stall average over the last 10 seconds.",
+                                                   "optional" : 1,
+                                                   "type" : "number"
                                                 },
                                                 "status" : {
                                                    "description" : "LXC Container status.",
@@ -38655,6 +40672,105 @@ const apiSchema = [
                            },
                            {
                               "info" : {
+                                 "GET" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Get preconditions for migration.",
+                                    "method" : "GET",
+                                    "name" : "migrate_vm_precondition",
+                                    "parameters" : {
+                                       "additionalProperties" : 0,
+                                       "properties" : {
+                                          "node" : {
+                                             "description" : "The cluster node name.",
+                                             "format" : "pve-node",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "target" : {
+                                             "description" : "Target node.",
+                                             "format" : "pve-node",
+                                             "optional" : 1,
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          },
+                                          "vmid" : {
+                                             "description" : "The (unique) ID of the VM.",
+                                             "format" : "pve-vmid",
+                                             "maximum" : 999999999,
+                                             "minimum" : 100,
+                                             "type" : "integer",
+                                             "typetext" : "<integer> (100 - 999999999)"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/vms/{vmid}",
+                                          [
+                                             "VM.Migrate"
+                                          ]
+                                       ]
+                                    },
+                                    "protected" : 1,
+                                    "proxyto" : "node",
+                                    "returns" : {
+                                       "properties" : {
+                                          "allowed-nodes" : {
+                                             "description" : "List of nodes allowed for migration.",
+                                             "items" : {
+                                                "description" : "An allowed node",
+                                                "type" : "string"
+                                             },
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "comigrated-ha-resources" : {
+                                             "description" : "HA resources, which will be migrated to the same target node as the container, because these are in positive affinity with the container.",
+                                             "items" : {
+                                                "description" : "A comigrated HA resource",
+                                                "type" : "string"
+                                             },
+                                             "optional" : 1,
+                                             "type" : "array"
+                                          },
+                                          "not-allowed-nodes" : {
+                                             "description" : "List of not allowed nodes with additional information.",
+                                             "optional" : 1,
+                                             "properties" : {
+                                                "blocking-ha-resources" : {
+                                                   "description" : "HA resources, which are blocking the container from being migrated to the node.",
+                                                   "items" : {
+                                                      "description" : "A blocking HA resource",
+                                                      "properties" : {
+                                                         "cause" : {
+                                                            "description" : "The reason why the HA resource is blocking the migration.",
+                                                            "enum" : [
+                                                               "resource-affinity"
+                                                            ],
+                                                            "type" : "string"
+                                                         },
+                                                         "sid" : {
+                                                            "description" : "The blocking HA resource id",
+                                                            "type" : "string"
+                                                         }
+                                                      },
+                                                      "type" : "object"
+                                                   },
+                                                   "optional" : 1,
+                                                   "type" : "array"
+                                                }
+                                             },
+                                             "type" : "object"
+                                          },
+                                          "running" : {
+                                             "description" : "Determines if the container is running.",
+                                             "type" : "boolean"
+                                          }
+                                       },
+                                       "type" : "object"
+                                    }
+                                 },
                                  "POST" : {
                                     "allowtoken" : 1,
                                     "description" : "Migrate the container to another node. Creates a new migration task.",
@@ -40971,6 +43087,31 @@ const apiSchema = [
                                     "renderer" : "bytes",
                                     "type" : "integer"
                                  },
+                                 "pressurecpusome" : {
+                                    "description" : "CPU Some pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressureiofull" : {
+                                    "description" : "IO Full pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressureiosome" : {
+                                    "description" : "IO Some pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressurememoryfull" : {
+                                    "description" : "Memory Full pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
+                                 "pressurememorysome" : {
+                                    "description" : "Memory Some pressure stall average over the last 10 seconds.",
+                                    "optional" : 1,
+                                    "type" : "number"
+                                 },
                                  "status" : {
                                     "description" : "LXC Container status.",
                                     "enum" : [
@@ -41663,7 +43804,7 @@ const apiSchema = [
                            }
                         },
                         "permissions" : {
-                           "description" : "You need 'VM.Allocate' permission on /vms/{vmid} or on the VM pool /pool/{pool}. For restore, it is enough if the user has 'VM.Backup' permission and the VM already exists. You also need 'Datastore.AllocateSpace' permissions on the storage.",
+                           "description" : "You need 'VM.Allocate' permission on /vms/{vmid} or on the VM pool /pool/{pool}. For restore, it is enough if the user has 'VM.Backup' permission and the VM already exists. You also need 'Datastore.AllocateSpace' permissions on the storage. For privileged containers, 'Sys.Modify' permissions on '/' are required.",
                            "user" : "all"
                         },
                         "protected" : 1,
@@ -44490,23 +46631,6 @@ const apiSchema = [
                                        "optional" : 1,
                                        "type" : "string"
                                     },
-                                    "notification-policy" : {
-                                       "default" : "always",
-                                       "description" : "Deprecated: Do not use",
-                                       "enum" : [
-                                          "always",
-                                          "failure",
-                                          "never"
-                                       ],
-                                       "optional" : 1,
-                                       "type" : "string"
-                                    },
-                                    "notification-target" : {
-                                       "description" : "Deprecated: Do not use",
-                                       "format" : "pve-configid",
-                                       "optional" : 1,
-                                       "type" : "string"
-                                    },
                                     "pbs-change-detection-mode" : {
                                        "description" : "PBS mode used to detect file changes and switch encoding format for container backups.",
                                        "enum" : [
@@ -44806,24 +46930,6 @@ const apiSchema = [
                                  "optional" : 1,
                                  "type" : "string"
                               },
-                              "notification-policy" : {
-                                 "default" : "always",
-                                 "description" : "Deprecated: Do not use",
-                                 "enum" : [
-                                    "always",
-                                    "failure",
-                                    "never"
-                                 ],
-                                 "optional" : 1,
-                                 "type" : "string"
-                              },
-                              "notification-target" : {
-                                 "description" : "Deprecated: Do not use",
-                                 "format" : "pve-configid",
-                                 "optional" : 1,
-                                 "type" : "string",
-                                 "typetext" : "<string>"
-                              },
                               "pbs-change-detection-mode" : {
                                  "description" : "PBS mode used to detect file changes and switch encoding format for container backups.",
                                  "enum" : [
@@ -44948,7 +47054,7 @@ const apiSchema = [
                            }
                         },
                         "permissions" : {
-                           "description" : "The user needs 'VM.Backup' permissions on any VM, and 'Datastore.AllocateSpace' on the backup storage (and fleecing storage when fleecing is used). The 'tmpdir', 'dumpdir', 'script' and 'job-id' parameters are restricted to the 'root@pam' user. The 'maxfiles' and 'prune-backups' settings require 'Datastore.Allocate' on the backup storage. The 'bwlimit', 'performance' and 'ionice' parameters require 'Sys.Modify' on '/'.",
+                           "description" : "The user needs 'VM.Backup' permissions on any VM, and 'Datastore.AllocateSpace' on the backup storage (and fleecing storage when fleecing is used). The 'tmpdir', 'dumpdir', 'script' and 'job-id' parameters are restricted to the 'root@pam' user. The 'prune-backups' setting requires 'Datastore.Allocate' on the backup storage. The 'bwlimit', 'performance' and 'ionice' parameters require 'Sys.Modify' on '/'.",
                            "user" : "all"
                         },
                         "protected" : 1,
@@ -44989,16 +47095,20 @@ const apiSchema = [
                                                 "corosync",
                                                 "cron",
                                                 "ksmtuned",
+                                                "lxcfs",
                                                 "postfix",
+                                                "proxmox-firewall",
                                                 "pve-cluster",
                                                 "pve-firewall",
                                                 "pve-ha-crm",
                                                 "pve-ha-lrm",
+                                                "pve-lxc-syscalld",
                                                 "pvedaemon",
                                                 "pvefw-logger",
                                                 "pveproxy",
                                                 "pvescheduler",
                                                 "pvestatd",
+                                                "qmeventd",
                                                 "spiceproxy",
                                                 "sshd",
                                                 "syslog",
@@ -45052,16 +47162,20 @@ const apiSchema = [
                                                 "corosync",
                                                 "cron",
                                                 "ksmtuned",
+                                                "lxcfs",
                                                 "postfix",
+                                                "proxmox-firewall",
                                                 "pve-cluster",
                                                 "pve-firewall",
                                                 "pve-ha-crm",
                                                 "pve-ha-lrm",
+                                                "pve-lxc-syscalld",
                                                 "pvedaemon",
                                                 "pvefw-logger",
                                                 "pveproxy",
                                                 "pvescheduler",
                                                 "pvestatd",
+                                                "qmeventd",
                                                 "spiceproxy",
                                                 "sshd",
                                                 "syslog",
@@ -45115,16 +47229,20 @@ const apiSchema = [
                                                 "corosync",
                                                 "cron",
                                                 "ksmtuned",
+                                                "lxcfs",
                                                 "postfix",
+                                                "proxmox-firewall",
                                                 "pve-cluster",
                                                 "pve-firewall",
                                                 "pve-ha-crm",
                                                 "pve-ha-lrm",
+                                                "pve-lxc-syscalld",
                                                 "pvedaemon",
                                                 "pvefw-logger",
                                                 "pveproxy",
                                                 "pvescheduler",
                                                 "pvestatd",
+                                                "qmeventd",
                                                 "spiceproxy",
                                                 "sshd",
                                                 "syslog",
@@ -45178,16 +47296,20 @@ const apiSchema = [
                                                 "corosync",
                                                 "cron",
                                                 "ksmtuned",
+                                                "lxcfs",
                                                 "postfix",
+                                                "proxmox-firewall",
                                                 "pve-cluster",
                                                 "pve-firewall",
                                                 "pve-ha-crm",
                                                 "pve-ha-lrm",
+                                                "pve-lxc-syscalld",
                                                 "pvedaemon",
                                                 "pvefw-logger",
                                                 "pveproxy",
                                                 "pvescheduler",
                                                 "pvestatd",
+                                                "qmeventd",
                                                 "spiceproxy",
                                                 "sshd",
                                                 "syslog",
@@ -45241,16 +47363,20 @@ const apiSchema = [
                                                 "corosync",
                                                 "cron",
                                                 "ksmtuned",
+                                                "lxcfs",
                                                 "postfix",
+                                                "proxmox-firewall",
                                                 "pve-cluster",
                                                 "pve-firewall",
                                                 "pve-ha-crm",
                                                 "pve-ha-lrm",
+                                                "pve-lxc-syscalld",
                                                 "pvedaemon",
                                                 "pvefw-logger",
                                                 "pveproxy",
                                                 "pvescheduler",
                                                 "pvestatd",
+                                                "qmeventd",
                                                 "spiceproxy",
                                                 "sshd",
                                                 "syslog",
@@ -45304,16 +47430,20 @@ const apiSchema = [
                                           "corosync",
                                           "cron",
                                           "ksmtuned",
+                                          "lxcfs",
                                           "postfix",
+                                          "proxmox-firewall",
                                           "pve-cluster",
                                           "pve-firewall",
                                           "pve-ha-crm",
                                           "pve-ha-lrm",
+                                          "pve-lxc-syscalld",
                                           "pvedaemon",
                                           "pvefw-logger",
                                           "pveproxy",
                                           "pvescheduler",
                                           "pvestatd",
+                                          "qmeventd",
                                           "spiceproxy",
                                           "sshd",
                                           "syslog",
@@ -45921,6 +48051,7 @@ const apiSchema = [
                                           "eth",
                                           "alias",
                                           "vlan",
+                                          "fabric",
                                           "OVSBridge",
                                           "OVSBond",
                                           "OVSPort",
@@ -46022,13 +48153,15 @@ const apiSchema = [
                                     "eth",
                                     "alias",
                                     "vlan",
+                                    "fabric",
                                     "OVSBridge",
                                     "OVSBond",
                                     "OVSPort",
                                     "OVSIntPort",
                                     "vnet",
                                     "any_bridge",
-                                    "any_local_bridge"
+                                    "any_local_bridge",
+                                    "include_sdn"
                                  ],
                                  "optional" : 1,
                                  "type" : "string"
@@ -46319,6 +48452,7 @@ const apiSchema = [
                                        "eth",
                                        "alias",
                                        "vlan",
+                                       "fabric",
                                        "OVSBridge",
                                        "OVSBond",
                                        "OVSPort",
@@ -46601,6 +48735,7 @@ const apiSchema = [
                                     "eth",
                                     "alias",
                                     "vlan",
+                                    "fabric",
                                     "OVSBridge",
                                     "OVSBond",
                                     "OVSPort",
@@ -46655,6 +48790,12 @@ const apiSchema = [
                                  "format" : "pve-node",
                                  "type" : "string",
                                  "typetext" : "<string>"
+                              },
+                              "skip_frr" : {
+                                 "description" : "Whether FRR config generation should get skipped or not.",
+                                 "optional" : 1,
+                                 "type" : "boolean",
+                                 "typetext" : "<boolean>"
                               }
                            }
                         },
@@ -47279,59 +49420,6 @@ const apiSchema = [
                         "leaf" : 1,
                         "path" : "/nodes/{node}/scan/pbs",
                         "text" : "pbs"
-                     },
-                     {
-                        "info" : {
-                           "GET" : {
-                              "allowtoken" : 1,
-                              "description" : "Scan remote GlusterFS server.",
-                              "method" : "GET",
-                              "name" : "glusterfsscan",
-                              "parameters" : {
-                                 "additionalProperties" : 0,
-                                 "properties" : {
-                                    "node" : {
-                                       "description" : "The cluster node name.",
-                                       "format" : "pve-node",
-                                       "type" : "string",
-                                       "typetext" : "<string>"
-                                    },
-                                    "server" : {
-                                       "description" : "The server address (name or IP).",
-                                       "format" : "pve-storage-server",
-                                       "type" : "string",
-                                       "typetext" : "<string>"
-                                    }
-                                 }
-                              },
-                              "permissions" : {
-                                 "check" : [
-                                    "perm",
-                                    "/storage",
-                                    [
-                                       "Datastore.Allocate"
-                                    ]
-                                 ]
-                              },
-                              "protected" : 1,
-                              "proxyto" : "node",
-                              "returns" : {
-                                 "items" : {
-                                    "properties" : {
-                                       "volname" : {
-                                          "description" : "The volume name.",
-                                          "type" : "string"
-                                       }
-                                    },
-                                    "type" : "object"
-                                 },
-                                 "type" : "array"
-                              }
-                           }
-                        },
-                        "leaf" : 1,
-                        "path" : "/nodes/{node}/scan/glusterfs",
-                        "text" : "glusterfs"
                      },
                      {
                         "info" : {
@@ -48062,6 +50150,50 @@ const apiSchema = [
                               "leaf" : 1,
                               "path" : "/nodes/{node}/capabilities/qemu/machines",
                               "text" : "machines"
+                           },
+                           {
+                              "info" : {
+                                 "GET" : {
+                                    "allowtoken" : 1,
+                                    "description" : "Get node-specific QEMU migration capabilities of the node. Requires the 'Sys.Audit' permission on '/nodes/<node>'.",
+                                    "method" : "GET",
+                                    "name" : "capabilities",
+                                    "parameters" : {
+                                       "additionalProperties" : 0,
+                                       "properties" : {
+                                          "node" : {
+                                             "description" : "The cluster node name.",
+                                             "format" : "pve-node",
+                                             "type" : "string",
+                                             "typetext" : "<string>"
+                                          }
+                                       }
+                                    },
+                                    "permissions" : {
+                                       "check" : [
+                                          "perm",
+                                          "/nodes/{node}",
+                                          [
+                                             "Sys.Audit"
+                                          ]
+                                       ]
+                                    },
+                                    "proxyto" : "node",
+                                    "returns" : {
+                                       "additionalProperties" : 0,
+                                       "properties" : {
+                                          "dbus-vmstate" : {
+                                             "description" : "Whether the host supports live-migrating additional VM state via the dbus-vmstate helper.",
+                                             "type" : "boolean"
+                                          }
+                                       },
+                                       "type" : "object"
+                                    }
+                                 }
+                              },
+                              "leaf" : 1,
+                              "path" : "/nodes/{node}/capabilities/qemu/migration",
+                              "text" : "migration"
                            }
                         ],
                         "info" : {
@@ -48084,6 +50216,7 @@ const apiSchema = [
                               "permissions" : {
                                  "user" : "all"
                               },
+                              "proxyto" : "node",
                               "returns" : {
                                  "items" : {
                                     "properties" : {},
@@ -48124,6 +50257,7 @@ const apiSchema = [
                         "permissions" : {
                            "user" : "all"
                         },
+                        "proxyto" : "node",
                         "returns" : {
                            "items" : {
                               "properties" : {},
@@ -52605,13 +54739,8 @@ const apiSchema = [
                                        }
                                     },
                                     "permissions" : {
-                                       "check" : [
-                                          "perm",
-                                          "/storage",
-                                          [
-                                             "Datastore.Allocate"
-                                          ]
-                                       ]
+                                       "description" : "Requires the VM.Replicate permission on /vms/<vmid>.",
+                                       "user" : "all"
                                     },
                                     "protected" : 1,
                                     "proxyto" : "node",
@@ -54131,7 +56260,8 @@ const apiSchema = [
                                     "day",
                                     "week",
                                     "month",
-                                    "year"
+                                    "year",
+                                    "decade"
                                  ],
                                  "type" : "string"
                               }
@@ -54193,7 +56323,8 @@ const apiSchema = [
                                     "day",
                                     "week",
                                     "month",
-                                    "year"
+                                    "year",
+                                    "decade"
                                  ],
                                  "type" : "string"
                               }
@@ -54393,9 +56524,9 @@ const apiSchema = [
                                  "default" : "login",
                                  "description" : "Run specific command or default to login (requires 'root@pam')",
                                  "enum" : [
-                                    "ceph_install",
                                     "upgrade",
-                                    "login"
+                                    "login",
+                                    "ceph_install"
                                  ],
                                  "optional" : 1,
                                  "type" : "string"
@@ -54488,9 +56619,9 @@ const apiSchema = [
                                  "default" : "login",
                                  "description" : "Run specific command or default to login (requires 'root@pam')",
                                  "enum" : [
-                                    "ceph_install",
                                     "upgrade",
-                                    "login"
+                                    "login",
+                                    "ceph_install"
                                  ],
                                  "optional" : 1,
                                  "type" : "string"
@@ -54613,9 +56744,9 @@ const apiSchema = [
                                  "default" : "login",
                                  "description" : "Run specific command or default to login (requires 'root@pam')",
                                  "enum" : [
-                                    "ceph_install",
                                     "upgrade",
-                                    "login"
+                                    "login",
+                                    "ceph_install"
                                  ],
                                  "optional" : 1,
                                  "type" : "string"
@@ -55775,13 +57906,6 @@ const apiSchema = [
                            "type" : "integer",
                            "typetext" : "<integer> (-1 - N)"
                         },
-                        "maxfiles" : {
-                           "description" : "Deprecated: use 'prune-backups' instead. Maximal number of backup files per VM. Use '0' for unlimited.",
-                           "minimum" : 0,
-                           "optional" : 1,
-                           "type" : "integer",
-                           "typetext" : "<integer> (0 - N)"
-                        },
                         "mkdir" : {
                            "default" : "yes",
                            "description" : "Create the directory if it doesn't exist and populate it with default sub-dirs. NOTE: Deprecated, use the 'create-base-path' and 'create-subdirs' options instead.",
@@ -55895,14 +58019,6 @@ const apiSchema = [
                            "type" : "string",
                            "typetext" : "<string>"
                         },
-                        "server2" : {
-                           "description" : "Backup volfile server IP or DNS name.",
-                           "format" : "pve-storage-server",
-                           "optional" : 1,
-                           "requires" : "server",
-                           "type" : "string",
-                           "typetext" : "<string>"
-                        },
                         "shared" : {
                            "description" : "Indicate that this is a single storage with the same contents on all nodes (or all listed in the 'nodes' option). It will not make the contents of a local storage automatically accessible to other nodes, it just marks an already shared storage as such!",
                            "optional" : 1,
@@ -55930,6 +58046,13 @@ const apiSchema = [
                            "optional" : 1,
                            "type" : "string"
                         },
+                        "snapshot-as-volume-chain" : {
+                           "default" : 0,
+                           "description" : "Enable support for creating storage-vendor agnostic snapshot through volume backing-chains.",
+                           "optional" : 1,
+                           "type" : "boolean",
+                           "typetext" : "<boolean>"
+                        },
                         "sparse" : {
                            "description" : "use sparse volumes",
                            "optional" : 1,
@@ -55956,18 +58079,15 @@ const apiSchema = [
                            "type" : "boolean",
                            "typetext" : "<boolean>"
                         },
-                        "transport" : {
-                           "description" : "Gluster transport: tcp or rdma",
-                           "enum" : [
-                              "tcp",
-                              "rdma",
-                              "unix"
-                           ],
-                           "optional" : 1,
-                           "type" : "string"
-                        },
                         "username" : {
                            "description" : "RBD Id.",
+                           "optional" : 1,
+                           "type" : "string",
+                           "typetext" : "<string>"
+                        },
+                        "zfs-base-path" : {
+                           "description" : "Base path where to look for the created ZFS block devices. Set automatically during creation if not specified. Usually '/dev/zvol'.",
+                           "format" : "pve-storage-path",
                            "optional" : 1,
                            "type" : "string",
                            "typetext" : "<string>"
@@ -56012,7 +58132,6 @@ const apiSchema = [
                               "cifs",
                               "dir",
                               "esxi",
-                              "glusterfs",
                               "iscsi",
                               "iscsidirect",
                               "lvm",
@@ -56052,7 +58171,6 @@ const apiSchema = [
                         "cifs",
                         "dir",
                         "esxi",
-                        "glusterfs",
                         "iscsi",
                         "iscsidirect",
                         "lvm",
@@ -56314,13 +58432,6 @@ const apiSchema = [
                      "type" : "integer",
                      "typetext" : "<integer> (-1 - N)"
                   },
-                  "maxfiles" : {
-                     "description" : "Deprecated: use 'prune-backups' instead. Maximal number of backup files per VM. Use '0' for unlimited.",
-                     "minimum" : 0,
-                     "optional" : 1,
-                     "type" : "integer",
-                     "typetext" : "<integer> (0 - N)"
-                  },
                   "mkdir" : {
                      "default" : "yes",
                      "description" : "Create the directory if it doesn't exist and populate it with default sub-dirs. NOTE: Deprecated, use the 'create-base-path' and 'create-subdirs' options instead.",
@@ -56448,14 +58559,6 @@ const apiSchema = [
                      "type" : "string",
                      "typetext" : "<string>"
                   },
-                  "server2" : {
-                     "description" : "Backup volfile server IP or DNS name.",
-                     "format" : "pve-storage-server",
-                     "optional" : 1,
-                     "requires" : "server",
-                     "type" : "string",
-                     "typetext" : "<string>"
-                  },
                   "share" : {
                      "description" : "CIFS share.",
                      "optional" : 1,
@@ -56488,6 +58591,13 @@ const apiSchema = [
                      ],
                      "optional" : 1,
                      "type" : "string"
+                  },
+                  "snapshot-as-volume-chain" : {
+                     "default" : 0,
+                     "description" : "Enable support for creating storage-vendor agnostic snapshot through volume backing-chains.",
+                     "optional" : 1,
+                     "type" : "boolean",
+                     "typetext" : "<boolean>"
                   },
                   "sparse" : {
                      "description" : "use sparse volumes",
@@ -56528,16 +58638,6 @@ const apiSchema = [
                      "type" : "string",
                      "typetext" : "<string>"
                   },
-                  "transport" : {
-                     "description" : "Gluster transport: tcp or rdma",
-                     "enum" : [
-                        "tcp",
-                        "rdma",
-                        "unix"
-                     ],
-                     "optional" : 1,
-                     "type" : "string"
-                  },
                   "type" : {
                      "description" : "Storage type.",
                      "enum" : [
@@ -56546,7 +58646,6 @@ const apiSchema = [
                         "cifs",
                         "dir",
                         "esxi",
-                        "glusterfs",
                         "iscsi",
                         "iscsidirect",
                         "lvm",
@@ -56572,8 +58671,9 @@ const apiSchema = [
                      "type" : "string",
                      "typetext" : "<string>"
                   },
-                  "volume" : {
-                     "description" : "Glusterfs Volume.",
+                  "zfs-base-path" : {
+                     "description" : "Base path where to look for the created ZFS block devices. Set automatically during creation if not specified. Usually '/dev/zvol'.",
+                     "format" : "pve-storage-path",
                      "optional" : 1,
                      "type" : "string",
                      "typetext" : "<string>"
@@ -56618,7 +58718,6 @@ const apiSchema = [
                         "cifs",
                         "dir",
                         "esxi",
-                        "glusterfs",
                         "iscsi",
                         "iscsidirect",
                         "lvm",
@@ -58025,15 +60124,35 @@ const apiSchema = [
                                  "optional" : 1,
                                  "type" : "boolean"
                               },
+                              "VM.GuestAgent.Audit" : {
+                                 "optional" : 1,
+                                 "type" : "boolean"
+                              },
+                              "VM.GuestAgent.FileRead" : {
+                                 "optional" : 1,
+                                 "type" : "boolean"
+                              },
+                              "VM.GuestAgent.FileSystemMgmt" : {
+                                 "optional" : 1,
+                                 "type" : "boolean"
+                              },
+                              "VM.GuestAgent.FileWrite" : {
+                                 "optional" : 1,
+                                 "type" : "boolean"
+                              },
+                              "VM.GuestAgent.Unrestricted" : {
+                                 "optional" : 1,
+                                 "type" : "boolean"
+                              },
                               "VM.Migrate" : {
                                  "optional" : 1,
                                  "type" : "boolean"
                               },
-                              "VM.Monitor" : {
+                              "VM.PowerMgmt" : {
                                  "optional" : 1,
                                  "type" : "boolean"
                               },
-                              "VM.PowerMgmt" : {
+                              "VM.Replicate" : {
                                  "optional" : 1,
                                  "type" : "boolean"
                               },

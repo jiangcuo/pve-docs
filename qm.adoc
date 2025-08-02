@@ -278,8 +278,8 @@ On each controller you attach a number of emulated hard disks, which are backed
 by a file or a block device residing in the configured storage. The choice of
 a storage type will determine the format of the hard disk image. Storages which
 present block devices (LVM, ZFS, Ceph) will require the *raw disk image format*,
-whereas files based storages (Ext4, NFS, CIFS, GlusterFS) will let you to choose
-either the *raw disk image format* or the *QEMU image format*.
+whereas files based storages (like Ext4, XFS, NFS, or CIFS) will let you to
+choose either the *raw disk image format* or the *QEMU image format*.
 
  * the *QEMU image format* is a copy on write format which allows snapshots, and
   thin provisioning of the disk image.
@@ -517,7 +517,7 @@ Added CPU flags compared to 'x86-64-v1': '+cx16', '+lahf-lm', '+popcnt', '+pni',
 * 'x86-64-v2-AES': Compatible with Intel CPU >= Westmere, AMD CPU >= Opteron_G4.
 Added CPU flags compared to 'x86-64-v2': '+aes'.
 +
-* 'x86-64-v3': Compatible with Intel CPU >= Broadwell, AMD CPU >= EPYC. Added
+* 'x86-64-v3': Compatible with Intel CPU >= Haswell, AMD CPU >= EPYC. Added
 CPU flags compared to 'x86-64-v2-AES': '+avx', '+avx2', '+bmi1', '+bmi2',
 '+f16c', '+fma', '+movbe', '+xsave'.
 +
@@ -926,10 +926,9 @@ but not via the web UI.
 You can also skip adding a network device when creating a VM by selecting *No
 network device*.
 
-You can overwrite the *MTU* setting for each VM network device. The option
-`mtu=1` represents a special case, in which the MTU value will be inherited
-from the underlying bridge.
-This option is only available for *VirtIO* network devices.
+You can overwrite the *MTU* setting for each VM network device manually. Leaving
+the field empty or setting `mtu=1` will inherit the MTU from the underlying
+bridge. This option is only available for *VirtIO* network devices.
 
 .Multiqueue
 If you are using the VirtIO driver, you can optionally activate the
@@ -1034,6 +1033,14 @@ function (e.g. in the noVNC console panel). However, if you're using
 SPICE, virtio or virgl, you'll need to choose which clipboard to use.
 This is because the default *SPICE* clipboard will be replaced by the
 *VNC* clipboard, if `clipboard` is set to `vnc`.
+
+// TODO: Change NOTE below when live-migration patch is packaged in pve-qemu:
+// https://lists.gnu.org/archive/html/qemu-devel/2025-05/msg05656.html
+NOTE: In order to enable the VNC clipboard, QEMU is configured to use the
+qemu-vdagent device.
+https://lists.gnu.org/archive/html/qemu-devel/2021-08/msg05393.html[Currently,
+the qemu-vdagent device does not support live migration.] This means that a VM
+with an enabled VNC clipboard cannot be live-migrated at the moment.
 
 [[qm_usb_passthrough]]
 USB Passthrough
@@ -1669,6 +1676,24 @@ For Live Migration to work, there are some things required:
   vendor  *might* work depending on the actual models and VMs CPU type
   configured, but it cannot be guaranteed - so please test before deploying
   such a setup in production.
+
+Conntrack State Migration
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+NOTE: Conntrack state migration is considered best-effort only and might not
+work, as it heavily depends on the network setup. For example, setups using
+xref:sysadmin_network_masquerading[source address masquerading (SNAT)] on the
+host will most likely *not* work.
+
+Conntrack is a Linux kernel mechanism to enable a stateful firewall by tracking
+individual connection. When live migrating running VMs, active in- and/or
+outbound connections *might* get interrupted as soon as the VM starts running on
+the target host, as the new host node does not have the same conntrack entries
+and thus the firewall can drop packets.
+
+Conntrack state migration copies all conntrack entries on the host for the
+live-migrated VM to the target node and afterwards flushes the migrated entries
+from the conntrack table on the source node.
 
 Offline Migration
 ~~~~~~~~~~~~~~~~~

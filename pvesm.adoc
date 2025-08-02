@@ -60,38 +60,44 @@ Block level storage::
 Allows to store large 'raw' images. It is usually not possible to store
 other files (ISO, backups, ..) on such storage types. Most modern
 block level storage implementations support snapshots and clones.
-RADOS and GlusterFS are distributed systems, replicating storage
-data to different nodes.
+Ceph RADOS is a distributed systems, replicating storage data to different
+nodes that can be accessed as RBD (RADOS Block Device).
 
 
 .Available storage types
 [width="100%",cols="<2d,1*m,4*d",options="header"]
-|===========================================================
+|========================================================================
 |Description    |Plugin type |Level  |Shared|Snapshots|Stable
 |ZFS (local)    |zfspool     |both^1^|no    |yes      |yes
-|Directory      |dir         |file   |no    |no^2^    |yes
-|BTRFS          |btrfs       |file   |no    |yes      |technology preview
-|NFS            |nfs         |file   |yes   |no^2^    |yes
-|CIFS           |cifs        |file   |yes   |no^2^    |yes
+|Directory      |dir         |file   |no    |yes^2^   |yes
+|BTRFS          |btrfs       |file   |no    |yes      |TP^5^
+|NFS            |nfs         |file   |yes   |yes^2^   |yes
+|CIFS           |cifs        |file   |yes   |yes^2^   |yes
 |Proxmox Backup |pbs         |both   |yes   |n/a      |yes
-|GlusterFS      |glusterfs   |file   |yes   |no^2^    |yes
 |CephFS         |cephfs      |file   |yes   |yes      |yes
-|LVM            |lvm         |block  |no^3^ |no       |yes
+|LVM            |lvm         |block  |no^3^ |yes^4^   |yes
 |LVM-thin       |lvmthin     |block  |no    |yes      |yes
 |iSCSI/kernel   |iscsi       |block  |yes   |no       |yes
 |iSCSI/libiscsi |iscsidirect |block  |yes   |no       |yes
 |Ceph/RBD       |rbd         |block  |yes   |yes      |yes
 |ZFS over iSCSI |zfs         |block  |yes   |yes      |yes
-|===========================================================
+|========================================================================
 
 ^1^: Disk images for VMs are stored in ZFS volume (zvol) datasets, which provide
 block device functionality.
 
-^2^: On file based storages, snapshots are possible with the 'qcow2' format.
+^2^: On file based storages, snapshots are possible with the 'qcow2' format,
+either using the internal snapshot function, or snapshots as volume chains^4^.
 
 ^3^: It is possible to use LVM on top of an iSCSI or FC-based storage.
 That way you get a `shared` LVM storage
 
+^4^: Since {pve} 9, snapshots as a volume chain have been available for VMs.
+These snapshots use separate volumes for the snapshot data and layer them.  For
+more details, see the description for `snapshot-as-volume-chain` in the
+xref:pvesm_lvm_config[LVM configuration] section.
+
+^5^ Technology preview with best-effort support.
 
 Thin Provisioning
 ~~~~~~~~~~~~~~~~~
@@ -236,11 +242,6 @@ storage as such!
 disable::
 
 You can use this flag to disable the storage completely.
-
-maxfiles::
-
-Deprecated, please use `prune-backups` instead. Maximum number of backup files
-per VM. Use `0` for unlimited.
 
 prune-backups::
 
@@ -398,8 +399,6 @@ See Also
 
 * link:/wiki/Storage:_Directory[Storage: Directory]
 
-* link:/wiki/Storage:_GlusterFS[Storage: GlusterFS]
-
 * link:/wiki/Storage:_User_Mode_iSCSI[Storage: User Mode iSCSI]
 
 * link:/wiki/Storage:_iSCSI[Storage: iSCSI]
@@ -435,8 +434,6 @@ include::pve-storage-nfs.adoc[]
 include::pve-storage-cifs.adoc[]
 
 include::pve-storage-pbs.adoc[]
-
-include::pve-storage-glusterfs.adoc[]
 
 include::pve-storage-zfspool.adoc[]
 

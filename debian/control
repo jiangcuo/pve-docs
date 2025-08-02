@@ -3,12 +3,12 @@ Section: perl
 Priority: optional
 Maintainer: Lierfang Support Team <itsupport@lierfang.com>
 Build-Depends: asciidoc-dblatex,
-               asciidoc-base (>= 10.2.0-2~bpo12+proxmox1),
+               asciidoc-base (>= 10.2.1-1+deb13u1),
                debhelper-compat (= 13),
                docbook-xsl,
                git,
                graphviz,
-               imagemagick-6.q16,
+               imagemagick-7.q16,
                libjson-perl,
                librsvg2-bin,
                lintian,

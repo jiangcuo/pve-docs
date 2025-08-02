@@ -4,7 +4,7 @@
 
 Create a new storage.
 
-`<type>`: `<btrfs | cephfs | cifs | dir | esxi | glusterfs | iscsi | iscsidirect | lvm | lvmthin | nfs | pbs | rbd | zfs | zfspool>` ::
+`<type>`: `<btrfs | cephfs | cifs | dir | esxi | iscsi | iscsidirect | lvm | lvmthin | nfs | pbs | rbd | zfs | zfspool>` ::
 
 Storage type.
 
@@ -122,10 +122,6 @@ Base64-encoded, PEM-formatted public RSA key. Used to encrypt a copy of the encr
 
 Maximal number of protected backups per guest. Use '-1' for unlimited.
 
-`--maxfiles` `<integer> (0 - N)` ::
-
-Deprecated: use 'prune-backups' instead. Maximal number of backup files per VM. Use '0' for unlimited.
-
 `--mkdir` `<boolean>` ('default =' `yes`)::
 
 Create the directory if it doesn't exist and populate it with default sub-dirs. NOTE: Deprecated, use the 'create-base-path' and 'create-subdirs' options instead.
@@ -198,12 +194,6 @@ Wipe throughput (cstream -t parameter value).
 
 Server IP or DNS name.
 
-`--server2` `<string>` ::
-
-Backup volfile server IP or DNS name.
-+
-NOTE: Requires option(s): `server`
-
 `--share` `<string>` ::
 
 CIFS share.
@@ -219,6 +209,10 @@ Disable TLS certificate verification, only enable on fully trusted networks!
 `--smbversion` `<2.0 | 2.1 | 3 | 3.0 | 3.11 | default>` ('default =' `default`)::
 
 SMB protocol version. 'default' if not set, negotiates the highest SMB2+ version supported by both the client and server.
+
+`--snapshot-as-volume-chain` `<boolean>` ('default =' `0`)::
+
+Enable support for creating storage-vendor agnostic snapshot through volume backing-chains.
 
 `--sparse` `<boolean>` ::
 
@@ -240,10 +234,6 @@ iSCSI target.
 
 LVM thin pool LV name.
 
-`--transport` `<rdma | tcp | unix>` ::
-
-Gluster transport: tcp or rdma
-
 `--username` `<string>` ::
 
 RBD Id.
@@ -252,9 +242,9 @@ RBD Id.
 
 Volume group name.
 
-`--volume` `<string>` ::
+`--zfs-base-path` `<string>` ::
 
-Glusterfs Volume.
+Base path where to look for the created ZFS block devices. Set automatically during creation if not specified. Usually '/dev/zvol'.
 
 *pvesm alloc* `<storage> <vmid> <filename> <size>` `[OPTIONS]`
 
@@ -345,10 +335,6 @@ Time to wait for the task to finish. We return 'null' if the task finish within 
 `--storage` `<storage ID>` ::
 
 The storage identifier.
-
-*pvesm glusterfsscan*
-
-An alias for 'pvesm scan glusterfs'.
 
 *pvesm help* `[OPTIONS]`
 
@@ -516,14 +502,6 @@ User password.
 
 User name.
 
-*pvesm scan glusterfs* `<server>`
-
-Scan remote GlusterFS server.
-
-`<server>`: `<string>` ::
-
-The server address (name or IP).
-
 *pvesm scan iscsi* `<portal>`
 
 Scan remote iSCSI server.
@@ -686,10 +664,6 @@ Base64-encoded, PEM-formatted public RSA key. Used to encrypt a copy of the encr
 
 Maximal number of protected backups per guest. Use '-1' for unlimited.
 
-`--maxfiles` `<integer> (0 - N)` ::
-
-Deprecated: use 'prune-backups' instead. Maximal number of backup files per VM. Use '0' for unlimited.
-
 `--mkdir` `<boolean>` ('default =' `yes`)::
 
 Create the directory if it doesn't exist and populate it with default sub-dirs. NOTE: Deprecated, use the 'create-base-path' and 'create-subdirs' options instead.
@@ -754,12 +728,6 @@ Wipe throughput (cstream -t parameter value).
 
 Server IP or DNS name.
 
-`--server2` `<string>` ::
-
-Backup volfile server IP or DNS name.
-+
-NOTE: Requires option(s): `server`
-
 `--shared` `<boolean>` ::
 
 Indicate that this is a single storage with the same contents on all nodes (or all listed in the 'nodes' option). It will not make the contents of a local storage automatically accessible to other nodes, it just marks an already shared storage as such!
@@ -771,6 +739,10 @@ Disable TLS certificate verification, only enable on fully trusted networks!
 `--smbversion` `<2.0 | 2.1 | 3 | 3.0 | 3.11 | default>` ('default =' `default`)::
 
 SMB protocol version. 'default' if not set, negotiates the highest SMB2+ version supported by both the client and server.
+
+`--snapshot-as-volume-chain` `<boolean>` ('default =' `0`)::
+
+Enable support for creating storage-vendor agnostic snapshot through volume backing-chains.
 
 `--sparse` `<boolean>` ::
 
@@ -784,13 +756,13 @@ Subdir to mount.
 
 Only use logical volumes tagged with 'pve-vm-ID'.
 
-`--transport` `<rdma | tcp | unix>` ::
-
-Gluster transport: tcp or rdma
-
 `--username` `<string>` ::
 
 RBD Id.
+
+`--zfs-base-path` `<string>` ::
+
+Base path where to look for the created ZFS block devices. Set automatically during creation if not specified. Usually '/dev/zvol'.
 
 *pvesm status* `[OPTIONS]`
 
