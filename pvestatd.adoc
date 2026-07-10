@@ -1,29 +1,30 @@
 ifdef::manvolnum[]
-pvestatd(8)
-===========
+= pvestatd(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvestatd - PVE Status Daemon
+pvestatd - PVE 状态守护进程
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvestatd.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-pvestatd - Proxmox VE Status Daemon
-===================================
+= pvestatd - Proxmox VE 状态守护进程
 endif::manvolnum[]
 
-This daemon queries the status of VMs, storages and containers at
-regular intervals. The result is sent to all nodes in the cluster.
+该守护进程会定期查询虚拟机、存储和容器的状态。查询结果会发送到集群中的所有节点。
+
+== 常用命令示例
+
+----
+systemctl status pvestatd.service
+journalctl -u pvestatd.service
+----
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

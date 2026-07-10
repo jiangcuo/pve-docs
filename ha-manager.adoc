@@ -1,188 +1,146 @@
 [[chapter_ha_manager]]
 ifdef::manvolnum[]
-ha-manager(1)
-=============
+= ha-manager(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-ha-manager - Proxmox VE HA Manager
+ha-manager - Proxmox VE HA 管理器
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::ha-manager.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 ifndef::manvolnum[]
-High Availability
-=================
+= 高可用性
 :pve-toplevel:
 endif::manvolnum[]
 
-Our modern society depends heavily on information provided by
-computers over the network. Mobile devices amplified that dependency,
-because people can access the network any time from anywhere. If you
-provide such services, it is very important that they are available
-most of the time.
+现代社会高度依赖由计算机通过网络提供的信息。移动设备进一步放大了这种依赖，
+因为人们可以随时随地访问网络。如果提供这类服务，确保它们在绝大多数时间内可用就非常重要。
 
-We can mathematically define the availability as the ratio of (A), the
-total time a service is capable of being used during a given interval
-to (B), the length of the interval. It is normally expressed as a
-percentage of uptime in a given year.
+从数学上讲，可用性可以定义为 (A) 服务在给定时间区间内可被使用的总时间，
+与 (B) 该时间区间长度之间的比值。它通常表示为某一年内正常运行时间的百分比。
 
-.Availability - Downtime per Year
+.可用性 - 每年停机时间
 [width="60%",cols="<d,d",options="header"]
 |===========================================================
-|Availability % |Downtime per year
-|99             |3.65 days
-|99.9 		|8.76 hours
-|99.99  	|52.56 minutes
-|99.999  	|5.26 minutes
-|99.9999  	|31.5 seconds
-|99.99999 	|3.15 seconds
+|可用性 % |每年停机时间
+|99             |3.65 天
+|99.9 		|8.76 小时
+|99.99  	|52.56 分钟
+|99.999  	|5.26 分钟
+|99.9999  	|31.5 秒
+|99.99999 	|3.15 秒
 |===========================================================
 
-There are several ways to increase availability. The most elegant
-solution is to rewrite your software, so that you can run it on
-several hosts at the same time. The software itself needs to have a way
-to detect errors and do failover. If you only want to serve read-only
-web pages, then this is relatively simple. However, this is generally complex
-and sometimes impossible, because you cannot modify the software yourself. The
-following solutions works without modifying the software:
+提高可用性有多种方式。最优雅的方案是重写软件，使其能够同时在多台主机上运行。
+软件本身需要具备检测错误并执行故障切换的能力。如果只是提供只读网页，
+这相对简单。不过，这通常很复杂，有时甚至不可能，因为无法自行修改软件。
+以下方案无需修改软件即可工作：
 
-* Use reliable ``server'' components
+* 使用可靠的“服务器”组件
 +
-NOTE: Computer components with the same functionality can have varying
-reliability numbers, depending on the component quality. Most vendors
-sell components with higher reliability as ``server'' components -
-usually at higher price.
+NOTE: 功能相同的计算机组件可能因为组件质量不同而具有不同的可靠性指标。
+多数厂商会将可靠性更高的组件作为“服务器”组件销售，通常价格也更高。
 
-* Eliminate single point of failure (redundant components)
-** use an uninterruptible power supply (UPS)
-** use redundant power supplies in your servers
-** use ECC-RAM
-** use redundant network hardware
-** use RAID for local storage
-** use distributed, redundant storage for VM data
+* 消除单点故障（冗余组件）
+** 使用不间断电源（UPS）
+** 在服务器中使用冗余电源
+** 使用 ECC-RAM
+** 使用冗余网络硬件
+** 对本地存储使用 RAID
+** 为虚拟机数据使用分布式冗余存储
 
-* Reduce downtime
-** rapidly accessible administrators (24/7)
-** availability of spare parts (other nodes in a {pve} cluster)
-** automatic error detection (provided by `ha-manager`)
-** automatic failover (provided by `ha-manager`)
+* 减少停机时间
+** 管理员可快速响应（24/7）
+** 具备备件可用性（{pve} 集群中的其他节点）
+** 自动错误检测（由 `ha-manager` 提供）
+** 自动故障切换（由 `ha-manager` 提供）
 
-Virtualization environments like {pve} make it much easier to reach
-high availability because they remove the ``hardware'' dependency. They
-also support the setup and use of redundant storage and network
-devices, so if one host fails, you can simply start those services on
-another host within your cluster.
+像 {pve} 这样的虚拟化环境让实现高可用性容易得多，因为它们消除了对“硬件”的依赖。
+它们还支持配置和使用冗余存储及网络设备，因此如果一台主机发生故障，
+可以直接在集群内另一台主机上启动这些服务。
 
-Better still, {pve} provides a software stack called `ha-manager`,
-which can do that automatically for you. It is able to automatically
-detect errors and do automatic failover.
+更进一步，{pve} 提供了名为 `ha-manager` 的软件栈，可以自动完成这些工作。
+它能够自动检测错误并自动执行故障切换。
 
-{pve} `ha-manager` works like an ``automated'' administrator. First, you
-configure what resources (VMs, containers, ...) it should
-manage. Then, `ha-manager` observes the correct functionality, and handles
-service failover to another node in case of errors. `ha-manager` can
-also handle normal user requests which may start, stop, relocate and
-migrate a service.
+{pve} `ha-manager` 的工作方式类似一位“自动化”的管理员。首先，配置它应管理哪些资源
+（虚拟机、容器等）。然后，`ha-manager` 会监控其正确运行状态，并在发生错误时将服务故障切换到另一节点。
+`ha-manager` 也可以处理普通用户请求，例如启动、停止、重定位和迁移服务。
 
-But high availability comes at a price. High quality components are
-more expensive, and making them redundant doubles the costs at
-least. Additional spare parts increase costs further. So you should
-carefully calculate the benefits, and compare with those additional
-costs.
+但高可用性是有成本的。高质量组件更昂贵，而将它们冗余化至少会使成本翻倍。
+额外备件会进一步增加成本。因此，应仔细计算收益，并与这些额外成本进行比较。
 
-TIP: Increasing availability from 99% to 99.9% is relatively
-simple. But increasing availability from 99.9999% to 99.99999% is very
-hard and costly. `ha-manager` has typical error detection and failover
-times of about 2 minutes, so you can get no more than 99.999%
-availability.
+TIP: 将可用性从 99% 提高到 99.9% 相对简单。但从 99.9999% 提高到 99.99999%
+非常困难且成本高昂。`ha-manager` 的典型错误检测和故障切换时间约为 2 分钟，
+因此最多只能获得约 99.999% 的可用性。
 
 
-Requirements
-------------
+== 要求
 
-You must meet the following requirements before you start with HA:
+开始使用 HA 之前，必须满足以下要求：
 
-* at least three cluster nodes (to get reliable quorum)
+* 至少三个集群节点（以获得可靠的 quorum）
 
-* shared storage for VMs and containers
+* 用于虚拟机和容器的共享存储
 
-* hardware redundancy (everywhere)
+* 硬件冗余（全范围）
 
-* use reliable “server” components
+* 使用可靠的“服务器”组件
 
-* hardware watchdog - if not available we fall back to the
-  linux kernel software watchdog (`softdog`)
+* 硬件 watchdog - 如果不可用，则回退到 Linux 内核软件 watchdog（`softdog`）
 
-* optional hardware fencing devices
+* 可选的硬件 fencing 设备
 
 
 [[ha_manager_resources]]
-Resources
----------
+== 资源
 
-We call the primary management unit handled by `ha-manager` a
-resource. A resource (also called ``service'') is uniquely
-identified by a service ID (SID), which consists of the resource type
-and a type specific ID, for example `vm:100`. That example would be a
-resource of type `vm` (virtual machine) with the ID 100.
+`ha-manager` 处理的主要管理单元称为资源。资源（也称为“服务”）由服务 ID（SID）
+唯一标识，SID 由资源类型和类型特定 ID 组成，例如 `vm:100`。该示例表示一个类型为
+`vm`（虚拟机）、ID 为 100 的资源。
 
-For now we have two important resources types - virtual machines and
-containers. One basic idea here is that we can bundle related software
-into such a VM or container, so there is no need to compose one big
-service from other services, as was done with `rgmanager`. In
-general, a HA managed resource should not depend on other resources.
+目前有两类重要资源类型：虚拟机和容器。这里的基本思路之一是，可以将相关软件打包到这类
+虚拟机或容器中，因此不需要像 `rgmanager` 那样由其他服务组合出一个大服务。
+一般来说，由 HA 管理的资源不应依赖其他资源。
 
 
-Management Tasks
-----------------
+== 管理任务
 
-This section provides a short overview of common management tasks. The
-first step is to enable HA for a resource. This is done by adding the
-resource to the HA resource configuration. You can do this using the
-GUI, or simply use the command-line tool, for example:
+本节简要概述常见管理任务。第一步是为资源启用 HA。做法是将资源添加到 HA 资源配置中。
+可以通过 GUI 完成，也可以直接使用命令行工具，例如：
 
 ----
 # ha-manager add vm:100
 ----
 
-The HA stack now tries to start the resources and keep them
-running. Please note that you can configure the ``requested''
-resources state. For example you may want the HA stack to stop the
-resource:
+HA 栈现在会尝试启动资源并保持其运行。请注意，可以配置资源的“请求”状态。
+例如，可能希望 HA 栈停止该资源：
 
 ----
 # ha-manager set vm:100 --state stopped
 ----
 
-and start it again later:
+稍后再重新启动：
 
 ----
 # ha-manager set vm:100 --state started
 ----
 
-You can also use the normal VM and container management commands. They
-automatically forward the commands to the HA stack, so
+也可以使用普通的虚拟机和容器管理命令。它们会自动将命令转发给 HA 栈，因此
 
 ----
 # qm start 100
 ----
 
-simply sets the requested state to `started`. The same applies to `qm
-stop`, which sets the requested state to `stopped`.
+只是将请求状态设置为 `started`。`qm stop` 同样如此，它会将请求状态设置为 `stopped`。
 
-NOTE: The HA stack works fully asynchronous and needs to communicate
-with other cluster members. Therefore, it takes some seconds until you see
-the result of such actions.
+NOTE: HA 栈完全异步工作，并且需要与其他集群成员通信。因此，看到这些操作的结果需要几秒钟。
 
-To view the current HA resource configuration use:
+要查看当前 HA 资源配置，请使用：
 
 ----
 # ha-manager config
@@ -190,7 +148,7 @@ vm:100
 	state stopped
 ----
 
-And you can view the actual HA manager and resource state with:
+可以使用以下命令查看实际的 HA 管理器和资源状态：
 
 ----
 # ha-manager status
@@ -200,73 +158,67 @@ lrm elsa (active, Wed Nov 23 11:07:19 2016)
 service vm:100 (node1, started)
 ----
 
-You can also initiate resource migration to other nodes:
+也可以发起资源向其他节点迁移：
 
 ----
 # ha-manager migrate vm:100 node2
 ----
 
-This uses online migration and tries to keep the VM running. Online
-migration needs to transfer all used memory over the network, so it is
-sometimes faster to stop the VM, then restart it on the new node. This can be
-done using the `relocate` command:
+这会使用在线迁移，并尝试保持虚拟机运行。在线迁移需要通过网络传输所有已使用内存，
+因此有时先停止虚拟机再在新节点上重启会更快。可以使用 `relocate` 命令完成：
 
 ----
 # ha-manager relocate vm:100 node2
 ----
 
-Finally, you can remove the resource from the HA configuration using
-the following command:
+最后，可以使用以下命令从 HA 配置中移除资源：
 
 ----
 # ha-manager remove vm:100
 ----
 
-NOTE: This does not start or stop the resource.
+NOTE: 这不会启动或停止该资源。
 
-But all HA related tasks can be done in the GUI, so there is no need to
-use the command line at all.
+不过，所有 HA 相关任务都可以在 GUI 中完成，因此完全不需要使用命令行。
+
+常用命令示例：
+
+----
+ha-manager status
+ha-manager config
+ha-manager set vm:100 --state started
+----
 
 
-How It Works
-------------
+== 工作原理
 
-This section provides a detailed description of the {PVE} HA manager
-internals. It describes all involved daemons and how they work
-together. To provide HA, two daemons run on each node:
+本节详细说明 {pve} HA 管理器的内部机制。它描述所有相关守护进程以及它们如何协同工作。
+为了提供 HA，每个节点上会运行两个守护进程：
 
 `pve-ha-lrm`::
 
-The local resource manager (LRM), which controls the services running on
-the local node. It reads the requested states for its services from
-the current manager status file and executes the respective commands.
+本地资源管理器（LRM），用于控制在本地节点上运行的服务。它从当前 manager status
+文件中读取其服务的请求状态，并执行相应命令。
 
 `pve-ha-crm`::
 
-The cluster resource manager (CRM), which makes the cluster-wide
-decisions. It sends commands to the LRM, processes the results,
-and moves resources to other nodes if something fails. The CRM also
-handles node fencing.
+集群资源管理器（CRM），用于做出集群范围内的决策。它向 LRM 发送命令、处理结果，
+并在发生故障时将资源移动到其他节点。CRM 还负责节点 fencing。
 
 
-.Locks in the LRM & CRM
+.LRM 与 CRM 中的锁
 [NOTE]
-Locks are provided by our distributed configuration file system (pmxcfs).
-They are used to guarantee that each LRM is active once and working. As an
-LRM only executes actions when it holds its lock, we can mark a failed node
-as fenced if we can acquire its lock. This then lets us recover any failed
-HA services securely without any interference from the now unknown failed node.
-This all gets supervised by the CRM which currently holds the manager master
-lock.
+锁由分布式配置文件系统（pmxcfs）提供。它们用于保证每个 LRM 只活动一次并正常工作。
+由于 LRM 只有在持有自己的锁时才会执行操作，如果能够取得某个失败节点的锁，
+就可以将该节点标记为已 fenced。这样便可安全恢复任何失败的 HA 服务，
+而不会受到当前状态未知的失败节点干扰。所有这些都由当前持有 manager master 锁的 CRM 监督。
 
 
 [[ha_manager_service_states]]
-Service States
-~~~~~~~~~~~~~~
+=== 服务状态
 
-The CRM uses a service state enumeration to record the current service
-state. This state is displayed on the GUI and can be queried using
-the `ha-manager` command-line tool:
+CRM 使用服务状态枚举来记录当前服务状态。该状态会显示在 GUI 中，也可以使用
+`ha-manager` 命令行工具查询：
 
 ----
 # ha-manager status
@@ -278,281 +230,223 @@ service ct:102 (elsa, started)
 service vm:501 (elsa, started)
 ----
 
-Here is the list of possible states:
+可能的状态如下：
 
 stopped::
 
-Service is stopped (confirmed by LRM). If the LRM detects a stopped
-service is still running, it will stop it again.
+服务已停止（由 LRM 确认）。如果 LRM 检测到标记为停止的服务仍在运行，
+它会再次停止该服务。
 
 request_stop::
 
-Service should be stopped. The CRM waits for confirmation from the
-LRM.
+服务应被停止。CRM 等待 LRM 确认。
 
 stopping::
 
-Pending stop request. But the CRM did not get the request so far.
+停止请求待处理。但 CRM 目前尚未获得该请求的结果。
 
 started::
 
-Service is active an LRM should start it ASAP if not already running.
-If the Service fails and is detected to be not running the LRM
-restarts it
-(see xref:ha_manager_start_failure_policy[Start Failure Policy]).
+服务处于活动状态，如果尚未运行，LRM 应尽快启动它。如果服务失败并被检测为未运行，
+LRM 会重启它（见 xref:ha_manager_start_failure_policy[启动失败策略]）。
 
 starting::
 
-Pending start request. But the CRM has not got any confirmation from the
-LRM that the service is running.
+启动请求待处理。但 CRM 尚未从 LRM 收到服务正在运行的确认。
 
 fence::
 
-Wait for node fencing as the service node is not inside the quorate cluster
-partition (see xref:ha_manager_fencing[Fencing]).
-As soon as node gets fenced successfully the service will be placed into the
-recovery state.
+等待节点 fencing，因为服务所在节点不在具备 quorum 的集群分区内
+（见 xref:ha_manager_fencing[Fencing]）。一旦节点成功 fenced，服务会被置于 recovery 状态。
 
 recovery::
 
-Wait for recovery of the service. The HA manager tries to find a new node where
-the service can run on. This search depends not only on the list of online and
-quorate nodes, but also if the service is a group member and how such a group
-is limited.
-As soon as a new available node is found, the service will be moved there and
-initially placed into stopped state. If it's configured to run the new node
-will do so.
+等待服务恢复。HA 管理器会尝试寻找一个可运行该服务的新节点。该搜索不仅取决于在线且具备
+quorum 的节点列表，也取决于服务是否为某个组的成员，以及该组如何受限。
+一旦找到新的可用节点，服务会被移动到该节点，并初始置于 stopped 状态。
+如果配置为运行，新节点会启动它。
 
 freeze::
 
-Do not touch the service state. We use this state while we reboot a
-node, or when we restart the LRM daemon
-(see xref:ha_manager_package_updates[Package Updates]).
+不要修改服务状态。在重启节点或重启 LRM 守护进程时会使用该状态
+（见 xref:ha_manager_package_updates[软件包更新]）。
 
 ignored::
 
-Act as if the service were not managed by HA at all.
-Useful, when full control over the service is desired temporarily, without
-removing it from the HA configuration.
+表现得像该服务完全不由 HA 管理。当需要临时完全控制服务、但不想将其从 HA 配置中移除时，
+该状态很有用。
 
 migrate::
 
-Migrate service (live) to other node.
+将服务（实时）迁移到其他节点。
 
 error::
 
-Service is disabled because of LRM errors. Needs manual intervention
-(see xref:ha_manager_error_recovery[Error Recovery]).
+服务因 LRM 错误而被禁用。需要人工干预（见 xref:ha_manager_error_recovery[错误恢复]）。
 
 queued::
 
-Service is newly added, and the CRM has not seen it so far.
+服务是新添加的，CRM 目前尚未看到它。
 
 disabled::
 
-Service is stopped and marked as `disabled`
+服务已停止，并被标记为 `disabled`
 
 
 [[ha_manager_lrm]]
-Local Resource Manager
-~~~~~~~~~~~~~~~~~~~~~~
+=== 本地资源管理器
 
-The local resource manager (`pve-ha-lrm`) is started as a daemon on
-boot and waits until the HA cluster is quorate and thus cluster-wide
-locks are working.
+本地资源管理器（`pve-ha-lrm`）会在启动时作为守护进程启动，并等待 HA 集群具备 quorum，
+从而确保集群范围锁可以工作。
 
-It can be in three states:
+它可以处于三种状态：
 
 wait for agent lock::
 
-The LRM waits for our exclusive lock. This is also used as idle state if no
-service is configured.
+LRM 等待其独占锁。如果未配置任何服务，这也用作空闲状态。
 
 active::
 
-The LRM holds its exclusive lock and has services configured.
+LRM 持有其独占锁，并且已配置服务。
 
 lost agent lock::
 
-The LRM lost its lock, this means a failure happened and quorum was lost.
+LRM 丢失了锁，这表示发生了故障并丢失了 quorum。
 
-After the LRM gets in the active state it reads the manager status
-file in `/etc/pve/ha/manager_status` and determines the commands it
-has to execute for the services it owns.
-For each command a worker gets started, these workers are running in
-parallel and are limited to at most 4 by default. This default setting
-may be changed through the datacenter configuration key `max_worker`.
-When finished the worker process gets collected and its result saved for
-the CRM.
+LRM 进入 active 状态后，会读取 `/etc/pve/ha/manager_status` 中的 manager status 文件，
+并确定需要为其拥有的服务执行哪些命令。每个命令都会启动一个 worker，
+这些 worker 并行运行，默认最多限制为 4 个。该默认设置可以通过数据中心配置键
+`max_worker` 修改。完成后，worker 进程会被回收，其结果会保存给 CRM。
 
-.Maximum Concurrent Worker Adjustment Tips
+.最大并发 worker 调整提示
 [NOTE]
-The default value of at most 4 concurrent workers may be unsuited for
-a specific setup. For example, 4 live migrations may occur at the same
-time, which can lead to network congestions with slower networks and/or
-big (memory wise) services. Also, ensure that in the worst case, congestion is
-at a minimum, even if this means lowering the `max_worker` value. On the
-contrary, if you have a particularly powerful, high-end setup you may also want
-to increase it.
+最多 4 个并发 worker 的默认值可能不适合特定环境。例如，可能同时发生 4 次实时迁移，
+在较慢网络和/或大型（以内存计）服务的情况下会导致网络拥塞。还应确保即使在最坏情况下，
+拥塞也保持在最低水平，即使这意味着降低 `max_worker` 值。相反，如果环境特别强大、
+属于高端配置，也可以考虑提高该值。
 
-Each command requested by the CRM is uniquely identifiable by a UID. When
-the worker finishes, its result will be processed and written in the LRM
-status file `/etc/pve/nodes/<nodename>/lrm_status`. There the CRM may collect
-it and let its state machine - respective to the commands output - act on it.
+CRM 请求的每个命令都可以通过 UID 唯一识别。worker 完成后，其结果会被处理并写入
+LRM 状态文件 `/etc/pve/nodes/<nodename>/lrm_status`。CRM 可以在那里收集结果，
+并让其状态机根据命令输出采取相应动作。
 
-The actions on each service between CRM and LRM are normally always synced.
-This means that the CRM requests a state uniquely marked by a UID, the LRM
-then executes this action *one time* and writes back the result, which is also
-identifiable by the same UID. This is needed so that the LRM does not
-execute an outdated command.
-The only exceptions to this behaviour are the `stop` and `error` commands;
-these two do not depend on the result produced and are executed
-always in the case of the stopped state and once in the case of
-the error state.
+CRM 与 LRM 之间对每个服务的操作通常始终保持同步。这意味着 CRM 请求一个由 UID
+唯一标记的状态，LRM 随后 *只执行一次* 该操作，并写回同样可由该 UID 识别的结果。
+这是为了避免 LRM 执行过期命令。该行为只有 `stop` 和 `error` 命令例外；
+这两者不依赖产生的结果，在 stopped 状态下总是执行，在 error 状态下执行一次。
 
-.Read the Logs
+.读取日志
 [NOTE]
-The HA Stack logs every action it makes. This helps to understand what
-and also why something happens in the cluster. Here its important to see
-what both daemons, the LRM and the CRM, did. You may use
-`journalctl -u pve-ha-lrm` on the node(s) where the service is and
-the same command for the pve-ha-crm on the node which is the current master.
+HA 栈会记录它执行的每个操作。这有助于理解集群中发生了什么以及为什么发生。
+这里重要的是查看 LRM 和 CRM 两个守护进程分别做了什么。可以在服务所在节点上使用
+`journalctl -u pve-ha-lrm`，并在当前 master 节点上对 pve-ha-crm 使用相同命令。
 
 
 [[ha_manager_crm]]
-Cluster Resource Manager
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 集群资源管理器
 
-The cluster resource manager (`pve-ha-crm`) starts on each node and
-waits there for the manager lock, which can only be held by one node
-at a time. The node which successfully acquires the manager lock gets
-promoted to the CRM master.
+集群资源管理器（`pve-ha-crm`）会在每个节点上启动，并等待 manager lock，
+该锁同一时间只能由一个节点持有。成功取得 manager lock 的节点会被提升为 CRM master。
 
-It can be in three states:
+它可以处于三种状态：
 
 wait for agent lock::
 
-The CRM waits for our exclusive lock. This is also used as idle state if no
-service is configured
+CRM 等待其独占锁。如果未配置任何服务，这也用作空闲状态。
 
 active::
 
-The CRM holds its exclusive lock and has services configured
+CRM 持有其独占锁，并且已配置服务。
 
 lost agent lock::
 
-The CRM lost its lock, this means a failure happened and quorum was lost.
+CRM 丢失了锁，这表示发生了故障并丢失了 quorum。
 
-Its main task is to manage the services which are configured to be highly
-available and try to always enforce the requested state. For example, a
-service with the requested state 'started' will be started if its not
-already running. If it crashes it will be automatically started again.
-Thus the CRM dictates the actions the LRM needs to execute.
+其主要任务是管理配置为高可用的服务，并始终尝试强制满足请求状态。例如，
+请求状态为 `started` 的服务如果尚未运行，就会被启动。如果它崩溃，
+则会自动再次启动。因此，CRM 会指示 LRM 需要执行的操作。
 
-When a node leaves the cluster quorum, its state changes to unknown.
-If the current CRM can then secure the failed node's lock, the services
-will be 'stolen' and restarted on another node.
+当某个节点离开集群 quorum 时，其状态会变为 unknown。如果当前 CRM 随后能够取得失败节点的锁，
+服务会被“窃取”并在另一节点上重启。
 
-When a cluster member determines that it is no longer in the cluster quorum, the
-LRM waits for a new quorum to form. Until there is a cluster quorum, the node
-cannot reset the watchdog. If there are active services on the node, or if the
-LRM or CRM process is not scheduled or is killed, this will trigger a reboot
-after the watchdog has timed out (this happens after 60 seconds).
+当某个集群成员确定自己不再处于集群 quorum 中时，LRM 会等待形成新的 quorum。
+在存在集群 quorum 之前，该节点无法重置 watchdog。如果节点上有活动服务，
+或者 LRM 或 CRM 进程未被调度或被杀死，则会在 watchdog 超时后触发重启
+（这会在 60 秒后发生）。
 
-Note that if a node has an active CRM but the LRM is idle, a quorum loss will
-not trigger a self-fence reset. The reason for this is that all state files and
-configurations that the CRM accesses are backed up by the
-xref:chapter_pmxcfs[clustered configuration file system], which becomes
-read-only upon quorum loss. This means that the CRM only needs to protect itself
-against its process being scheduled for too long, in which case another CRM
-could take over unaware of the situation, causing corruption of the HA state.
-The open watchdog ensures that this cannot happen.
+请注意，如果某节点有活动 CRM 但 LRM 处于空闲状态，quorum 丢失不会触发 self-fence reset。
+原因是 CRM 访问的所有状态文件和配置都由 xref:chapter_pmxcfs[集群配置文件系统] 支撑，
+而该文件系统会在 quorum 丢失时变为只读。这意味着 CRM 只需要防止自身进程长时间得不到调度；
+否则另一个 CRM 可能在不了解情况的情况下接管，从而破坏 HA 状态。已打开的 watchdog
+确保这种情况不会发生。
 
-If no service is configured for more than 15 minutes, the CRM automatically
-returns to the idle state and closes the watchdog completely.
+如果超过 15 分钟未配置任何服务，CRM 会自动返回空闲状态，并完全关闭 watchdog。
 
-HA Simulator
-------------
+== HA 模拟器
 
 [thumbnail="screenshot/gui-ha-manager-status.png"]
 
-By using the HA simulator you can test and learn all functionalities of the
-Proxmox VE HA solutions.
+使用 HA 模拟器，可以测试并学习 Proxmox VE HA 方案的所有功能。
 
-By default, the simulator allows you to watch and test the behaviour of a
-real-world 3 node cluster with 6 VMs. You can also add or remove additional VMs
-or Container.
+默认情况下，模拟器允许观察并测试一个真实场景中的 3 节点集群和 6 台虚拟机的行为。
+也可以添加或移除额外的虚拟机或容器。
 
-You do not have to setup or configure a real cluster, the HA simulator runs out
-of the box.
+无需设置或配置真实集群，HA 模拟器开箱即可运行。
 
-Install with apt:
+使用 dnf 安装：
 
 ----
-apt install pve-ha-simulator
+dnf install pve-ha-simulator
 ----
 
-You can even install the package on any Debian-based system without any
-other Proxmox VE packages.  For that you will need to download the package and
-copy it to the system you want to run it on for installation.  When you install
-the package with apt from the local file system it will also resolve the
-required dependencies for you.
+甚至可以在没有任何其他 Proxmox VE 软件包的 Debian 系统上安装该软件包。
+为此，需要下载该软件包，并将其复制到要运行它的系统中进行安装。
+从本地文件系统使用 dnf 安装该软件包时，dnf 也会为你解析所需依赖。
 
 
-To start the simulator on a remote machine you must have an X11 redirection to
-your current system.
+要在远程机器上启动模拟器，必须将 X11 重定向到当前系统。
 
-If you are on a Linux machine you can use:
+如果使用 Linux 机器，可以使用：
 
 ----
 ssh root@<IPofPVE> -Y
 ----
 
-On Windows it works with https://mobaxterm.mobatek.net/[mobaxterm].
+在 Windows 上，可以使用 https://mobaxterm.mobatek.net/[mobaxterm]。
 
-After connecting to an existing {pve} with the simulator installed or
-installing it on your local Debian-based system manually, you can try it out as
-follows.
+连接到已安装模拟器的现有 {pve}，或在本地 Debian 系统上手动安装后，
+可以按如下方式试用。
 
-First you need to create a working directory where the simulator saves its
-current state and writes its default config:
+首先需要创建一个工作目录，模拟器会在其中保存当前状态并写入默认配置：
 
 ----
 mkdir working
 ----
 
-Then, simply pass the created directory as a parameter to 'pve-ha-simulator':
+然后，只需将创建的目录作为参数传递给 `pve-ha-simulator`：
 
 ----
 pve-ha-simulator working/
 ----
 
-You can then start, stop, migrate the simulated HA services, or even check out
-what happens on a node failure.
+随后可以启动、停止、迁移模拟的 HA 服务，甚至可以查看节点故障时会发生什么。
 
-Configuration
--------------
+== 配置
 
-The HA stack is well integrated into the {pve} API. So, for example,
-HA can be configured via the `ha-manager` command-line interface, or
-the {pve} web interface - both interfaces provide an easy way to
-manage HA. Automation tools can use the API directly.
+HA 栈与 {pve} API 深度集成。因此，例如可以通过 `ha-manager` 命令行界面或 {pve}
+Web 界面配置 HA，这两种界面都提供了简单的 HA 管理方式。自动化工具可以直接使用 API。
 
-All HA configuration files are within `/etc/pve/ha/`, so they get
-automatically distributed to the cluster nodes, and all nodes share
-the same HA configuration.
+所有 HA 配置文件都位于 `/etc/pve/ha/` 中，因此会自动分发到集群节点，
+并由所有节点共享同一份 HA 配置。
 
 
 [[ha_manager_resource_config]]
-Resources
-~~~~~~~~~
+=== 资源
 
 [thumbnail="screenshot/gui-ha-manager-status.png"]
 
 
-The resource configuration file `/etc/pve/ha/resources.cfg` stores
-the list of resources managed by `ha-manager`. A resource configuration
-inside that list looks like this:
+资源配置文件 `/etc/pve/ha/resources.cfg` 存储由 `ha-manager` 管理的资源列表。
+该列表中的资源配置如下所示：
 
 ----
 <type>: <name>
@@ -560,19 +454,16 @@ inside that list looks like this:
 	...
 ----
 
-It starts with a resource type followed by a resource specific name,
-separated with colon. Together this forms the HA resource ID, which is
-used by all `ha-manager` commands to uniquely identify a resource
-(example: `vm:100` or `ct:101`). The next lines contain additional
-properties:
+它以资源类型开头，后接资源特定名称，中间用冒号分隔。两者共同组成 HA 资源 ID，
+所有 `ha-manager` 命令都使用该 ID 唯一标识资源（例如 `vm:100` 或 `ct:101`）。
+后续行包含其他属性：
 
 include::ha-resources-opts.adoc[]
 
-Here is a real world example with one VM and one container. As you see,
-the syntax of those files is really simple, so it is even possible to
-read or edit those files using your favorite editor:
+下面是一个包含一台虚拟机和一个容器的真实示例。可以看到，这些文件的语法非常简单，
+甚至可以使用熟悉的编辑器读取或编辑这些文件：
 
-.Configuration Example (`/etc/pve/ha/resources.cfg`)
+.配置示例（`/etc/pve/ha/resources.cfg`）
 ----
 vm: 501
     state started
@@ -584,7 +475,7 @@ ct: 102
 
 [thumbnail="screenshot/gui-ha-manager-add-resource.png"]
 
-The above config was generated using the `ha-manager` command-line tool:
+上述配置由 `ha-manager` 命令行工具生成：
 
 ----
 # ha-manager add vm:501 --state started --max_relocate 2
@@ -593,15 +484,12 @@ The above config was generated using the `ha-manager` command-line tool:
 
 
 [[ha_manager_groups]]
-Groups
-~~~~~~
+=== 组
 
 [thumbnail="screenshot/gui-ha-manager-groups-view.png"]
 
-The HA group configuration file `/etc/pve/ha/groups.cfg` is used to
-define groups of cluster nodes. A resource can be restricted to run
-only on the members of such group. A group configuration look like
-this:
+HA 组配置文件 `/etc/pve/ha/groups.cfg` 用于定义集群节点组。可以将资源限制为仅在这类组的成员上运行。
+组配置如下所示：
 
 ----
 group: <group>
@@ -614,37 +502,31 @@ include::ha-groups-opts.adoc[]
 
 [thumbnail="screenshot/gui-ha-manager-add-group.png"]
 
-A common requirement is that a resource should run on a specific
-node. Usually the resource is able to run on other nodes, so you can define
-an unrestricted group with a single member:
+常见需求是让某个资源运行在特定节点上。通常该资源也能够在其他节点上运行，
+因此可以定义一个只有单个成员的非受限组：
 
 ----
 # ha-manager groupadd prefer_node1 --nodes node1
 ----
 
-For bigger clusters, it makes sense to define a more detailed failover
-behavior. For example, you may want to run a set of services on
-`node1` if possible. If `node1` is not available, you want to run them
-equally split on `node2` and `node3`. If those nodes also fail, the
-services should run on `node4`. To achieve this you could set the node
-list to:
+对于较大的集群，定义更详细的故障切换行为是有意义的。例如，可能希望在可行时将一组服务运行在
+`node1` 上。如果 `node1` 不可用，则希望它们平均分布在 `node2` 和 `node3` 上。
+如果这些节点也失败，服务应运行在 `node4` 上。为实现这一点，可以将节点列表设置为：
 
 ----
 # ha-manager groupadd mygroup1 -nodes "node1:2,node2:1,node3:1,node4"
 ----
 
-Another use case is if a resource uses other resources only available
-on specific nodes, lets say `node1` and `node2`. We need to make sure
-that HA manager does not use other nodes, so we need to create a
-restricted group with said nodes:
+另一种用例是，某个资源依赖仅在特定节点上可用的其他资源，例如 `node1` 和 `node2`。
+需要确保 HA 管理器不会使用其他节点，因此需要使用这些节点创建一个受限组：
 
 ----
 # ha-manager groupadd mygroup2 -nodes "node1,node2" -restricted
 ----
 
-The above commands created the following group configuration file:
+上述命令创建了以下组配置文件：
 
-.Configuration Example (`/etc/pve/ha/groups.cfg`)
+.配置示例（`/etc/pve/ha/groups.cfg`）
 ----
 group: prefer_node1
        nodes node1
@@ -658,375 +540,275 @@ group: mygroup2
 ----
 
 
-The `nofailback` options is mostly useful to avoid unwanted resource
-movements during administration tasks. For example, if you need to
-migrate a service to a node which doesn't have the highest priority in the
-group, you need to tell the HA manager not to instantly move this service
-back by setting the `nofailback` option.
+`nofailback` 选项主要用于在管理任务期间避免不必要的资源移动。例如，
+如果需要将服务迁移到组中优先级不是最高的节点，就需要通过设置 `nofailback` 选项告诉
+HA 管理器不要立即将该服务移回去。
 
-Another scenario is when a service was fenced and it got recovered to
-another node. The admin tries to repair the fenced node and brings it
-up online again to investigate the cause of failure and check if it runs
-stably again. Setting the `nofailback` flag prevents the recovered services from
-moving straight back to the fenced node.
+另一种场景是某个服务被 fenced 后恢复到另一节点。管理员尝试修复被 fenced 的节点，
+并重新将其上线，以调查故障原因并检查其是否再次稳定运行。设置 `nofailback` 标志可防止
+已恢复的服务直接迁回被 fenced 的节点。
 
 
 [[ha_manager_fencing]]
-Fencing
--------
+== Fencing
 
-On node failures, fencing ensures that the erroneous node is
-guaranteed to be offline. This is required to make sure that no
-resource runs twice when it gets recovered on another node. This is a
-really important task, because without this, it would not be possible to
-recover a resource on another node.
+节点故障时，fencing 确保出错节点一定处于离线状态。这是为了确保资源在另一节点上恢复时不会同时运行两份。
+这是一项非常重要的任务，因为没有它，就无法在另一节点上恢复资源。
 
-If a node did not get fenced, it would be in an unknown state where
-it may have still access to shared resources. This is really
-dangerous! Imagine that every network but the storage one broke. Now,
-while not reachable from the public network, the VM still runs and
-writes to the shared storage.
+如果某个节点没有被 fenced，它会处于未知状态，可能仍然能够访问共享资源。
+这非常危险。设想除了存储网络之外的所有网络都断开了。此时虚拟机虽然无法从公网访问，
+但仍在运行并写入共享存储。
 
-If we then simply start up this VM on another node, we would get a
-dangerous race condition, because we write from both nodes. Such
-conditions can destroy all VM data and the whole VM could be rendered
-unusable. The recovery could also fail if the storage protects against
-multiple mounts.
+如果此时简单地在另一节点上启动该虚拟机，就会出现危险的竞争条件，因为两个节点都会写入。
+这种情况可能破坏所有虚拟机数据，并导致整个虚拟机不可用。如果存储防止多重挂载，
+恢复也可能失败。
 
 
-How {pve} Fences
-~~~~~~~~~~~~~~~~
+=== {pve} 如何执行 Fencing
 
-There are different methods to fence a node, for example, fence
-devices which cut off the power from the node or disable their
-communication completely. Those are often quite expensive and bring
-additional critical components into a system, because if they fail you
-cannot recover any service.
+对节点执行 fencing 有多种方法，例如使用 fence 设备切断节点电源，或完全禁用其通信。
+这些设备通常相当昂贵，并会向系统中引入额外关键组件，因为如果它们失败，就无法恢复任何服务。
 
-We thus wanted to integrate a simpler fencing method, which does not
-require additional external hardware. This can be done using
-watchdog timers.
+因此，{pve} 集成了一种更简单的 fencing 方法，不需要额外的外部硬件。
+这可以通过 watchdog 定时器实现。
 
-.Possible Fencing Methods
-- external power switches
-- isolate nodes by disabling complete network traffic on the switch
-- self fencing using watchdog timers
+.可能的 Fencing 方法
+- 外部电源开关
+- 通过在交换机上完全禁用网络流量来隔离节点
+- 使用 watchdog 定时器执行 self fencing
 
-Watchdog timers have been widely used in critical and dependable systems
-since the beginning of microcontrollers. They are often simple, independent
-integrated circuits which are used to detect and recover from computer malfunctions.
+从微控制器出现之初，watchdog 定时器就已广泛用于关键且可靠性要求高的系统中。
+它们通常是简单、独立的集成电路，用于检测并从计算机故障中恢复。
 
-During normal operation, `ha-manager` regularly resets the watchdog
-timer to prevent it from elapsing. If, due to a hardware fault or
-program error, the computer fails to reset the watchdog, the timer
-will elapse and trigger a reset of the whole server (reboot).
+正常运行期间，`ha-manager` 会定期重置 watchdog 定时器，防止其超时。
+如果由于硬件故障或程序错误，计算机未能重置 watchdog，定时器就会超时，
+并触发整个服务器重置（重启）。
 
-Recent server motherboards often include such hardware watchdogs, but
-these need to be configured. If no watchdog is available or
-configured, we fall back to the Linux Kernel 'softdog'. While still
-reliable, it is not independent of the servers hardware, and thus has
-a lower reliability than a hardware watchdog.
+较新的服务器主板通常包含这类硬件 watchdog，但需要进行配置。如果没有可用或已配置的
+watchdog，则回退到 Linux 内核 `softdog`。它虽然仍然可靠，但并不独立于服务器硬件，
+因此可靠性低于硬件 watchdog。
 
 
-Configure Hardware Watchdog
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 配置硬件 Watchdog
 
-By default, all hardware watchdog modules are blocked for security
-reasons. They are like a loaded gun if not correctly initialized. To
-enable a hardware watchdog, you need to specify the module to load in
-'/etc/default/pve-ha-manager', for example:
+默认情况下，出于安全原因，所有硬件 watchdog 模块都会被阻止。如果没有正确初始化，
+它们就像一把上膛的枪。要启用硬件 watchdog，需要在 `/etc/default/pve-ha-manager`
+中指定要加载的模块，例如：
 
 ----
 # select watchdog module (default is softdog)
 WATCHDOG_MODULE=iTCO_wdt
 ----
 
-This configuration is read by the 'watchdog-mux' service, which loads
-the specified module at startup.
+该配置由 `watchdog-mux` 服务读取，该服务会在启动时加载指定模块。
 
 
-Recover Fenced Services
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 恢复已 Fenced 的服务
 
-After a node failed and its fencing was successful, the CRM tries to
-move services from the failed node to nodes which are still online.
+节点失败并成功完成 fencing 后，CRM 会尝试将服务从失败节点移动到仍在线的节点。
 
-The selection of nodes, on which those services gets recovered, is
-influenced by the resource `group` settings, the list of currently active
-nodes, and their respective active service count.
+这些服务恢复到哪些节点，会受资源 `group` 设置、当前活动节点列表以及各节点活动服务数量影响。
 
-The CRM first builds a set out of the intersection between user selected
-nodes (from `group` setting) and available nodes. It then choose the
-subset of nodes with the highest priority, and finally select the node
-with the lowest active service count. This minimizes the possibility
-of an overloaded node.
+CRM 首先根据用户选择的节点（来自 `group` 设置）与可用节点的交集构建集合。
+然后选择优先级最高的节点子集，最后选择活动服务数量最低的节点。
+这可以尽量降低节点过载的可能性。
 
-CAUTION: On node failure, the CRM distributes services to the
-remaining nodes. This increases the service count on those nodes, and
-can lead to high load, especially on small clusters. Please design
-your cluster so that it can handle such worst case scenarios.
+CAUTION: 节点故障时，CRM 会将服务分发到剩余节点。这会增加这些节点上的服务数量，
+并可能导致高负载，尤其是在小型集群中。请设计集群，使其能够处理这类最坏情况。
 
 
 [[ha_manager_start_failure_policy]]
-Start Failure Policy
----------------------
+== 启动失败策略
 
-The start failure policy comes into effect if a service failed to start on a
-node one or more times. It can be used to configure how often a restart
-should be triggered on the same node and how often a service should be
-relocated, so that it has an attempt to be started on another node.
-The aim of this policy is to circumvent temporary unavailability of shared
-resources on a specific node. For example, if a shared storage isn't available
-on a quorate node anymore, for instance due to network problems, but is still
-available on other nodes, the relocate policy allows the service to start
-nonetheless.
+如果服务在某个节点上一次或多次启动失败，启动失败策略就会生效。它可用于配置在同一节点上
+应触发多少次重启，以及服务应重定位多少次，以便尝试在另一节点上启动。
+该策略的目标是规避特定节点上共享资源的临时不可用。例如，如果由于网络问题，
+某个具备 quorum 的节点不再能够访问共享存储，但其他节点仍可访问，
+则 relocate 策略仍允许服务启动。
 
-There are two service start recover policy settings which can be configured
-specific for each resource.
+有两个可针对每个资源单独配置的服务启动恢复策略设置。
 
 max_restart::
 
-Maximum number of attempts to restart a failed service on the actual
-node.  The default is set to one.
+在实际节点上重启失败服务的最大尝试次数。默认值为一。
 
 max_relocate::
 
-Maximum number of attempts to relocate the service to a different node.
-A relocate only happens after the max_restart value is exceeded on the
-actual node. The default is set to one.
+将服务重定位到其他节点的最大尝试次数。只有在实际节点上超过 max_restart 值后，
+才会发生 relocate。默认值为一。
 
-NOTE: The relocate count state will only reset to zero when the
-service had at least one successful start. That means if a service is
-re-started without fixing the error only the restart policy gets
-repeated.
+NOTE: 只有服务至少成功启动过一次，relocate 计数状态才会重置为零。
+这意味着如果未修复错误就重新启动服务，只会重复执行重启策略。
 
 
 [[ha_manager_error_recovery]]
-Error Recovery
---------------
+== 错误恢复
 
-If, after all attempts, the service state could not be recovered, it gets
-placed in an error state. In this state, the service won't get touched
-by the HA stack anymore. The only way out is disabling a service:
+如果在所有尝试之后仍无法恢复服务状态，它会被置于 error 状态。在该状态下，
+HA 栈不再触碰该服务。唯一的退出方式是禁用该服务：
 
 ----
 # ha-manager set vm:100 --state disabled
 ----
 
-This can also be done in the web interface.
+这也可以在 Web 界面中完成。
 
-To recover from the error state you should do the following:
+要从 error 状态恢复，应执行以下操作：
 
-* bring the resource back into a safe and consistent state (e.g.:
-kill its process if the service could not be stopped)
+* 将资源恢复到安全且一致的状态（例如：如果服务无法停止，则 kill 其进程）
 
-* disable the resource to remove the error flag
+* 禁用资源以移除 error 标志
 
-* fix the error which led to this failures
+* 修复导致这些失败的错误
 
-* *after* you fixed all errors you may request that the service starts again
+* 在修复所有错误 *之后*，才可以请求再次启动该服务
 
 
 [[ha_manager_package_updates]]
-Package Updates
----------------
+== 软件包更新
 
-When updating the ha-manager, you should do one node after the other, never
-all at once for various reasons. First, while we test our software
-thoroughly, a bug affecting your specific setup cannot totally be ruled out.
-Updating one node after the other and checking the functionality of each node
-after finishing the update helps to recover from eventual problems, while
-updating all at once could result in a broken cluster and is generally not
-good practice.
+更新 ha-manager 时，应逐个节点更新，切勿一次性全部更新，原因有多个。首先，
+尽管项目会全面测试软件，但无法完全排除影响特定环境的 bug。逐个节点更新，
+并在每个节点更新完成后检查其功能，有助于从潜在问题中恢复；而一次性全部更新可能导致集群损坏，
+通常也不是良好实践。
 
-Also, the {pve} HA stack uses a request acknowledge protocol to perform
-actions between the cluster and the local resource manager. For restarting,
-the LRM makes a request to the CRM to freeze all its services. This prevents
-them from getting touched by the Cluster during the short time the LRM is restarting.
-After that, the LRM may safely close the watchdog during a restart.
-Such a restart happens normally during a package update and, as already stated,
-an active master CRM is needed to acknowledge the requests from the LRM. If
-this is not the case the update process can take too long which, in the worst
-case, may result in a reset triggered by the watchdog.
+此外，{pve} HA 栈使用请求确认协议在集群和本地资源管理器之间执行操作。重启时，
+LRM 会向 CRM 请求冻结其所有服务。这可以防止在 LRM 重启的短时间内这些服务被集群触碰。
+随后，LRM 可以在重启期间安全关闭 watchdog。这类重启通常发生在软件包更新期间；
+如前所述，需要一个活动的 master CRM 来确认来自 LRM 的请求。如果不是这样，
+更新过程可能耗时过长，在最坏情况下可能导致 watchdog 触发重置。
 
 
 [[ha_manager_node_maintenance]]
-Node Maintenance
-----------------
+== 节点维护
 
-Sometimes it is necessary to perform maintenance on a node, such as replacing
-hardware or simply installing a new kernel image. This also applies while the
-HA stack is in use.
+有时需要对节点执行维护，例如更换硬件或只是安装新的内核镜像。使用 HA 栈时同样如此。
 
-The HA stack can support you mainly in two types of maintenance:
+HA 栈主要可以支持两类维护：
 
-* for general shutdowns or reboots, the behavior can be configured, see
-  xref:ha_manager_shutdown_policy[Shutdown Policy].
-* for maintenance that does not require a shutdown or reboot, or that should
-  not be switched off automatically after only one reboot, you can enable the
-  manual maintenance mode.
+* 对于常规关机或重启，可以配置其行为，见 xref:ha_manager_shutdown_policy[关机策略]。
+* 对于不需要关机或重启的维护，或不应在仅一次重启后自动关闭的维护，
+  可以启用手动维护模式。
 
 
-Maintenance Mode
-~~~~~~~~~~~~~~~~
+=== 维护模式
 
-You can use the manual maintenance mode to mark the node as unavailable for HA
-operation, prompting all services managed by HA to migrate to other nodes.
+可以使用手动维护模式将节点标记为不适用于 HA 操作，从而促使 HA 管理的所有服务迁移到其他节点。
 
-The target nodes for these migrations are selected from the other currently
-available nodes, and determined by the HA group configuration and the configured
-cluster resource scheduler (CRS) mode.
-During each migration, the original node will be recorded in the HA managers'
-state, so that the service can be moved back again automatically once the
-maintenance mode is disabled and the node is back online.
+这些迁移的目标节点会从当前其他可用节点中选择，并由 HA 组配置和已配置的集群资源调度器
+（CRS）模式决定。在每次迁移期间，原始节点会记录在 HA 管理器状态中，
+以便在维护模式禁用且节点重新上线后，可以自动将服务移回。
 
-Currently you can enabled or disable the maintenance mode using the ha-manager
-CLI tool.
+目前可以使用 ha-manager CLI 工具启用或禁用维护模式。
 
-.Enabling maintenance mode for a node
+.为节点启用维护模式
 ----
 # ha-manager crm-command node-maintenance enable NODENAME
 ----
 
-This will queue a CRM command, when the manager processes this command it will
-record the request for maintenance-mode in the manager status. This allows you
-to submit the command on any node, not just on the one you want to place in, or
-out of the maintenance mode.
+这会将一个 CRM 命令加入队列，当管理器处理该命令时，会在 manager status 中记录维护模式请求。
+这允许在任意节点上提交该命令，而不必只在要进入或退出维护模式的节点上执行。
 
-Once the LRM on the respective node picks the command up it will mark itself as
-unavailable, but still process all migration commands. This means that the LRM
-self-fencing watchdog will stay active until all active services got moved, and
-all running workers finished.
+一旦相应节点上的 LRM 接收到该命令，它会将自身标记为不可用，但仍会处理所有迁移命令。
+这意味着 LRM self-fencing watchdog 会保持活动，直到所有活动服务都已移动且所有正在运行的
+worker 都已完成。
 
-Note that the LRM status will read `maintenance` mode as soon as the LRM
-picked the requested state up, not only when all services got moved away, this
-user experience is planned to be improved in the future.
-For now, you can check for any active HA service left on the node, or watching
-out for a log line like: `pve-ha-lrm[PID]: watchdog closed (disabled)` to know
-when the node finished its transition into the maintenance mode.
+请注意，只要 LRM 接收到请求状态，LRM 状态就会显示 `maintenance` 模式，
+而不是等到所有服务都迁移离开后才显示。该用户体验计划在未来改进。
+目前，可以检查节点上是否仍有活动 HA 服务，或留意类似
+`pve-ha-lrm[PID]: watchdog closed (disabled)` 的日志行，以判断节点何时完成进入维护模式的转换。
 
-NOTE: The manual maintenance mode is not automatically deleted on node reboot,
-but only if it is either manually deactivated using the `ha-manager` CLI or if
-the manager-status is manually cleared.
+NOTE: 手动维护模式不会在节点重启时自动删除，只有通过 `ha-manager` CLI 手动停用，
+或手动清除 manager-status 时才会删除。
 
-.Disabling maintenance mode for a node
+.为节点禁用维护模式
 ----
 # ha-manager crm-command node-maintenance disable NODENAME
 ----
 
-The process of disabling the manual maintenance mode is similar to enabling it.
-Using the `ha-manager` CLI command shown above will queue a CRM command that,
-once processed, marks the respective LRM node as available again.
+禁用手动维护模式的过程与启用类似。使用上面所示的 `ha-manager` CLI 命令会将一个 CRM
+命令加入队列；处理完成后，相应 LRM 节点会再次标记为可用。
 
-If you deactivate the maintenance mode, all services that were on the node when
-the maintenance mode was activated will be moved back.
+如果停用维护模式，在维护模式激活时位于该节点上的所有服务都会被移回。
 
 [[ha_manager_shutdown_policy]]
-Shutdown Policy
-~~~~~~~~~~~~~~~
+=== 关机策略
 
-Below you will find a description of the different HA policies for a node
-shutdown. Currently 'Conditional' is the default due to backward compatibility.
-Some users may find that 'Migrate' behaves more as expected.
+下面描述节点关机时的不同 HA 策略。当前出于向后兼容性考虑，`Conditional` 是默认值。
+部分用户可能会发现 `Migrate` 的行为更符合预期。
 
-The shutdown policy can be configured in the Web UI (`Datacenter` -> `Options`
--> `HA Settings`), or directly in `datacenter.cfg`:
+关机策略可以在 Web UI（`Datacenter` -> `Options` -> `HA Settings`）中配置，
+也可以直接在 `datacenter.cfg` 中配置：
 
 ----
 ha: shutdown_policy=<value>
 ----
 
-Migrate
-^^^^^^^
+==== Migrate
 
-Once the Local Resource manager (LRM) gets a shutdown request and this policy
-is enabled, it will mark itself as unavailable for the current HA manager.
-This triggers a migration of all HA Services currently located on this node.
-The LRM will try to delay the shutdown process, until all running services get
-moved away. But, this expects that the running services *can* be migrated to
-another node. In other words, the service must not be locally bound, for example
-by using hardware passthrough. As non-group member nodes are considered as
-runnable target if no group member is available, this policy can still be used
-when making use of HA groups with only some nodes selected. But, marking a group
-as 'restricted' tells the HA manager that the service cannot run outside of the
-chosen set of nodes. If all of those nodes are unavailable, the shutdown will
-hang until you manually intervene. Once the shut down node comes back online
-again, the previously displaced services will be moved back, if they were not
-already manually migrated in-between.
+本地资源管理器（LRM）收到关机请求且启用该策略后，会将自身标记为对当前 HA 管理器不可用。
+这会触发当前位于该节点上的所有 HA 服务迁移。LRM 会尝试延迟关机过程，
+直到所有正在运行的服务都被迁走。但这要求正在运行的服务 *可以* 迁移到另一节点。
+换言之，服务不能绑定在本地，例如不能使用硬件直通。由于在没有可用组成员时，
+非组成员节点会被视为可运行目标，因此即使使用只选择部分节点的 HA 组，
+仍可使用该策略。但是，将组标记为 `restricted` 会告诉 HA 管理器该服务不能在所选节点集合之外运行。
+如果所有这些节点都不可用，关机会挂起，直到人工干预。关机节点重新上线后，
+之前被迁出的服务会被移回，除非它们在此期间已经被手动迁移。
 
-NOTE: The watchdog is still active during the migration process on shutdown.
-If the node loses quorum it will be fenced and the services will be recovered.
+NOTE: 关机迁移过程中 watchdog 仍保持活动。如果节点丢失 quorum，它会被 fenced，
+服务也会被恢复。
 
-If you start a (previously stopped) service on a node which is currently being
-maintained, the node needs to be fenced to ensure that the service can be moved
-and started on another available node.
+如果在当前正在维护的节点上启动一个（此前已停止的）服务，则需要对该节点执行 fencing，
+以确保该服务可以移动并在另一可用节点上启动。
 
-Failover
-^^^^^^^^
+==== Failover
 
-This mode ensures that all services get stopped, but that they will also be
-recovered, if the current node is not online soon. It can be useful when doing
-maintenance on a cluster scale, where live-migrating VMs may not be possible if
-too many nodes are powered off at a time, but you still want to ensure HA
-services get recovered and started again as soon as possible.
+该模式确保所有服务都会停止；如果当前节点短时间内没有重新上线，这些服务也会被恢复。
+在集群规模维护时，该模式可能很有用，因为如果一次关闭太多节点，虚拟机实时迁移可能不可行，
+但仍希望确保 HA 服务尽快恢复并重新启动。
 
-Freeze
-^^^^^^
+==== Freeze
 
-This mode ensures that all services get stopped and frozen, so that they won't
-get recovered until the current node is online again.
+该模式确保所有服务都被停止并冻结，因此直到当前节点重新上线之前，它们不会被恢复。
 
-Conditional
-^^^^^^^^^^^
+==== Conditional
 
-The 'Conditional' shutdown policy automatically detects if a shutdown or a
-reboot is requested, and changes behaviour accordingly.
+`Conditional` 关机策略会自动检测请求的是关机还是重启，并相应改变行为。
 
-.Shutdown
+.关机
 
-A shutdown ('poweroff') is usually done if it is planned for the node to stay
-down for some time. The LRM stops all managed services in this case. This means
-that other nodes will take over those services afterwards.
+如果计划让节点停机一段时间，通常会执行关机（`poweroff`）。在这种情况下，
+LRM 会停止所有受管理服务。这意味着其他节点随后会接管这些服务。
 
-NOTE: Recent hardware has large amounts of memory (RAM). So we stop all
-resources, then restart them to avoid online migration of all that RAM. If you
-want to use online migration, you need to invoke that manually before you
-shutdown the node.
+NOTE: 现代硬件通常拥有大量内存（RAM）。因此，系统会停止所有资源，然后重新启动它们，
+以避免在线迁移全部 RAM。如果要使用在线迁移，需要在关闭节点前手动调用。
 
 
-.Reboot
+.重启
 
-Node reboots are initiated with the 'reboot' command. This is usually done
-after installing a new kernel. Please note that this is different from
-``shutdown'', because the node immediately starts again.
+节点重启通过 `reboot` 命令发起。这通常在安装新内核后执行。请注意，
+这不同于“关机”，因为节点会立即再次启动。
 
-The LRM tells the CRM that it wants to restart, and waits until the CRM puts
-all resources into the `freeze` state (same mechanism is used for
-xref:ha_manager_package_updates[Package Updates]). This prevents those resources
-from being moved to other nodes. Instead, the CRM starts the resources after the
-reboot on the same node.
+LRM 会告知 CRM 它希望重启，并等待 CRM 将所有资源置于 `freeze` 状态
+（xref:ha_manager_package_updates[软件包更新] 使用同一机制）。
+这可以防止这些资源被移动到其他节点。相反，CRM 会在重启后在同一节点上启动这些资源。
 
 
-Manual Resource Movement
-^^^^^^^^^^^^^^^^^^^^^^^^
+==== 手动资源移动
 
-Last but not least, you can also manually move resources to other nodes, before
-you shutdown or restart a node. The advantage is that you have full control,
-and you can decide if you want to use online migration or not.
+最后，也可以在关闭或重启节点之前，手动将资源移动到其他节点。其优势是拥有完全控制权，
+并且可以决定是否使用在线迁移。
 
-NOTE: Please do not 'kill' services like `pve-ha-crm`, `pve-ha-lrm` or
-`watchdog-mux`. They manage and use the watchdog, so this can result in an
-immediate node reboot or even reset.
+NOTE: 请不要 `kill` `pve-ha-crm`、`pve-ha-lrm` 或 `watchdog-mux` 等服务。
+它们管理并使用 watchdog，因此这样做可能导致节点立即重启甚至重置。
 
 
 [[ha_manager_crs]]
-Cluster Resource Scheduling
----------------------------
+== 集群资源调度
 
-The cluster resource scheduler (CRS) mode controls how HA selects nodes for the
-recovery of a service as well as for migrations that are triggered by a
-shutdown policy. The default mode is `basic`, you can change it in the Web UI
-(`Datacenter` -> `Options`), or directly in `datacenter.cfg`:
+集群资源调度器（CRS）模式控制 HA 如何为服务恢复以及由关机策略触发的迁移选择节点。
+默认模式为 `basic`，可以在 Web UI（`Datacenter` -> `Options`）中更改，
+也可以直接在 `datacenter.cfg` 中更改：
 
 ----
 crs: ha=static
@@ -1034,73 +816,52 @@ crs: ha=static
 
 [thumbnail="screenshot/gui-datacenter-options-crs.png"]
 
-The change will be in effect starting with the next manager round (after a few
-seconds).
+该变更会从下一轮 manager 运行开始生效（几秒钟后）。
 
-For each service that needs to be recovered or migrated, the scheduler
-iteratively chooses the best node among the nodes with the highest priority in
-the service's group.
+对于每个需要恢复或迁移的服务，调度器会在该服务所属组中优先级最高的节点之间迭代选择最佳节点。
 
-NOTE: There are plans to add modes for (static and dynamic) load-balancing in
-the future.
+NOTE: 未来计划添加（静态和动态）负载均衡模式。
 
-Basic Scheduler
-~~~~~~~~~~~~~~~
+=== Basic 调度器
 
-The number of active HA services on each node is used to choose a recovery node.
-Non-HA-managed services are currently not counted.
+每个节点上的活动 HA 服务数量用于选择恢复节点。当前不统计非 HA 管理的服务。
 
-Static-Load Scheduler
-~~~~~~~~~~~~~~~~~~~~~
+=== Static-Load 调度器
 
-IMPORTANT: The static mode is still a technology preview.
+IMPORTANT: static 模式仍是技术预览。
 
-Static usage information from HA services on each node is used to choose a
-recovery node. Usage of non-HA-managed services is currently not considered.
+每个节点上 HA 服务的静态使用信息用于选择恢复节点。当前不考虑非 HA 管理服务的使用情况。
 
-For this selection, each node in turn is considered as if the service was
-already running on it, using CPU and memory usage from the associated guest
-configuration. Then for each such alternative, CPU and memory usage of all nodes
-are considered, with memory being weighted much more, because it's a truly
-limited resource. For both, CPU and memory, highest usage among nodes (weighted
-more, as ideally no node should be overcommitted) and average usage of all nodes
-(to still be able to distinguish in case there already is a more highly
-committed node) are considered.
+在此选择过程中，会依次将每个节点视为该服务已经在其上运行，并使用关联客户机配置中的
+CPU 和内存使用量。随后，对每个此类备选方案，都会考虑所有节点的 CPU 和内存使用量；
+其中内存权重高得多，因为它是真正有限的资源。对于 CPU 和内存，都会考虑节点中的最高使用量
+（权重更高，因为理想情况下不应有节点被过度承诺）以及所有节点的平均使用量
+（以便在已经存在承诺更高的节点时仍能区分）。
 
-IMPORTANT: The more services the more possible combinations there are, so it's
-currently not recommended to use it if you have thousands of HA managed
-services.
+IMPORTANT: 服务越多，可能的组合就越多，因此如果有数千个 HA 管理服务，
+当前不建议使用该模式。
 
 
-CRS Scheduling Points
-~~~~~~~~~~~~~~~~~~~~~
+=== CRS 调度点
 
-The CRS algorithm is not applied for every service in every round, since this
-would mean a large number of constant migrations. Depending on the workload,
-this could put more strain on the cluster than could be avoided by constant
-balancing.
-That's why the {pve} HA manager favors keeping services on their current node.
+CRS 算法不会在每一轮都应用于每个服务，因为这会导致大量持续迁移。
+根据工作负载不同，这可能给集群带来的压力，比持续均衡所能避免的压力还要大。
+因此，{pve} HA 管理器倾向于让服务保持在当前节点上。
 
-The CRS is currently used at the following scheduling points:
+CRS 当前用于以下调度点：
 
-- Service recovery (always active). When a node with active HA services fails,
-  all its services need to be recovered to other nodes. The CRS algorithm will
-  be used here to balance that recovery over the remaining nodes.
+- 服务恢复（始终活动）。当带有活动 HA 服务的节点失败时，其所有服务都需要恢复到其他节点。
+  这里会使用 CRS 算法，在剩余节点之间均衡该恢复过程。
 
-- HA group config changes (always active). If a node is removed from a group,
-  or its priority is reduced, the HA stack will use the CRS algorithm to find a
-  new target node for the HA services in that group, matching the adapted
-  priority constraints.
+- HA 组配置变更（始终活动）。如果某个节点从组中移除，或其优先级降低，HA 栈会使用
+  CRS 算法为该组中的 HA 服务寻找新的目标节点，以匹配调整后的优先级约束。
 
-- HA service stopped -> start transition (opt-in). Requesting that a stopped
-  service should be started is an good opportunity to check for the best suited
-  node as per the CRS algorithm, as moving stopped services is  cheaper to do
-  than moving them started, especially if their disk volumes reside on shared
-  storage. You can enable this by setting the **`ha-rebalance-on-start`**
-  CRS option in the datacenter config. You can change that option also in the
-  Web UI, under `Datacenter` -> `Options` -> `Cluster Resource Scheduling`.
+- HA 服务从 stopped 到 start 的转换（可选启用）。请求启动已停止服务时，
+  是根据 CRS 算法检查最合适节点的好机会，因为移动已停止服务的成本低于移动已启动服务，
+  尤其是其磁盘卷位于共享存储上时。可以通过在数据中心配置中设置
+  **`ha-rebalance-on-start`** CRS 选项来启用此行为。也可以在 Web UI 的
+  `Datacenter` -> `Options` -> `Cluster Resource Scheduling` 下更改该选项。
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]
 endif::manvolnum[]
-

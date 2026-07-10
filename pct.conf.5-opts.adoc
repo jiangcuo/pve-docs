@@ -1,304 +1,320 @@
 `arch`: `<amd64 | arm64 | armhf | i386 | riscv32 | riscv64>` ('default =' `amd64`)::
 
-OS architecture type.
+操作系统架构类型。
 
 `cmode`: `<console | shell | tty>` ('default =' `tty`)::
 
-Console mode. By default, the console command tries to open a connection to one of the available tty devices. By setting cmode to 'console' it tries to attach to /dev/console instead. If you set cmode to 'shell', it simply invokes a shell inside the container (no login).
+控制台模式。默认情况下，console 命令会尝试连接到一个可用的 tty 设备。将
+cmode 设置为 `console` 时，它会改为尝试附加到 `/dev/console`。如果将 cmode
+设置为 `shell`，则会直接在容器内调用 shell（不登录）。
 
 `console`: `<boolean>` ('default =' `1`)::
 
-Attach a console device (/dev/console) to the container.
+为容器附加一个控制台设备（/dev/console）。
 
 `cores`: `<integer> (1 - 8192)` ::
 
-The number of cores assigned to the container. A container can use all available cores by default.
+分配给容器的核心数量。默认情况下，容器可以使用所有可用核心。
 
 `cpulimit`: `<number> (0 - 8192)` ('default =' `0`)::
 
-Limit of CPU usage.
+CPU 使用限制。
 +
-NOTE: If the computer has 2 CPUs, it has a total of '2' CPU time. Value '0' indicates no CPU limit.
+NOTE: 如果计算机有 2 个 CPU，则总共有 `2` 份 CPU 时间。值 `0` 表示不限制 CPU。
 
 `cpuunits`: `<integer> (0 - 500000)` ('default =' `cgroup v1: 1024, cgroup v2: 100`)::
 
-CPU weight for a container. Argument is used in the kernel fair scheduler. The larger the number is, the more CPU time this container gets. Number is relative to the weights of all the other running guests.
+容器的 CPU 权重。该参数用于内核公平调度器。数值越大，该容器获得的 CPU 时间越多。
+该数值相对于所有其他正在运行的来宾的权重。
 
 `debug`: `<boolean>` ('default =' `0`)::
 
-Try to be more verbose. For now this only enables debug log-level on start.
+尝试输出更详细的信息。目前这只会在启动时启用 debug 日志级别。
 
 `description`: `<string>` ::
 
-Description for the Container. Shown in the web-interface CT's summary. This is saved as comment inside the configuration file.
+容器的描述。显示在 Web 界面中 CT 的概要页。该内容会作为注释保存在配置文件中。
 
 `dev[n]`: `[[path=]<Path>] [,deny-write=<1|0>] [,gid=<integer>] [,mode=<Octal access mode>] [,uid=<integer>]` ::
 
-Device to pass through to the container
+要直通给容器的设备。
 
 `deny-write`=`<boolean>` ('default =' `0`);;
 
-Deny the container to write to the device
+禁止容器写入该设备。
 
 `gid`=`<integer> (0 - N)` ;;
 
-Group ID to be assigned to the device node
+要分配给设备节点的组 ID。
 
 `mode`=`<Octal access mode>` ;;
 
-Access mode to be set on the device node
+要在设备节点上设置的访问模式。
 
 `path`=`<Path>` ;;
 
-Path to the device to pass through to the container
+要直通给容器的设备路径。
 
 `uid`=`<integer> (0 - N)` ;;
 
-User ID to be assigned to the device node
+要分配给设备节点的用户 ID。
 
 `features`: `[force_rw_sys=<1|0>] [,fuse=<1|0>] [,keyctl=<1|0>] [,mknod=<1|0>] [,mount=<fstype;fstype;...>] [,nesting=<1|0>]` ::
 
-Allow containers access to advanced features.
+允许容器访问高级功能。
 
 `force_rw_sys`=`<boolean>` ('default =' `0`);;
 
-Mount /sys in unprivileged containers as `rw` instead of `mixed`. This can break networking under newer (>= v245) systemd-network use.
+在非特权容器中将 /sys 挂载为 `rw`，而不是 `mixed`。这可能会破坏较新版
+（>= v245）systemd-network 下的网络功能。
 
 `fuse`=`<boolean>` ('default =' `0`);;
 
-Allow using 'fuse' file systems in a container. Note that interactions between fuse and the freezer cgroup can potentially cause I/O deadlocks.
+允许在容器中使用 `fuse` 文件系统。请注意，fuse 与 freezer cgroup 之间的交互
+可能导致 I/O 死锁。
 
 `keyctl`=`<boolean>` ('default =' `0`);;
 
-For unprivileged containers only: Allow the use of the keyctl() system call. This is required to use docker inside a container. By default unprivileged containers will see this system call as non-existent. This is mostly a workaround for systemd-networkd, as it will treat it as a fatal error when some keyctl() operations are denied by the kernel due to lacking permissions. Essentially, you can choose between running systemd-networkd or docker.
+仅用于非特权容器：允许使用 keyctl() 系统调用。在容器内使用 docker 需要此功能。
+默认情况下，非特权容器会看到该系统调用不存在。这主要是针对 systemd-networkd 的
+变通措施，因为当部分 keyctl() 操作因权限不足而被内核拒绝时，它会将其视为致命错误。
+本质上，需要在运行 systemd-networkd 和 docker 之间做出选择。
 
 `mknod`=`<boolean>` ('default =' `0`);;
 
-Allow unprivileged containers to use mknod() to add certain device nodes. This requires a kernel with seccomp trap to user space support (5.3 or newer). This is experimental.
+允许非特权容器使用 mknod() 添加某些设备节点。这需要内核支持 seccomp trap 到用户空间
+（5.3 或更新版本）。此功能为实验性。
 
 `mount`=`<fstype;fstype;...>` ;;
 
-Allow mounting file systems of specific types. This should be a list of file system types as used with the mount command. Note that this can have negative effects on the container's security. With access to a loop device, mounting a file can circumvent the mknod permission of the devices cgroup, mounting an NFS file system can block the host's I/O completely and prevent it from rebooting, etc.
+允许挂载特定类型的文件系统。该值应为 mount 命令所使用的文件系统类型列表。请注意，
+这可能对容器安全性产生负面影响。如果可以访问 loop 设备，挂载文件可能绕过 devices
+cgroup 的 mknod 权限；挂载 NFS 文件系统可能完全阻塞主机 I/O 并阻止其重启，等等。
 
 `nesting`=`<boolean>` ('default =' `0`);;
 
-Allow nesting. Best used with unprivileged containers with additional id mapping. Note that this will expose procfs and sysfs contents of the host to the guest.
+允许嵌套。最好与带有额外 ID 映射的非特权容器一起使用。请注意，这会将主机的
+procfs 和 sysfs 内容暴露给来宾。
 
 `hookscript`: `<string>` ::
 
-Script that will be executed during various steps in the containers lifetime.
+在容器生命周期的多个阶段执行的脚本。
 
 `hostname`: `<string>` ::
 
-Set a host name for the container.
+设置容器的主机名。
 
 `lock`: `<backup | create | destroyed | disk | fstrim | migrate | mounted | rollback | snapshot | snapshot-delete>` ::
 
-Lock/unlock the container.
+锁定或解锁容器。
 
 `memory`: `<integer> (16 - N)` ('default =' `512`)::
 
-Amount of RAM for the container in MB.
+容器的 RAM 容量，单位为 MB。
 
 `mp[n]`: `[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]` ::
 
-Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.
+将卷用作容器挂载点。使用特殊语法 STORAGE_ID:SIZE_IN_GiB 可分配新卷。
 
 `acl`=`<boolean>` ;;
 
-Explicitly enable or disable ACL support.
+显式启用或禁用 ACL 支持。
 
 `backup`=`<boolean>` ;;
 
-Whether to include the mount point in backups (only used for volume mount points).
+是否将该挂载点包含在备份中（仅用于卷挂载点）。
 
 `mountoptions`=`<opt[;opt...]>` ;;
 
-Extra mount options for rootfs/mps.
+rootfs/mps 的额外挂载选项。
 
 `mp`=`<Path>` ;;
 
-Path to the mount point as seen from inside the container.
+从容器内部看到的挂载点路径。
 +
-NOTE: Must not contain any symlinks for security reasons.
+NOTE: 出于安全原因，不得包含任何符号链接。
 
 `quota`=`<boolean>` ;;
 
-Enable user quotas inside the container (not supported with zfs subvolumes)
+在容器内启用用户配额（zfs 子卷不支持）。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Will include this volume to a storage replica job.
+会将该卷包含到存储复制作业中。
 
 `ro`=`<boolean>` ;;
 
-Read-only mount point
+只读挂载点。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this non-volume mount point as available on all nodes.
+将此非卷挂载点标记为在所有节点上可用。
 +
-WARNING: This option does not share the mount point automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享挂载点，而是假定它已经被共享。
 
 `size`=`<DiskSize>` ;;
 
-Volume size (read only value).
+卷大小（只读值）。
 
 `volume`=`<volume>` ;;
 
-Volume, device or directory to mount into the container.
+要挂载到容器中的卷、设备或目录。
 
 `nameserver`: `<string>` ::
 
-Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
+设置容器的 DNS 服务器 IP 地址。如果既未设置 searchdomain 也未设置 nameserver，
+创建时会自动使用主机上的设置。
 
 `net[n]`: `name=<string> [,bridge=<bridge>] [,firewall=<1|0>] [,gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,hwaddr=<XX:XX:XX:XX:XX:XX>] [,ip=<(IPv4/CIDR|dhcp|manual)>] [,ip6=<(IPv6/CIDR|auto|dhcp|manual)>] [,link_down=<1|0>] [,mtu=<integer>] [,rate=<mbps>] [,tag=<integer>] [,trunks=<vlanid[;vlanid...]>] [,type=<veth>]` ::
 
-Specifies network interfaces for the container.
+指定容器的网络接口。
 
 `bridge`=`<bridge>` ;;
 
-Bridge to attach the network device to.
+要附加网络设备的网桥。
 
 `firewall`=`<boolean>` ;;
 
-Controls whether this interface's firewall rules should be used.
+控制是否使用此接口的防火墙规则。
 
 `gw`=`<GatewayIPv4>` ;;
 
-Default gateway for IPv4 traffic.
+IPv4 流量的默认网关。
 
 `gw6`=`<GatewayIPv6>` ;;
 
-Default gateway for IPv6 traffic.
+IPv6 流量的默认网关。
 
 `hwaddr`=`<XX:XX:XX:XX:XX:XX>` ;;
 
-A common MAC address with the I/G (Individual/Group) bit not set.
+常规 MAC 地址，未设置 I/G（Individual/Group）位。
 
 `ip`=`<(IPv4/CIDR|dhcp|manual)>` ;;
 
-IPv4 address in CIDR format.
+CIDR 格式的 IPv4 地址。
 
 `ip6`=`<(IPv6/CIDR|auto|dhcp|manual)>` ;;
 
-IPv6 address in CIDR format.
+CIDR 格式的 IPv6 地址。
 
 `link_down`=`<boolean>` ;;
 
-Whether this interface should be disconnected (like pulling the plug).
+是否断开该接口（类似拔掉网线）。
 
 `mtu`=`<integer> (64 - 65535)` ;;
 
-Maximum transfer unit of the interface. (lxc.network.mtu)
+接口的最大传输单元。（lxc.network.mtu）
 
 `name`=`<string>` ;;
 
-Name of the network device as seen from inside the container. (lxc.network.name)
+从容器内部看到的网络设备名称。（lxc.network.name）
 
 `rate`=`<mbps>` ;;
 
-Apply rate limiting to the interface
+对该接口应用速率限制。
 
 `tag`=`<integer> (1 - 4094)` ;;
 
-VLAN tag for this interface.
+此接口的 VLAN 标签。
 
 `trunks`=`<vlanid[;vlanid...]>` ;;
 
-VLAN ids to pass through the interface
+允许通过该接口的 VLAN ID。
 
 `type`=`<veth>` ;;
 
-Network interface type.
+网络接口类型。
 
 `onboot`: `<boolean>` ('default =' `0`)::
 
-Specifies whether a container will be started during system bootup.
+指定容器是否在系统启动期间自动启动。
 
 `ostype`: `<alpine | archlinux | centos | debian | devuan | fedora | gentoo | nixos | opensuse | ubuntu | unmanaged>` ::
 
-OS type. This is used to setup configuration inside the container, and corresponds to lxc setup scripts in /usr/share/lxc/config/<ostype>.common.conf. Value 'unmanaged' can be used to skip and OS specific setup.
+操作系统类型。该值用于在容器内设置配置，并对应
+/usr/share/lxc/config/<ostype>.common.conf 中的 lxc 设置脚本。值 `unmanaged`
+可用于跳过特定于操作系统的设置。
 
 `protection`: `<boolean>` ('default =' `0`)::
 
-Sets the protection flag of the container. This will prevent the CT or CT's disk remove/update operation.
+设置容器的保护标志。这会阻止对 CT 或 CT 磁盘执行移除/更新操作。
 
 `rootfs`: `[volume=]<volume> [,acl=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]` ::
 
-Use volume as container root.
+将卷用作容器根文件系统。
 
 `acl`=`<boolean>` ;;
 
-Explicitly enable or disable ACL support.
+显式启用或禁用 ACL 支持。
 
 `mountoptions`=`<opt[;opt...]>` ;;
 
-Extra mount options for rootfs/mps.
+rootfs/mps 的额外挂载选项。
 
 `quota`=`<boolean>` ;;
 
-Enable user quotas inside the container (not supported with zfs subvolumes)
+在容器内启用用户配额（zfs 子卷不支持）。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Will include this volume to a storage replica job.
+会将该卷包含到存储复制作业中。
 
 `ro`=`<boolean>` ;;
 
-Read-only mount point
+只读挂载点。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this non-volume mount point as available on all nodes.
+将此非卷挂载点标记为在所有节点上可用。
 +
-WARNING: This option does not share the mount point automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享挂载点，而是假定它已经被共享。
 
 `size`=`<DiskSize>` ;;
 
-Volume size (read only value).
+卷大小（只读值）。
 
 `volume`=`<volume>` ;;
 
-Volume, device or directory to mount into the container.
+要挂载到容器中的卷、设备或目录。
 
 `searchdomain`: `<string>` ::
 
-Sets DNS search domains for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
+设置容器的 DNS 搜索域。如果既未设置 searchdomain 也未设置 nameserver，创建时会自动使用主机上的设置。
 
 `startup`: `[[order=]\d+] [,up=\d+] [,down=\d+] ` ::
 
-Startup and shutdown behavior. Order is a non-negative number defining the general startup order. Shutdown in done with reverse ordering. Additionally you can set the 'up' or 'down' delay in seconds, which specifies a delay to wait before the next VM is started or stopped.
+启动和关闭行为。Order 是一个非负数，用于定义总体启动顺序。关闭时按相反顺序执行。
+此外，可以设置以秒为单位的 `up` 或 `down` 延迟，用于指定启动或停止下一个虚拟机前等待的延迟。
 
 `swap`: `<integer> (0 - N)` ('default =' `512`)::
 
-Amount of SWAP for the container in MB.
+容器的 SWAP 容量，单位为 MB。
 
 `tags`: `<string>` ::
 
-Tags of the Container. This is only meta information.
+容器的标签。这只是元信息。
 
 `template`: `<boolean>` ('default =' `0`)::
 
-Enable/disable Template.
+启用或禁用模板。
 
 `timezone`: `<string>` ::
 
-Time zone to use in the container. If option isn't set, then nothing will be done. Can be set to 'host' to match the host time zone, or an arbitrary time zone option from /usr/share/zoneinfo/zone.tab
+容器中使用的时区。如果未设置该选项，则不会执行任何操作。可设置为 `host` 以匹配主机时区，
+也可以设置为 /usr/share/zoneinfo/zone.tab 中的任意时区选项。
 
 `tty`: `<integer> (0 - 6)` ('default =' `2`)::
 
-Specify the number of tty available to the container
+指定容器可用的 tty 数量。
 
 `unprivileged`: `<boolean>` ('default =' `0`)::
 
-Makes the container run as unprivileged user. (Should not be modified manually.)
+使容器以非特权用户身份运行。（不应手动修改。）
 
 `unused[n]`: `[volume=]<volume>` ::
 
-Reference to unused volumes. This is used internally, and should not be modified manually.
+对未使用卷的引用。该项供内部使用，不应手动修改。
 
 `volume`=`<volume>` ;;
 
-The volume that is not used currently.
-
+当前未使用的卷。

@@ -1,0 +1,147 @@
+ifdef::manvolnum[]
+= pvebcache(1)
+:pve-toplevel:
+
+== NAME
+
+pvebcache - PXVIRT bcache 管理工具
+
+== SYNOPSIS
+
+include::pvebcache.1-synopsis.adoc[]
+
+== DESCRIPTION
+endif::manvolnum[]
+
+ifndef::manvolnum[]
+= pvebcache - bcache 管理工具
+:pve-toplevel:
+endif::manvolnum[]
+
+`pvebcache` 是 PXVIRT 的 bcache 管理工具，用于创建、注册、停止 bcache 后端设备，
+以及创建、停止、绑定、分离和配置 bcache 缓存设备。
+
+bcache 可以将高速块设备（例如 NVMe SSD）作为缓存设备，为较慢的后端块设备提供缓存能力。
+
+CAUTION: 创建 bcache 后端设备或缓存设备会修改目标块设备元数据。执行相关命令前，
+请确认设备上没有需要保留的数据，并确认设备没有被系统或虚拟机使用。
+
+== 后端设备管理
+
+=== 创建后端设备
+
+`pvebcache create` 用于将一个磁盘设备转换为 bcache 后端设备。
+
+----
+# pvebcache create /dev/sdb
+----
+
+以上命令会将 `/dev/sdb` 转换为 bcache 后端设备。
+
+=== 查看设备列表
+
+`pvebcache list` 用于查看当前 bcache 后端设备和缓存设备。
+
+----
+# pvebcache list
+name       type       backend-dev          cache-dev             state           size            cachemode
+bcache0    backend    sdc                  unknown              Running         80GB            writeback
+nvme0n1    cache      unknown              unknown              Running         32GB            unknown
+----
+
+=== 停止后端设备
+
+`pvebcache stop` 用于停止指定 bcache 后端设备。
+
+----
+# pvebcache stop bcache0
+----
+
+=== 重新注册后端设备
+
+`pvebcache register` 用于重新注册已经创建过的 bcache 后端设备。
+
+----
+# pvebcache register /dev/sdb
+----
+
+== 缓存设备管理
+
+=== 创建缓存设备
+
+`pvebcache cache create` 用于将指定块设备创建为 bcache 缓存设备。
+
+----
+# pvebcache cache create /dev/nvme0n1p1
+----
+
+=== 停止缓存设备
+
+`pvebcache cache stop` 用于停止指定缓存设备。如果该缓存设备正在被后端设备使用，
+则无法停止。
+
+----
+# pvebcache cache stop /dev/nvme0n1p1
+----
+
+=== 绑定缓存设备
+
+`pvebcache cache attach` 用于将缓存设备绑定到 bcache 后端设备。
+
+----
+# pvebcache cache attach bcache0 --cache /dev/nvme0n1p1
+----
+
+=== 分离缓存设备
+
+`pvebcache cache detach` 用于将 bcache 后端设备与当前缓存设备分离。
+
+----
+# pvebcache cache detach bcache0
+----
+
+== 缓存策略
+
+`pvebcache cache set` 用于设置 bcache 后端设备的缓存策略和相关参数。
+
+cachemode::
+
+缓存模式。支持以下取值：
+
+* `writethrough`
+* `writeback`
+* `writearound`
+* `none`
+
+sequential::
+
+顺序 IO 阈值，单位为 KiB。
+
+wb-percent::
+
+回写缓存比例。
+
+clear-stats::
+
+清除统计数据。
+
+以下示例将 `bcache0` 的缓存模式设置为 `writeback`，顺序 IO 阈值设置为
+`4096` KiB，回写缓存比例设置为 `20`：
+
+----
+# pvebcache cache set bcache0 --cachemode writeback --sequential 4096 --wb-percent 20
+----
+
+== 常用命令示例
+
+----
+# pvebcache list
+# pvebcache create /dev/sdb
+# pvebcache cache create /dev/nvme0n1p1
+# pvebcache cache attach bcache0 --cache /dev/nvme0n1p1
+# pvebcache cache set bcache0 --cachemode writeback --sequential 4096 --wb-percent 20
+----
+
+ifdef::manvolnum[]
+include::pve-copyright.adoc[]
+endif::manvolnum[]

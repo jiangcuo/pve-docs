@@ -1,30 +1,33 @@
 ifdef::manvolnum[]
-pveam(1)
-========
+= pveam(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pveam - Proxmox VE Appliance Manager
+pveam - Proxmox VE 应用模板管理器
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pveam.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Container Images
-================
+= 容器镜像
 endif::manvolnum[]
 
-Command line tool to manage container images. See `man pct` for usage
-examples.
+用于管理容器镜像的命令行工具。用法示例请参见 `man pct`。
+
+== 常用命令示例
+
+更新容器模板数据库并列出 `local` 存储上的模板：
+
+----
+# pveam update
+# pveam list local
+----
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

@@ -1,29 +1,24 @@
 [[chapter_installation]]
-Installing {pve}
-================
+= 安装 {pve}
 ifndef::manvolnum[]
 :pve-toplevel:
 endif::manvolnum[]
 ifdef::wiki[]
-:title: Installation
+:title: 安装
 endif::wiki[]
 
-{pve} is based on Debian. This is why the install disk images (ISO files)
-provided by Proxmox include a complete Debian system as well as all necessary
-{pve} packages.
+{pve} 基于 OpenEuler。因此，梨儿方 提供的安装磁盘镜像（ISO 文件）中包含完整的
+OpenEuler 系统，以及所有必需的 {pve} 软件包。
 
-TIP: See the xref:faq-support-table[support table in the FAQ] for the
-relationship between {pve} releases and Debian releases.
+TIP: 请参阅 xref:faq-support-table[FAQ 中的支持表]，了解 {pve} 版本与 OpenEuler
+版本之间的对应关系。
 
-The installer will guide you through the setup, allowing you to partition the
-local disk(s), apply basic system configurations (for example, timezone,
-language, network) and install all required packages. This process should not
-take more than a few minutes. Installing with the provided ISO is the
-recommended method for new and existing users.
+安装程序会引导你完成设置，包括对本地磁盘进行分区、应用基础系统配置（例如时区、
+语言、网络），并安装所有必需软件包。该过程通常只需几分钟。对于新用户和现有
+用户，推荐使用提供的 ISO 进行安装。
 
-Alternatively, {pve} can be installed on top of an existing Debian system. This
-option is only recommended for advanced users because detailed knowledge about
-{pve} is required.
+也可以在现有 OpenEuler 系统之上安装 {pve}。该选项仅推荐高级用户使用，因为需要
+对 {pve} 有较深入的了解。
 
 ifndef::wiki[]
 
@@ -35,441 +30,367 @@ endif::wiki[]
 
 
 [[installation_installer]]
-Using the {pve} Installer
--------------------------
+== 使用 {pve} 安装程序
 
-The installer ISO image includes the following:
+安装程序 ISO 镜像包含以下内容：
 
-* Complete operating system (Debian Linux, 64-bit)
+* 完整操作系统（OpenEuler Linux，64 位）
 
-* The {pve} installer, which partitions the local disk(s) with ext4, XFS,
-  BTRFS (technology preview), or ZFS and installs the operating system
+* {pve} 安装程序，可使用 ext4、XFS、BTRFS（技术预览）或 ZFS 对本地磁盘进行
+  分区，并安装操作系统
 
-* {pve} Linux kernel with KVM and LXC support
+* 支持 KVM 和 LXC 的 {pve} Linux 内核
 
-* Complete toolset for administering virtual machines, containers, the host
-  system, clusters and all necessary resources
+* 用于管理虚拟机、容器、主机系统、集群和所有必要资源的完整工具集
 
-* Web-based management interface
+* 基于 Web 的管理界面
 
-NOTE: All existing data on the selected drives will be removed during the
-installation process. The installer does not add boot menu entries for other
-operating systems.
+NOTE: 安装过程中会移除所选驱动器上的所有现有数据。安装程序不会为其他操作系统
+添加启动菜单项。
 
-Please insert the xref:installation_prepare_media[prepared installation media]
-(for example, USB flash drive or CD-ROM) and boot from it.
+请插入 xref:installation_prepare_media[准备好的安装介质]（例如 USB 闪存盘或
+CD-ROM），并从该介质启动。
 
-TIP: Make sure that booting from the installation medium (for example, USB) is
-enabled in your server's firmware settings. Secure boot needs to be disabled
-when booting an installer prior to {pve} version 8.1.
+TIP: 请确保服务器固件设置中已启用从安装介质（例如 USB）启动。启动 {pve} 8.1
+之前版本的安装程序时，需要禁用 Secure Boot。
 
 [thumbnail="screenshot/pve-grub-menu.png"]
 
-After choosing the correct entry (for example, 'Boot from USB') the {pve} menu
-will be displayed, and one of the following options can be selected:
+选择正确的启动项后（例如 'Boot from USB'），会显示 {pve} 菜单，并可选择以下
+选项之一：
 
 Install {pve} (Graphical)::
 
-Starts the normal installation.
+启动普通图形安装。
 
-TIP: It's possible to use the installation wizard with a keyboard only. Buttons
-can be clicked by pressing the `ALT` key combined with the underlined character
-from the respective button. For example, `ALT + N` to press a `Next` button.
+TIP: 可以只使用键盘操作安装向导。按下 `ALT` 键并结合相应按钮中带下划线的字符，
+即可点击按钮。例如，按 `ALT + N` 可点击 `Next` 按钮。
 
 Install {pve} (Terminal UI)::
 
-Starts the terminal-mode installation wizard. It provides the same overall
-installation experience as the graphical installer, but has generally better
-compatibility with very old and very new hardware.
+启动终端模式安装向导。它提供与图形安装程序总体相同的安装体验，但通常对非常旧
+或非常新的硬件具有更好的兼容性。
 
 Install {pve} (Terminal UI, Serial Console)::
 
-Starts the terminal-mode installation wizard, additionally setting up the Linux
-kernel to use the (first) serial port of the machine for in- and output. This
-can be used if the machine is completely headless and only has a serial console
-available.
+启动终端模式安装向导，并额外设置 Linux 内核使用机器的（第一个）串口进行输入和
+输出。该选项适用于完全无头、且只有串口控制台可用的机器。
 
 [thumbnail="screenshot/pve-tui-installer.png"]
 
-Both modes use the same code base for the actual installation process to
-benefit from more than a decade of bug fixes and ensure feature parity.
+两种模式在实际安装流程中使用同一套代码库，从而受益于十余年的问题修复，并确保
+功能一致。
 
-TIP: The 'Terminal UI' option can be used in case the graphical installer does
-not work correctly, due to e.g. driver issues. See also
-xref:nomodeset_kernel_param[adding the `nomodeset` kernel parameter].
+TIP: 如果图形安装程序因驱动等问题无法正常工作，可以使用 'Terminal UI' 选项。
+另请参阅 xref:nomodeset_kernel_param[添加 `nomodeset` 内核参数]。
 
 Advanced Options: Install {pve} (Graphical, Debug Mode)::
 
-Starts the installation in debug mode. A console will be opened at several
-installation steps. This helps to debug the situation if something goes wrong.
-To exit a debug console, press `CTRL-D`. This option can be used to boot a live
-system with all basic tools available. You can use it, for example, to
-xref:chapter_zfs[repair a degraded ZFS 'rpool'] or fix the
-xref:sysboot[bootloader] for an existing {pve} setup.
+以调试模式启动安装。在若干安装步骤中会打开控制台。如果出现问题，这有助于调试
+现场。要退出调试控制台，请按 `CTRL-D`。该选项可用于启动一个包含所有基础工具的
+live 系统。例如，可用于 xref:chapter_zfs[修复降级的 ZFS 'rpool']，或修复现有
+{pve} 设置的 xref:sysboot[引导加载器]。
 
 Advanced Options: Install {pve} (Terminal UI, Debug Mode)::
 
-Same as the graphical debug mode, but preparing the system to run the
-terminal-based installer instead.
+与图形调试模式相同，但会准备系统以运行基于终端的安装程序。
 
 Advanced Options: Install {pve} (Serial Console Debug Mode)::
 
-Same the terminal-based debug mode, but additionally sets up the Linux kernel to
-use the (first) serial port of the machine for in- and output.
+与基于终端的调试模式相同，但会额外设置 Linux 内核使用机器的（第一个）串口进行
+输入和输出。
 
 Advanced Options: Install {pve} (Automated)::
 
-Starts the installer in unattended mode, even if the ISO has not been
-appropriately prepared for an automated installation. This option can be used to
-gather hardware details or might be useful to debug an automated installation
-setup. See xref:installation_unattended[Unattended Installation] for more
-information.
+以无人值守模式启动安装程序，即使 ISO 尚未为自动化安装正确准备。该选项可用于
+收集硬件详情，也可能有助于调试自动化安装设置。更多信息请参阅
+xref:installation_unattended[无人值守安装]。
 
 Advanced Options: Rescue Boot::
 
-With this option you can boot an existing installation. It searches all attached
-hard disks. If it finds an existing installation, it boots directly into that
-disk using the Linux kernel from the ISO. This can be useful if there are
-problems with the bootloader (GRUB/`systemd-boot`) or the BIOS/UEFI is unable to
-read the boot block from the disk.
+通过该选项可以启动现有安装。它会搜索所有连接的硬盘。如果找到现有安装，则使用
+ISO 中的 Linux 内核直接启动到该磁盘。当引导加载器（GRUB/`systemd-boot`）存在
+问题，或 BIOS/UEFI 无法从磁盘读取引导块时，该选项会很有用。
 
 Advanced Options: Test Memory (memtest86+)::
 
-Runs `memtest86+`. This is useful to check if the memory is functional and free
-of errors. Secure Boot must be turned off in the UEFI firmware setup utility to
-run this option.
+运行 `memtest86+`。这有助于检查内存是否可用且没有错误。要运行该选项，必须在
+UEFI 固件设置工具中关闭 Secure Boot。
 
-You normally select *Install {pve} (Graphical)* to start the installation.
+通常选择 *Install {pve} (Graphical)* 来开始安装。
 
 [thumbnail="screenshot/pve-select-target-disk.png"]
 
-The first step is to read our EULA (End User License Agreement). Following this,
-you can select the target hard disk(s) for the installation.
+第一步是阅读 EULA（End User License Agreement）。随后，可以选择安装目标硬盘。
 
-CAUTION: By default, the whole server is used and all existing data is removed.
-Make sure there is no important data on the server before proceeding with the
-installation.
+CAUTION: 默认情况下会使用整台服务器，并移除所有现有数据。继续安装前，请确保
+服务器上没有重要数据。
 
-The `Options` button lets you select the target file system, which
-defaults to `ext4`. The installer uses LVM if you select
-`ext4` or `xfs` as a file system, and offers additional options to
-restrict LVM space (see xref:advanced_lvm_options[below]).
+`Options` 按钮可用于选择目标文件系统，默认为 `ext4`。如果选择 `ext4` 或 `xfs`
+作为文件系统，安装程序会使用 LVM，并提供额外选项来限制 LVM 空间（参见
+xref:advanced_lvm_options[下文]）。
 
-{pve} can also be installed on ZFS. As ZFS offers several software RAID levels,
-this is an option for systems that don't have a hardware RAID controller. The
-target disks must be selected in the `Options` dialog. More ZFS specific
-settings can be changed under xref:advanced_zfs_options[`Advanced Options`].
+{pve} 也可以安装在 ZFS 上。由于 ZFS 提供多种软件 RAID 级别，对于没有硬件 RAID
+控制器的系统，这是一种可选方案。必须在 `Options` 对话框中选择目标磁盘。更多
+ZFS 专用设置可在 xref:advanced_zfs_options[`Advanced Options`] 中更改。
 
-WARNING: ZFS on top of any hardware RAID is not supported and can result in data
-loss.
+WARNING: 不支持在任何硬件 RAID 之上使用 ZFS，这可能导致数据丢失。
 
 [thumbnail="screenshot/pve-select-location.png"]
 
-The next page asks for basic configuration options like your location, time
-zone, and keyboard layout. The location is used to select a nearby download
-server, in order to increase the speed of updates. The installer is usually able
-to auto-detect these settings, so you only need to change them in rare
-situations when auto-detection fails, or when you want to use a keyboard layout
-not commonly used in your country.
+下一页会要求填写基础配置选项，例如位置、时区和键盘布局。位置信息用于选择邻近
+下载服务器，以提升更新速度。安装程序通常能够自动检测这些设置，因此只有在自动
+检测失败，或需要使用所在国家不常见的键盘布局时，才需要手动修改。
 
 [thumbnail="screenshot/pve-set-password.png", float="left"]
 
-Next the password of the superuser (`root`) and an email address needs to be
-specified. The password must consist of at least 8 characters. It's highly
-recommended to use a stronger password. Some guidelines are:
+接下来需要指定超级用户（`root`）的密码和电子邮件地址。密码至少需要包含 8 个
+字符。强烈建议使用更强的密码。以下是一些建议：
 
-- Use a minimum password length of at least 12 characters.
+- 密码长度至少 12 个字符。
 
-- Include lowercase and uppercase alphabetic characters, numbers, and symbols.
+- 包含小写字母、大写字母、数字和符号。
 
-- Avoid character repetition, keyboard patterns, common dictionary words,
-  letter or number sequences, usernames, relative or pet names, romantic links
-  (current or past), and biographical information (for example ID numbers,
-  ancestors' names or dates).
+- 避免字符重复、键盘模式、常见词典词汇、字母或数字序列、用户名、亲属或宠物
+  名称、恋爱关系相关信息（当前或过去），以及个人经历信息（例如身份证号、祖辈
+  姓名或日期）。
 
-The email address is used to send notifications to the system administrator.
-For example:
+电子邮件地址用于向系统管理员发送通知。例如：
 
-- Information about available package updates.
+- 可用软件包更新的信息。
 
-- Error messages from periodic 'cron' jobs.
+- 周期性 'cron' 任务产生的错误消息。
 
 [thumbnail="screenshot/pve-setup-network.png"]
 
-All those notification mails will be sent to the specified email address.
+所有这些通知邮件都会发送到指定电子邮件地址。
 
-The last step is the network configuration. Network interfaces that are 'UP'
-show a filled circle in front of their name in the drop down menu. Please note
-that during installation you can either specify an IPv4 or IPv6 address, but not
-both. To configure a dual stack node, add additional IP addresses after the
-installation.
+最后一步是网络配置。在下拉菜单中，状态为 'UP' 的网络接口名称前会显示实心圆。
+请注意，安装期间只能指定 IPv4 或 IPv6 地址之一，不能同时指定二者。要配置双栈
+节点，请在安装完成后添加额外 IP 地址。
 
 [thumbnail="screenshot/pve-installation.png", float="left"]
 
-The next step shows a summary of the previously selected options. Please
-re-check every setting and use the `Previous` button if a setting needs to be
-changed.
+下一步会显示此前所选选项的摘要。请重新检查每项设置；如果需要更改某项设置，
+请使用 `Previous` 按钮。
 
-After clicking `Install`, the installer will begin to format the disks and copy
-packages to the target disk(s). Please wait until this step has finished; then
-remove the installation medium and restart your system.
+点击 `Install` 后，安装程序会开始格式化磁盘，并将软件包复制到目标磁盘。请等待
+该步骤完成；随后移除安装介质并重启系统。
 
 [thumbnail="screenshot/pve-install-summary.png"]
 
-Copying the packages usually takes several minutes, mostly depending on the
-speed of the installation medium and the target disk performance.
+复制软件包通常需要几分钟，主要取决于安装介质速度和目标磁盘性能。
 
-When copying and setting up the packages has finished, you can reboot the
-server. This will be done automatically after a few seconds by default.
+复制并设置软件包完成后，可以重启服务器。默认情况下，系统会在几秒后自动完成该
+操作。
 
-.Installation Failure
+.安装失败
 
-If the installation failed, check out specific errors on the second TTY
-('CTRL + ALT + F2') and ensure that the systems meets the
-xref:install_minimal_requirements[minimum requirements].
+如果安装失败，请在第二个 TTY（'CTRL + ALT + F2'）上查看具体错误，并确保系统
+满足 xref:install_minimal_requirements[最低要求]。
 
-If the installation is still not working, look at the
-xref:getting_help[how to get help chapter].
+如果安装仍无法正常进行，请查看 xref:getting_help[如何获取帮助章节]。
 
 
-Accessing the Management Interface Post-Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 安装后访问管理界面
 
 [thumbnail="screenshot/gui-login-window.png"]
 
-After a successful installation and reboot of the system you can use the {pve}
-web interface for further configuration.
+成功安装并重启系统后，可以使用 {pve} Web 界面进行进一步配置。
 
-. Point your browser to the IP address given during the installation and port
-  8006, for example: https://youripaddress:8006
+. 在浏览器中访问安装期间指定的 IP 地址和端口 8006，例如：
+  https://youripaddress:8006
 
-. Log in using the `root` (realm 'PAM') username and the password chosen during
-  installation.
+. 使用 `root`（realm 'PAM'）用户名和安装期间选择的密码登录。
 
-. Upload your subscription key to gain access to the Enterprise repository.
-  Otherwise, you will need to set up one of the public, less tested package
-  repositories to get updates for security fixes, bug fixes, and new features.
+. 上传订阅密钥以获得 Enterprise 仓库访问权限。否则，需要设置一个公开但测试较少
+  的软件包仓库，以获取安全修复、问题修复和新功能更新。
 
-. Check the IP configuration and hostname.
+. 检查 IP 配置和主机名。
 
-. Check the timezone.
+. 检查时区。
 
-. Check your xref:chapter_pve_firewall[Firewall settings].
+. 检查 xref:chapter_pve_firewall[防火墙设置]。
+
+.常用命令示例
+----
+# pveversion -v
+# systemctl status pveproxy.service
+# ip address
+----
 
 [[advanced_lvm_options]]
-Advanced LVM Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 高级 LVM 配置选项
 
-The installer creates a Volume Group (VG) called `pve`, and additional Logical
-Volumes (LVs) called `root`, `data`, and `swap`, if `ext4` or `xfs` is used. To
-control the size of these volumes use:
+如果使用 `ext4` 或 `xfs`，安装程序会创建名为 `pve` 的卷组（VG），以及名为
+`root`、`data` 和 `swap` 的逻辑卷（LV）。要控制这些卷的大小，请使用：
 
 `hdsize`::
 
-Defines the total hard disk size to be used. This way you can reserve free space
-on the hard disk for further partitioning (for example for an additional PV and
-VG on the same hard disk that can be used for LVM storage).
+定义要使用的硬盘总大小。这样可以在硬盘上保留空闲空间用于进一步分区（例如在
+同一块硬盘上创建额外 PV 和 VG，用作 LVM 存储）。
 
 `swapsize`::
 
-Defines the size of the `swap` volume. The default is the size of the installed
-memory, minimum 4 GB and maximum 8 GB. The resulting value cannot be greater
-than `hdsize/8`.
+定义 `swap` 卷大小。默认值为已安装内存大小，最小 4 GB，最大 8 GB。最终值不能
+大于 `hdsize/8`。
 +
-NOTE: If set to `0`, no `swap` volume will be created.
+NOTE: 如果设置为 `0`，则不会创建 `swap` 卷。
 
 `maxroot`::
 
-Defines the maximum size of the `root` volume, which stores the operation
-system. The maximum limit of the `root` volume size is `hdsize/4`.
+定义 `root` 卷的最大大小，该卷用于存储操作系统。`root` 卷大小上限为
+`hdsize/4`。
 
 `maxvz`::
 
-Defines the maximum size of the `data` volume. The actual size of the `data`
-volume is:
+定义 `data` 卷的最大大小。`data` 卷的实际大小为：
 +
 `datasize = hdsize - rootsize - swapsize - minfree`
 +
-Where `datasize` cannot be bigger than `maxvz`.
+其中 `datasize` 不能大于 `maxvz`。
 +
-NOTE: In case of LVM thin, the `data` pool will only be created if `datasize` is
-bigger than 4GB.
+NOTE: 对于 LVM thin，仅当 `datasize` 大于 4GB 时才会创建 `data` 池。
 +
-NOTE: If set to `0`, no `data` volume will be created and the storage
-configuration will be adapted accordingly.
+NOTE: 如果设置为 `0`，则不会创建 `data` 卷，存储配置也会相应调整。
 
 `minfree`::
 
-Defines the amount of free space that should be left in the LVM volume group
-`pve`. With more than 128GB storage available, the default is 16GB, otherwise
-`hdsize/8` will be used.
+定义应在 LVM 卷组 `pve` 中保留的空闲空间量。当可用存储超过 128GB 时，默认值为
+16GB；否则使用 `hdsize/8`。
 +
-NOTE: LVM requires free space in the VG for snapshot creation (not required for
-lvmthin snapshots).
+NOTE: LVM 需要 VG 中有空闲空间才能创建快照（lvmthin 快照不需要）。
 
 [[advanced_zfs_options]]
-Advanced ZFS Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The installer creates the ZFS pool `rpool`, if ZFS is used. No swap space is
-created but you can reserve some unpartitioned space on the install disks for
-swap. You can also create a swap zvol after the installation, although this can
-lead to problems (see xref:zfs_swap[ZFS swap notes]).
+=== 高级 ZFS 配置选项
+如果使用 ZFS，安装程序会创建 ZFS 池 `rpool`。不会创建 swap 空间，但可以在安装
+磁盘上为 swap 保留一些未分区空间。也可以在安装后创建 swap zvol，不过这可能会
+带来问题（参见 xref:zfs_swap[ZFS swap notes]）。
 
 `ashift`::
 
-Defines the `ashift` value for the created pool. The `ashift` needs to be set at
-least to the sector-size of the underlying disks (2 to the power of `ashift` is
-the sector-size), or any disk which might be put in the pool (for example the
-replacement of a defective disk).
+定义所创建池的 `ashift` 值。`ashift` 至少需要设置为底层磁盘的扇区大小（2 的
+`ashift` 次方即扇区大小），或未来可能加入该池的任何磁盘的扇区大小（例如替换
+故障磁盘时使用的磁盘）。
 
 `compress`::
 
-Defines whether compression is enabled for `rpool`.
+定义是否为 `rpool` 启用压缩。
 
 `checksum`::
 
-Defines which checksumming algorithm should be used for `rpool`.
+定义 `rpool` 应使用哪种校验和算法。
 
 `copies`::
 
-Defines the `copies` parameter for `rpool`. Check the `zfs(8)` manpage for the
-semantics, and why this does not replace redundancy on disk-level.
+定义 `rpool` 的 `copies` 参数。请查看 `zfs(8)` 手册页了解其语义，以及为什么它
+不能替代磁盘级冗余。
 
 `ARC max size`::
 
-Defines the maximum size the ARC can grow to and thus limits the amount of
-memory ZFS will use. See also the section on
-xref:sysadmin_zfs_limit_memory_usage[how to limit ZFS memory usage] for more
-details.
+定义 ARC 可增长到的最大大小，从而限制 ZFS 可使用的内存量。更多细节另请参阅
+xref:sysadmin_zfs_limit_memory_usage[如何限制 ZFS 内存使用]章节。
 
 `hdsize`::
 
-Defines the total hard disk size to be used. This is useful to save free space
-on the hard disk(s) for further partitioning (for example to create a
-swap-partition). `hdsize` is only honored for bootable disks, that is only the
-first disk or mirror for RAID0, RAID1 or RAID10, and all disks in RAID-Z[123].
+定义要使用的硬盘总大小。这有助于在硬盘上保留空闲空间用于进一步分区（例如创建
+swap 分区）。`hdsize` 仅对可启动磁盘生效，也就是 RAID0、RAID1 或 RAID10 中的
+第一块磁盘或镜像，以及 RAID-Z[123] 中的所有磁盘。
 
 [[advanced_btrfs_options]]
-Advanced BTRFS Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 高级 BTRFS 配置选项
 
-No swap space is created when BTRFS is used but you can reserve some
-unpartitioned space on the install disks for swap. You can either create a
-separate partition, BTRFS subvolume or a swapfile using the `btrfs filesystem
-mkswapfile` command.
+使用 BTRFS 时不会创建 swap 空间，但可以在安装磁盘上为 swap 保留一些未分区空间。
+可以创建独立分区、BTRFS 子卷，或使用 `btrfs filesystem mkswapfile` 命令创建
+swapfile。
 
 `compress`::
 
-Defines whether compression is enabled for the BTRFS subvolume. Different
-compression algorithms are supported: 'on' (equivalent to 'zlib'), 'zlib', 'lzo'
-and 'zstd'. Defaults to 'off'.
+定义是否为 BTRFS 子卷启用压缩。支持不同压缩算法：'on'（等同于 'zlib'）、
+'zlib'、'lzo' 和 'zstd'。默认为 'off'。
 
 `hdsize`::
 
-Defines the total hard disk size to be used. This is useful to save free space
-on the hard disk(s) for further partitioning (for example, to create a
-swap partition).
+定义要使用的硬盘总大小。这有助于在硬盘上保留空闲空间用于进一步分区（例如创建
+swap 分区）。
 
-ZFS Performance Tips
-~~~~~~~~~~~~~~~~~~~~
+=== ZFS 性能提示
 
-ZFS works best with a lot of memory. If you intend to use ZFS make sure to have
-enough RAM available for it. A good calculation is 4GB plus 1GB RAM for each TB
-RAW disk space.
+ZFS 在内存充足时效果最佳。如果计划使用 ZFS，请确保有足够 RAM 可用。一个较好
+的估算方式是 4GB 基础内存，加上每 TB RAW 磁盘空间 1GB RAM。
 
-ZFS can use a dedicated drive as write cache, called the ZFS Intent Log (ZIL).
-Use a fast drive (SSD) for it. It can be added after installation with the
-following command:
+ZFS 可以使用专用驱动器作为写缓存，称为 ZFS Intent Log（ZIL）。应使用快速驱动器
+（SSD）承载它。安装后可使用以下命令添加：
 
 ----
 # zpool add <pool-name> log </dev/path_to_fast_ssd>
 ----
 
 [[nomodeset_kernel_param]]
-Adding the `nomodeset` Kernel Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 添加 `nomodeset` 内核参数
 
-Problems may arise on very old or very new hardware due to graphics drivers. If
-the installation hangs during boot, you can try adding the `nomodeset`
-parameter. This prevents the Linux kernel from loading any graphics drivers and
-forces it to continue using the BIOS/UEFI-provided framebuffer.
+在非常旧或非常新的硬件上，图形驱动可能导致问题。如果安装在启动期间卡住，可以
+尝试添加 `nomodeset` 参数。该参数会阻止 Linux 内核加载任何图形驱动，并强制其
+继续使用 BIOS/UEFI 提供的 framebuffer。
 
-On the {pve} bootloader menu, navigate to 'Install {pve} (Terminal UI)' and
-press `e` to edit the entry. Using the arrow keys, navigate to the line starting
-with `linux`, move the cursor to the end of that line and add the
-parameter `nomodeset`, separated by a space from the pre-existing last
-parameter.
+在 {pve} 引导加载器菜单中，导航到 'Install {pve} (Terminal UI)'，按 `e` 编辑该
+条目。使用方向键导航到以 `linux` 开头的行，将光标移到该行末尾，并添加
+`nomodeset` 参数，需与原有最后一个参数之间用空格分隔。
 
-Then press `Ctrl-X` or `F10` to boot the configuration.
+然后按 `Ctrl-X` 或 `F10` 使用该配置启动。
 
 [[installation_unattended]]
-Unattended Installation
------------------------
+== 无人值守安装
 
-The automated installation method allows installing {pve}
-in an unattended manner. This enables you to fully automate the setup
-process on bare-metal. Once the installation is complete and the host
-has booted up, automation tools like Ansible can be used to further
-configure the installation.
+自动化安装方法允许以无人值守方式安装 {pve}。这使你可以在裸机上完全自动化设置
+流程。安装完成且主机启动后，可以使用 Ansible 等自动化工具进一步配置该安装。
 
-The necessary options for the installer must be provided in an answer
-file. This file allows using filter rules to determine which disks and
-network cards should be used.
+必须在应答文件中提供安装程序所需选项。该文件允许使用过滤规则来确定应使用哪些
+磁盘和网卡。
 
-To use the automated installation, it is first necessary to choose a
-source from which the answer file is fetched from and then prepare an
-installation ISO with that choice.
+要使用自动化安装，首先需要选择应答文件的获取来源，然后根据该选择准备安装 ISO。
 
-Once the ISO is prepared, its initial boot menu will show a new boot
-entry named 'Automated Installation' which gets automatically selected
-after a 10-second timeout.
+ISO 准备完成后，其初始启动菜单会显示一个名为 'Automated Installation' 的新启动
+项，并在 10 秒超时后自动选择该项。
 
-https://pve.proxmox.com/wiki/Automated_Installation[Visit our wiki] for more
-details and information on the unattended installation.
+有关无人值守安装的更多细节和信息，请
+https://pve.proxmox.com/wiki/Automated_Installation[访问我们的 wiki]。
 
 ifndef::wiki[]
 
-Install {pve} on Debian
------------------------
+== 在 OpenEuler 上安装 {pve}
 
-{pve} ships as a set of Debian packages and can be installed on top of a standard
-Debian installation.
-xref:sysadmin_package_repositories[After configuring the repositories] you need
-to run the following commands:
+{pve} 以一组 OpenEuler 软件包的形式发布，可以安装在标准 OpenEuler 安装之上。
+xref:sysadmin_package_repositories[配置仓库后]需要运行以下命令：
 
 ----
 # apt-get update
 # apt-get install proxmox-ve
 ----
 
-Installing on top of an existing Debian installation looks easy, but it presumes
-that the base system has been installed correctly and that you know how you want
-to configure and use the local storage. You also need to configure the network
-manually.
+在现有 OpenEuler 安装之上安装看似简单，但前提是基础系统已经正确安装，并且你清楚
+如何配置和使用本地存储。还需要手动配置网络。
 
-In general, this is not trivial, especially when LVM or ZFS is used.
+一般来说，这并不简单，尤其是在使用 LVM 或 ZFS 时。
 
-A detailed step by step how-to can be found on the
-{webwiki-url}Install_Proxmox_VE_on_Debian_12_Bookworm[wiki].
+详细的逐步操作指南可在
+{webwiki-url}Install_Proxmox_VE_on_OpenEuler_12_Bookworm[wiki] 中找到。
 
 
 endif::wiki[]
 
 ifdef::wiki[]
 
-Video Tutorials
----------------
+== 视频教程
 
-See the list of all official tutorials on our
-https://www.youtube.com/proxmoxve[{pve} YouTube Channel]
+请在 https://www.youtube.com/proxmoxve[{pve} YouTube 频道]查看所有官方教程列表。
 
 
-See Also
---------
+== 另请参阅
 
 * link:/wiki/Prepare_Installation_Media[Prepare Installation Media]
 
-* link:/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm[Install Proxmox VE on Debian 12 Bookworm]
+* link:/wiki/Install_Proxmox_VE_on_OpenEuler_12_Bookworm[Install Proxmox VE on OpenEuler 12 Bookworm]
 
 * link:/wiki/System_Requirements[System Requirements]
 

@@ -1,98 +1,83 @@
 [[chapter_calendar_events]]
 ifdef::wiki[]
-Calendar Events
-===============
+= 日历事件
 :pve-toplevel:
 endif::wiki[]
 
-Schedule Format
----------------
+== 调度格式
 
-{pve} has a very flexible scheduling configuration. It is based on the systemd
-time calendar event format.footnote:[see `man 7 systemd.time` for more information]
-Calendar events may be used to refer to one or more points in time in a
-single expression.
+{pve} 提供非常灵活的调度配置。它基于 systemd 的时间日历事件格式。
+footnote:[更多信息请参见 `man 7 systemd.time`] 日历事件可用于在单个表达式中
+表示一个或多个时间点。
 
-Such a calendar event uses the following format:
+此类日历事件使用以下格式：
 
 ----
 [WEEKDAY] [[YEARS-]MONTHS-DAYS] [HOURS:MINUTES[:SECONDS]]
 ----
 
-This format allows you to configure a set of days on which the job should run.
-You can also set one or more start times. It tells the replication scheduler
-the moments in time when a job should start.
-With this information we, can create a job which runs every workday at 10
-PM: `'mon,tue,wed,thu,fri 22'` which could be abbreviated to: `'mon..fri
-22'`, most reasonable schedules can be written quite intuitive this way.
+此格式允许配置作业应在哪些日期运行。也可以设置一个或多个开始时间。它会告知
+复制调度器作业应在哪些时间点启动。借助这些信息，可以创建一个在每个工作日
+晚上 10 点运行的作业：`'mon,tue,wed,thu,fri 22'`，也可缩写为：
+`'mon..fri 22'`。大多数合理的调度都可以用这种方式直观表达。
 
-NOTE: Hours are formatted in 24-hour format.
+NOTE: 小时使用 24 小时制格式。
 
-To allow a convenient and shorter configuration, one or more repeat times per
-guest can be set. They indicate that replications are done on the start-time(s)
-itself and the start-time(s) plus all multiples of the repetition value. If
-you want to start replication at 8 AM and repeat it every 15 minutes until
-9 AM you would use: `'8:00/15'`
+为了便于使用更短的配置，可以为每个来宾设置一个或多个重复时间。它们表示复制
+会在开始时间本身以及开始时间加上重复值所有倍数的时间点执行。如果希望在上午
+8 点开始复制，并每 15 分钟重复一次直到上午 9 点，可使用：`'8:00/15'`
 
-Here you see that if no hour separation (`:`), is used the value gets
-interpreted as minute. If such a separation is used, the value on the left
-denotes the hour(s), and the value on the right denotes the minute(s).
-Further, you can use `*` to match all possible values.
+由此可见，如果未使用小时分隔符（`:`），该值会被解释为分钟。如果使用该分隔符，
+左侧的值表示小时，右侧的值表示分钟。此外，可以使用 `*` 匹配所有可能的值。
 
-To get additional ideas look at
-xref:pvesr_schedule_format_examples[more Examples below].
+如需更多用法思路，请参见
+xref:pvesr_schedule_format_examples[下方的更多示例]。
 
-Detailed Specification
-----------------------
+== 详细规范
 
-weekdays:: Days are specified with an abbreviated English version: `sun, mon,
-tue, wed, thu, fri and sat`. You may use multiple days as a comma-separated
-list. A range of days can also be set by specifying the start and end day
-separated by ``..'', for example `mon..fri`. These formats can be mixed.
-If omitted `'*'` is assumed.
+weekdays:: 日期使用英文缩写指定：`sun, mon, tue, wed, thu, fri and sat`。
+可以使用逗号分隔列表指定多个日期。也可以用 ``..'' 分隔开始日和结束日来设置日期范围，
+例如 `mon..fri`。这些格式可以混合使用。如果省略，则假定为 `'*'`。
 
-time-format:: A time format consists of hours and minutes interval lists.
-Hours and minutes are separated by `':'`. Both hour and minute can be list
-and ranges of values, using the same format as days.
-First are hours, then minutes. Hours can be omitted if not needed. In this
-case `'*'` is assumed for the value of hours.
-The valid range for values is `0-23` for hours and `0-59` for minutes.
+time-format:: 时间格式由小时和分钟的间隔列表组成。小时和分钟用 `':'`
+分隔。小时和分钟都可以是值列表或范围，使用与日期相同的格式。
+先写小时，再写分钟。如果不需要，可以省略小时。在这种情况下，小时值假定为
+`'*'`。有效取值范围为：小时 `0-23`，分钟 `0-59`。
 
 [[pvesr_schedule_format_examples]]
-Examples:
-~~~~~~~~~
+=== 示例：
 
-There are some special values that have a specific meaning:
+有一些特殊值具有特定含义：
 
-.Special Values
+.特殊值
 [width="100%",options="header"]
 |================================================================
-|Value					|Syntax
+|值					|语法
 |`minutely`				|`*-*-* *:*:00`
 |`hourly`				|`*-*-* *:00:00`
 |`daily`				|`*-*-* 00:00:00`
 |`weekly`				|`mon *-*-* 00:00:00`
 |`monthly`				|`*-*-01 00:00:00`
-|`yearly` or `annually`			| `*-01-01 00:00:00`
+|`yearly` 或 `annually`			| `*-01-01 00:00:00`
 |`quarterly`				|`*-01,04,07,10-01 00:00:00`
-|`semiannually` or `semi-annually`	|`*-01,07-01 00:00:00`
+|`semiannually` 或 `semi-annually`	|`*-01,07-01 00:00:00`
 |================================================================
 
-.Schedule Examples
+.调度示例
 [width="100%",options="header"]
 |==============================================================================
-|Schedule String	|Alternative		|Meaning
-|mon,tue,wed,thu,fri	|mon..fri		|Every working day at 0:00
-|sat,sun		|sat..sun		|Only on weekends at 0:00
-|mon,wed,fri		|--			|Only on Monday, Wednesday and Friday at 0:00
-|12:05			|12:05			|Every day at 12:05 PM
-|*/5			|0/5			|Every five minutes
-|mon..wed 30/10		|mon,tue,wed 30/10	|Monday, Tuesday, Wednesday 30, 40 and 50 minutes after every full hour
-|mon..fri 8..17,22:0/15	|--			|Every working day every 15 minutes between 8 AM and 6 PM and between 10 PM and 11 PM
-|fri 12..13:5/20	|fri 12,13:5/20		|Friday at 12:05, 12:25, 12:45, 13:05, 13:25 and 13:45
-|12,14,16,18,20,22:5	|12/2:5			|Every day starting at 12:05 until 22:05, every 2 hours
-|*			|*/1			|Every minute (minimum interval)
-|*-05			|--			|On the 5th day of every Month
-|Sat *-1..7 15:00	|--			|First Saturday each Month at 15:00
-|2015-10-21		|--			|21st October 2015 at 00:00
+|调度字符串	|替代写法		|含义
+|mon,tue,wed,thu,fri	|mon..fri		|每个工作日 0:00
+|sat,sun		|sat..sun		|仅周末 0:00
+|mon,wed,fri		|--			|仅周一、周三和周五 0:00
+|12:05			|12:05			|每天 12:05
+|*/5			|0/5			|每五分钟
+|mon..wed 30/10		|mon,tue,wed 30/10	|周一、周二、周三每个整点后的 30、40 和 50 分钟
+|mon..fri 8..17,22:0/15	|--			|每个工作日 8:00 到 18:00 之间，以及 22:00 到 23:00 之间每 15 分钟
+|fri 12..13:5/20	|fri 12,13:5/20		|周五 12:05、12:25、12:45、13:05、13:25 和 13:45
+|12,14,16,18,20,22:5	|12/2:5			|每天从 12:05 到 22:05，每 2 小时
+|*			|*/1			|每分钟（最小间隔）
+|*-05			|--			|每月第 5 天
+|Sat *-1..7 15:00	|--			|每月第一个周六 15:00
+|2015-10-21		|--			|2015 年 10 月 21 日 00:00
 |==============================================================================

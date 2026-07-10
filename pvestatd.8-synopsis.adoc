@@ -2,34 +2,33 @@
 
 *pvestatd help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助。
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *pvestatd restart*
 
-Restart the daemon (or start if not running).
+重启守护进程（如果未运行则启动）。
 
 *pvestatd start* `[OPTIONS]`
 
-Start the daemon.
+启动守护进程。
 
 `--debug` `<boolean>` ('default =' `0`)::
 
-Debug mode - stay in foreground
+调试模式 - 保持在前台运行。
 
 *pvestatd status*
 
-Get daemon status.
+获取守护进程状态。
 
 *pvestatd stop*
 
-Stop the daemon.
-
+停止守护进程。
 

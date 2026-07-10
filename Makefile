@@ -128,18 +128,21 @@ pve-admin-guide.chunked: $(PVE_ADMIN_GUIDE_ADOCDEPENDS)
 	mv $@.tmp/$@ $@
 
 PVE_DOCBOOK_CONF=-b $(shell pwd)/asciidoc/pve-docbook -f asciidoc/asciidoc-pve.conf
-PVE_DBLATEX_OPTS='-p ./asciidoc/pve-dblatex.xsl -s asciidoc/dblatex-custom.sty -c asciidoc/dblatex-export.conf'
+PVE_DBLATEX_OPTS='--tmpdir=./pve-admin-guide.dblatex.tmp -b xetex -p ./asciidoc/pve-dblatex.xsl -s asciidoc/dblatex-custom.sty -c asciidoc/dblatex-export.conf'
 
 YEAR:=$(shell date '+%Y')
 pve-admin-guide-docinfo.xml: pve-admin-guide-docinfo.xml.in
 	sed -e 's/@RELEASE@/$(DOCRELEASE)/' -e 's/@YEAR@/$(YEAR)/' <$< >$@
 
 pve-admin-guide.pdf: $(PVE_ADMIN_GUIDE_ADOCDEPENDS) docinfo.xml pve-admin-guide-docinfo.xml
-	rsvg-convert -f pdf -o proxmox-logo.pdf images/proxmox-logo.svg
+	rm -rf pve-admin-guide.dblatex.tmp
+	mkdir pve-admin-guide.dblatex.tmp
+	rsvg-convert -f pdf -o lierfang-logo.pdf images/lierfang-logo.svg
 	rsvg-convert -f pdf -o proxmox-ci-header.pdf images/proxmox-ci-header.svg
 	grep ">Release $(DOCRELEASE)<" pve-admin-guide-docinfo.xml || (echo "wrong release in  pve-admin-guide-docinfo.xml" && false);
-	a2x -a docinfo -a docinfo1 -f pdf -L --asciidoc-opts="$(PVE_DOCBOOK_CONF)" --dblatex-opts $(PVE_DBLATEX_OPTS) pve-admin-guide.adoc
-	rm proxmox-logo.pdf proxmox-ci-header.pdf
+	a2x -a scripts=cjk -a docinfo -a docinfo1 -f pdf -L --asciidoc-opts="$(PVE_DOCBOOK_CONF)" --dblatex-opts $(PVE_DBLATEX_OPTS) pve-admin-guide.adoc
+	rm -rf pve-admin-guide.dblatex.tmp
+	rm lierfang-logo.pdf proxmox-ci-header.pdf
 
 pve-admin-guide.epub: $(PVE_ADMIN_GUIDE_ADOCDEPENDS)
 	rm -rf $@.tmp $@

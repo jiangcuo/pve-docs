@@ -2,822 +2,856 @@
 
 *pvesm add* `<type> <storage>` `[OPTIONS]`
 
-Create a new storage.
+创建新的存储。
 
 `<type>`: `<btrfs | cephfs | cifs | dir | esxi | glusterfs | iscsi | iscsidirect | lvm | lvmthin | nfs | pbs | rbd | zfs | zfspool>` ::
 
-Storage type.
+存储类型。
 
 `<storage>`: `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 `--authsupported` `<string>` ::
 
-Authsupported.
+支持的认证方式。
 
 `--base` `<string>` ::
 
-Base volume. This volume is automatically activated.
+基础卷。此卷会自动激活。
 
 `--blocksize` `<string>` ::
 
-block size
+块大小
 
 `--bwlimit` `[clone=<LIMIT>] [,default=<LIMIT>] [,migration=<LIMIT>] [,move=<LIMIT>] [,restore=<LIMIT>]` ::
 
-Set I/O bandwidth limit for various operations (in KiB/s).
+为各种操作设置 I/O 带宽限制（单位为 KiB/s）。
 
 `--comstar_hg` `<string>` ::
 
-host group for comstar views
+comstar views 的主机组
 
 `--comstar_tg` `<string>` ::
 
-target group for comstar views
+comstar views 的目标组
 
 `--content` `<string>` ::
 
-Allowed content types.
+允许的内容类型。
 +
-NOTE: the value 'rootdir' is used for Containers, and value 'images' for VMs.
+NOTE: 值 'rootdir' 用于容器，值 'images' 用于虚拟机。
 
 `--content-dirs` `<string>` ::
 
-Overrides for default content type directories.
+覆盖默认内容类型目录。
 
 `--create-base-path` `<boolean>` ('default =' `yes`)::
 
-Create the base directory if it doesn't exist.
+如果基础目录不存在，则创建它。
 
 `--create-subdirs` `<boolean>` ('default =' `yes`)::
 
-Populate the directory with the default structure.
+使用默认结构填充目录。
 
 `--data-pool` `<string>` ::
 
-Data Pool (for erasure coding only)
+数据池（仅用于纠删码）
 
 `--datastore` `<string>` ::
 
-Proxmox Backup Server datastore name.
+Proxmox Backup Server datastore 名称。
 
 `--disable` `<boolean>` ::
 
-Flag to disable the storage.
+用于禁用该存储的标志。
 
 `--domain` `<string>` ::
 
-CIFS domain.
+CIFS 域。
 
 `--encryption-key` `a file containing an encryption key, or the special value "autogen"` ::
 
-Encryption key. Use 'autogen' to generate one automatically without passphrase.
+加密密钥。使用 'autogen' 可自动生成一个不带口令的密钥。
 
 `--export` `<string>` ::
 
-NFS export path.
+NFS 导出路径。
 
 `--fingerprint` `([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}` ::
 
-Certificate SHA 256 fingerprint.
+证书 SHA 256 指纹。
 
 `--format` `<qcow2 | raw | subvol | vmdk>` ::
 
-Default image format.
+默认镜像格式。
 
 `--fs-name` `<string>` ::
 
-The Ceph filesystem name.
+Ceph 文件系统名称。
 
 `--fuse` `<boolean>` ::
 
-Mount CephFS through FUSE.
+通过 FUSE 挂载 CephFS。
 
 `--is_mountpoint` `<string>` ('default =' `no`)::
 
-Assume the given path is an externally managed mountpoint and consider the storage offline if it is not mounted. Using a boolean (yes/no) value serves as a shortcut to using the target path in this field.
+假定给定路径是由外部管理的挂载点；如果未挂载，则认为该存储离线。使用布尔值
+（yes/no）可作为在此字段中使用目标路径的快捷写法。
 
 `--iscsiprovider` `<string>` ::
 
-iscsi provider
+iscsi 提供程序
 
 `--keyring` `file containing the keyring to authenticate in the Ceph cluster` ::
 
-Client keyring contents (for external clusters).
+客户端 keyring 内容（用于外部集群）。
 
 `--krbd` `<boolean>` ('default =' `0`)::
 
-Always access rbd through krbd kernel module.
+始终通过 krbd 内核模块访问 rbd。
 
 `--lio_tpg` `<string>` ::
 
-target portal group for Linux LIO targets
+Linux LIO targets 的 target portal group
 
 `--master-pubkey` `a file containing a PEM-formatted master public key` ::
 
-Base64-encoded, PEM-formatted public RSA key. Used to encrypt a copy of the encryption-key which will be added to each encrypted backup.
+Base64 编码、PEM 格式的 RSA 公钥。用于加密 encryption-key 的副本，该副本会添加到
+每个加密备份中。
 
 `--max-protected-backups` `<integer> (-1 - N)` ('default =' `Unlimited for users with Datastore.Allocate privilege, 5 for other users`)::
 
-Maximal number of protected backups per guest. Use '-1' for unlimited.
+每个客户机的最大受保护备份数量。使用 '-1' 表示无限制。
 
 `--maxfiles` `<integer> (0 - N)` ::
 
-Deprecated: use 'prune-backups' instead. Maximal number of backup files per VM. Use '0' for unlimited.
+已弃用：请改用 'prune-backups'。每台虚拟机的最大备份文件数量。使用 '0' 表示
+无限制。
 
 `--mkdir` `<boolean>` ('default =' `yes`)::
 
-Create the directory if it doesn't exist and populate it with default sub-dirs. NOTE: Deprecated, use the 'create-base-path' and 'create-subdirs' options instead.
+如果目录不存在则创建它，并填充默认子目录。NOTE: 已弃用，请改用
+'create-base-path' 和 'create-subdirs' 选项。
 
 `--monhost` `<string>` ::
 
-IP addresses of monitors (for external clusters).
+monitor 的 IP 地址（用于外部集群）。
 
 `--mountpoint` `<string>` ::
 
-mount point
+挂载点
 
 `--namespace` `<string>` ::
 
-Namespace.
+命名空间。
 
 `--nocow` `<boolean>` ('default =' `0`)::
 
-Set the NOCOW flag on files. Disables data checksumming and causes data errors to be unrecoverable from while allowing direct I/O. Only use this if data does not need to be any more safe than on a single ext4 formatted disk with no underlying raid system.
+在文件上设置 NOCOW 标志。它会禁用数据校验和，并在允许 direct I/O 的同时导致数据
+错误无法恢复。仅当数据安全性不需要高于没有底层 RAID 系统的单块 ext4 格式化磁盘
+时才使用此选项。
 
 `--nodes` `<string>` ::
 
-List of nodes for which the storage configuration applies.
+该存储配置适用的节点列表。
 
 `--nowritecache` `<boolean>` ::
 
-disable write caching on the target
+禁用目标上的写缓存
 
 `--options` `<string>` ::
 
-NFS/CIFS mount options (see 'man nfs' or 'man mount.cifs')
+NFS/CIFS 挂载选项（参见 'man nfs' 或 'man mount.cifs'）
 
 `--password` `<password>` ::
 
-Password for accessing the share/datastore.
+访问共享/datastore 的密码。
 
 `--path` `<string>` ::
 
-File system path.
+文件系统路径。
 
 `--pool` `<string>` ::
 
-Pool.
+池。
 
 `--port` `<integer> (1 - 65535)` ::
 
-Use this port to connect to the storage instead of the default one (for example, with PBS or ESXi). For NFS and CIFS, use the 'options' option to configure the port via the mount options.
+使用此端口而不是默认端口连接存储（例如用于 PBS 或 ESXi）。对于 NFS 和 CIFS，请
+使用 'options' 选项通过挂载选项配置端口。
 
 `--portal` `<string>` ::
 
-iSCSI portal (IP or DNS name with optional port).
+iSCSI portal（IP 或 DNS 名称，可带端口）。
 
 `--preallocation` `<falloc | full | metadata | off>` ('default =' `metadata`)::
 
-Preallocation mode for raw and qcow2 images. Using 'metadata' on raw images results in preallocation=off.
+raw 和 qcow2 镜像的预分配模式。对 raw 镜像使用 'metadata' 会得到
+preallocation=off。
 
 `--prune-backups` `[keep-all=<1|0>] [,keep-daily=<N>] [,keep-hourly=<N>] [,keep-last=<N>] [,keep-monthly=<N>] [,keep-weekly=<N>] [,keep-yearly=<N>]` ::
 
-The retention options with shorter intervals are processed first with --keep-last being the very first one. Each option covers a specific period of time. We say that backups within this period are covered by this option. The next option does not take care of already covered backups and only considers older backups.
+保留选项会按较短时间间隔优先处理，其中 --keep-last 最先处理。每个选项覆盖一个
+特定时间段。我们称该时间段内的备份由此选项覆盖。下一个选项不会处理已经覆盖的
+备份，只会考虑更早的备份。
 
 `--saferemove` `<boolean>` ::
 
-Zero-out data when removing LVs.
+移除 LV 时将数据清零。
 
 `--saferemove_throughput` `<string>` ::
 
-Wipe throughput (cstream -t parameter value).
+擦除吞吐量（cstream -t 参数值）。
 
 `--server` `<string>` ::
 
-Server IP or DNS name.
+服务器 IP 或 DNS 名称。
 
 `--server2` `<string>` ::
 
-Backup volfile server IP or DNS name.
+备用 volfile 服务器 IP 或 DNS 名称。
 +
-NOTE: Requires option(s): `server`
+NOTE: 需要选项：`server`
 
 `--share` `<string>` ::
 
-CIFS share.
+CIFS 共享。
 
 `--shared` `<boolean>` ::
 
-Indicate that this is a single storage with the same contents on all nodes (or all listed in the 'nodes' option). It will not make the contents of a local storage automatically accessible to other nodes, it just marks an already shared storage as such!
+表示这是一个在所有节点（或 'nodes' 选项列出的所有节点）上内容相同的单一存储。
+它不会让本地存储的内容自动被其他节点访问，只是将一个已经共享的存储标记为共享。
 
 `--skip-cert-verification` `<boolean>` ('default =' `false`)::
 
-Disable TLS certificate verification, only enable on fully trusted networks!
+禁用 TLS 证书验证；仅应在完全可信的网络中启用。
 
 `--smbversion` `<2.0 | 2.1 | 3 | 3.0 | 3.11 | default>` ('default =' `default`)::
 
-SMB protocol version. 'default' if not set, negotiates the highest SMB2+ version supported by both the client and server.
+SMB 协议版本。未设置时为 'default'，会协商客户端和服务器双方均支持的最高 SMB2+
+版本。
 
 `--sparse` `<boolean>` ::
 
-use sparse volumes
+使用稀疏卷
 
 `--subdir` `<string>` ::
 
-Subdir to mount.
+要挂载的子目录。
 
 `--tagged_only` `<boolean>` ::
 
-Only use logical volumes tagged with 'pve-vm-ID'.
+仅使用带有 'pve-vm-ID' 标签的逻辑卷。
 
 `--target` `<string>` ::
 
-iSCSI target.
+iSCSI target。
 
 `--thinpool` `<string>` ::
 
-LVM thin pool LV name.
+LVM thin pool LV 名称。
 
 `--transport` `<rdma | tcp | unix>` ::
 
-Gluster transport: tcp or rdma
+Gluster 传输：tcp 或 rdma
 
 `--username` `<string>` ::
 
-RBD Id.
+RBD ID。
 
 `--vgname` `<string>` ::
 
-Volume group name.
+卷组名称。
 
 `--volume` `<string>` ::
 
-Glusterfs Volume.
+Glusterfs 卷。
 
 *pvesm alloc* `<storage> <vmid> <filename> <size>` `[OPTIONS]`
 
-Allocate disk images.
+分配磁盘镜像。
 
 `<storage>`: `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 `<vmid>`: `<integer> (100 - 999999999)` ::
 
-Specify owner VM
+指定所属虚拟机
 
 `<filename>`: `<string>` ::
 
-The name of the file to create.
+要创建的文件名称。
 
 `<size>`: `\d+[MG]?` ::
 
-Size in kilobyte (1024 bytes). Optional suffixes 'M' (megabyte, 1024K) and 'G' (gigabyte, 1024M)
+大小，单位为 kilobyte（1024 字节）。可选后缀 'M'（megabyte，1024K）和
+'G'（gigabyte，1024M）
 
 `--format` `<qcow2 | raw | subvol | vmdk>` ::
 
-Format of the image.
+镜像格式。
 +
-NOTE: Requires option(s): `size`
+NOTE: 需要选项：`size`
 
 *pvesm apiinfo*
 
-Returns APIVER and APIAGE.
+返回 APIVER 和 APIAGE。
 
 *pvesm cifsscan*
 
-An alias for 'pvesm scan cifs'.
+'pvesm scan cifs' 的别名。
 
 *pvesm export* `<volume> <format> <filename>` `[OPTIONS]`
 
-Used internally to export a volume.
+内部用于导出卷。
 
 `<volume>`: `<string>` ::
 
-Volume identifier
+卷标识符
 
 `<format>`: `<btrfs | qcow2+size | raw+size | tar+size | vmdk+size | zfs>` ::
 
-Export stream format
+导出流格式
 
 `<filename>`: `<string>` ::
 
-Destination file name
+目标文件名
 
 `--base` `(?^i:[a-z0-9_\-]{1,40})` ::
 
-Snapshot to start an incremental stream from
+增量流的起始快照
 
 `--snapshot` `(?^i:[a-z0-9_\-]{1,40})` ::
 
-Snapshot to export
+要导出的快照
 
 `--snapshot-list` `<string>` ::
 
-Ordered list of snapshots to transfer
+要传输的有序快照列表
 
 `--with-snapshots` `<boolean>` ('default =' `0`)::
 
-Whether to include intermediate snapshots in the stream
+是否在流中包含中间快照
 
 *pvesm extractconfig* `<volume>`
 
-Extract configuration from vzdump backup archive.
+从 vzdump 备份归档中提取配置。
 
 `<volume>`: `<string>` ::
 
-Volume identifier
+卷标识符
 
 *pvesm free* `<volume>` `[OPTIONS]`
 
-Delete volume
+删除卷
 
 `<volume>`: `<string>` ::
 
-Volume identifier
+卷标识符
 
 `--delay` `<integer> (1 - 30)` ::
 
-Time to wait for the task to finish. We return 'null' if the task finish within that time.
+等待任务完成的时间。如果任务在该时间内完成，则返回 'null'。
 
 `--storage` `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 *pvesm glusterfsscan*
 
-An alias for 'pvesm scan glusterfs'.
+'pvesm scan glusterfs' 的别名。
 
 *pvesm help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助信息。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助信息。
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *pvesm import* `<volume> <format> <filename>` `[OPTIONS]`
 
-Used internally to import a volume.
+内部用于导入卷。
 
 `<volume>`: `<string>` ::
 
-Volume identifier
+卷标识符
 
 `<format>`: `<btrfs | qcow2+size | raw+size | tar+size | vmdk+size | zfs>` ::
 
-Import stream format
+导入流格式
 
 `<filename>`: `<string>` ::
 
-Source file name. For '-' stdin is used, the tcp://<IP-or-CIDR> format allows to use a TCP connection, the unix://PATH-TO-SOCKET format a UNIX socket as input.Else, the file is treated as common file.
+源文件名。使用 '-' 表示 stdin；tcp://<IP-or-CIDR> 格式允许使用 TCP 连接；
+unix://PATH-TO-SOCKET 格式表示使用 UNIX socket 作为输入。否则，该文件会被视为
+普通文件。
 
 `--allow-rename` `<boolean>` ('default =' `0`)::
 
-Choose a new volume ID if the requested volume ID already exists, instead of throwing an error.
+如果请求的卷 ID 已存在，则选择新的卷 ID，而不是抛出错误。
 
 `--base` `(?^i:[a-z0-9_\-]{1,40})` ::
 
-Base snapshot of an incremental stream
+增量流的基础快照
 
 `--delete-snapshot` `(?^i:[a-z0-9_\-]{1,80})` ::
 
-A snapshot to delete on success
+成功后要删除的快照
 
 `--snapshot` `(?^i:[a-z0-9_\-]{1,40})` ::
 
-The current-state snapshot if the stream contains snapshots
+如果流包含快照，则表示当前状态快照
 
 `--with-snapshots` `<boolean>` ('default =' `0`)::
 
-Whether the stream includes intermediate snapshots
+流是否包含中间快照
 
 *pvesm iscsiscan*
 
-An alias for 'pvesm scan iscsi'.
+'pvesm scan iscsi' 的别名。
 
 *pvesm list* `<storage>` `[OPTIONS]`
 
-List storage content.
+列出存储内容。
 
 `<storage>`: `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 `--content` `<string>` ::
 
-Only list content of this type.
+仅列出此类型的内容。
 
 `--vmid` `<integer> (100 - 999999999)` ::
 
-Only list images for this VM
+仅列出此虚拟机的镜像
 
 *pvesm lvmscan*
 
-An alias for 'pvesm scan lvm'.
+'pvesm scan lvm' 的别名。
 
 *pvesm lvmthinscan*
 
-An alias for 'pvesm scan lvmthin'.
+'pvesm scan lvmthin' 的别名。
 
 *pvesm nfsscan*
 
-An alias for 'pvesm scan nfs'.
+'pvesm scan nfs' 的别名。
 
 *pvesm path* `<volume>`
 
-Get filesystem path for specified volume
+获取指定卷的文件系统路径
 
 `<volume>`: `<string>` ::
 
-Volume identifier
+卷标识符
 
 *pvesm prune-backups* `<storage>` `[OPTIONS]`
 
-Prune backups. Only those using the standard naming scheme are considered.
-If no keep options are specified, those from the storage configuration are
-used.
+修剪备份。仅考虑使用标准命名方案的备份。如果未指定 keep 选项，则使用存储配置中
+的选项。
 
 `<storage>`: `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 `--dry-run` `<boolean>` ::
 
-Only show what would be pruned, don't delete anything.
+仅显示将被修剪的内容，不删除任何内容。
 
 `--keep-all` `<boolean>` ::
 
-Keep all backups. Conflicts with the other options when true.
+保留所有备份。为 true 时与其他选项冲突。
 
 `--keep-daily` `<N>` ::
 
-Keep backups for the last <N> different days. If there is morethan one backup for a single day, only the latest one is kept.
+保留最近 <N> 个不同日期的备份。如果某一天有多个备份，则只保留最新的一个。
 
 `--keep-hourly` `<N>` ::
 
-Keep backups for the last <N> different hours. If there is morethan one backup for a single hour, only the latest one is kept.
+保留最近 <N> 个不同时段（小时）的备份。如果某一小时有多个备份，则只保留最新的
+一个。
 
 `--keep-last` `<N>` ::
 
-Keep the last <N> backups.
+保留最后 <N> 个备份。
 
 `--keep-monthly` `<N>` ::
 
-Keep backups for the last <N> different months. If there is morethan one backup for a single month, only the latest one is kept.
+保留最近 <N> 个不同月份的备份。如果某一月份有多个备份，则只保留最新的一个。
 
 `--keep-weekly` `<N>` ::
 
-Keep backups for the last <N> different weeks. If there is morethan one backup for a single week, only the latest one is kept.
+保留最近 <N> 个不同周的备份。如果某一周有多个备份，则只保留最新的一个。
 
 `--keep-yearly` `<N>` ::
 
-Keep backups for the last <N> different years. If there is morethan one backup for a single year, only the latest one is kept.
+保留最近 <N> 个不同年份的备份。如果某一年有多个备份，则只保留最新的一个。
 
 `--type` `<lxc | qemu>` ::
 
-Either 'qemu' or 'lxc'. Only consider backups for guests of this type.
+'qemu' 或 'lxc'。仅考虑此类型客户机的备份。
 
 `--vmid` `<integer> (100 - 999999999)` ::
 
-Only consider backups for this guest.
+仅考虑此客户机的备份。
 
 *pvesm remove* `<storage>`
 
-Delete storage configuration.
+删除存储配置。
 
 `<storage>`: `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 *pvesm scan cifs* `<server>` `[OPTIONS]`
 
-Scan remote CIFS server.
+扫描远程 CIFS 服务器。
 
 `<server>`: `<string>` ::
 
-The server address (name or IP).
+服务器地址（名称或 IP）。
 
 `--domain` `<string>` ::
 
-SMB domain (Workgroup).
+SMB 域（Workgroup）。
 
 `--password` `<password>` ::
 
-User password.
+用户密码。
 
 `--username` `<string>` ::
 
-User name.
+用户名。
 
 *pvesm scan glusterfs* `<server>`
 
-Scan remote GlusterFS server.
+扫描远程 GlusterFS 服务器。
 
 `<server>`: `<string>` ::
 
-The server address (name or IP).
+服务器地址（名称或 IP）。
 
 *pvesm scan iscsi* `<portal>`
 
-Scan remote iSCSI server.
+扫描远程 iSCSI 服务器。
 
 `<portal>`: `<string>` ::
 
-The iSCSI portal (IP or DNS name with optional port).
+iSCSI portal（IP 或 DNS 名称，可带端口）。
 
 *pvesm scan lvm*
 
-List local LVM volume groups.
+列出本地 LVM 卷组。
 
 *pvesm scan lvmthin* `<vg>`
 
-List local LVM Thin Pools.
+列出本地 LVM Thin Pool。
 
 `<vg>`: `[a-zA-Z0-9\.\+\_][a-zA-Z0-9\.\+\_\-]+` ::
 
-no description available
+无可用描述
 
 *pvesm scan nfs* `<server>`
 
-Scan remote NFS server.
+扫描远程 NFS 服务器。
 
 `<server>`: `<string>` ::
 
-The server address (name or IP).
+服务器地址（名称或 IP）。
 
 *pvesm scan pbs* `<server> <username> --password <string>` `[OPTIONS]` `[FORMAT_OPTIONS]`
 
-Scan remote Proxmox Backup Server.
+扫描远程 Proxmox Backup Server。
 
 `<server>`: `<string>` ::
 
-The server address (name or IP).
+服务器地址（名称或 IP）。
 
 `<username>`: `<string>` ::
 
-User-name or API token-ID.
+用户名或 API token-ID。
 
 `--fingerprint` `([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}` ::
 
-Certificate SHA 256 fingerprint.
+证书 SHA 256 指纹。
 
 `--password` `<string>` ::
 
-User password or API token secret.
+用户密码或 API token secret。
 
 `--port` `<integer> (1 - 65535)` ('default =' `8007`)::
 
-Optional port.
+可选端口。
 
 *pvesm scan zfs*
 
-Scan zfs pool list on local node.
+扫描本地节点上的 zfs pool 列表。
 
 *pvesm set* `<storage>` `[OPTIONS]`
 
-Update storage configuration.
+更新存储配置。
 
 `<storage>`: `<storage ID>` ::
 
-The storage identifier.
+存储标识符。
 
 `--blocksize` `<string>` ::
 
-block size
+块大小
 
 `--bwlimit` `[clone=<LIMIT>] [,default=<LIMIT>] [,migration=<LIMIT>] [,move=<LIMIT>] [,restore=<LIMIT>]` ::
 
-Set I/O bandwidth limit for various operations (in KiB/s).
+为各种操作设置 I/O 带宽限制（单位为 KiB/s）。
 
 `--comstar_hg` `<string>` ::
 
-host group for comstar views
+comstar views 的主机组
 
 `--comstar_tg` `<string>` ::
 
-target group for comstar views
+comstar views 的目标组
 
 `--content` `<string>` ::
 
-Allowed content types.
+允许的内容类型。
 +
-NOTE: the value 'rootdir' is used for Containers, and value 'images' for VMs.
+NOTE: 值 'rootdir' 用于容器，值 'images' 用于虚拟机。
 
 `--content-dirs` `<string>` ::
 
-Overrides for default content type directories.
+覆盖默认内容类型目录。
 
 `--create-base-path` `<boolean>` ('default =' `yes`)::
 
-Create the base directory if it doesn't exist.
+如果基础目录不存在，则创建它。
 
 `--create-subdirs` `<boolean>` ('default =' `yes`)::
 
-Populate the directory with the default structure.
+使用默认结构填充目录。
 
 `--data-pool` `<string>` ::
 
-Data Pool (for erasure coding only)
+数据池（仅用于纠删码）
 
 `--delete` `<string>` ::
 
-A list of settings you want to delete.
+要删除的设置列表。
 
 `--digest` `<string>` ::
 
-Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.
+如果当前配置文件的 digest 不同，则阻止变更。这可用于防止并发修改。
 
 `--disable` `<boolean>` ::
 
-Flag to disable the storage.
+用于禁用该存储的标志。
 
 `--domain` `<string>` ::
 
-CIFS domain.
+CIFS 域。
 
 `--encryption-key` `a file containing an encryption key, or the special value "autogen"` ::
 
-Encryption key. Use 'autogen' to generate one automatically without passphrase.
+加密密钥。使用 'autogen' 可自动生成一个不带口令的密钥。
 
 `--fingerprint` `([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}` ::
 
-Certificate SHA 256 fingerprint.
+证书 SHA 256 指纹。
 
 `--format` `<qcow2 | raw | subvol | vmdk>` ::
 
-Default image format.
+默认镜像格式。
 
 `--fs-name` `<string>` ::
 
-The Ceph filesystem name.
+Ceph 文件系统名称。
 
 `--fuse` `<boolean>` ::
 
-Mount CephFS through FUSE.
+通过 FUSE 挂载 CephFS。
 
 `--is_mountpoint` `<string>` ('default =' `no`)::
 
-Assume the given path is an externally managed mountpoint and consider the storage offline if it is not mounted. Using a boolean (yes/no) value serves as a shortcut to using the target path in this field.
+假定给定路径是由外部管理的挂载点；如果未挂载，则认为该存储离线。使用布尔值
+（yes/no）可作为在此字段中使用目标路径的快捷写法。
 
 `--keyring` `file containing the keyring to authenticate in the Ceph cluster` ::
 
-Client keyring contents (for external clusters).
+客户端 keyring 内容（用于外部集群）。
 
 `--krbd` `<boolean>` ('default =' `0`)::
 
-Always access rbd through krbd kernel module.
+始终通过 krbd 内核模块访问 rbd。
 
 `--lio_tpg` `<string>` ::
 
-target portal group for Linux LIO targets
+Linux LIO targets 的 target portal group
 
 `--master-pubkey` `a file containing a PEM-formatted master public key` ::
 
-Base64-encoded, PEM-formatted public RSA key. Used to encrypt a copy of the encryption-key which will be added to each encrypted backup.
+Base64 编码、PEM 格式的 RSA 公钥。用于加密 encryption-key 的副本，该副本会添加到
+每个加密备份中。
 
 `--max-protected-backups` `<integer> (-1 - N)` ('default =' `Unlimited for users with Datastore.Allocate privilege, 5 for other users`)::
 
-Maximal number of protected backups per guest. Use '-1' for unlimited.
+每个客户机的最大受保护备份数量。使用 '-1' 表示无限制。
 
 `--maxfiles` `<integer> (0 - N)` ::
 
-Deprecated: use 'prune-backups' instead. Maximal number of backup files per VM. Use '0' for unlimited.
+已弃用：请改用 'prune-backups'。每台虚拟机的最大备份文件数量。使用 '0' 表示
+无限制。
 
 `--mkdir` `<boolean>` ('default =' `yes`)::
 
-Create the directory if it doesn't exist and populate it with default sub-dirs. NOTE: Deprecated, use the 'create-base-path' and 'create-subdirs' options instead.
+如果目录不存在则创建它，并填充默认子目录。NOTE: 已弃用，请改用
+'create-base-path' 和 'create-subdirs' 选项。
 
 `--monhost` `<string>` ::
 
-IP addresses of monitors (for external clusters).
+monitor 的 IP 地址（用于外部集群）。
 
 `--mountpoint` `<string>` ::
 
-mount point
+挂载点
 
 `--namespace` `<string>` ::
 
-Namespace.
+命名空间。
 
 `--nocow` `<boolean>` ('default =' `0`)::
 
-Set the NOCOW flag on files. Disables data checksumming and causes data errors to be unrecoverable from while allowing direct I/O. Only use this if data does not need to be any more safe than on a single ext4 formatted disk with no underlying raid system.
+在文件上设置 NOCOW 标志。它会禁用数据校验和，并在允许 direct I/O 的同时导致数据
+错误无法恢复。仅当数据安全性不需要高于没有底层 RAID 系统的单块 ext4 格式化磁盘
+时才使用此选项。
 
 `--nodes` `<string>` ::
 
-List of nodes for which the storage configuration applies.
+该存储配置适用的节点列表。
 
 `--nowritecache` `<boolean>` ::
 
-disable write caching on the target
+禁用目标上的写缓存
 
 `--options` `<string>` ::
 
-NFS/CIFS mount options (see 'man nfs' or 'man mount.cifs')
+NFS/CIFS 挂载选项（参见 'man nfs' 或 'man mount.cifs'）
 
 `--password` `<password>` ::
 
-Password for accessing the share/datastore.
+访问共享/datastore 的密码。
 
 `--pool` `<string>` ::
 
-Pool.
+池。
 
 `--port` `<integer> (1 - 65535)` ::
 
-Use this port to connect to the storage instead of the default one (for example, with PBS or ESXi). For NFS and CIFS, use the 'options' option to configure the port via the mount options.
+使用此端口而不是默认端口连接存储（例如用于 PBS 或 ESXi）。对于 NFS 和 CIFS，请
+使用 'options' 选项通过挂载选项配置端口。
 
 `--preallocation` `<falloc | full | metadata | off>` ('default =' `metadata`)::
 
-Preallocation mode for raw and qcow2 images. Using 'metadata' on raw images results in preallocation=off.
+raw 和 qcow2 镜像的预分配模式。对 raw 镜像使用 'metadata' 会得到
+preallocation=off。
 
 `--prune-backups` `[keep-all=<1|0>] [,keep-daily=<N>] [,keep-hourly=<N>] [,keep-last=<N>] [,keep-monthly=<N>] [,keep-weekly=<N>] [,keep-yearly=<N>]` ::
 
-The retention options with shorter intervals are processed first with --keep-last being the very first one. Each option covers a specific period of time. We say that backups within this period are covered by this option. The next option does not take care of already covered backups and only considers older backups.
+保留选项会按较短时间间隔优先处理，其中 --keep-last 最先处理。每个选项覆盖一个
+特定时间段。我们称该时间段内的备份由此选项覆盖。下一个选项不会处理已经覆盖的
+备份，只会考虑更早的备份。
 
 `--saferemove` `<boolean>` ::
 
-Zero-out data when removing LVs.
+移除 LV 时将数据清零。
 
 `--saferemove_throughput` `<string>` ::
 
-Wipe throughput (cstream -t parameter value).
+擦除吞吐量（cstream -t 参数值）。
 
 `--server` `<string>` ::
 
-Server IP or DNS name.
+服务器 IP 或 DNS 名称。
 
 `--server2` `<string>` ::
 
-Backup volfile server IP or DNS name.
+备用 volfile 服务器 IP 或 DNS 名称。
 +
-NOTE: Requires option(s): `server`
+NOTE: 需要选项：`server`
 
 `--shared` `<boolean>` ::
 
-Indicate that this is a single storage with the same contents on all nodes (or all listed in the 'nodes' option). It will not make the contents of a local storage automatically accessible to other nodes, it just marks an already shared storage as such!
+表示这是一个在所有节点（或 'nodes' 选项列出的所有节点）上内容相同的单一存储。
+它不会让本地存储的内容自动被其他节点访问，只是将一个已经共享的存储标记为共享。
 
 `--skip-cert-verification` `<boolean>` ('default =' `false`)::
 
-Disable TLS certificate verification, only enable on fully trusted networks!
+禁用 TLS 证书验证；仅应在完全可信的网络中启用。
 
 `--smbversion` `<2.0 | 2.1 | 3 | 3.0 | 3.11 | default>` ('default =' `default`)::
 
-SMB protocol version. 'default' if not set, negotiates the highest SMB2+ version supported by both the client and server.
+SMB 协议版本。未设置时为 'default'，会协商客户端和服务器双方均支持的最高 SMB2+
+版本。
 
 `--sparse` `<boolean>` ::
 
-use sparse volumes
+使用稀疏卷
 
 `--subdir` `<string>` ::
 
-Subdir to mount.
+要挂载的子目录。
 
 `--tagged_only` `<boolean>` ::
 
-Only use logical volumes tagged with 'pve-vm-ID'.
+仅使用带有 'pve-vm-ID' 标签的逻辑卷。
 
 `--transport` `<rdma | tcp | unix>` ::
 
-Gluster transport: tcp or rdma
+Gluster 传输：tcp 或 rdma
 
 `--username` `<string>` ::
 
-RBD Id.
+RBD ID。
 
 *pvesm status* `[OPTIONS]`
 
-Get status for all datastores.
+获取所有 datastore 的状态。
 
 `--content` `<string>` ::
 
-Only list stores which support this content type.
+仅列出支持此内容类型的存储。
 
 `--enabled` `<boolean>` ('default =' `0`)::
 
-Only list stores which are enabled (not disabled in config).
+仅列出已启用的存储（未在配置中禁用）。
 
 `--format` `<boolean>` ('default =' `0`)::
 
-Include information about formats
+包含格式相关信息
 
 `--storage` `<storage ID>` ::
 
-Only list status for  specified storage
+仅列出指定存储的状态
 
 `--target` `<string>` ::
 
-If target is different to 'node', we only lists shared storages which content is accessible on this 'node' and the specified 'target' node.
+如果 target 不同于 'node'，则只列出内容可被此 'node' 和指定 'target' 节点访问的
+共享存储。
 
 *pvesm zfsscan*
 
-An alias for 'pvesm scan zfs'.
+'pvesm scan zfs' 的别名。
 
-
+.常用命令示例
+----
+# pvesm status
+# pvesm list <storage>
+# pvesm prune-backups <storage> --dry-run
+# pvesm scan nfs <server>
+----

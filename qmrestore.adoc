@@ -1,31 +1,38 @@
 ifdef::manvolnum[]
-qmrestore(1)
-============
+= qmrestore(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-qmrestore - Restore QemuServer `vzdump` Backups
+qmrestore - 还原 QemuServer `vzdump` 备份
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::qmrestore.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Restore Virtual Machines
-========================
+= 还原虚拟机
 endif::manvolnum[]
 
 
-Restore the QemuServer vzdump backup `archive` to virtual machine
-`vmid`. Volumes are allocated on the original storage if there is no
-`storage` specified.
+将 QemuServer vzdump 备份 `archive` 还原到虚拟机 `vmid`。如果未指定 `storage`，卷会分配到原始存储上。
+
+=== 常用命令示例
+
+查看 `qmrestore` 可用参数：
+
+----
+qmrestore help
+----
+
+将备份归档还原为指定 VMID 的虚拟机：
+
+----
+qmrestore /var/lib/vz/dump/vzdump-qemu-100.vma.zst 101 --storage local-lvm
+----
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

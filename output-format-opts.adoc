@@ -1,20 +1,19 @@
 `--human-readable` `<boolean>` ('default =' `1`)::
 
-Call output rendering functions to produce human readable text.
+调用输出渲染函数以生成人类可读的文本。
 
 `--noborder` `<boolean>` ('default =' `0`)::
 
-Do not draw borders (for 'text' format).
+不绘制边框（用于 'text' 格式）。
 
 `--noheader` `<boolean>` ('default =' `0`)::
 
-Do not show column headers (for 'text' format).
+不显示列标题（用于 'text' 格式）。
 
 `--output-format` `<json | json-pretty | text | yaml>` ('default =' `text`)::
 
-Output format.
+输出格式。
 
 `--quiet` `<boolean>` ::
 
-Suppress printing results.
-
+禁止打印结果。

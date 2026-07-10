@@ -1,32 +1,31 @@
 `--dest` `<string>` ::
 
-Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.
+限制数据包目标地址。可以引用单个 IP 地址、IP set（'+ipsetname'）或 IP 别名定义。也可以指定类似 '20.34.101.207-201.3.9.99' 的地址范围，或 IP 地址和网络列表（条目用逗号分隔）。请不要在此类列表中混用 IPv4 和 IPv6 地址。
 
 `--dport` `<string>` ::
 
-Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\d+:\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.
+限制 TCP/UDP 目标端口。可以使用 '/etc/services' 中定义的服务名或简单数字（0-65535）。端口范围可使用 '\d+:\d+' 指定，例如 '80:85'；也可以使用逗号分隔列表匹配多个端口或范围。
 
 `--icmp-type` `<string>` ::
 
-Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.
+指定 icmp-type。仅当 proto 等于 'icmp' 或 'icmpv6'/'ipv6-icmp' 时有效。
 
 `--iface` `<string>` ::
 
-Network interface name. You have to use network configuration key names for VMs and containers ('net\d+'). Host related rules can use arbitrary strings.
+网络接口名称。对于虚拟机和容器，必须使用网络配置键名（'net\d+'）。主机相关规则可以使用任意字符串。
 
 `--log` `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for firewall rule.
+防火墙规则的日志级别。
 
 `--proto` `<string>` ::
 
-IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.
+IP 协议。可以使用 '/etc/protocols' 中定义的协议名（'tcp'/'udp'）或简单数字。
 
 `--source` `<string>` ::
 
-Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.
+限制数据包源地址。可以引用单个 IP 地址、IP set（'+ipsetname'）或 IP 别名定义。也可以指定类似 '20.34.101.207-201.3.9.99' 的地址范围，或 IP 地址和网络列表（条目用逗号分隔）。请不要在此类列表中混用 IPv4 和 IPv6 地址。
 
 `--sport` `<string>` ::
 
-Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\d+:\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.
-
+限制 TCP/UDP 源端口。可以使用 '/etc/services' 中定义的服务名或简单数字（0-65535）。端口范围可使用 '\d+:\d+' 指定，例如 '80:85'；也可以使用逗号分隔列表匹配多个端口或范围。

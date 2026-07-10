@@ -1,49 +1,40 @@
 [[external_metric_server]]
-External Metric Server
-----------------------
+== 外部指标服务器
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
 [thumbnail="screenshot/gui-datacenter-metric-server-list.png"]
 
-In {pve}, you can define external metric servers, which will periodically
-receive various stats about your hosts, virtual guests and storages.
+在 {pve} 中，可以定义外部指标服务器，用于周期性接收主机、虚拟客户机和存储的各类统计信息。
 
-Currently supported are:
+当前支持：
 
- * Graphite (see https://graphiteapp.org )
- * InfluxDB (see https://www.influxdata.com/time-series-platform/influxdb/ )
+ * Graphite（见 https://graphiteapp.org ）
+ * InfluxDB（见 https://www.influxdata.com/time-series-platform/influxdb/ ）
 
-The external metric server definitions are saved in '/etc/pve/status.cfg', and
-can be edited through the web interface.
+外部指标服务器定义保存在 `/etc/pve/status.cfg` 中，也可以通过 Web 界面编辑。
 
 [[metric_server_graphite]]
-Graphite server configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Graphite 服务器配置
 
 [thumbnail="screenshot/gui-datacenter-metric-server-graphite.png"]
 
-The default port is set to *2003* and the default graphite path is *proxmox*.
+默认端口为 *2003*，默认 Graphite 路径为 *proxmox*。
 
-By default, {pve} sends the data over UDP, so the graphite server has to be
-configured to accept this. Here the maximum transmission unit (MTU) can be
-configured for environments not using the standard *1500* MTU.
+默认情况下，{pve} 通过 UDP 发送数据，因此 Graphite 服务器必须配置为接受 UDP 数据。在这里也可以为未使用标准 *1500*
+MTU 的环境配置最大传输单元（MTU）。
 
-You can also configure the plugin to use TCP. In order not to block the
-important `pvestatd` statistic collection daemon, a timeout is required to cope
-with network problems.
+也可以将插件配置为使用 TCP。为了避免阻塞重要的 `pvestatd` 统计采集守护进程，需要设置超时时间以应对网络问题。
 
 [[metric_server_influxdb]]
-Influxdb plugin configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== InfluxDB 插件配置
 
 [thumbnail="screenshot/gui-datacenter-metric-server-influxdb.png"]
 
-{pve} sends the data over UDP, so the influxdb server has to be configured for
-this. The MTU can also be configured here, if necessary.
+{pve} 通过 UDP 发送数据，因此 InfluxDB 服务器也必须为此进行配置。必要时，也可以在这里配置 MTU。
 
-Here is an example configuration for influxdb (on your influxdb server):
+以下是在 InfluxDB 服务器上的 InfluxDB 配置示例：
 
 ----
 [[udp]]
@@ -54,23 +45,32 @@ Here is an example configuration for influxdb (on your influxdb server):
    batch-timeout = "1s"
 ----
 
-With this configuration, your server listens on all IP addresses on port 8089,
-and writes the data in the *proxmox* database
+使用该配置时，服务器会在所有 IP 地址的 8089 端口监听，并将数据写入 *proxmox* 数据库。
 
-Alternatively, the plugin can be configured to use the http(s) API of InfluxDB 2.x.
-InfluxDB 1.8.x does contain a forwards compatible API endpoint for this v2 API.
+也可以将插件配置为使用 InfluxDB 2.x 的 http(s) API。InfluxDB 1.8.x 也包含与该 v2 API
+向前兼容的 API endpoint。
 
-To use it, set 'influxdbproto' to 'http' or 'https' (depending on your configuration).
-By default, {pve} uses the organization 'proxmox' and the bucket/db 'proxmox'
-(They can be set with the configuration 'organization' and 'bucket' respectively).
+要使用该方式，请根据配置将 `influxdbproto` 设置为 `http` 或 `https`。默认情况下，{pve}
+使用组织 `proxmox` 和 bucket/db `proxmox`（可分别通过 `organization` 和 `bucket` 配置项设置）。
 
-Since InfluxDB's v2 API is only available with authentication, you have
-to generate a token that can write into the correct bucket and set it.
+由于 InfluxDB 的 v2 API 只能在认证后使用，因此必须生成一个能够写入正确 bucket 的 token 并进行设置。
 
-In the v2 compatible API of 1.8.x, you can use 'user:password' as token
-(if required), and can omit the 'organization' since that has no meaning in InfluxDB 1.x.
+在 1.8.x 的 v2 兼容 API 中，如有需要，可以使用 `user:password` 作为 token；由于
+`organization` 在 InfluxDB 1.x 中没有意义，因此可以省略。
 
-You can also set the HTTP Timeout (default is 1s) with the 'timeout' setting,
-as well as the maximum batch size (default 25000000 bytes) with the
-'max-body-size' setting (this corresponds to the InfluxDB setting with the
-same name).
+还可以通过 `timeout` 设置 HTTP 超时时间（默认 1s），并通过 `max-body-size` 设置最大批量大小（默认
+25000000 字节）。后者对应 InfluxDB 中同名设置。
+
+=== 常用命令示例
+
+查看外部指标服务器配置文件：
+
+----
+# cat /etc/pve/status.cfg
+----
+
+确认统计采集守护进程正在运行：
+
+----
+# systemctl status pvestatd
+----

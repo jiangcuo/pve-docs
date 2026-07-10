@@ -1,33 +1,27 @@
 ifdef::manvolnum[]
-pvesh(1)
-========
+= pvesh(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvesh - Shell interface for the Proxmox VE API
+pvesh - Proxmox VE API 的 Shell 接口
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvesh.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Shell interface for the Proxmox VE API
-======================================
+= Proxmox VE API 的 Shell 接口
 :pve-toplevel:
 endif::manvolnum[]
 
 
-The {PVE} management tool (`pvesh`) allows to directly invoke API
-function, without using the REST/HTTPS server.
+{pve} 管理工具（`pvesh`）允许直接调用 API 函数，而无需使用 REST/HTTPS 服务器。
 
-NOTE: Only 'root' is allowed to do that.
+NOTE: 只有 'root' 允许执行该操作。
 
 
 ifdef::manvolnum[]
@@ -35,20 +29,26 @@ include::output-format.adoc[]
 endif::manvolnum[]
 
 
-EXAMPLES
---------
+== 示例
 
-Get the list of nodes in my cluster
+获取集群中的节点列表
 
  # pvesh get /nodes
 
-Get a list of available options for the datacenter
+获取数据中心可用选项列表
 
  # pvesh usage cluster/options -v
 
-Set the HTMl5 NoVNC console as the default console for the datacenter
+将 HTML5 NoVNC 控制台设置为数据中心的默认控制台
 
  # pvesh set cluster/options -console html5
+
+.常用命令示例
+----
+# pvesh get /version
+# pvesh get /nodes
+# pvesh usage cluster/options -v
+----
 
 
 ifdef::manvolnum[]

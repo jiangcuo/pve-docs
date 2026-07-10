@@ -1,30 +1,23 @@
 [[chapter_system_administration]]
-Host System Administration
-==========================
+= 主机系统管理
 ifndef::manvolnum[]
 :pve-toplevel:
 endif::manvolnum[]
 
-The following sections will focus on common virtualization tasks and explain the
-{pve} specifics regarding the administration and management of the host machine.
+以下章节将重点介绍常见虚拟化任务，并说明 {pve} 在主机管理和运维方面的特定内容。
 
-{pve} is based on https://www.debian.org/[Debian GNU/Linux] with additional
-repositories to provide the {pve} related packages. This means that the full
-range of Debian packages is available including security updates and bug fixes.
-{pve} provides its own Linux kernel based on the Ubuntu kernel. It has all the
-necessary virtualization and container features enabled and includes
-https://zfsonlinux.org[ZFS] and several extra hardware drivers.
+{pve} 基于 https://www.debian.org/[Debian GNU/Linux]，并通过额外仓库提供 {pve}
+相关软件包。这意味着可以使用完整的 Debian 软件包体系，包括安全更新和错误修复。
+{pve} 提供基于 Ubuntu kernel 的自有 Linux kernel，并启用了所有必要的虚拟化和容器功能，
+同时包含 https://zfsonlinux.org[ZFS] 以及若干额外硬件驱动。
 
-For other topics not included in the following sections, please refer to the
-Debian documentation. The
-https://debian-handbook.info/get[Debian
-Administrator\'s Handbook] is available online, and provides a comprehensive
-introduction to the Debian operating system (see xref:Hertzog13[]).
+对于以下章节未涵盖的其他主题，请参考 Debian 文档。在线版
+https://debian-handbook.info/get[Debian Administrator\'s Handbook]
+对 Debian 操作系统进行了全面介绍（参见 xref:Hertzog13[]）。
 
 ifdef::wiki[]
 
-See Also
---------
+== 另请参见
 
 * link:/wiki/Package_Repositories[Package Repositories]
 
@@ -91,12 +84,12 @@ endif::wiki[]
 ////
 TODO:
 
-Working with 'systemd'
-----------------------
+使用 'systemd'
+--------------
 
-Journal and syslog
-~~~~~~~~~~~~~~~~~~
+Journal 和 syslog
+~~~~~~~~~~~~~~~~~
 
-TODO: explain persistent journal...
+TODO: 说明持久化 journal...
 
 ////

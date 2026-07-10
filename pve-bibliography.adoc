@@ -1,12 +1,11 @@
 [bibliography]
-Bibliography
-============
+= 参考文献
 ifndef::manvolnum[]
 :pve-toplevel:
 endif::manvolnum[]
 
 [bibliography]
-.Books about {pve}
+.关于 {pve} 的书籍
 
 - [[[Ahmed16]]] Wasim Ahmed.
   'Mastering Proxmox - Third Edition'.
@@ -34,7 +33,7 @@ endif::manvolnum[]
   ASIN B01BBVQZT6
 
 [bibliography]
-.Books about related technology
+.关于相关技术的书籍
 
 - [[[Hertzog13]]] Raphaël Hertzog, Roland Mas., Freexian SARL
   https://debian-handbook.info/get[The Debian Administrator\'s Handbook: Debian Bullseye from Discovery to Mastery],
@@ -88,7 +87,7 @@ endif::manvolnum[]
   ISBN 978-0596521189
 
 [bibliography]
-.Books about related topics
+.关于相关主题的书籍
 
 - [[[Bessen09]]] James Bessen & Michael J. Meurer,
   'Patent Failure: How Judges, Bureaucrats, and Lawyers Put Innovators at Risk'.

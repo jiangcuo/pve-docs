@@ -1,473 +1,386 @@
 [[chapter_gui]]
-Graphical User Interface
-========================
+= 图形用户界面
 ifndef::manvolnum[]
 :pve-toplevel:
 endif::manvolnum[]
 
-{pve} is simple. There is no need to install a separate management
-tool, and everything can be done through your web browser (Latest
-Firefox or Google Chrome is preferred). A built-in HTML5 console is
-used to access the guest console. As an alternative,
-https://www.spice-space.org/[SPICE] can be used.
+{pve} 使用简单，无需安装单独的管理工具，所有操作都可以通过 Web 浏览器完成（建议使用最新
+Firefox 或 Google Chrome）。内置 HTML5 控制台可用于访问客户机控制台。也可以改用
+https://www.spice-space.org/[SPICE]。
 
-Because we use the Proxmox cluster file system (pmxcfs), you can
-connect to any node to manage the entire cluster. Each node can manage
-the entire cluster. There is no need for a dedicated manager node.
+由于使用 Proxmox cluster file system（pmxcfs），你可以连接到任意节点来管理整个集群。
+每个节点都可以管理整个集群，因此不需要专用管理节点。
 
-You can use the web-based administration interface with any modern
-browser. When {pve} detects that you are connecting from a mobile
-device, you are redirected to a simpler, touch-based user interface.
+可以使用任何现代浏览器访问基于 Web 的管理界面。当 {pve} 检测到你从移动设备连接时，
+会重定向到更简单的触控式用户界面。
 
-The web interface can be reached via https://youripaddress:8006
-(default login is: 'root', and the password is specified during the
-installation process).
+Web 界面可通过 https://youripaddress:8006 访问（默认登录用户为 'root'，密码在安装
+过程中指定）。
 
 
-Features
---------
+== 功能
 
-* Seamless integration and management of {pve} clusters
+* 对 {pve} 集群进行无缝集成和管理
 
-* AJAX technologies for dynamic updates of resources
+* 使用 AJAX 技术动态更新资源
 
-* Secure access to all Virtual Machines and Containers via SSL
-  encryption (https)
+* 通过 SSL 加密（https）安全访问所有虚拟机和容器
 
-* Fast search-driven interface, capable of handling hundreds and
-  probably thousands of VMs
+* 快速、搜索驱动的界面，可处理数百台甚至可能上千台 VM
 
-* Secure HTML5 console or SPICE
+* 安全的 HTML5 控制台或 SPICE
 
-* Role based permission management for all objects (VMs, storages,
-  nodes, etc.)
+* 面向所有对象（VM、存储、节点等）的基于角色的权限管理
 
-* Support for multiple authentication sources (e.g. local, MS ADS,
-  LDAP, ...)
+* 支持多个认证源（例如 local、MS ADS、LDAP 等）
 
-* Two-Factor Authentication (OATH, Yubikey)
+* 双因素认证（OATH、Yubikey）
 
-* Based on ExtJS 7.x JavaScript framework
+* 基于 ExtJS 7.x JavaScript 框架
 
 
-Login
------
+== 登录
 
 [thumbnail="screenshot/gui-login-window.png"]
 
-When you connect to the server, you will first see the login window.
-{pve} supports various authentication backends ('Realm'), and
-you can select the language here. The GUI is translated to more
-than 20 languages.
+连接到服务器时，首先会看到登录窗口。{pve} 支持多种认证后端（'Realm'），也可以在此处
+选择语言。GUI 已翻译为 20 多种语言。
 
-NOTE: You can save the user name on the client side by selecting the
-checkbox at the bottom. This saves some typing when you login next
-time.
+NOTE: 可以勾选底部复选框，将用户名保存在客户端。这样下次登录时可以减少输入。
 
 
-GUI Overview
-------------
+== GUI 概览
 
 [thumbnail="screenshot/gui-datacenter-summary.png"]
 
-The {pve} user interface consists of four regions.
+{pve} 用户界面由四个区域组成。
 
 [horizontal]
 
-Header:: On top. Shows status information and contains buttons for
-most important actions.
+页眉:: 位于顶部。显示状态信息，并包含最重要操作的按钮。
 
-Resource Tree:: At the left side. A navigation tree where you can select
-specific objects.
+资源树:: 位于左侧。可在该导航树中选择特定对象。
 
-Content Panel:: Center region. Selected objects display configuration
-options and status here.
+内容面板:: 位于中间区域。所选对象的配置选项和状态会显示在这里。
 
-Log Panel:: At the bottom. Displays log entries for recent tasks. You
-can double-click on those log entries to get more details, or to abort
-a running task.
+日志面板:: 位于底部。显示最近任务的日志条目。可以双击这些日志条目查看更多详情，或中止
+正在运行的任务。
 
-NOTE: You can shrink and expand the size of the resource tree and log
-panel, or completely hide the log panel. This can be helpful when you
-work on small displays and want more space to view other content.
+NOTE: 可以缩小和展开资源树及日志面板，也可以完全隐藏日志面板。在小屏幕上工作、需要更多
+空间查看其他内容时，这会很有帮助。
 
 
-Header
-~~~~~~
+=== 页眉
 
-On the top left side, the first thing you see is the Proxmox
-logo. Next to it is the current running version of {pve}. In the
-search bar nearside you can search for specific objects (VMs,
-containers, nodes, ...). This is sometimes faster than selecting an
-object in the resource tree.
+左上角首先看到的是 Proxmox 标志。旁边是当前运行的 {pve} 版本。在附近的搜索栏中，可以
+搜索特定对象（VM、容器、节点等）。有时这比在资源树中选择对象更快。
 
-The right part of the header contains four buttons:
+页眉右侧包含四个按钮：
 
 [horizontal]
-Documentation :: Opens a new browser window showing the reference documentation.
+Documentation :: 打开新的浏览器窗口，显示参考文档。
 
-Create&nbsp;VM :: Opens the virtual machine creation wizard.
+Create&nbsp;VM :: 打开虚拟机创建向导。
 
-Create&nbsp;CT :: Open the container creation wizard.
+Create&nbsp;CT :: 打开容器创建向导。
 
-User&nbsp;Menu :: Displays the identity of the user you're currently logged in
-with, and clicking it opens a menu with user-specific options.
+User&nbsp;Menu :: 显示当前登录用户身份；点击后会打开包含用户专属选项的菜单。
 +
-In the user menu, you'll find the 'My Settings' dialog, which provides local UI
-settings. Below that, there are shortcuts for 'TFA' (Two-Factor Authentication)
-and 'Password' self-service. You'll also find options to change the 'Language'
-and the 'Color Theme.' Finally, at the bottom of the menu is the 'Logout'
-option.
+在用户菜单中，可以找到提供本地 UI 设置的 'My Settings' 对话框。其下方有 'TFA'
+（双因素认证）和 'Password' 自助服务快捷入口。还可以找到用于更改 'Language' 和
+'Color Theme' 的选项。菜单底部是 'Logout' 选项。
 
 
 [[gui_my_settings]]
-My Settings
-~~~~~~~~~~~
+=== 我的设置
 
 [thumbnail="screenshot/gui-my-settings.png"]
 
-The 'My Settings' window allows you to set locally stored settings. These
-include the 'Dashboard Storages' which allow you to enable or disable specific
-storages to be counted towards the total amount visible in the datacenter
-summary. If no storage is checked the total is the sum of all storages, same
-as enabling every single one.
+'My Settings' 窗口允许设置本地保存的设置。其中包括 'Dashboard Storages'，可启用或
+禁用特定存储是否计入数据中心摘要中可见的总量。如果未勾选任何存储，则总量为所有存储之和，
+等同于启用每一个存储。
 
-Below the dashboard settings you find the stored user name and a button to
-clear it as well as a button to reset every layout in the GUI to its default.
+在仪表板设置下方，可以看到已保存的用户名、清除用户名的按钮，以及将 GUI 中所有布局重置为
+默认值的按钮。
 
-On the right side there are 'xterm.js Settings'. These contain the following
-options:
+右侧是 'xterm.js Settings'，包含以下选项：
 
 [horizontal]
-Font-Family :: The font to be used in xterm.js (e.g. Arial).
+Font-Family :: xterm.js 中使用的字体（例如 Arial）。
 
-Font-Size :: The preferred font size to be used.
+Font-Size :: 首选字体大小。
 
-Letter Spacing :: Increases or decreases spacing between letters in text.
+Letter Spacing :: 增大或减小文本中字母之间的间距。
 
-Line Height :: Specify the absolute height of a line.
+Line Height :: 指定一行的绝对高度。
 
 
 
-Resource Tree
-~~~~~~~~~~~~~
+=== 资源树
 
-This is the main navigation tree. On top of the tree you can select
-some predefined views, which change the structure of the tree
-below. The default view is the *Server View*, and it shows the following
-object types:
+这是主导航树。树顶部可以选择一些预定义视图，这会改变下方树的结构。默认视图是
+*Server View*，它显示以下对象类型：
 
 [horizontal]
-Datacenter:: Contains cluster-wide settings (relevant for all nodes).
+Datacenter:: 包含集群范围设置（与所有节点相关）。
 
-Node:: Represents the hosts inside a cluster, where the guests run.
+Node:: 表示集群中的主机，客户机在其上运行。
 
-Guest:: VMs, containers and templates.
+Guest:: VM、容器和模板。
 
-Storage:: Data Storage.
+Storage:: 数据存储。
 
-Pool:: It is possible to group guests using a pool to simplify
-management.
+Pool:: 可以使用池对客户机分组，以简化管理。
 
 
-The following view types are available:
+可使用以下视图类型：
 
 [horizontal]
-Server View:: Shows all kinds of objects, grouped by nodes.
+Server View:: 显示所有类型对象，并按节点分组。
 
-Folder View:: Shows all kinds of objects, grouped by object type.
+Folder View:: 显示所有类型对象，并按对象类型分组。
 
-Pool View:: Show VMs and containers, grouped by pool.
+Pool View:: 显示 VM 和容器，并按池分组。
 
-Tag View:: Show VMs and containers, grouped by tags.
+Tag View:: 显示 VM 和容器，并按标签分组。
 
-Log Panel
-~~~~~~~~~
+=== 日志面板
 
-The main purpose of the log panel is to show you what is currently
-going on in your cluster. Actions like creating an new VM are executed
-in the background, and we call such a background job a 'task'.
+日志面板的主要用途是显示集群中当前正在发生的事情。创建新 VM 等操作会在后台执行，
+这类后台作业称为 'task'。
 
-Any output from such a task is saved into a separate log file. You can
-view that log by simply double-click a task log entry. It is also
-possible to abort a running task there.
+此类任务的任何输出都会保存到单独的日志文件中。只需双击任务日志条目即可查看该日志。
+也可以在那里中止正在运行的任务。
 
-Please note that we display the most recent tasks from all cluster nodes
-here. So you can see when somebody else is working on another cluster
-node in real-time.
+请注意，这里会显示所有集群节点上的最新任务。因此可以实时看到其他人何时正在另一个集群节点上
+工作。
 
-NOTE: We remove older and finished task from the log panel to keep
-that list short. But you can still find those tasks within the node panel in the
-'Task History'.
+NOTE: 为保持列表简短，我们会从日志面板中移除较旧且已完成的任务。但仍可在节点面板的
+'Task History' 中找到这些任务。
 
-Some short-running actions simply send logs to all cluster
-members. You can see those messages in the 'Cluster log' panel.
+一些短时操作只会向所有集群成员发送日志。可以在 'Cluster log' 面板中看到这些消息。
 
 
-Content Panels
---------------
+== 内容面板
 
-When you select an item from the resource tree, the corresponding
-object displays configuration and status information in the content
-panel. The following sections provide a brief overview of this
-functionality. Please refer to the corresponding chapters in the
-reference documentation to get more detailed information.
+在资源树中选择项目时，对应对象会在内容面板中显示配置和状态信息。以下章节会简要概述这些
+功能。更多详细信息请参阅参考文档中的相应章节。
 
 
-Datacenter
-~~~~~~~~~~
+=== 数据中心
 
 [thumbnail="screenshot/gui-datacenter-search.png"]
 
-On the datacenter level, you can access cluster-wide settings and information.
+在数据中心级别，可以访问集群范围的设置和信息。
 
-* *Search:* perform a cluster-wide search for nodes, VMs, containers, storage
-   devices, and pools.
+* *Search:* 对节点、VM、容器、存储设备和池执行集群范围搜索。
 
-* *Summary:* gives a brief overview of the cluster's health and resource usage.
+* *Summary:* 简要概览集群健康状态和资源使用情况。
 
-* *Cluster:* provides the functionality and information necessary to create or
-   join a cluster.
+* *Cluster:* 提供创建或加入集群所需的功能和信息。
 
-* *Options:* view and manage cluster-wide default settings.
+* *Options:* 查看并管理集群范围默认设置。
 
-* *Storage:* provides an interface for managing cluster storage.
+* *Storage:* 提供管理集群存储的界面。
 
-* *Backup:* schedule backup jobs. This operates cluster wide, so it doesn't
-   matter where the VMs/containers are on your cluster when scheduling.
+* *Backup:* 计划备份任务。该功能在集群范围内运行，因此调度时无需关心 VM/容器位于集群中的
+   哪个节点。
 
-* *Replication:* view and manage replication jobs.
+* *Replication:* 查看并管理复制任务。
 
-* *Permissions:* manage user, group, and API token permissions, and LDAP,
-   MS-AD and Two-Factor authentication.
+* *Permissions:* 管理用户、组和 API token 权限，以及 LDAP、MS-AD 和双因素认证。
 
-* *HA:* manage {pve} High Availability.
+* *HA:* 管理 {pve} High Availability。
 
-* *ACME:* set up ACME (Let's Encrypt) certificates for server nodes.
+* *ACME:* 为服务器节点设置 ACME（Let's Encrypt）证书。
 
-* *Firewall:* configure and make templates for the Proxmox Firewall cluster wide.
+* *Firewall:* 配置 Proxmox Firewall，并创建集群范围模板。
 
-* *Metric Server:* define external metric servers for {pve}.
+* *Metric Server:* 为 {pve} 定义外部指标服务器。
 
-* *Notifications:* configurate notification behavior and targets for  {pve}.
+* *Notifications:* 配置 {pve} 的通知行为和目标。
 
-* *Support:* display information about your support subscription.
+* *Support:* 显示支持订阅信息。
 
 
-Nodes
-~~~~~
+=== 节点
 
 [thumbnail="screenshot/gui-node-summary.png"]
 
-Nodes in your cluster can be managed individually at this level.
+可以在该级别分别管理集群中的节点。
 
-The top header has useful buttons such as 'Reboot', 'Shutdown', 'Shell',
-'Bulk Actions' and 'Help'.
-'Shell' has the options 'noVNC', 'SPICE' and 'xterm.js'.
-'Bulk Actions' has the options 'Bulk Start', 'Bulk Shutdown' and 'Bulk Migrate'.
+顶部页眉包含 'Reboot'、'Shutdown'、'Shell'、'Bulk Actions' 和 'Help' 等常用按钮。
+'Shell' 包含 'noVNC'、'SPICE' 和 'xterm.js' 选项。'Bulk Actions' 包含
+'Bulk Start'、'Bulk Shutdown' 和 'Bulk Migrate' 选项。
 
-* *Search:* search a node for VMs, containers, storage devices, and pools.
+* *Search:* 在节点中搜索 VM、容器、存储设备和池。
 
-* *Summary:* display a brief overview of the node's resource usage.
+* *Summary:* 简要显示节点资源使用情况。
 
-* *Notes:* write custom comments in xref:markdown_basics[Markdown syntax].
+* *Notes:* 使用 xref:markdown_basics[Markdown 语法]编写自定义备注。
 
-* *Shell:* access to a shell interface for the node.
+* *Shell:* 访问节点的 shell 界面。
 
-* *System:* configure network, DNS and time settings, and access the syslog.
+* *System:* 配置网络、DNS 和时间设置，并访问 syslog。
 
-* *Updates:* upgrade the system and see the available new packages.
+* *Updates:* 升级系统并查看可用的新软件包。
 
-* *Firewall:* manage the Proxmox Firewall for a specific node.
+* *Firewall:* 管理特定节点的 Proxmox Firewall。
 
-* *Disks:* get an overview of the attached disks, and manage how they are used.
+* *Disks:* 概览已连接磁盘，并管理其使用方式。
 
-* *Ceph:* is only used if you have installed a Ceph server on your
-   host. In this case, you can manage your Ceph cluster and see the status
-   of it here.
+* *Ceph:* 仅在主机上安装了 Ceph server 时使用。在这种情况下，可以在此管理 Ceph 集群并
+   查看其状态。
 
-* *Replication:* view and manage replication jobs.
+* *Replication:* 查看并管理复制任务。
 
-* *Task History:* see a list of past tasks.
+* *Task History:* 查看历史任务列表。
 
-* *Subscription:* upload a subscription key, and generate a system report for
-   use in support cases.
+* *Subscription:* 上传订阅密钥，并生成用于支持案例的系统报告。
 
 
-Guests
-~~~~~~
+=== 客户机
 
 [thumbnail="screenshot/gui-qemu-summary.png"]
 
-There are two different kinds of guests and both can be converted to a template.
-One of them is a Kernel-based Virtual Machine (KVM) and the other is a Linux Container (LXC).
-Navigation for these are mostly the same; only some options are different.
+客户机有两种不同类型，并且都可以转换为模板。一种是 Kernel-based Virtual Machine（KVM），
+另一种是 Linux Container（LXC）。两者的导航大体相同，仅部分选项不同。
 
-To access the various guest management interfaces, select a VM or container from
-the menu on the left.
+要访问各种客户机管理界面，请从左侧菜单选择 VM 或容器。
 
-The header contains commands for items such as power management, migration,
-console access and type, cloning, HA, and help.
-Some of these buttons contain drop-down menus, for example, 'Shutdown' also contains
-other power options, and 'Console' contains the different console types:
-'SPICE', 'noVNC' and 'xterm.js'.
+页眉包含电源管理、迁移、控制台访问和类型、克隆、HA、帮助等命令。其中一些按钮带有下拉
+菜单，例如 'Shutdown' 还包含其他电源选项，'Console' 包含不同控制台类型：'SPICE'、
+'noVNC' 和 'xterm.js'。
 
-The panel on the right contains an interface for whatever item is selected from
-the menu on the left.
+右侧面板会显示左侧菜单中所选项目对应的界面。
 
-The available interfaces are as follows.
+可用界面如下。
 
-* *Summary:* provides a brief overview of the VM's activity and a `Notes` field
-  for xref:markdown_basics[Markdown syntax] comments.
+* *Summary:* 简要概览 VM 活动，并提供用于 xref:markdown_basics[Markdown 语法]备注的
+  `Notes` 字段。
 
-* *Console:* access to an interactive console for the VM/container.
+* *Console:* 访问 VM/容器的交互式控制台。
 
-* *(KVM)Hardware:* define the hardware available to the KVM VM.
+* *(KVM)Hardware:* 定义 KVM VM 可用的硬件。
 
-* *(LXC)Resources:* define the system resources available to the LXC.
+* *(LXC)Resources:* 定义 LXC 可用的系统资源。
 
-* *(LXC)Network:* configure a container's network settings.
+* *(LXC)Network:* 配置容器网络设置。
 
-* *(LXC)DNS:* configure a container's DNS settings.
+* *(LXC)DNS:* 配置容器 DNS 设置。
 
-* *Options:* manage guest options.
+* *Options:* 管理客户机选项。
 
-* *Task History:* view all previous tasks related to the selected guest.
+* *Task History:* 查看与所选客户机相关的所有历史任务。
 
-* *(KVM) Monitor:* an interactive communication interface to the KVM process.
+* *(KVM) Monitor:* 与 KVM 进程交互通信的界面。
 
-* *Backup:* create and restore system backups.
+* *Backup:* 创建和还原系统备份。
 
-* *Replication:* view and manage the replication jobs for the selected guest.
+* *Replication:* 查看并管理所选客户机的复制任务。
 
-* *Snapshots:* create and restore VM snapshots.
+* *Snapshots:* 创建和还原 VM 快照。
 
-* *Firewall:* configure the firewall on the VM level.
+* *Firewall:* 在 VM 级别配置防火墙。
 
-* *Permissions:* manage permissions for the selected guest.
+* *Permissions:* 管理所选客户机的权限。
 
 
-Storage
-~~~~~~~
+=== 存储
 
 [thumbnail="screenshot/gui-storage-summary-local.png"]
 
-As with the guest interface, the interface for storage consists of a menu on the
-left for certain storage elements and an interface on the right to manage
-these elements.
+与客户机界面类似，存储界面由左侧的存储元素菜单和右侧用于管理这些元素的界面组成。
 
-In this view we have a two partition split-view.
-On the left side we have the storage options
-and on the right side the content of the selected option will be shown.
+该视图采用左右两栏的分割视图。左侧是存储选项，右侧显示所选选项的内容。
 
-* *Summary:* shows important information about the storage, such as the type,
-   usage, and content which it stores.
+* *Summary:* 显示存储的重要信息，例如类型、使用情况以及存放的内容。
 
-* *Content:* a menu item for each content type which the storage
-   stores, for example, Backups, ISO Images, CT Templates.
+* *Content:* 针对该存储保存的每种内容类型提供菜单项，例如 Backups、ISO Images、
+   CT Templates。
 
-* *Permissions:* manage permissions for the storage.
+* *Permissions:* 管理该存储的权限。
 
 
-Pools
-~~~~~
+=== 池
 
 [thumbnail="screenshot/gui-pool-summary-development.png"]
 
-Again, the pools view comprises two partitions: a menu on the left,
-and the corresponding interfaces for each menu item on the right.
+同样，池视图由两部分组成：左侧菜单，以及右侧每个菜单项对应的界面。
 
-* *Summary:* shows a description of the pool.
+* *Summary:* 显示池的描述。
 
-* *Members:* display and manage pool members (guests and storage).
+* *Members:* 显示并管理池成员（客户机和存储）。
 
-* *Permissions:* manage the permissions for the pool.
+* *Permissions:* 管理池的权限。
 
 
 [[gui_tags]]
-Tags
-----
+== 标签
 
 [thumbnail="screenshot/gui-qemu-summary-tags-edit.png", float="left"]
 
-For organizational purposes, it is possible to set `tags` for guests.
-Currently, these only provide informational value to users.
-Tags are displayed in two places in the web interface: in the `Resource Tree` and
-in the status line when a guest is selected.
+出于组织管理目的，可以为客户机设置 `tags`。目前这些标签仅为用户提供信息价值。标签会显示在
+Web 界面的两个位置：`Resource Tree` 中，以及选择客户机时的状态行中。
 
-Tags can be added, edited, and removed in the status line of the guest by
-clicking on the `pencil` icon. You can add multiple tags by pressing the `+`
-button and remove them by pressing the `-` button. To save or cancel the changes,
-you can use the `✓` and `x` button respectively.
+点击客户机状态行中的 `pencil` 图标，可以添加、编辑和移除标签。按 `+` 按钮可以添加多个
+标签，按 `-` 按钮可以移除标签。可分别使用 `✓` 和 `x` 按钮保存或取消更改。
 
-Tags can also be set via the CLI, where multiple tags are separated by semicolons.
-For example:
+也可以通过 CLI 设置标签，多个标签用分号分隔。例如：
 
 ----
 # qm set ID --tags 'myfirsttag;mysecondtag'
 ----
 
-Style Configuration
-~~~~~~~~~~~~~~~~~~~
+=== 样式配置
 
 [thumbnail="screenshot/gui-datacenter-tag-style.png"]
 
-By default, the tag colors are derived from their text in a deterministic way.
-The color, shape in the resource tree, and case-sensitivity, as well as how tags
-are sorted, can be customized. This can be done via the web interface under
-__Datacenter -> Options -> Tag Style Override__. Alternatively, this can be done
-via the CLI. For example:
+默认情况下，标签颜色会根据其文本以确定性方式派生。可以自定义颜色、资源树中的形状、
+大小写敏感性，以及标签排序方式。这可以通过 Web 界面的
+__Datacenter -> Options -> Tag Style Override__ 完成，也可以通过 CLI 完成。例如：
 
 ----
 # pvesh set /cluster/options --tag-style color-map=example:000000:FFFFFF
 ----
 
-sets the background color of the tag `example` to black (#000000) and the text
-color to white (#FFFFFF).
+将标签 `example` 的背景颜色设置为黑色（#000000），文本颜色设置为白色（#FFFFFF）。
 
-Permissions
-~~~~~~~~~~~
+=== 权限
 
 [thumbnail="screenshot/gui-datacenter-options.png"]
 
-By default, users with the privilege `VM.Config.Options` on a guest (`/vms/ID`)
-can set any tags they want (see
-xref:pveum_permission_management[Permission Management]). If you want to
-restrict this behavior, appropriate permissions can be set under
-__Datacenter -> Options -> User Tag Access__:
+默认情况下，在客户机（`/vms/ID`）上拥有 `VM.Config.Options` 权限的用户可以设置任意标签
+（参见 xref:pveum_permission_management[权限管理]）。如果要限制此行为，可以在
+__Datacenter -> Options -> User Tag Access__ 下设置相应权限：
 
-* `free`: users are not restricted in setting tags (Default)
-* `list`: users can set tags based on a predefined list of tags
-* `existing`: like list but users can also use already existing tags
-* `none`: users are restricted from using tags
+* `free`: 用户设置标签不受限制（默认）
+* `list`: 用户可以基于预定义标签列表设置标签
+* `existing`: 类似 list，但用户也可以使用已经存在的标签
+* `none`: 用户被限制，不能使用标签
 
-The same can also be done via the CLI.
+同样也可以通过 CLI 完成。
 
-Note that a user with the `Sys.Modify` privileges on `/` is always able to set
-or delete any tags, regardless of the settings here. Additionally, there is a
-configurable list of `registered tags` which can only be added and removed by
-users with the privilege `Sys.Modify` on `/`. The list of registered tags can be
-edited under __Datacenter -> Options -> Registered Tags__ or via the CLI.
+请注意，在 `/` 上拥有 `Sys.Modify` 权限的用户始终可以设置或删除任何标签，不受此处设置
+影响。此外，还有一个可配置的 `registered tags` 列表，只有在 `/` 上拥有 `Sys.Modify`
+权限的用户才能添加和移除其中的标签。registered tags 列表可以在
+__Datacenter -> Options -> Registered Tags__ 下编辑，也可以通过 CLI 编辑。
 
 
-For more details on the exact options and how to invoke them in the CLI, see
-xref:datacenter_configuration_file[Datacenter Configuration].
+关于具体选项以及如何在 CLI 中调用它们的更多详情，请参见
+xref:datacenter_configuration_file[数据中心配置]。
 
 [[gui_consent_banner]]
-Consent Banner
-------------
+== 同意横幅
 
-A custom consent banner that has to be accepted before login can be configured
-in __Datacenter -> Options -> Consent Text__. If there is no
-content, the consent banner will not be displayed. The text will be stored as a
-base64 string in the `/etc/pve/datacenter.cfg` config file.
+可以在 __Datacenter -> Options -> Consent Text__ 中配置自定义同意横幅，用户必须先接受它
+才能登录。如果没有内容，则不会显示同意横幅。该文本会以 base64 字符串形式存储在
+`/etc/pve/datacenter.cfg` 配置文件中。
 
 ifdef::wiki[]
 
-See Also
---------
+== 另请参见
 
 * link:/wiki/Central_Web-based_Management
 
 endif::wiki[]
-

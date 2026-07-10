@@ -1,84 +1,76 @@
 [[translation]]
-Translating {pve}
------------------
+== 翻译 {pve}
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
 
 
-The {pve} user interface is in English by default. However, thanks to the
-contributions of the community, translations to other languages are also available.
-We welcome any support in adding new languages, translating the latest features, and
-improving incomplete or inconsistent translations.
+{pve} 用户界面默认使用英语。不过，得益于社区贡献，也提供了其他语言的翻译。
+我们欢迎任何形式的支持，包括新增语言、翻译最新功能，以及改进不完整或不一致的翻译。
 
-We use https://www.gnu.org/software/gettext/[gettext] for the management of the
-translation files. Tools like https://poedit.net/[Poedit] offer a nice user
-interface to edit the translation files, but you can use whatever editor you're
-comfortable with. No programming knowledge is required for translating.
+我们使用 https://www.gnu.org/software/gettext/[gettext] 管理翻译文件。
+https://poedit.net/[Poedit] 等工具提供了便于编辑翻译文件的用户界面，
+但你也可以使用自己熟悉的任何编辑器。翻译工作不需要编程知识。
 
 [[i18n_with_git]]
-Translating with git
-~~~~~~~~~~~~~~~~~~~~
+=== 使用 git 翻译
 
-The language files are available as a
-https://git.proxmox.com/?p=proxmox-i18n.git[git repository]. If you are familiar
-with git, please contribute according to our
-{webwiki-url}Developer_Documentation[Developer Documentation].
+语言文件以 https://git.proxmox.com/?p=proxmox-i18n.git[git 仓库]形式提供。
+如果你熟悉 git，请按照我们的
+{webwiki-url}Developer_Documentation[开发者文档]进行贡献。
 
-You can create a new translation by doing the following (replace <LANG> with the
-language ID):
+可以通过以下步骤创建新的翻译（将 <LANG> 替换为语言 ID）：
 
  # git clone git://git.proxmox.com/git/proxmox-i18n.git
  # cd proxmox-i18n
  # make init-<LANG>.po
 
-Or you can edit an existing translation, using the editor of your choice:
+也可以使用你选择的编辑器编辑已有翻译：
 
  # poedit <LANG>.po
 
 
 [[i18n_without_git]]
-Translating without git
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 不使用 git 翻译
 
-Even if you are not familiar with git, you can help translate {pve}.
-To start, you can download the language files
-https://git.proxmox.com/?p=proxmox-i18n.git;a=tree[here]. Find the
-language you want to improve, then right click on the "raw" link of this language
-file and select 'Save Link As...'. Make your changes to the file, and then
-send your final translation directly to office(at)proxmox.com, together with a
-signed
-{webwiki-url}Developer_Documentation#Software_License_and_Copyright[contributor license agreement].
+即使你不熟悉 git，也可以帮助翻译 {pve}。首先，可以从
+https://git.proxmox.com/?p=proxmox-i18n.git;a=tree[这里]下载语言文件。
+找到要改进的语言，然后右键点击该语言文件的 "raw" 链接并选择
+'Save Link As...'。修改文件后，将最终翻译连同已签署的
+{webwiki-url}Developer_Documentation#Software_License_and_Copyright[贡献者许可协议]
+直接发送到 office(at)proxmox.com。
 
 
-Testing the Translation
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 测试翻译
 
-In order for the translation to be used in {pve}, you must first translate
-the `.po` file into a `.js` file. You can do this by invoking the following script,
-which is located in the same repository:
+为了让 {pve} 使用该翻译，必须先将 `.po` 文件转换为 `.js` 文件。可以调用同一仓库中的以下脚本完成转换：
 
  # ./po2js.pl -t pve xx.po >pve-lang-xx.js
 
-The resulting file `pve-lang-xx.js` can then be copied to the directory
-`/usr/share/pve-i18n`, on your proxmox server, in order to test it out.
+随后可将生成的文件 `pve-lang-xx.js` 复制到 Proxmox 服务器上的
+`/usr/share/pve-i18n` 目录中进行测试。
 
-Alternatively, you can build a deb package by running the following command from
-the root of the repository:
+也可以在仓库根目录运行以下命令构建 deb 包：
 
  # make deb
 
-IMPORTANT: For either of these methods to work, you need to have the following
-perl packages installed on your system. For Debian/Ubuntu:
+IMPORTANT: 无论使用哪种方法，都需要在系统中安装以下 perl 包。对于 Debian/Ubuntu：
 
    # apt-get install perl liblocale-po-perl libjson-perl
 
 
-Sending the Translation
-~~~~~~~~~~~~~~~~~~~~~~~
-You can send the finished translation (`.po` file) to the Proxmox team at the address
-office(at)proxmox.com, along with a signed contributor license agreement.
-Alternatively, if you have some developer experience, you can send it as a
-patch to the {pve} development mailing list. See
-{webwiki-url}Developer_Documentation[Developer Documentation].
+=== 发送翻译
+可以将完成的翻译（`.po` 文件）连同已签署的贡献者许可协议发送到
+Proxmox 团队的 office(at)proxmox.com。或者，如果你有一定开发经验，也可以将其作为补丁发送到
+{pve} 开发邮件列表。参见
+{webwiki-url}Developer_Documentation[开发者文档]。
+
+=== 常用命令示例
+
+生成并测试某个语言的 JavaScript 翻译文件：
+
+----
+# ./po2js.pl -t pve zh_CN.po >pve-lang-zh_CN.js
+# cp pve-lang-zh_CN.js /usr/share/pve-i18n/
+----

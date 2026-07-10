@@ -1,85 +1,81 @@
 [[chapter_qm_vcpu_list]]
-Introduction
--------------
+== 简介
 
-This is a list of AMD and Intel x86-64/amd64 CPU types as defined in QEMU,
-going back to 2007.
+这是 QEMU 中定义的 AMD 和 Intel x86-64/amd64 CPU 类型列表，可追溯到 2007 年。
 
-Intel CPU Types
----------------
+== Intel CPU 类型
 
 https://en.wikipedia.org/wiki/List_of_Intel_Xeon_processors[Intel processors]
 
-* 'Nahelem' : https://en.wikipedia.org/wiki/Nehalem_(microarchitecture)[1st generation of the Intel Core processor]
+* 'Nahelem' : https://en.wikipedia.org/wiki/Nehalem_(microarchitecture)[第 1 代 Intel Core 处理器]
 +
-* 'Nahelem-IBRS (v2)' : add Spectre v1 protection ('+spec-ctrl')
+* 'Nahelem-IBRS (v2)' : 添加 Spectre v1 防护（'+spec-ctrl'）
 +
-* 'Westmere' : https://en.wikipedia.org/wiki/Westmere_(microarchitecture)[1st generation of the Intel Core processor (Xeon E7-)]
+* 'Westmere' : https://en.wikipedia.org/wiki/Westmere_(microarchitecture)[第 1 代 Intel Core 处理器（Xeon E7-）]
 +
-* 'Westmere-IBRS (v2)' : add Spectre v1 protection ('+spec-ctrl')
+* 'Westmere-IBRS (v2)' : 添加 Spectre v1 防护（'+spec-ctrl'）
 +
-* 'SandyBridge' : https://en.wikipedia.org/wiki/Sandy_Bridge[2nd generation of the Intel Core processor]
+* 'SandyBridge' : https://en.wikipedia.org/wiki/Sandy_Bridge[第 2 代 Intel Core 处理器]
 +
-* 'SandyBridge-IBRS (v2)' : add Spectre v1 protection ('+spec-ctrl')
+* 'SandyBridge-IBRS (v2)' : 添加 Spectre v1 防护（'+spec-ctrl'）
 +
-* 'IvyBridge' : https://en.wikipedia.org/wiki/Ivy_Bridge_(microarchitecture)[3rd generation of the Intel Core processor]
+* 'IvyBridge' : https://en.wikipedia.org/wiki/Ivy_Bridge_(microarchitecture)[第 3 代 Intel Core 处理器]
 +
-* 'IvyBridge-IBRS (v2)': add Spectre v1 protection ('+spec-ctrl')
+* 'IvyBridge-IBRS (v2)': 添加 Spectre v1 防护（'+spec-ctrl'）
 +
-* 'Haswell' : https://en.wikipedia.org/wiki/Haswell_(microarchitecture)[4th generation of the Intel Core processor]
+* 'Haswell' : https://en.wikipedia.org/wiki/Haswell_(microarchitecture)[第 4 代 Intel Core 处理器]
 +
-* 'Haswell-noTSX (v2)' : disable TSX ('-hle', '-rtm')
+* 'Haswell-noTSX (v2)' : 禁用 TSX（'-hle', '-rtm'）
 +
-* 'Haswell-IBRS (v3)' : re-add TSX, add Spectre v1 protection ('+hle', '+rtm',
-'+spec-ctrl')
+* 'Haswell-IBRS (v3)' : 重新添加 TSX，并添加 Spectre v1 防护（'+hle', '+rtm',
+'+spec-ctrl'）
 +
-* 'Haswell-noTSX-IBRS (v4)' : disable TSX ('-hle', '-rtm')
+* 'Haswell-noTSX-IBRS (v4)' : 禁用 TSX（'-hle', '-rtm'）
 +
-* 'Broadwell': https://en.wikipedia.org/wiki/Broadwell_(microarchitecture)[5th generation of the Intel Core processor]
+* 'Broadwell': https://en.wikipedia.org/wiki/Broadwell_(microarchitecture)[第 5 代 Intel Core 处理器]
 +
-* 'Skylake': https://en.wikipedia.org/wiki/Skylake_(microarchitecture)[1st generation Xeon Scalable server processors]
+* 'Skylake': https://en.wikipedia.org/wiki/Skylake_(microarchitecture)[第 1 代 Xeon Scalable 服务器处理器]
 +
-* 'Skylake-IBRS (v2)' : add Spectre v1 protection, disable CLFLUSHOPT
-('+spec-ctrl', '-clflushopt')
+* 'Skylake-IBRS (v2)' : 添加 Spectre v1 防护，禁用 CLFLUSHOPT
+（'+spec-ctrl', '-clflushopt'）
 +
-* 'Skylake-noTSX-IBRS (v3)' : disable TSX ('-hle', '-rtm')
+* 'Skylake-noTSX-IBRS (v3)' : 禁用 TSX（'-hle', '-rtm'）
 +
-* 'Skylake-v4': add EPT switching ('+vmx-eptp-switching')
+* 'Skylake-v4': 添加 EPT switching（'+vmx-eptp-switching'）
 +
-* 'Cascadelake': https://en.wikipedia.org/wiki/Cascade_Lake_(microprocessor)[2nd generation Xeon Scalable processor]
+* 'Cascadelake': https://en.wikipedia.org/wiki/Cascade_Lake_(microprocessor)[第 2 代 Xeon Scalable 处理器]
 +
-* 'Cascadelake-v2' : add arch_capabilities msr ('+arch-capabilities',
-'+rdctl-no', '+ibrs-all', '+skip-l1dfl-vmentry', '+mds-no')
+* 'Cascadelake-v2' : 添加 arch_capabilities msr（'+arch-capabilities',
+'+rdctl-no', '+ibrs-all', '+skip-l1dfl-vmentry', '+mds-no'）
 +
-* 'Cascadelake-v3' : disable TSX ('-hle', '-rtm')
+* 'Cascadelake-v3' : 禁用 TSX（'-hle', '-rtm'）
 +
-* 'Cascadelake-v4' : add EPT switching ('+vmx-eptp-switching')
+* 'Cascadelake-v4' : 添加 EPT switching（'+vmx-eptp-switching'）
 +
-* 'Cascadelake-v5' : add XSAVES ('+xsaves', '+vmx-xsaves')
+* 'Cascadelake-v5' : 添加 XSAVES（'+xsaves', '+vmx-xsaves'）
 +
-* 'Cooperlake' : https://en.wikipedia.org/wiki/Cooper_Lake_(microprocessor)[3rd generation Xeon Scalable processors for 4 & 8 sockets servers]
+* 'Cooperlake' : https://en.wikipedia.org/wiki/Cooper_Lake_(microprocessor)[面向 4 路和 8 路服务器的第 3 代 Xeon Scalable 处理器]
 +
-* 'Cooperlake-v2' : add XSAVES ('+xsaves', '+vmx-xsaves')
+* 'Cooperlake-v2' : 添加 XSAVES（'+xsaves', '+vmx-xsaves'）
 +
-* 'Icelake': https://en.wikipedia.org/wiki/Ice_Lake_(microprocessor)[3rd generation Xeon Scalable server processors]
+* 'Icelake': https://en.wikipedia.org/wiki/Ice_Lake_(microprocessor)[第 3 代 Xeon Scalable 服务器处理器]
 +
-* 'Icelake-v2' : disable TSX ('-hle', '-rtm')
+* 'Icelake-v2' : 禁用 TSX（'-hle', '-rtm'）
 +
-* 'Icelake-v3' : add arch_capabilities msr ('+arch-capabilities', '+rdctl-no',
-'+ibrs-all', '+skip-l1dfl-vmentry', '+mds-no', '+pschange-mc-no', '+taa-no')
+* 'Icelake-v3' : 添加 arch_capabilities msr（'+arch-capabilities', '+rdctl-no',
+'+ibrs-all', '+skip-l1dfl-vmentry', '+mds-no', '+pschange-mc-no', '+taa-no'）
 +
-* 'Icelake-v4' : add missing flags ('+sha-ni', '+avx512ifma', '+rdpid', '+fsrm',
-'+vmx-rdseed-exit', '+vmx-pml', '+vmx-eptp-switching')
+* 'Icelake-v4' : 添加缺失 flags（'+sha-ni', '+avx512ifma', '+rdpid', '+fsrm',
+'+vmx-rdseed-exit', '+vmx-pml', '+vmx-eptp-switching'）
 +
-* 'Icelake-v5' : add XSAVES ('+xsaves', '+vmx-xsaves')
+* 'Icelake-v5' : 添加 XSAVES（'+xsaves', '+vmx-xsaves'）
 +
-* 'Icelake-v6' : add "5-level EPT" ('+vmx-page-walk-5')
+* 'Icelake-v6' : 添加 "5-level EPT"（'+vmx-page-walk-5'）
 +
-* 'SapphireRapids' : https://en.wikipedia.org/wiki/Sapphire_Rapids[4th generation Xeon Scalable server processors]
+* 'SapphireRapids' : https://en.wikipedia.org/wiki/Sapphire_Rapids[第 4 代 Xeon Scalable 服务器处理器]
 
 
-AMD CPU Types
--------------
+== AMD CPU 类型
 
 https://en.wikipedia.org/wiki/List_of_AMD_processors[AMD processors]
 
@@ -89,51 +85,47 @@ https://en.wikipedia.org/wiki/List_of_AMD_processors[AMD processors]
 +
 * 'Opteron_G5' :  https://en.wikipedia.org/wiki/Piledriver_(microarchitecture)[Piledriver]
 +
-* 'EPYC' : https://en.wikipedia.org/wiki/Zen_(first_generation)[1st generation of Zen processors]
+* 'EPYC' : https://en.wikipedia.org/wiki/Zen_(first_generation)[第 1 代 Zen 处理器]
 +
-* 'EPYC-IBPB (v2)' : add Spectre v1 protection ('+ibpb')
+* 'EPYC-IBPB (v2)' : 添加 Spectre v1 防护（'+ibpb'）
 +
-* 'EPYC-v3' : add missing flags ('+perfctr-core', '+clzero', '+xsaveerptr',
-'+xsaves')
+* 'EPYC-v3' : 添加缺失 flags（'+perfctr-core', '+clzero', '+xsaveerptr',
+'+xsaves'）
 +
-* 'EPYC-Rome' : https://en.wikipedia.org/wiki/Zen_2[2nd generation of Zen processors]
+* 'EPYC-Rome' : https://en.wikipedia.org/wiki/Zen_2[第 2 代 Zen 处理器]
 +
-* 'EPYC-Rome-v2' : add Spectre v2, v4 protection ('+ibrs', '+amd-ssbd')
+* 'EPYC-Rome-v2' : 添加 Spectre v2、v4 防护（'+ibrs', '+amd-ssbd'）
 +
-* 'EPYC-Milan' : https://en.wikipedia.org/wiki/Zen_3[3rd generation of Zen processors]
+* 'EPYC-Milan' : https://en.wikipedia.org/wiki/Zen_3[第 3 代 Zen 处理器]
 +
-* 'EPYC-Milan-v2' : add missing flags ('+vaes', '+vpclmulqdq',
+* 'EPYC-Milan-v2' : 添加缺失 flags（'+vaes', '+vpclmulqdq',
 '+stibp-always-on', '+amd-psfd', '+no-nested-data-bp',
-'+lfence-always-serializing', '+null-sel-clr-base')
+'+lfence-always-serializing', '+null-sel-clr-base'）
 
-ARM64 CPU Types
--------------
-* 'cortex-a35' : qemu arm64 tcg supported
+== ARM64 CPU 类型
+* 'cortex-a35' : qemu arm64 tcg 支持
 +
-* 'cortex-a53' : qemu arm64 tcg supported
+* 'cortex-a53' : qemu arm64 tcg 支持
 +
-* 'cortex-a57' : qemu arm64 tcg supported
+* 'cortex-a57' : qemu arm64 tcg 支持
 +
-* 'cortex-a72' : qemu arm64 tcg supported
+* 'cortex-a72' : qemu arm64 tcg 支持
 +
-* 'cortex-a76' : qemu arm64 tcg supported
+* 'cortex-a76' : qemu arm64 tcg 支持
 +
-* 'neoverse-n1' : qemu arm64 tcg supported
+* 'neoverse-n1' : qemu arm64 tcg 支持
 +
-* 'neoverse-n2' : qemu arm64 tcg supported
+* 'neoverse-n2' : qemu arm64 tcg 支持
 +
-* 'neoverse-v1' : qemu arm64 tcg supported
+* 'neoverse-v1' : qemu arm64 tcg 支持
 +
-* 'Kunpeng-920' : qemu tcg or kvm supported
+* 'Kunpeng-920' : qemu tcg 或 kvm 支持
 
 
-riscv64 CPU Types
--------------
+== riscv64 CPU 类型
 
-* 'rv64' : qemu rv64 tcg support
+* 'rv64' : qemu rv64 tcg 支持
 
-loongarch64 CPU Types
--------------
+== loongarch64 CPU 类型
 
-* 'la464' : qemu loongarch la464 tcg  or kvm support
-
+* 'la464' : qemu loongarch la464 tcg 或 kvm 支持

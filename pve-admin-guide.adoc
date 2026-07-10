@@ -1,13 +1,11 @@
 ifdef::pvelogo[]
-image:./images/proxmox-logo.svg[] pass:[<br>] Proxmox VE Administration Guide
-=============================================================================
+= image:./images/lierfang-logo.svg[] pass:[<br>] Pxvirt 管理指南
 endif::pvelogo[]
 ifndef::pvelogo[]
-Proxmox VE Administration Guide
-===============================
+= Pxvirt 管理指南
 endif::pvelogo[]
 :doctype:   book
-:title: Proxmox VE Administration Guide
+:title: Pxvirt 管理指南
 :toc2:
 :numbered:
 :data-uri:
@@ -56,8 +54,7 @@ include::notifications.adoc[]
 // Return to normal title levels.
 :leveloffset: 0
 
-Important Service Daemons
--------------------------
+== 重要服务守护进程
 
 :leveloffset: 2
 include::pvedaemon.adoc[]
@@ -73,14 +70,15 @@ include::pvescheduler.adoc[]
 :leveloffset: 0
 
 
-Useful Command-line Tools
--------------------------
+== 实用命令行工具
 
 :leveloffset: 2
 
 include::pvesubscription.adoc[]
 
 include::pveperf.adoc[]
+
+include::pvebcache.adoc[]
 
 include::pvesh.adoc[]
 
@@ -93,8 +91,7 @@ include::pve-bibliography.adoc[]
 :leveloffset: 0
 
 [appendix]
-Command-line Interface
-----------------------
+== 命令行界面
 
 :leveloffset: 1
 
@@ -105,96 +102,91 @@ include::output-format.adoc[]
 :leveloffset: 0
 
 
-*pvesm* - {pve} Storage Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvesm* - {pve} 存储管理器
 
 :leveloffset: 1
 include::pvesm.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvesubscription* - {pve} Subscription Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvesubscription* - {pve} 订阅管理器
 
 :leveloffset: 1
 include::pvesubscription.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pveperf* - {pve} Benchmark Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pveperf* - {pve} 基准测试脚本
 
 :leveloffset: 1
 include::pveperf.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pveceph* - Manage CEPH Services on {pve} Nodes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvebcache* - PXVIRT bcache 管理工具
+
+:leveloffset: 1
+include::pvebcache.1-synopsis.adoc[]
+
+:leveloffset: 0
+
+=== *pveceph* - 管理 {pve} 节点上的 CEPH 服务
 
 :leveloffset: 1
 include::pveceph.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvenode* - {pve} Node Management
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvenode* - {pve} 节点管理
 
 :leveloffset: 1
 include::pvenode.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvesh* - Shell interface for the {pve} API
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvesh* - {pve} API 的 Shell 接口
 
 :leveloffset: 1
 include::pvesh.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*qm* - QEMU/KVM Virtual Machine Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *qm* - QEMU/KVM 虚拟机管理器
 
 :leveloffset: 1
 include::qm.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*qmrestore* - Restore QemuServer `vzdump` Backups
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *qmrestore* - 还原 QemuServer `vzdump` 备份
 
 :leveloffset: 1
 include::qmrestore.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pct* - Proxmox Container Toolkit
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pct* - Proxmox 容器工具包
 
 :leveloffset: 1
 include::pct.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pveam* -  {pve} Appliance Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pveam* -  {pve} Appliance 管理器
 
 :leveloffset: 1
 include::pveam.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvecm* - {pve} Cluster Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvecm* - {pve} 集群管理器
 
 :leveloffset: 1
 include::pvecm.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvesr* - {pve} Storage Replication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvesr* - {pve} 存储复制
 
 :leveloffset: 1
 include::pvesr.1-synopsis.adoc[]
@@ -202,24 +194,21 @@ include::pvesr.1-synopsis.adoc[]
 :leveloffset: 0
 
 
-*pveum* - {pve} User Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pveum* - {pve} 用户管理器
 
 :leveloffset: 1
 include::pveum.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*vzdump* - Backup Utility for VMs and Containers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *vzdump* - 虚拟机和容器备份工具
 
 :leveloffset: 1
 include::vzdump.1-synopsis.adoc[]
 
 :leveloffset: 0
 
-*ha-manager* - {pve} HA Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *ha-manager* - {pve} HA 管理器
 
 :leveloffset: 1
 include::ha-manager.1-synopsis.adoc[]
@@ -228,27 +217,23 @@ include::ha-manager.1-synopsis.adoc[]
 
 
 [appendix]
-Service Daemons
----------------
+== 服务守护进程
 
-*pve-firewall* - {pve} Firewall Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pve-firewall* - {pve} 防火墙守护进程
 
 :leveloffset: 1
 include::pve-firewall.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvedaemon* - {pve} API Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvedaemon* - {pve} API 守护进程
 
 :leveloffset: 1
 include::pvedaemon.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pveproxy* - {pve} API Proxy Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pveproxy* - {pve} API 代理守护进程
 
 :leveloffset: 1
 
@@ -256,16 +241,14 @@ include::pveproxy.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvestatd* - {pve} Status Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvestatd* - {pve} 状态守护进程
 
 :leveloffset: 1
 include::pvestatd.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*spiceproxy* - SPICE Proxy Service
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *spiceproxy* - SPICE 代理服务
 
 :leveloffset: 1
 
@@ -273,32 +256,28 @@ include::spiceproxy.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pmxcfs* - Proxmox Cluster File System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pmxcfs* - Proxmox 集群文件系统
 
 :leveloffset: 1
 include::pmxcfs.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pve-ha-crm* - Cluster Resource Manager Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pve-ha-crm* - 集群资源管理器守护进程
 
 :leveloffset: 1
 include::pve-ha-crm.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pve-ha-lrm* - Local Resource Manager Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pve-ha-lrm* - 本地资源管理器守护进程
 
 :leveloffset: 1
 include::pve-ha-lrm.8-synopsis.adoc[]
 
 :leveloffset: 0
 
-*pvescheduler* - {pve} Scheduler Daemon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== *pvescheduler* - {pve} 调度器守护进程
 
 :leveloffset: 1
 include::pvescheduler.8-synopsis.adoc[]
@@ -306,8 +285,7 @@ include::pvescheduler.8-synopsis.adoc[]
 :leveloffset: 0
 
 [appendix]
-Configuration Files
--------------------
+== 配置文件
 
 :leveloffset: 2
 include::configuration-files.adoc[]
@@ -315,8 +293,7 @@ include::configuration-files.adoc[]
 :leveloffset: 0
 
 [appendix]
-Calendar Events
----------------
+== 日历事件
 
 :leveloffset: 1
 include::calendar-events.adoc[]
@@ -324,8 +301,7 @@ include::calendar-events.adoc[]
 :leveloffset: 0
 
 [appendix]
-QEMU vCPU List
---------------
+== QEMU vCPU 列表
 
 :leveloffset: 1
 include::qm-vcpu-list.adoc[]
@@ -333,8 +309,7 @@ include::qm-vcpu-list.adoc[]
 :leveloffset: 0
 
 [appendix]
-Firewall Macro Definitions
---------------------------
+== 防火墙宏定义
 
 include::pve-firewall-macros.adoc[]
 

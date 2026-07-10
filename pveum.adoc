@@ -3,213 +3,162 @@
 [[user_mgmt]]
 
 ifdef::manvolnum[]
-pveum(1)
-========
+= pveum(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pveum - Proxmox VE User Manager
+pveum - Proxmox VE 用户管理器
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pveum.1-synopsis.adoc[]
 
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 ifndef::manvolnum[]
-User Management
-===============
+= 用户管理
 :pve-toplevel:
 endif::manvolnum[]
 
 // Copied from pve wiki: Revision as of 16:10, 27 October 2015
 
-{pve} supports multiple authentication sources, for example Linux PAM,
-an integrated Proxmox VE authentication server, LDAP, Microsoft Active
-Directory and OpenID Connect.
+{pve} 支持多个认证源，例如 Linux PAM、集成的 Proxmox VE 认证服务器、LDAP、
+Microsoft Active Directory 和 OpenID Connect。
 
-By using role-based user and permission management for all objects (VMs,
-Storage, nodes, etc.), granular access can be defined.
+通过对所有对象（VM、存储、节点等）使用基于角色的用户和权限管理，可以定义细粒度访问控制。
 
 
 [[pveum_users]]
-Users
------
+== 用户
 
-{pve} stores user attributes in `/etc/pve/user.cfg`.
-Passwords are not stored here; users are instead associated with the
-<<pveum_authentication_realms,authentication realms>> described below.
-Therefore, a user is often internally identified by their username and
-realm in the form `<userid>@<realm>`.
+{pve} 将用户属性存储在 `/etc/pve/user.cfg` 中。密码不存储在这里；用户会关联到下文描述的
+<<pveum_authentication_realms,认证域>>。因此，在内部通常以 `<userid>@<realm>` 的形式，
+通过用户名和域来标识用户。
 
-Each user entry in this file contains the following information:
+该文件中的每个用户条目都包含以下信息：
 
-* First name
-* Last name
-* E-mail address
-* Group memberships
-* An optional expiration date
-* A comment or note about this user
-* Whether this user is enabled or disabled
-* Optional two-factor authentication keys
+* 名
+* 姓
+* 电子邮件地址
+* 组成员关系
+* 可选的过期日期
+* 关于该用户的注释或备注
+* 该用户是否启用或禁用
+* 可选的双因素认证密钥
 
-CAUTION: When you disable or delete a user, or if the expiry date set is
-in the past, this user will not be able to log in to new sessions or start new
-tasks. All tasks which have already been started by this user (for example,
-terminal sessions) will **not** be terminated automatically by any such event.
+CAUTION: 当禁用或删除用户，或者设置的过期日期已在过去时，该用户将无法登录新会话或启动
+新任务。该用户已经启动的所有任务（例如终端会话）都**不会**因这些事件而自动终止。
 
 
-System administrator
-~~~~~~~~~~~~~~~~~~~~
+=== 系统管理员
 
-The system's root user can always log in via the Linux PAM realm and is an
-unconfined administrator. This user cannot be deleted, but attributes can
-still be changed. System mails will be sent to the email address
-assigned to this user.
+系统的 root 用户始终可以通过 Linux PAM 域登录，并且是不受限制的管理员。该用户不能删除，
+但仍可更改其属性。系统邮件会发送到分配给该用户的电子邮件地址。
 
 
 [[pveum_groups]]
-Groups
-------
+== 组
 
-Each user can be a member of several groups. Groups are the preferred
-way to organize access permissions. You should always grant permissions
-to groups instead of individual users. That way you will get a
-much more maintainable access control list.
+每个用户可以属于多个组。组是组织访问权限的首选方式。应始终向组授予权限，而不是向单个用户
+授予权限。这样可以获得更易维护的访问控制列表。
 
 [[pveum_tokens]]
-API Tokens
-----------
+== API token
 
-API tokens allow stateless access to most parts of the REST API from another
-system, software or API client. Tokens can be generated for individual users
-and can be given separate permissions and expiration dates to limit the scope
-and duration of the access. Should the API token get compromised, it can be
-revoked without disabling the user itself.
+API token 允许其他系统、软件或 API 客户端以无状态方式访问 REST API 的大部分内容。
+可以为单个用户生成 token，并为其授予独立权限和过期日期，以限制访问范围和持续时间。如果
+API token 泄露，可以撤销它，而无需禁用用户本身。
 
-API tokens come in two basic types:
+API token 有两种基本类型：
 
-* Separated privileges: The token needs to be given explicit access with ACLs.
-  Its effective permissions are calculated by intersecting user and token
-  permissions.
-* Full privileges: The token's permissions are identical to that of the
-  associated user.
+* Separated privileges：需要通过 ACL 显式授予 token 访问权限。其有效权限通过用户权限与
+  token 权限的交集计算得出。
+* Full privileges：token 权限与关联用户的权限完全相同。
 
-CAUTION: The token value is only displayed/returned once when the token is
-generated. It cannot be retrieved again over the API at a later time!
+CAUTION: token 值只会在生成 token 时显示/返回一次。之后无法再通过 API 取回！
 
-To use an API token, set the HTTP header 'Authorization' to the displayed value
-of the form `PVEAPIToken=USER@REALM!TOKENID=UUID` when making API requests, or
-refer to your API client's documentation.
+使用 API token 时，请在发起 API 请求时将 HTTP header 'Authorization' 设置为显示的值，
+格式为 `PVEAPIToken=USER@REALM!TOKENID=UUID`；也可以参考所用 API 客户端的文档。
 
 [[pveum_resource_pools]]
-Resource Pools
---------------
+== 资源池
 
 [thumbnail="screenshot/gui-datacenter-pool-window.png"]
 
-A resource pool is a set of virtual machines, containers, and storage
-devices. It is useful for permission handling in cases where certain users
-should have controlled access to a specific set of resources, as it allows for a
-single permission to be applied to a set of elements, rather than having to
-manage this on a per-resource basis. Resource pools are often used in tandem
-with groups, so that the members of a group have permissions on a set of
-machines and storage.
+资源池是一组虚拟机、容器和存储设备。在某些用户应受控访问特定资源集合的场景中，它非常适合
+处理权限，因为可以将单个权限应用到一组元素，而不必逐个资源管理。资源池通常与组配合使用，
+使组成员对一组机器和存储拥有权限。
 
 [[pveum_authentication_realms]]
-Authentication Realms
----------------------
+== 认证域
 
-As {pve} users are just counterparts for users existing on some external
-realm, the realms have to be configured in `/etc/pve/domains.cfg`.
-The following realms (authentication methods) are available:
+由于 {pve} 用户只是某些外部域中已有用户的对应项，因此必须在 `/etc/pve/domains.cfg`
+中配置这些域。可用的域（认证方法）如下：
 
-Linux PAM Standard Authentication::
+Linux PAM 标准认证::
 
-Linux PAM is a framework for system-wide user authentication. These users are
-created on the host system with commands such as `adduser`. If PAM users exist
-on the {pve} host system, corresponding entries can be added to {pve}, to allow
-these users to log in via their system username and password.
+Linux PAM 是用于系统范围用户认证的框架。这些用户通过 `adduser` 等命令在主机系统上创建。
+如果 {pve} 主机系统中存在 PAM 用户，可以在 {pve} 中添加对应条目，使这些用户能够通过其
+系统用户名和密码登录。
 
 {pve} Authentication Server::
 
-This is a Unix-like password store, which stores hashed passwords in
-`/etc/pve/priv/shadow.cfg`. Passwords are hashed using the SHA-256 hashing
-algorithm. This is the most convenient realm for small-scale (or even
-mid-scale) installations, where users do not need access to anything outside of
-{pve}. In this case, users are fully managed by {pve} and are able to change
-their own passwords via the GUI.
+这是一个类 Unix 的密码存储，会在 `/etc/pve/priv/shadow.cfg` 中存储哈希后的密码。密码使用
+SHA-256 哈希算法处理。对于用户不需要访问 {pve} 外部任何内容的小规模（甚至中等规模）安装，
+这是最方便的域。在这种情况下，用户完全由 {pve} 管理，并且可以通过 GUI 修改自己的密码。
 
 LDAP::
 
-LDAP (Lightweight Directory Access Protocol) is an open, cross-platform protocol
-for authentication using directory services. OpenLDAP is a popular open-source
-implementations of the LDAP protocol.
+LDAP（Lightweight Directory Access Protocol）是一种开放、跨平台的协议，用于通过目录
+服务进行认证。OpenLDAP 是流行的开源 LDAP 协议实现。
 
-Microsoft Active Directory (AD)::
+Microsoft Active Directory（AD）::
 
-Microsoft Active Directory (AD) is a directory service for Windows domain
-networks and is supported as an authentication realm for {pve}. It supports LDAP
-as an authentication protocol.
+Microsoft Active Directory（AD）是用于 Windows 域网络的目录服务，{pve} 支持将其作为
+认证域。它支持 LDAP 作为认证协议。
 
 OpenID Connect::
 
-OpenID Connect is implemented as an identity layer on top of the OAuth 2.0
-protocol. It allows clients to verify the identity of the user, based on
-authentication performed by an external authorization server.
+OpenID Connect 是构建在 OAuth 2.0 协议之上的身份层。它允许客户端基于外部授权服务器
+执行的认证来验证用户身份。
 
 [[user-realms-pam]]
-Linux PAM Standard Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Linux PAM 标准认证
 
-As Linux PAM corresponds to host system users, a system user must exist on each
-node which the user is allowed to log in on. The user authenticates with their
-usual system password. This realm is added by default and can't be removed.
+由于 Linux PAM 对应主机系统用户，因此用户允许登录的每个节点上都必须存在系统用户。
+用户使用其常规系统密码进行认证。该域默认添加，且无法移除。
 
-Password changes via the GUI or, equivalently, the `/access/password` API
-endpoint only apply to the local node and not cluster-wide. Even though {pve}
-has a multi-master design, using different passwords for different nodes can
-still offer a security benefit.
+通过 GUI 或等价的 `/access/password` API 端点修改密码时，只会应用到本地节点，而不是
+集群范围。即使 {pve} 采用多主设计，为不同节点使用不同密码仍可带来安全收益。
 
-In terms of configurability, an administrator can choose to require two-factor
-authentication with logins from the realm and to set the realm as the default
-authentication realm.
+在可配置性方面，管理员可以选择要求来自该域的登录使用双因素认证，也可以将该域设置为默认
+认证域。
 
 
 [[user-realms-pve]]
-{pve} Authentication Server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== {pve} Authentication Server
 
-The {pve} authentication server realm is a simple Unix-like password store.
-The realm is created by default, and as with Linux PAM, the only configuration
-items available are the ability to require two-factor authentication for users
-of the realm, and to set it as the default realm for login.
+{pve} 认证服务器域是一个简单的类 Unix 密码存储。该域默认创建；与 Linux PAM 一样，
+可用的配置项只有：要求该域用户使用双因素认证，以及将其设置为默认登录域。
 
-Unlike the other {pve} realm types, users are created and authenticated entirely
-through {pve}, rather than authenticating against another system. Hence, you are
-required to set a password for this type of user upon creation.
+与其他 {pve} 域类型不同，这类用户完全通过 {pve} 创建和认证，而不是向另一个系统认证。
+因此，创建此类用户时必须为其设置密码。
 
 
 [[user-realms-ldap]]
-LDAP
-~~~~
+=== LDAP
 
-You can also use an external LDAP server for user authentication (for example,
-OpenLDAP). In this realm type, users are searched under a 'Base Domain Name'
-(`base_dn`), using the username attribute specified in the 'User Attribute Name'
-(`user_attr`) field.
+也可以使用外部 LDAP 服务器进行用户认证（例如 OpenLDAP）。在此域类型中，会在
+'Base Domain Name' (`base_dn`) 下搜索用户，并使用 'User Attribute Name' (`user_attr`)
+字段中指定的用户名属性。
 
-A server and optional fallback server can be configured, and the connection can
-be encrypted via SSL. Furthermore, filters can be configured for directories and
-groups. Filters allow you to further limit the scope of the realm.
+可以配置服务器和可选备用服务器，并可通过 SSL 加密连接。此外，可以为目录和组配置过滤器。
+过滤器允许进一步限制该域的范围。
 
-For instance, if a user is represented via the following LDIF dataset:
+例如，如果用户由以下 LDIF 数据集表示：
 
 ----
 # user1 of People at ldap-test.com
@@ -224,436 +173,341 @@ sn: Testers
 description: This is the first test user.
 ----
 
-The 'Base Domain Name' would be `ou=People,dc=ldap-test,dc=com` and the user
-attribute would be `uid`.
+'Base Domain Name' 将是 `ou=People,dc=ldap-test,dc=com`，用户属性将是 `uid`。
 
-If {pve} needs to authenticate (bind) to the LDAP server before being
-able to query and authenticate users, a bind domain name can be
-configured via the `bind_dn` property in `/etc/pve/domains.cfg`. Its
-password then has to be stored in `/etc/pve/priv/realm/<realmname>.pw`
-(for example, `/etc/pve/priv/realm/my-ldap.pw`). This file should contain a
-single line with the raw password.
+如果 {pve} 在查询和认证用户前需要先向 LDAP 服务器认证（bind），可以通过
+`/etc/pve/domains.cfg` 中的 `bind_dn` 属性配置 bind domain name。其密码必须存储在
+`/etc/pve/priv/realm/<realmname>.pw` 中（例如 `/etc/pve/priv/realm/my-ldap.pw`）。
+该文件应只包含一行原始密码。
 
-To verify certificates, you need to set `capath`. You can set it either
-directly to the CA certificate of your LDAP server, or to the system path
-containing all trusted CA certificates (`/etc/ssl/certs`).
-Additionally, you need to set the `verify` option, which can also be done over
-the web interface.
+要验证证书，需要设置 `capath`。可以将其直接设置为 LDAP 服务器的 CA 证书，也可以设置为
+包含所有受信任 CA 证书的系统路径（`/etc/ssl/certs`）。此外，还需要设置 `verify` 选项，
+这也可以通过 Web 界面完成。
 
-The main configuration options for an LDAP server realm are as follows:
+LDAP 服务器域的主要配置选项如下：
 
-* `Realm` (`realm`): The realm identifier for {pve} users
+* `Realm` (`realm`): {pve} 用户的域标识符
 
-* `Base Domain Name` (`base_dn`): The directory which users are searched under
+* `Base Domain Name` (`base_dn`): 搜索用户所在的目录
 
-* `User Attribute Name` (`user_attr`): The LDAP attribute containing the
-  username that users will log in with
+* `User Attribute Name` (`user_attr`): 包含用户登录用户名的 LDAP 属性
 
-* `Server` (`server1`): The server hosting the LDAP directory
+* `Server` (`server1`): 托管 LDAP 目录的服务器
 
-* `Fallback Server` (`server2`): An optional fallback server address, in case
-  the primary server is unreachable
+* `Fallback Server` (`server2`): 可选备用服务器地址，用于主服务器不可达时
 
-* `Port` (`port`): The port that the LDAP server listens on
+* `Port` (`port`): LDAP 服务器监听的端口
 
-NOTE: In order to allow a particular user to authenticate using the LDAP server,
-you must also add them as a user of that realm from the {pve} server. This can
-be carried out automatically with <<pveum_ldap_sync, syncing>>.
+NOTE: 要允许特定用户使用 LDAP 服务器认证，还必须从 {pve} 服务器将其添加为该域的用户。
+这可以通过 <<pveum_ldap_sync,同步>> 自动完成。
 
 
 [[user-realms-ad]]
-Microsoft Active Directory (AD)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Microsoft Active Directory（AD）
 
-To set up Microsoft AD as a realm, a server address and authentication domain
-need to be specified. Active Directory supports most of the same properties as
-LDAP, such as an optional fallback server, port, and SSL encryption.
-Furthermore, users can be added to {pve} automatically via
-<<pveum_ldap_sync, sync>> operations, after configuration.
+要将 Microsoft AD 设置为域，需要指定服务器地址和认证域。Active Directory 支持大多数与
+LDAP 相同的属性，例如可选备用服务器、端口和 SSL 加密。此外，配置完成后，可以通过
+<<pveum_ldap_sync,同步>> 操作自动将用户添加到 {pve}。
 
-As with LDAP, if {pve} needs to authenticate before it binds to the AD server,
-you must configure the 'Bind User' (`bind_dn`) property. This property is
-typically required by default for Microsoft AD.
+与 LDAP 一样，如果 {pve} 在绑定到 AD 服务器前需要认证，必须配置 'Bind User'
+(`bind_dn`) 属性。对于 Microsoft AD，通常默认需要该属性。
 
-The main configuration settings for Microsoft Active Directory are:
+Microsoft Active Directory 的主要配置设置如下：
 
-* `Realm` (`realm`): The realm identifier for {pve} users
+* `Realm` (`realm`): {pve} 用户的域标识符
 
-* `Domain` (`domain`): The AD domain of the server
+* `Domain` (`domain`): 服务器的 AD 域
 
-* `Server` (`server1`): The FQDN or IP address of the server
+* `Server` (`server1`): 服务器的 FQDN 或 IP 地址
 
-* `Fallback Server` (`server2`): An optional fallback server address, in case
-  the primary server is unreachable
+* `Fallback Server` (`server2`): 可选备用服务器地址，用于主服务器不可达时
 
-* `Port` (`port`): The port that the Microsoft AD server listens on
+* `Port` (`port`): Microsoft AD 服务器监听的端口
 
 
-NOTE: Microsoft AD normally checks values like usernames without case
-sensitivity. To make {pve} do the same, you can disable the default
-`case-sensitive` option by editing the realm in the web UI, or using the CLI
-(change the `ID` with the realm ID):
+NOTE: Microsoft AD 通常以大小写不敏感方式检查用户名等值。要让 {pve} 执行相同行为，
+可以在 Web UI 中编辑该域，或使用 CLI 禁用默认的 `case-sensitive` 选项（将 `ID` 替换为
+域 ID）：
 `pveum realm modify ID --case-sensitive 0`
 
 [[pveum_ldap_sync]]
-Syncing LDAP-Based Realms
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 同步基于 LDAP 的域
 
 [thumbnail="screenshot/gui-datacenter-realm-add-ldap.png"]
 
-It's possible to automatically sync users and groups for LDAP-based realms (LDAP
-& Microsoft Active Directory), rather than having to add them to {pve} manually.
-You can access the sync options from the Add/Edit window of the web interface's
-`Authentication` panel or via the `pveum realm add/modify` commands. You can
-then carry out the sync operation from the `Authentication` panel of the GUI or
-using the following command:
+可以为基于 LDAP 的域（LDAP 和 Microsoft Active Directory）自动同步用户和组，而不必手动
+将它们添加到 {pve}。可以从 Web 界面 `Authentication` 面板的 Add/Edit 窗口访问同步选项，
+也可以通过 `pveum realm add/modify` 命令访问。之后可以从 GUI 的 `Authentication` 面板
+执行同步操作，或使用以下命令：
 
 ----
 pveum realm sync <realm>
 ----
 
-Users and groups are synced to the cluster-wide configuration file,
-`/etc/pve/user.cfg`.
+用户和组会同步到集群范围配置文件 `/etc/pve/user.cfg`。
 
 
-Attributes to Properties
-^^^^^^^^^^^^^^^^^^^^^^^^
+==== 属性到属性映射
 
-If the sync response includes user attributes, they will be synced into the
-matching user property in the `user.cfg`. For example: `firstname` or
-`lastname`.
+如果同步响应包含用户属性，它们会同步到 `user.cfg` 中匹配的用户属性。例如：`firstname`
+或 `lastname`。
 
-If the names of the attributes are not matching the {pve} properties, you can
-set a custom field-to-field map in the config by using the `sync_attributes`
-option.
+如果属性名称与 {pve} 属性不匹配，可以使用 `sync_attributes` 选项在配置中设置自定义
+字段到字段映射。
 
-How such properties are handled if anything vanishes can be controlled via the
-sync options, see below.
+如果某些内容消失，这些属性的处理方式可以通过同步选项控制，见下文。
 
-Sync Configuration
-^^^^^^^^^^^^^^^^^^
+==== 同步配置
 
-The configuration options for syncing LDAP-based realms can be found in the
-`Sync Options` tab of the Add/Edit window.
+同步基于 LDAP 的域所需的配置选项，可以在 Add/Edit 窗口的 `Sync Options` 选项卡中找到。
 
-The configuration options are as follows:
+配置选项如下：
 
-* `Bind User` (`bind_dn`): Refers to the LDAP account used to query users
-  and groups. This account needs access to all desired entries. If it's set, the
-  search will be carried out via binding; otherwise, the search will be carried
-  out anonymously. The user must be a complete LDAP formatted distinguished name
-  (DN), for example, `cn=admin,dc=example,dc=com`.
+* `Bind User` (`bind_dn`): 指用于查询用户和组的 LDAP 账号。该账号需要能够访问所有目标
+  条目。如果设置了该项，搜索会通过绑定执行；否则搜索会匿名执行。该用户必须是完整的 LDAP
+  格式 distinguished name（DN），例如 `cn=admin,dc=example,dc=com`。
 
-* Groupname attr. (group_name_attr): Represents the
-  users' groups. Only entries which adhere to the usual character limitations of
-  the `user.cfg` are synced. Groups are synced with `-$realm` attached to the
-  name, in order to avoid naming conflicts. Please ensure that a sync does not
-  overwrite manually created groups.
+* Groupname attr. (group_name_attr): 表示用户所属的组。只会同步符合 `user.cfg` 常规字符
+  限制的条目。为避免命名冲突，组同步时会在名称后附加 `-$realm`。请确保同步不会覆盖手动
+  创建的组。
 
-* `User classes` (`user_classes`): Objects classes associated with users.
+* `User classes` (`user_classes`): 与用户关联的对象类。
 
-* `Group classes` (`group_classes`): Objects classes associated with groups.
+* `Group classes` (`group_classes`): 与组关联的对象类。
 
-* `E-Mail attribute`: If the LDAP-based server specifies user email addresses,
-  these can also be included in the sync by setting the associated attribute
-  here. From the command line, this is achievable through the
-  `--sync_attributes` parameter.
+* `E-Mail attribute`: 如果基于 LDAP 的服务器指定了用户电子邮件地址，可以在此处设置关联
+  属性，将其包含在同步中。从命令行可通过 `--sync_attributes` 参数实现。
 
-* `User Filter` (`filter`): For further filter options to target specific users.
+* `User Filter` (`filter`): 用于定位特定用户的进一步过滤选项。
 
-* `Group Filter` (`group_filter`): For further filter options to target specific
-  groups.
+* `Group Filter` (`group_filter`): 用于定位特定组的进一步过滤选项。
 
-NOTE: Filters allow you to create a set of additional match criteria, to narrow
-down the scope of a sync. Information on available LDAP filter types and their
-usage can be found at https://ldap.com/ldap-filters/[ldap.com].
+NOTE: 过滤器允许创建一组额外匹配条件，以缩小同步范围。可用 LDAP 过滤器类型及其用法的信息
+可在 https://ldap.com/ldap-filters/[ldap.com] 查看。
 
 [[pveum_ldap_sync_options]]
-Sync Options
-^^^^^^^^^^^^
+==== 同步选项
 
 [thumbnail="screenshot/gui-datacenter-realm-add-ldap-sync-options.png"]
 
-In addition to the options specified in the previous section, you can also
-configure further options that describe the behavior of the sync operation.
+除上一节指定的选项外，还可以配置更多用于描述同步操作行为的选项。
 
-These options are either set as parameters before the sync, or as defaults via
-the realm option `sync-defaults-options`.
+这些选项可以在同步前作为参数设置，也可以通过域选项 `sync-defaults-options` 设置为默认值。
 
-The main options for syncing are:
+主要同步选项如下：
 
-* `Scope` (`scope`): The scope of what to sync. It can be either `users`,
-  `groups` or `both`.
+* `Scope` (`scope`): 要同步的范围。可以是 `users`、`groups` 或 `both`。
 
-* `Enable new` (`enable-new`): If set, the newly synced users are enabled and
-  can log in. The default is `true`.
+* `Enable new` (`enable-new`): 如果设置，新同步的用户会被启用并可登录。默认值为 `true`。
 
-* `Remove Vanished` (`remove-vanished`): This is a list of options which, when
-  activated, determine if they are removed when they are not returned from
-  the sync response. The options are:
+* `Remove Vanished` (`remove-vanished`): 这是一个选项列表。启用后，当同步响应未返回相应
+  内容时，会决定是否移除它们。选项包括：
 
-    - `ACL` (`acl)`: Remove ACLs of users and groups which were not returned
-      returned in the sync response. This most often makes sense together with
-      `Entry`.
+    - `ACL` (`acl)`: 移除同步响应中未返回的用户和组的 ACL。它通常与 `Entry` 一起使用
+      最有意义。
 
-    - `Entry` (`entry`): Removes entries (i.e. users and groups) when they are
-      not returned in the sync response.
+    - `Entry` (`entry`): 当同步响应未返回条目（即用户和组）时移除这些条目。
 
-    - `Properties` (`properties`): Removes properties of entries where the user
-      in the sync response did not contain those attributes. This includes
-      all properties, even those never set by a sync. Exceptions are tokens
-      and the enable flag, these will be retained even with this option enabled.
+    - `Properties` (`properties`): 当同步响应中的用户未包含某些属性时，移除条目的这些属性。
+      这包括所有属性，即使它们从未由同步设置。例外是 token 和 enable 标志，即使启用此选项，
+      它们也会保留。
 
-* `Preview` (`dry-run`): No data is written to the config. This is useful if you
-  want to see which users and groups would get synced to the `user.cfg`.
+* `Preview` (`dry-run`): 不向配置写入任何数据。如果想查看哪些用户和组会同步到
+  `user.cfg`，这会很有用。
 
 [[pveum_ldap_reserved_characters]]
-Reserved characters
-^^^^^^^^^^^^^^^^^^^
+==== 保留字符
 
-Certain characters are reserved (see https://www.ietf.org/rfc/rfc2253.txt[RFC2253]) and cannot be
-easily used in attribute values in DNs without being escaped properly.
+某些字符是保留字符（参见 https://www.ietf.org/rfc/rfc2253.txt[RFC2253]），如果未正确转义，
+就不能轻易用于 DN 中的属性值。
 
-Following characters need escaping:
+以下字符需要转义：
 
-* Space ( ) at the beginning or end
-* Number sign (`#`) at the beginning
-* Comma (`,`)
-* Plus sign (`+`)
-* Double quote (`"`)
-* Forward slashes (`/`)
-* Angle brackets (`<>`)
-* Semicolon (`;`)
-* Equals sign (`=`)
+* 开头或结尾的空格（ ）
+* 开头的井号 (`#`)
+* 逗号 (`,`)
+* 加号 (`+`)
+* 双引号 (`"`)
+* 正斜杠 (`/`)
+* 尖括号 (`<>`)
+* 分号 (`;`)
+* 等号 (`=`)
 
-To use such characters in DNs, surround the attribute value in double quotes.
-For example, to bind with a user with the CN (Common Name) `Example, User`, use
-`CN="Example, User",OU=people,DC=example,DC=com` as value for `bind_dn`.
+要在 DN 中使用这类字符，请将属性值放入双引号中。例如，要以 CN（Common Name）为
+`Example, User` 的用户进行绑定，请使用 `CN="Example, User",OU=people,DC=example,DC=com`
+作为 `bind_dn` 的值。
 
-This applies to the `base_dn`, `bind_dn`, and `group_dn` attributes.
+这适用于 `base_dn`、`bind_dn` 和 `group_dn` 属性。
 
-NOTE: Users with colons and forward slashes cannot be synced since these are
-reserved characters in usernames.
+NOTE: 带有冒号和正斜杠的用户无法同步，因为这些是用户名中的保留字符。
 
 [[pveum_openid]]
-OpenID Connect
-~~~~~~~~~~~~~~
+=== OpenID Connect
 
-The main OpenID Connect configuration options are:
+OpenID Connect 的主要配置选项如下：
 
-* `Issuer URL` (`issuer-url`): This is the URL of the authorization server.
-{pve} uses the OpenID Connect Discovery protocol to automatically configure
-further details.
+* `Issuer URL` (`issuer-url`): 授权服务器的 URL。{pve} 使用 OpenID Connect Discovery
+协议自动配置更多细节。
 +
-While it is possible to use unencrypted `http://` URLs, we strongly recommend to
-use encrypted `https://` connections.
+虽然可以使用未加密的 `http://` URL，但强烈建议使用加密的 `https://` 连接。
 
-* `Realm` (`realm`): The realm identifier for {pve} users
+* `Realm` (`realm`): {pve} 用户的域标识符
 
-* `Client ID` (`client-id`):  OpenID Client ID.
+* `Client ID` (`client-id`): OpenID Client ID。
 
-* `Client Key` (`client-key`): Optional OpenID Client Key.
+* `Client Key` (`client-key`): 可选 OpenID Client Key。
 
-* `Autocreate Users` (`autocreate`): Automatically create users if they do not
-exist. While authentication is done at the OpenID server, all users still need
-an entry in the {pve} user configuration. You can either add them manually, or
-use the `autocreate` option to automatically add new users.
+* `Autocreate Users` (`autocreate`): 如果用户不存在，则自动创建用户。虽然认证在 OpenID
+服务器完成，但所有用户仍需要在 {pve} 用户配置中有条目。可以手动添加，也可以使用
+`autocreate` 选项自动添加新用户。
 
-* `Username Claim` (`username-claim`): OpenID claim used to generate the unique
-username (`subject`, `username` or `email`).
+* `Username Claim` (`username-claim`): 用于生成唯一用户名的 OpenID claim（`subject`、
+`username` 或 `email`）。
 
-* `Autocreate Groups` (`groups-autocreate`): Create all groups in the claim
-instead of using existing PVE groups (default behavior).
+* `Autocreate Groups` (`groups-autocreate`): 创建 claim 中的所有组，而不是使用现有 PVE 组
+（默认行为）。
 
-* `Groups Claim` (`groups-claim`): OpenID claim used to retrieve the groups from
-the ID token or userinfo endpoint.
+* `Groups Claim` (`groups-claim`): 用于从 ID token 或 userinfo endpoint 获取组的
+OpenID claim。
 
-* `Overwrite Groups` (`groups-overwrite`): Overwrite all groups assigned to user
-instead of appending to existing groups (default behavior).
+* `Overwrite Groups` (`groups-overwrite`): 覆盖分配给用户的所有组，而不是追加到现有组
+（默认行为）。
 
-Username mapping
-^^^^^^^^^^^^^^^^
+==== 用户名映射
 
-The OpenID Connect specification defines a single unique attribute
-('claim' in OpenID terms) named `subject`. By default, we use the
-value of this attribute to generate {pve} usernames, by simple adding
-`@` and the realm name: `${subject}@${realm}`.
+OpenID Connect 规范定义了一个名为 `subject` 的唯一属性（OpenID 术语中称为 'claim'）。
+默认情况下，我们使用该属性的值生成 {pve} 用户名，方式是简单追加 `@` 和域名：
+`${subject}@${realm}`。
 
-Unfortunately, most OpenID servers use random strings for `subject`, like
-`DGH76OKH34BNG3245SB`, so a typical username would look like
-`DGH76OKH34BNG3245SB@yourrealm`. While unique, it is difficult for
-humans to remember such random strings, making it quite impossible to
-associate real users with this.
+遗憾的是，大多数 OpenID 服务器会为 `subject` 使用随机字符串，例如
+`DGH76OKH34BNG3245SB`，因此典型用户名会类似 `DGH76OKH34BNG3245SB@yourrealm`。
+虽然它是唯一的，但这类随机字符串很难记忆，也几乎无法将其与真实用户关联起来。
 
-The `username-claim` setting allows you to use other attributes for
-the username mapping. Setting it to `username` is preferred if the
-OpenID Connect server provides that attribute and guarantees its
-uniqueness.
+`username-claim` 设置允许使用其他属性进行用户名映射。如果 OpenID Connect 服务器提供
+`username` 属性并保证其唯一性，建议将其设置为 `username`。
 
-Another option is to use `email`, which also yields human readable
-usernames. Again, only use this setting if the server guarantees the
-uniqueness of this attribute.
+另一个选项是使用 `email`，这也会生成便于人类阅读的用户名。同样，只有在服务器保证该属性
+唯一时才应使用此设置。
 
-Groups mapping
-^^^^^^^^^^^^^^
+==== 组映射
 
-Specifying the `groups-claim` setting in the OpenID configuration enables group
-mapping functionality. The data provided in the `groups-claim` should be
-a list of strings that correspond to groups that a user should be a member of in
-{pve}. To prevent collisions, group names from the OpenID claim are suffixed 
-with `-<realm name>` (e.g. for the OpenID group name `my-openid-group` in the 
-realm `oidc`, the group name in {pve} would be `my-openid-group-oidc`).
+在 OpenID 配置中指定 `groups-claim` 设置会启用组映射功能。`groups-claim` 中提供的数据
+应是字符串列表，对应用户在 {pve} 中应属于的组。为避免冲突，来自 OpenID claim 的组名会
+附加 `-<realm name>` 后缀（例如，域 `oidc` 中的 OpenID 组名 `my-openid-group`，在
+{pve} 中的组名会是 `my-openid-group-oidc`）。
 
-Any groups reported by the OpenID provider that do not exist in {pve} are
-ignored by default. If all groups reported by the OpenID provider should exist
-in {pve}, the `groups-autocreate` option may be used to automatically create
-these groups on user logins.
+默认情况下，OpenID provider 报告但在 {pve} 中不存在的任何组都会被忽略。如果希望 OpenID
+provider 报告的所有组都存在于 {pve} 中，可以使用 `groups-autocreate` 选项在用户登录时
+自动创建这些组。
 
-By default, groups are appended to the user's existing groups. It may be 
-desirable to overwrite any groups that the user is already a member in {pve}
-with those from the OpenID provider. Enabling the `groups-overwrite` setting
-removes all groups from the user in {pve} before adding the groups reported by
-the OpenID provider.
+默认情况下，组会追加到用户现有组中。某些场景下，可能希望使用 OpenID provider 提供的组
+覆盖用户在 {pve} 中已有的组。启用 `groups-overwrite` 设置后，会先从 {pve} 中移除该用户的
+所有组，再添加 OpenID provider 报告的组。
 
-In some cases, OpenID servers may send groups claims which include invalid
-characters for {pve} group IDs. Any groups that contain characters not allowed
-in a {pve} group name are not included and a warning will be sent to the logs.
+在某些情况下，OpenID 服务器可能发送包含 {pve} 组 ID 无效字符的 groups claim。任何包含
+{pve} 组名不允许字符的组都不会被包含，并会向日志发送警告。
 
-Advanced settings
-^^^^^^^^^^^^^^^^^
+==== 高级设置
 
-* `Query userinfo endpoint` (`query-userinfo`): Enabling this option requires
-the OpenID Connect authenticator to query the "userinfo" endpoint for claim
-values. Disabling this option is useful for some identity providers that do not
-support the "userinfo" endpoint (e.g. ADFS).
+* `Query userinfo endpoint` (`query-userinfo`): 启用该选项后，OpenID Connect 认证器需要
+查询 "userinfo" endpoint 以获取 claim 值。对于某些不支持 "userinfo" endpoint 的身份
+提供方（例如 ADFS），禁用该选项会很有用。
 
-Examples
-^^^^^^^^
+==== 示例
 
-Here is an example of creating an OpenID realm using Google. You need to
-replace `--client-id` and `--client-key` with the values
-from your Google OpenID settings.
+以下是使用 Google 创建 OpenID 域的示例。需要将 `--client-id` 和 `--client-key` 替换为
+Google OpenID 设置中的值。
 
 ----
 pveum realm add myrealm1 --type openid --issuer-url  https://accounts.google.com --client-id XXXX --client-key YYYY --username-claim email
 ----
 
-The above command uses `--username-claim email`, so that the usernames on the
-{pve} side look like `example.user@google.com@myrealm1`.
+上述命令使用 `--username-claim email`，因此 {pve} 端的用户名类似
+`example.user@google.com@myrealm1`。
 
-Keycloak (https://www.keycloak.org/) is a popular open source Identity
-and Access Management tool, which supports OpenID Connect. In the following
-example, you need to replace the `--issuer-url` and `--client-id` with
-your information:
+Keycloak (https://www.keycloak.org/) 是流行的开源 Identity and Access Management
+工具，支持 OpenID Connect。在以下示例中，需要将 `--issuer-url` 和 `--client-id` 替换为
+你的信息：
 
 ----
 pveum realm add myrealm2 --type openid --issuer-url  https://your.server:8080/realms/your-realm --client-id XXX --username-claim username
 ----
 
-Using `--username-claim username` enables simple usernames on the
-{pve} side, like `example.user@myrealm2`.
+使用 `--username-claim username` 会在 {pve} 端启用简单用户名，例如
+`example.user@myrealm2`。
 
-WARNING: You need to ensure that the user is not allowed to edit
-the username setting themselves (on the Keycloak server).
+WARNING: 需要确保用户不允许自行编辑用户名设置（在 Keycloak 服务器上）。
 
 
 [[pveum_tfa_auth]]
-Two-Factor Authentication
--------------------------
+== 双因素认证
 
-There are two ways to use two-factor authentication:
+双因素认证有两种使用方式：
 
-It can be required by the authentication realm, either via 'TOTP'
-(Time-based One-Time Password) or 'YubiKey OTP'. In this case, a newly
-created user needs to have their keys added immediately, as there is no way to
-log in without the second factor. In the case of 'TOTP', users can
-also change the 'TOTP' later on, provided they can log in first.
+可以由认证域强制要求，方式可以是 'TOTP'（Time-based One-Time Password）或
+'YubiKey OTP'。在这种情况下，新创建用户需要立即添加其密钥，因为没有第二因素就无法登录。
+对于 'TOTP'，只要用户能先登录，也可以稍后更改 'TOTP'。
 
-Alternatively, users can choose to opt-in to two-factor authentication
-later on, even if the realm does not enforce it.
+或者，即使域没有强制要求，用户也可以稍后自行选择启用双因素认证。
 
-Available Second Factors
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 可用的第二因素
 
-You can set up multiple second factors, in order to avoid a situation in
-which losing your smartphone or security key locks you out of your
-account permanently.
+可以设置多个第二因素，以避免因丢失智能手机或安全密钥而永久无法访问账号。
 
-The following two-factor authentication methods are available in
-addition to realm-enforced TOTP and YubiKey OTP:
+除域强制的 TOTP 和 YubiKey OTP 外，还可使用以下双因素认证方法：
 
-* User configured TOTP
+* 用户配置的 TOTP
   (https://en.wikipedia.org/wiki/Time-based_One-Time_Password[Time-based One-Time Password]).
-  A short code derived from a shared secret and the current time, it changes
-  every 30 seconds.
+  它是由共享密钥和当前时间派生出的短代码，每 30 秒变化一次。
 * WebAuthn (https://en.wikipedia.org/wiki/WebAuthn[Web Authentication]).
-  A general standard for authentication. It is implemented by various
-  security devices, like hardware keys or trusted platform modules (TPM)
-  from a computer or smart phone.
-* Single use Recovery Keys. A list of keys which should either be
-  printed out and locked in a secure place or saved digitally in an
-  electronic vault. Each key can be used only once. These are perfect for
-  ensuring that you are not locked out, even if all of your other second
-  factors are lost or corrupt.
+  它是一种通用认证标准。各种安全设备都实现了该标准，例如硬件密钥，或来自计算机/智能手机的
+  trusted platform module（TPM）。
+* 一次性 Recovery Keys。这是一组密钥，应打印出来并锁在安全位置，或以数字形式保存在电子
+  保险库中。每个密钥只能使用一次。即使所有其他第二因素丢失或损坏，它们也非常适合用于确保
+  你不会被锁定在账号之外。
 
-Before WebAuthn was supported, U2F could be setup by the user. Existing
-U2F factors can still be used, but it is recommended to switch to
-WebAuthn, once it is configured on the server.
+在支持 WebAuthn 之前，用户可以设置 U2F。现有 U2F 因素仍可继续使用，但建议在服务器配置
+WebAuthn 后切换到 WebAuthn。
 
-Realm Enforced Two-Factor Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 认证域强制双因素认证
 
-This can be done by selecting one of the available methods via the
-'TFA' dropdown box when adding or editing an Authentication Realm.
-When a realm has TFA enabled, it becomes a requirement, and only users
-with configured TFA will be able to log in.
+添加或编辑 Authentication Realm 时，可以通过 'TFA' 下拉框选择一种可用方法来完成此设置。
+当域启用 TFA 后，它会成为强制要求，只有已配置 TFA 的用户才能登录。
 
-Currently there are two methods available:
+当前有两种可用方法：
 
-Time-based OATH (TOTP):: This uses the standard HMAC-SHA1 algorithm,
-where the current time is hashed with the user's configured key. The
-time step and password length parameters are configurable.
+Time-based OATH (TOTP):: 它使用标准 HMAC-SHA1 算法，将当前时间与用户配置的密钥一起
+进行哈希处理。时间步长和密码长度参数均可配置。
 +
-A user can have multiple keys configured (separated by spaces), and the keys
-can be specified in Base32 (RFC3548) or hexadecimal notation.
+用户可以配置多个密钥（用空格分隔），密钥可以用 Base32（RFC3548）或十六进制表示法指定。
 +
-{pve} provides a key generation tool (`oathkeygen`) which prints out a random
-key in Base32 notation, that can be used directly with various OTP tools, such
-as the `oathtool` command-line tool, or on Android Google Authenticator,
-FreeOTP, andOTP or similar applications.
+{pve} 提供密钥生成工具 (`oathkeygen`)，它会打印一个 Base32 表示法的随机密钥，可直接用于
+各种 OTP 工具，例如 `oathtool` 命令行工具，或 Android 上的 Google Authenticator、
+FreeOTP、andOTP 或类似应用。
 
 YubiKey OTP::
-For authenticating via a YubiKey a Yubico API ID, API KEY and validation
-server URL must be configured, and users must have a YubiKey available. In
-order to get the key ID from a YubiKey, you can trigger the YubiKey once
-after connecting it via USB, and copy the first 12 characters of the typed
-password into the user's 'Key IDs' field.
+要通过 YubiKey 认证，必须配置 Yubico API ID、API KEY 和验证服务器 URL，用户也必须拥有
+可用的 YubiKey。要从 YubiKey 获取 key ID，可以通过 USB 连接后触发一次 YubiKey，并将输入
+密码的前 12 个字符复制到用户的 'Key IDs' 字段中。
 
-Please refer to the https://developers.yubico.com/OTP/[YubiKey OTP]
-documentation for how to use the
+关于如何使用
 https://www.yubico.com/products/services-software/yubicloud/[YubiCloud] or
-https://developers.yubico.com/Software_Projects/Yubico_OTP/YubiCloud_Validation_Servers/[host your own verification server].
+https://developers.yubico.com/Software_Projects/Yubico_OTP/YubiCloud_Validation_Servers/[host your own verification server]，
+请参考 https://developers.yubico.com/OTP/[YubiKey OTP] 文档。
 
 [[pveum_tfa_lockout]]
-Limits and Lockout of Two-Factor Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 双因素认证限制与锁定
 
-A second factor is meant to protect users if their password is somehow leaked
-or guessed. However, some factors could still be broken by brute force. For
-this reason, users will be locked out after too many failed 2nd factor login
-attempts.
+第二因素用于在用户密码泄露或被猜中时保护用户。不过，某些因素仍可能被暴力破解。因此，
+当第二因素登录尝试失败次数过多时，用户会被锁定。
 
-For TOTP, 8 failed attempts will disable the user's TOTP factors. They are
-unlocked when logging in with a recovery key. If TOTP was the only available
-factor, admin intervention is required, and it is highly recommended to require
-the user to change their password immediately.
+对于 TOTP，失败 8 次会禁用用户的 TOTP 因素。使用恢复密钥登录时会解锁它们。如果 TOTP
+是唯一可用因素，则需要管理员干预，并强烈建议要求用户立即修改密码。
 
-Since FIDO2/Webauthn and recovery keys are less susceptible to brute force
-attacks, the limit there is higher (100 tries), but all second factors are
-blocked for an hour when exceeded.
+由于 FIDO2/Webauthn 和恢复密钥较不容易受到暴力攻击，因此限制更高（100 次尝试），但超过
+限制后所有第二因素都会被阻止一小时。
 
-An admin can unlock a user's Two-Factor Authentication at any time via the user
-list in the UI or the command line:
+管理员可以随时通过 UI 中的用户列表或命令行解锁用户的双因素认证：
 
 [source,bash]
 ----
@@ -661,437 +515,365 @@ list in the UI or the command line:
 ----
 
 [[pveum_user_configured_totp]]
-User Configured TOTP Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 用户配置的 TOTP 认证
 
-Users can choose to enable 'TOTP' or 'WebAuthn' as a second factor on login, via
-the 'TFA' button in the user list (unless the realm enforces 'YubiKey OTP').
+用户可以通过用户列表中的 'TFA' 按钮，选择启用 'TOTP' 或 'WebAuthn' 作为登录第二因素
+（除非该域强制使用 'YubiKey OTP'）。
 
-Users can always add and use one time 'Recovery Keys'.
+用户始终可以添加并使用一次性 'Recovery Keys'。
 
 [thumbnail="screenshot/gui-datacenter-two-factor.png"]
 
-After opening the 'TFA' window, the user is presented with a dialog to set up
-'TOTP' authentication. The 'Secret' field contains the key, which can be
-randomly generated via the 'Randomize' button. An optional 'Issuer Name' can be
-added to provide information to the 'TOTP' app about what the key belongs to.
-Most 'TOTP' apps will show the issuer name together with the corresponding
-'OTP' values. The username is also included in the QR code for the 'TOTP' app.
+打开 'TFA' 窗口后，用户会看到用于设置 'TOTP' 认证的对话框。'Secret' 字段包含密钥，可通过
+'Randomize' 按钮随机生成。可以添加可选的 'Issuer Name'，用于向 'TOTP' 应用提供该密钥
+归属信息。大多数 'TOTP' 应用会同时显示 issuer name 和对应的 'OTP' 值。用户名也会包含在
+'TOTP' 应用的二维码中。
 
-After generating a key, a QR code will be displayed, which can be used with most
-OTP apps such as FreeOTP. The user then needs to verify the current user
-password (unless logged in as 'root'), as well as the ability to correctly use
-the 'TOTP' key, by typing the current 'OTP' value into the 'Verification Code'
-field and pressing the 'Apply' button.
+生成密钥后，会显示一个二维码，可与 FreeOTP 等大多数 OTP 应用一起使用。然后，用户需要验证
+当前用户密码（除非以 'root' 登录），并通过在 'Verification Code' 字段中输入当前 'OTP'
+值并按 'Apply' 按钮，验证其能够正确使用 'TOTP' 密钥。
 
 [[user_tfa_setup_totp]]
 === TOTP
 
 [thumbnail="screenshot/pve-gui-tfa-add-totp.png"]
 
-There is no server setup required. Simply install a TOTP app on your
-smartphone (for example, https://freeotp.github.io/[FreeOTP]) and use
-the {pve} web interface to add a TOTP factor.
+不需要服务器端设置。只需在智能手机上安装 TOTP 应用（例如
+https://freeotp.github.io/[FreeOTP]），并使用 {pve} Web 界面添加 TOTP 因素。
 
 [[user_tfa_setup_webauthn]]
 === WebAuthn
 
-For WebAuthn to work, you need to have two things:
+要让 WebAuthn 工作，需要满足两个条件：
 
-* A trusted HTTPS certificate (for example, by using
-  https://pve.proxmox.com/wiki/Certificate_Management[Let's Encrypt]).
-  While it probably works with an untrusted certificate, some browsers may
-  warn or refuse WebAuthn operations if it is not trusted.
-* Setup the WebAuthn configuration (see *Datacenter -> Options ->
-  WebAuthn Settings* in the Proxmox VE web interface). This can be
-  auto-filled in most setups.
+* 受信任的 HTTPS 证书（例如使用
+  https://pve.proxmox.com/wiki/Certificate_Management[Let's Encrypt]）。
+  虽然使用不受信任证书也可能工作，但如果证书不受信任，某些浏览器可能会警告或拒绝 WebAuthn
+  操作。
+* 设置 WebAuthn 配置（参见 Proxmox VE Web 界面中的 *Datacenter -> Options ->
+  WebAuthn Settings*）。在大多数设置中，这可以自动填充。
 
-Once you have fulfilled both of these requirements, you can add a WebAuthn
-configuration in the *Two Factor* panel under *Datacenter -> Permissions -> Two
-Factor*.
+满足这两个要求后，可以在 *Datacenter -> Permissions -> Two Factor* 下的 *Two Factor*
+面板中添加 WebAuthn 配置。
 
 [[user_tfa_setup_recovery_keys]]
 === Recovery Keys
 
 [thumbnail="screenshot/pve-gui-tfa-add-recovery-keys.png"]
 
-Recovery key codes do not need any preparation; you can simply create a
-set of recovery keys in the *Two Factor* panel under *Datacenter -> Permissions
--> Two Factor*.
+恢复密钥代码不需要任何准备；可以直接在 *Datacenter -> Permissions -> Two Factor* 下的
+*Two Factor* 面板中创建一组恢复密钥。
 
-NOTE: There can only be one set of single-use recovery keys per user at any
-time.
+NOTE: 每个用户在任意时刻只能拥有一组一次性恢复密钥。
 
 
 [[pveum_configure_webauthn]]
-Server Side Webauthn Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 服务器端 Webauthn 配置
 
 [thumbnail="screenshot/gui-datacenter-webauthn-edit.png"]
 
-To allow users to use 'WebAuthn' authentication, it is necessary to use a valid
-domain with a valid SSL certificate, otherwise some browsers may warn or refuse
-to authenticate altogether.
+要允许用户使用 'WebAuthn' 认证，必须使用带有效 SSL 证书的有效域名；否则某些浏览器可能警告
+或完全拒绝认证。
 
-NOTE: Changing the 'WebAuthn' configuration may render all existing 'WebAuthn'
-registrations unusable!
+NOTE: 更改 'WebAuthn' 配置可能导致所有现有 'WebAuthn' 注册无法使用！
 
-This is done via `/etc/pve/datacenter.cfg`. For instance:
+这通过 `/etc/pve/datacenter.cfg` 完成。例如：
 
 ----
 webauthn: rp=mypve.example.com,origin=https://mypve.example.com:8006,id=mypve.example.com
 ----
 
 [[pveum_configure_u2f]]
-Server Side U2F Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 服务器端 U2F 配置
 
-NOTE: It is recommended to use WebAuthn instead.
+NOTE: 建议改用 WebAuthn。
 
-To allow users to use 'U2F' authentication, it may be necessary to use a valid
-domain with a valid SSL certificate, otherwise, some browsers may print
-a warning or reject U2F usage altogether. Initially, an 'AppId'
+要允许用户使用 'U2F' 认证，可能需要使用带有效 SSL 证书的有效域名；否则某些浏览器可能显示
+警告，或完全拒绝使用 U2F。首先，需要配置 'AppId'
 footnote:[AppId https://developers.yubico.com/U2F/App_ID.html]
-needs to be configured.
+。
 
-NOTE: Changing the 'AppId' will render all existing 'U2F' registrations
-unusable!
+NOTE: 更改 'AppId' 会导致所有现有 'U2F' 注册无法使用！
 
-This is done via `/etc/pve/datacenter.cfg`. For instance:
+这通过 `/etc/pve/datacenter.cfg` 完成。例如：
 
 ----
 u2f: appid=https://mypve.example.com:8006
 ----
 
-For a single node, the 'AppId' can simply be the address of the web interface,
-exactly as it is used in the browser, including the 'https://' and the port, as
-shown above. Please note that some browsers may be more strict than others when
-matching 'AppIds'.
+对于单个节点，'AppId' 可以简单设置为 Web 界面的地址，完全按照浏览器中使用的形式，包括
+'https://' 和端口，如上所示。请注意，在匹配 'AppIds' 时，某些浏览器可能比其他浏览器更严格。
 
-When using multiple nodes, it is best to have a separate `https` server
-providing an `appid.json`
+使用多个节点时，最好有一个单独的 `https` 服务器提供 `appid.json`
 footnote:[Multi-facet apps: https://developers.yubico.com/U2F/App_ID.html]
-file, as it seems to be compatible with most
-browsers. If all nodes use subdomains of the same top level domain, it may be
-enough to use the TLD as 'AppId'. It should however be noted that some browsers
-may not accept this.
+文件，因为这似乎与大多数浏览器兼容。如果所有节点都使用同一顶级域下的子域，则使用 TLD 作为
+'AppId' 可能已经足够。但需要注意，某些浏览器可能不接受这种做法。
 
-NOTE: A bad 'AppId' will usually produce an error, but we have encountered
-situations when this does not happen, particularly when using a top level domain
-'AppId' for a node that is accessed via a subdomain in Chromium. For this reason
-it is recommended to test the configuration with multiple browsers, as changing
-the 'AppId' later will render existing 'U2F' registrations unusable.
+NOTE: 错误的 'AppId' 通常会产生错误，但我们也遇到过不报错的情况，尤其是在 Chromium 中，
+通过子域访问某个节点却为其使用顶级域 'AppId' 时。因此建议使用多个浏览器测试配置，因为之后
+更改 'AppId' 会导致现有 'U2F' 注册无法使用。
 
 [[pveum_user_configured_u2f]]
-Activating U2F as a User
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 用户启用 U2F
 
-To enable 'U2F' authentication, open the 'TFA' window's 'U2F' tab, type in the
-current password (unless logged in as root), and press the 'Register' button.
-If the server is set up correctly and the browser accepts the server's provided
-'AppId', a message will appear prompting the user to press the button on the
-'U2F' device (if it is a 'YubiKey', the button light should be toggling on and
-off steadily, roughly twice per second).
+要启用 'U2F' 认证，请打开 'TFA' 窗口的 'U2F' 选项卡，输入当前密码（除非以 root 登录），
+然后按 'Register' 按钮。如果服务器设置正确，并且浏览器接受服务器提供的 'AppId'，会出现
+提示用户按下 'U2F' 设备按钮的消息（如果是 'YubiKey'，按钮灯应稳定地亮灭切换，大约每秒两次）。
 
-Firefox users may need to enable 'security.webauth.u2f' via 'about:config'
-before they can use a 'U2F' token.
+Firefox 用户可能需要先通过 'about:config' 启用 'security.webauth.u2f'，才能使用 'U2F'
+token。
 
 [[pveum_permission_management]]
-Permission Management
----------------------
+== 权限管理
 
-In order for a user to perform an action (such as listing, modifying or
-deleting parts of a VM's configuration), the user needs to have the
-appropriate permissions.
+为了让用户执行某个操作（例如列出、修改或删除 VM 配置的部分内容），该用户需要具备相应权限。
 
-{pve} uses a role and path based permission management system. An entry in
-the permissions table allows a user, group or token to take on a specific role
-when accessing an 'object' or 'path'. This means that such an access rule can
-be represented as a triple of '(path, user, role)', '(path, group,
-role)' or '(path, token, role)', with the role containing a set of allowed
-actions, and the path representing the target of these actions.
+{pve} 使用基于角色和路径的权限管理系统。权限表中的条目允许用户、组或 token 在访问某个
+'object' 或 'path' 时承担特定角色。这意味着此类访问规则可以表示为
+'(path, user, role)'、'(path, group, role)' 或 '(path, token, role)' 三元组，其中角色
+包含一组允许的动作，而路径表示这些动作的目标。
 
 
 [[pveum_roles]]
-Roles
-~~~~~
+=== 角色
 
-A role is simply a list of privileges. Proxmox VE comes with a number
-of predefined roles, which satisfy most requirements.
+角色本质上是一组权限列表。Proxmox VE 随附多个预定义角色，可满足大多数需求。
 
-* `Administrator`: has full privileges
-* `NoAccess`: has no privileges (used to forbid access)
-* `PVEAdmin`: can do most tasks, but has no rights to modify system settings
-  (`Sys.PowerMgmt`, `Sys.Modify`, `Realm.Allocate`) or permissions
+* `Administrator`: 拥有全部权限
+* `NoAccess`: 没有任何权限（用于禁止访问）
+* `PVEAdmin`: 可以执行大多数任务，但无权修改系统设置
+  (`Sys.PowerMgmt`, `Sys.Modify`, `Realm.Allocate`) 或权限
   (`Permissions.Modify`)
-* `PVEAuditor`: has read only access
-* `PVEDatastoreAdmin`: create and allocate backup space and templates
-* `PVEDatastoreUser`: allocate backup space and view storage
-* `PVEMappingAdmin`: manage resource mappings
-* `PVEMappingUser`: view and use resource mappings
-* `PVEPoolAdmin`: allocate pools
-* `PVEPoolUser`: view pools
-* `PVESDNAdmin`: manage SDN configuration
-* `PVESDNUser`: access to bridges/vnets
-* `PVESysAdmin`: audit, system console and system logs
-* `PVETemplateUser`: view and clone templates
-* `PVEUserAdmin`: manage users
-* `PVEVMAdmin`: fully administer VMs
-* `PVEVMUser`: view, backup, configure CD-ROM, VM console, VM power management
+* `PVEAuditor`: 拥有只读访问权限
+* `PVEDatastoreAdmin`: 创建并分配备份空间和模板
+* `PVEDatastoreUser`: 分配备份空间并查看存储
+* `PVEMappingAdmin`: 管理资源映射
+* `PVEMappingUser`: 查看和使用资源映射
+* `PVEPoolAdmin`: 分配池
+* `PVEPoolUser`: 查看池
+* `PVESDNAdmin`: 管理 SDN 配置
+* `PVESDNUser`: 访问 bridge/vnet
+* `PVESysAdmin`: 审计、系统控制台和系统日志
+* `PVETemplateUser`: 查看和克隆模板
+* `PVEUserAdmin`: 管理用户
+* `PVEVMAdmin`: 完整管理 VM
+* `PVEVMUser`: 查看、备份、配置 CD-ROM、VM 控制台、VM 电源管理
 
-You can see the whole set of predefined roles in the GUI.
+可以在 GUI 中查看完整的预定义角色集合。
 
-You can add new roles via the GUI or the command line.
+可以通过 GUI 或命令行添加新角色。
 
 [thumbnail="screenshot/gui-datacenter-role-add.png"]
-From the GUI, navigate to the 'Permissions -> Roles' tab from 'Datacenter' and
-click on the 'Create' button. There you can set a role name and select any
-desired privileges from the 'Privileges' drop-down menu.
+在 GUI 中，从 'Datacenter' 导航到 'Permissions -> Roles' 选项卡，然后点击 'Create'
+按钮。可以在那里设置角色名称，并从 'Privileges' 下拉菜单中选择所需权限。
 
-To add a role through the command line, you can use the 'pveum' CLI tool, for
-example:
+要通过命令行添加角色，可以使用 'pveum' CLI 工具，例如：
 [source,bash]
 ----
 pveum role add VM_Power-only --privs "VM.PowerMgmt VM.Console"
 pveum role add Sys_Power-only --privs "Sys.PowerMgmt Sys.Console"
 ----
 
-NOTE: Roles starting with `PVE` are always builtin, custom roles are not
-allowed use this reserved prefix.
+NOTE: 以 `PVE` 开头的角色始终是内置角色，自定义角色不允许使用此前缀。
 
-Privileges
-~~~~~~~~~~
+=== 权限
 
-A privilege is the right to perform a specific action. To simplify
-management, lists of privileges are grouped into roles, which can then
-be used in the permission table. Note that privileges cannot be directly
-assigned to users and paths without being part of a role.
+权限是执行特定操作的权利。为简化管理，权限列表会组合成角色，然后可在权限表中使用。请注意，
+权限不能不经角色而直接分配给用户和路径。
 
-We currently support the following privileges:
+当前支持以下权限：
 
-Node / System related privileges::
+节点/系统相关权限::
 
-* `Group.Allocate`: create/modify/remove groups
-* `Mapping.Audit`: view resource mappings
-* `Mapping.Modify`: manage resource mappings
-* `Mapping.Use`: use resource mappings
-* `Permissions.Modify`: modify access permissions
-* `Pool.Allocate`: create/modify/remove a pool
-* `Pool.Audit`: view a pool
-* `Realm.AllocateUser`: assign user to a realm
-* `Realm.Allocate`: create/modify/remove authentication realms
-* `SDN.Allocate`: manage SDN configuration
-* `SDN.Audit`: view SDN configuration
-* `Sys.Audit`: view node status/config, Corosync cluster config, and HA config
-* `Sys.Console`: console access to node
-* `Sys.Incoming`: allow incoming data streams from other clusters (experimental)
-* `Sys.Modify`: create/modify/remove node network parameters
-* `Sys.PowerMgmt`: node power management (start, stop, reset, shutdown, ...)
-* `Sys.Syslog`: view syslog
-* `User.Modify`: create/modify/remove user access and details.
+* `Group.Allocate`: 创建/修改/移除组
+* `Mapping.Audit`: 查看资源映射
+* `Mapping.Modify`: 管理资源映射
+* `Mapping.Use`: 使用资源映射
+* `Permissions.Modify`: 修改访问权限
+* `Pool.Allocate`: 创建/修改/移除池
+* `Pool.Audit`: 查看池
+* `Realm.AllocateUser`: 将用户分配到域
+* `Realm.Allocate`: 创建/修改/移除认证域
+* `SDN.Allocate`: 管理 SDN 配置
+* `SDN.Audit`: 查看 SDN 配置
+* `Sys.Audit`: 查看节点状态/配置、Corosync 集群配置和 HA 配置
+* `Sys.Console`: 节点控制台访问
+* `Sys.Incoming`: 允许来自其他集群的入站数据流（实验性）
+* `Sys.Modify`: 创建/修改/移除节点网络参数
+* `Sys.PowerMgmt`: 节点电源管理（start、stop、reset、shutdown 等）
+* `Sys.Syslog`: 查看 syslog
+* `User.Modify`: 创建/修改/移除用户访问和详细信息。
 
-Virtual machine related privileges::
+虚拟机相关权限::
 
-* `SDN.Use`: access SDN vnets and local network bridges
-* `VM.Allocate`: create/remove VM on a server
-* `VM.Audit`: view VM config
-* `VM.Backup`: backup/restore VMs
-* `VM.Clone`: clone/copy a VM
-* `VM.Config.CDROM`: eject/change CD-ROM
-* `VM.Config.CPU`: modify CPU settings
-* `VM.Config.Cloudinit`: modify Cloud-init parameters
-* `VM.Config.Disk`: add/modify/remove disks
-* `VM.Config.HWType`: modify emulated hardware types
-* `VM.Config.Memory`: modify memory settings
-* `VM.Config.Network`: add/modify/remove network devices
-* `VM.Config.Options`: modify any other VM configuration
-* `VM.Console`: console access to VM
-* `VM.Migrate`: migrate VM to alternate server on cluster
-* `VM.Monitor`: access to VM monitor (kvm)
-* `VM.PowerMgmt`: power management (start, stop, reset, shutdown, ...)
-* `VM.Snapshot.Rollback`: rollback VM to one of its snapshots
-* `VM.Snapshot`: create/delete VM snapshots
+* `SDN.Use`: 访问 SDN vnet 和本地网络 bridge
+* `VM.Allocate`: 在服务器上创建/移除 VM
+* `VM.Audit`: 查看 VM 配置
+* `VM.Backup`: 备份/还原 VM
+* `VM.Clone`: 克隆/复制 VM
+* `VM.Config.CDROM`: 弹出/更换 CD-ROM
+* `VM.Config.CPU`: 修改 CPU 设置
+* `VM.Config.Cloudinit`: 修改 Cloud-init 参数
+* `VM.Config.Disk`: 添加/修改/移除磁盘
+* `VM.Config.HWType`: 修改模拟硬件类型
+* `VM.Config.Memory`: 修改内存设置
+* `VM.Config.Network`: 添加/修改/移除网络设备
+* `VM.Config.Options`: 修改任何其他 VM 配置
+* `VM.Console`: VM 控制台访问
+* `VM.Migrate`: 将 VM 迁移到集群中的其他服务器
+* `VM.Monitor`: 访问 VM monitor (kvm)
+* `VM.PowerMgmt`: 电源管理（start、stop、reset、shutdown 等）
+* `VM.Snapshot.Rollback`: 将 VM 回滚到某个快照
+* `VM.Snapshot`: 创建/删除 VM 快照
 
-Storage related privileges::
+存储相关权限::
 
-* `Datastore.Allocate`: create/modify/remove a datastore and delete volumes
-* `Datastore.AllocateSpace`: allocate space on a datastore
-* `Datastore.AllocateTemplate`: allocate/upload templates and ISO images
-* `Datastore.Audit`: view/browse a datastore
+* `Datastore.Allocate`: 创建/修改/移除 datastore，并删除卷
+* `Datastore.AllocateSpace`: 在 datastore 上分配空间
+* `Datastore.AllocateTemplate`: 分配/上传模板和 ISO 镜像
+* `Datastore.Audit`: 查看/浏览 datastore
 
-WARNING: Both `Permissions.Modify` and `Sys.Modify` should be handled with
-care, as they allow modifying aspects of the system and its configuration that
-are dangerous or sensitive.
+WARNING: `Permissions.Modify` 和 `Sys.Modify` 都应谨慎处理，因为它们允许修改系统及其配置中
+危险或敏感的部分。
 
-WARNING: Carefully read the section about inheritance below to understand how
-assigned roles (and their privileges) are propagated along the ACL tree.
+WARNING: 请仔细阅读下文关于继承的章节，以理解已分配角色（及其权限）如何沿 ACL 树传播。
 
-Objects and Paths
-~~~~~~~~~~~~~~~~~
+=== 对象和路径
 
-Access permissions are assigned to objects, such as virtual machines,
-storages or resource pools.
-We use file system like paths to address these objects. These paths form a
-natural tree, and permissions of higher levels (shorter paths) can
-optionally be propagated down within this hierarchy.
+访问权限会分配给对象，例如虚拟机、存储或资源池。我们使用类似文件系统的路径来寻址这些对象。
+这些路径形成一棵自然树，高层级（较短路径）的权限可以选择性地在此层级结构中向下传播。
 
 [[pveum_templated_paths]]
-Paths can be templated. When an API call requires permissions on a
-templated path, the path may contain references to parameters of the API
-call. These references are specified in curly braces. Some parameters are
-implicitly taken from the API call's URI. For instance, the permission path
-`/nodes/{node}` when calling '/nodes/mynode/status' requires permissions on
-`/nodes/mynode`, while the path `{path}` in a PUT request to `/access/acl`
-refers to the method's `path` parameter.
+路径可以模板化。当 API 调用需要某个模板化路径上的权限时，该路径可能包含对 API 调用参数的
+引用。这些引用用花括号指定。有些参数会从 API 调用的 URI 中隐式取得。例如，在调用
+'/nodes/mynode/status' 时，权限路径 `/nodes/{node}` 要求拥有 `/nodes/mynode` 上的权限；
+而对 `/access/acl` 的 PUT 请求中的路径 `{path}` 则引用该方法的 `path` 参数。
 
-Some examples are:
+一些示例如下：
 
-* `/nodes/{node}`: Access to {pve} server machines
-* `/vms`: Covers all VMs
-* `/vms/{vmid}`: Access to specific VMs
-* `/storage/{storeid}`: Access to a specific storage
-* `/pool/{poolname}`: Access to resources contained in a specific <<pveum_pools,pool>>
-* `/access/groups`: Group administration
-* `/access/realms/{realmid}`: Administrative access to realms
+* `/nodes/{node}`: 访问 {pve} 服务器机器
+* `/vms`: 覆盖所有 VM
+* `/vms/{vmid}`: 访问特定 VM
+* `/storage/{storeid}`: 访问特定存储
+* `/pool/{poolname}`: 访问特定 <<pveum_pools,池>> 中包含的资源
+* `/access/groups`: 组管理
+* `/access/realms/{realmid}`: 对域的管理访问
 
 
-Inheritance
-^^^^^^^^^^^
+==== 继承
 
-As mentioned earlier, object paths form a file system like tree, and
-permissions can be inherited by objects down that tree (the propagate flag is
-set by default). We use the following inheritance rules:
+如前所述，对象路径形成一棵类似文件系统的树，权限可以被树中下层对象继承（propagate 标志
+默认设置）。我们使用以下继承规则：
 
-* Permissions for individual users always replace group permissions.
-* Permissions for groups apply when the user is member of that group.
-* Permissions on deeper levels replace those inherited from an upper level.
-* `NoAccess` cancels all other roles on a given path.
+* 单个用户的权限始终替代组权限。
+* 当用户属于某个组时，组权限会生效。
+* 更深层级的权限会替代从上层继承的权限。
+* `NoAccess` 会取消给定路径上的所有其他角色。
 
-Additionally, privilege separated tokens can never have permissions on any
-given path that their associated user does not have.
+此外，权限分离 token 在任何给定路径上都不能拥有其关联用户没有的权限。
 
 [[pveum_pools]]
-Pools
-~~~~~
+=== 池
 
-Pools can be used to group a set of virtual machines and datastores. You can
-then simply set permissions on pools (`/pool/{poolid}`), which are inherited by
-all pool members. This is a great way to simplify access control.
+池可用于对一组虚拟机和 datastore 分组。之后只需在池 (`/pool/{poolid}`) 上设置权限，
+所有池成员都会继承这些权限。这是简化访问控制的好方法。
 
 
-Which Permissions Do I Need?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 我需要哪些权限？
 
-The required API permissions are documented for each individual
-method, and can be found at https://pve.proxmox.com/pve-docs/api-viewer/.
+每个单独方法所需的 API 权限都有文档记录，可在
+https://pve.proxmox.com/pve-docs/api-viewer/ 找到。
 
-The permissions are specified as a list, which can be interpreted as a
-tree of logic and access-check functions:
+权限以列表形式指定，可解释为逻辑和访问检查函数构成的树：
 
 `["and", <subtests>...]` and `["or", <subtests>...]`::
-Each(`and`) or any(`or`) further element in the current list has to be true.
+当前列表中的后续元素必须全部（`and`）或任意一个（`or`）为真。
 
 `["perm", <path>, [ <privileges>... ], <options>...]`::
-The `path` is a templated parameter (see
-<<pveum_templated_paths,Objects and Paths>>). All (or, if the `any`
-option is used, any) of the listed
-privileges must be allowed on the specified path. If a `require-param`
-option is specified, then its specified parameter is required even if the
-API call's schema otherwise lists it as being optional.
+`path` 是模板化参数（参见 <<pveum_templated_paths,对象和路径>>）。指定路径上必须允许列出的
+所有权限（或者，如果使用 `any` 选项，则允许任意一个权限）。如果指定了 `require-param`
+选项，那么即使 API 调用的 schema 将其列为可选参数，该选项指定的参数也仍是必需的。
 
 `["userid-group", [ <privileges>... ], <options>...]`::
-The caller must have any of the listed privileges on `/access/groups`. In
-addition, there are two possible checks, depending on whether the
-`groups_param` option is set:
+调用者必须在 `/access/groups` 上拥有列出的任意权限。此外，根据是否设置 `groups_param`
+选项，有两种可能检查：
 +
-* `groups_param` is set: The API call has a non-optional `groups` parameter
-and the caller must have any of the listed privileges on all of the listed
-groups.
-* `groups_param` is not set: The user passed via the `userid` parameter
-must exist and be part of a group on which the caller has any of the listed
-privileges (via the `/access/groups/<group>` path).
+* 设置了 `groups_param`：API 调用有一个不可选的 `groups` 参数，调用者必须在列出的所有组上
+拥有列出的任意权限。
+* 未设置 `groups_param`：通过 `userid` 参数传入的用户必须存在，并且必须属于某个组，
+调用者在该组上拥有列出的任意权限（通过 `/access/groups/<group>` 路径）。
 
 `["userid-param", "self"]`::
-The value provided for the API call's `userid` parameter must refer to the
-user performing the action (usually in conjunction with `or`, to allow
-users to perform an action on themselves, even if they don't have elevated
-privileges).
+为 API 调用的 `userid` 参数提供的值必须指向执行该操作的用户（通常与 `or` 结合使用，
+允许用户在没有提升权限的情况下对自己执行操作）。
 
 `["userid-param", "Realm.AllocateUser"]`::
-The user needs `Realm.AllocateUser` access to `/access/realm/<realm>`, with
-`<realm>` referring to the realm of the user passed via the `userid`
-parameter. Note that the user does not need to exist in order to be
-associated with a realm, since user IDs are passed in the form of
-`<username>@<realm>`.
+用户需要对 `/access/realm/<realm>` 拥有 `Realm.AllocateUser` 访问权限，其中 `<realm>`
+指通过 `userid` 参数传入用户所属的域。请注意，用户无需已经存在即可与域关联，因为用户 ID
+以 `<username>@<realm>` 形式传入。
 
 `["perm-modify", <path>]`::
-The `path` is a templated parameter (see
-<<pveum_templated_paths,Objects and Paths>>). The user needs either the
-`Permissions.Modify` privilege or,
-depending on the path, the following privileges as a possible substitute:
+`path` 是模板化参数（参见 <<pveum_templated_paths,对象和路径>>）。用户需要
+`Permissions.Modify` 权限，或者根据路径，可以使用以下权限作为替代：
 +
-* `/storage/...`: requires 'Datastore.Allocate`
-* `/vms/...`: requires 'VM.Allocate`
-* `/pool/...`: requires 'Pool.Allocate`
+* `/storage/...`: 需要 'Datastore.Allocate'
+* `/vms/...`: 需要 'VM.Allocate'
+* `/pool/...`: 需要 'Pool.Allocate'
 +
-If the path is empty, `Permissions.Modify` on `/access` is required.
+如果路径为空，则需要 `/access` 上的 `Permissions.Modify`。
 +
-If the user does not have the `Permissions.Modify` privilege, they can only
-delegate subsets of their own privileges on the given path (e.g., a user with
-`PVEVMAdmin` could assign `PVEVMUser`, but not `PVEAdmin`).
+如果用户没有 `Permissions.Modify` 权限，则只能在给定路径上委派自己权限的子集（例如，
+拥有 `PVEVMAdmin` 的用户可以分配 `PVEVMUser`，但不能分配 `PVEAdmin`）。
 
-Command-line Tool
------------------
+== 命令行工具
 
-Most users will simply use the GUI to manage users. But there is also
-a fully featured command-line tool called `pveum` (short for ``**P**roxmox
-**VE** **U**ser **M**anager''). Please note that all Proxmox VE command-line
-tools are wrappers around the API, so you can also access those
-functions through the REST API.
+大多数用户会直接使用 GUI 管理用户。但也有一个功能完整的命令行工具，名为 `pveum`
+（``**P**roxmox **VE** **U**ser **M**anager'' 的缩写）。请注意，所有 Proxmox VE
+命令行工具都是 API 的包装器，因此也可以通过 REST API 访问这些功能。
 
-Here are some simple usage examples. To show help, type:
+下面是一些简单用法示例。要显示帮助，请输入：
 
 [source,bash]
 ----
  pveum
 ----
 
-or (to show detailed help about a specific command)
+或者（显示特定命令的详细帮助）：
 
 [source,bash]
 ----
  pveum help user add
 ----
 
-Create a new user:
+创建新用户：
 
 [source,bash]
 ----
  pveum user add testuser@pve -comment "Just a test"
 ----
 
-Set or change the password (not all realms support this):
+设置或更改密码（并非所有域都支持）：
 
 [source,bash]
 ----
  pveum passwd testuser@pve
 ----
 
-Disable a user:
+禁用用户：
 
 [source,bash]
 ----
  pveum user modify testuser@pve -enable 0
 ----
 
-Create a new group:
+创建新组：
 
 [source,bash]
 ----
  pveum group add testgroup
 ----
 
-Create a new role:
+创建新角色：
 
 [source,bash]
 ----
@@ -1099,31 +881,28 @@ Create a new role:
 ----
 
 
-Real World Examples
--------------------
+== 真实场景示例
 
 
-Administrator Group
-~~~~~~~~~~~~~~~~~~~
+=== 管理员组
 
-It is possible that an administrator would want to create a group of users with
-full administrator rights (without using the root account).
+管理员可能希望创建一组拥有完整管理员权限的用户（而不使用 root 账号）。
 
-To do this, first define the group:
+为此，首先定义该组：
 
 [source,bash]
 ----
  pveum group add admin -comment "System Administrators"
 ----
 
-Then assign the role:
+然后分配角色：
 
 [source,bash]
 ----
  pveum acl modify / -group admin -role Administrator
 ----
 
-Finally, you can add users to the new 'admin' group:
+最后，可以将用户添加到新的 'admin' 组：
 
 [source,bash]
 ----
@@ -1131,20 +910,18 @@ Finally, you can add users to the new 'admin' group:
 ----
 
 
-Auditors
-~~~~~~~~
+=== 审计员
 
-You can give read only access to users by assigning the `PVEAuditor`
-role to users or groups.
+可以通过向用户或组分配 `PVEAuditor` 角色，授予只读访问权限。
 
-Example 1: Allow user `joe@pve` to see everything
+示例 1：允许用户 `joe@pve` 查看所有内容
 
 [source,bash]
 ----
  pveum acl modify / -user joe@pve -role PVEAuditor
 ----
 
-Example 2: Allow user `joe@pve` to see all virtual machines
+示例 2：允许用户 `joe@pve` 查看所有虚拟机
 
 [source,bash]
 ----
@@ -1152,22 +929,18 @@ Example 2: Allow user `joe@pve` to see all virtual machines
 ----
 
 
-Delegate User Management
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 委派用户管理
 
-If you want to delegate user management to user `joe@pve`, you can do
-that with:
+如果希望将用户管理委派给用户 `joe@pve`，可以使用：
 
 [source,bash]
 ----
  pveum acl modify /access -user joe@pve -role PVEUserAdmin
 ----
 
-User `joe@pve` can now add and remove users, and change other user attributes,
-such as passwords. This is a very powerful role, and you most
-likely want to limit it to selected realms and groups. The following
-example allows `joe@pve` to modify users within the realm `pve`, if they
-are members of group `customers`:
+用户 `joe@pve` 现在可以添加和移除用户，并更改其他用户属性，例如密码。这是一个非常强大的
+角色，通常应将其限制在选定域和组内。以下示例允许 `joe@pve` 修改 `pve` 域内且属于
+`customers` 组的用户：
 
 [source,bash]
 ----
@@ -1175,27 +948,21 @@ are members of group `customers`:
  pveum acl modify /access/groups/customers -user joe@pve -role PVEUserAdmin
 ----
 
-NOTE: The user is able to add other users, but only if they are
-members of the group `customers` and within the realm `pve`.
+NOTE: 该用户能够添加其他用户，但仅限这些用户属于 `customers` 组且位于 `pve` 域内。
 
-Limited API Token for Monitoring
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 用于监控的受限 API token
 
-Permissions on API tokens are always a subset of those of their corresponding
-user, meaning that an API token can't be used to carry out a task that the
-backing user has no permission to do. This section will demonstrate how you can
-use an API token with separate privileges, to limit the token owner's
-permissions further.
+API token 上的权限始终是其对应用户权限的子集，这意味着 API token 不能用于执行其背后用户
+无权执行的任务。本节演示如何使用具有独立权限的 API token，进一步限制 token 所有者的权限。
 
-Give the user `joe@pve` the role PVEVMAdmin on all VMs:
+授予用户 `joe@pve` 对所有 VM 的 PVEVMAdmin 角色：
 
 [source,bash]
 ----
  pveum acl modify /vms -user joe@pve -role PVEVMAdmin
 ----
 
-Add a new API token with separate privileges, which is only allowed to view VM
-information (for example, for monitoring purposes):
+添加一个具有独立权限的新 API token，只允许查看 VM 信息（例如用于监控）：
 
 [source,bash]
 ----
@@ -1203,7 +970,7 @@ information (for example, for monitoring purposes):
  pveum acl modify /vms -token 'joe@pve!monitoring' -role PVEAuditor
 ----
 
-Verify the permissions of the user and token:
+验证用户和 token 的权限：
 
 [source,bash]
 ----
@@ -1211,47 +978,42 @@ Verify the permissions of the user and token:
  pveum user token permissions joe@pve monitoring
 ----
 
-Resource Pools
-~~~~~~~~~~~~~~
+=== 资源池
 
-An enterprise is usually structured into several smaller departments, and it is
-common that you want to assign resources and delegate management tasks to each
-of these. Let's assume that you want to set up a pool for a software development
-department. First, create a group:
+企业通常由多个较小部门组成，经常需要为每个部门分配资源并委派管理任务。假设要为软件开发部门
+设置一个池。首先创建一个组：
 
 [source,bash]
 ----
  pveum group add developers -comment "Our software developers"
 ----
 
-Now we create a new user which is a member of that group:
+现在创建一个属于该组的新用户：
 
 [source,bash]
 ----
  pveum user add developer1@pve -group developers -password
 ----
 
-NOTE: The "-password" parameter will prompt you for a password
+NOTE: "-password" 参数会提示输入密码。
 
-Then we create a resource pool for our development department to use:
+然后创建供开发部门使用的资源池：
 
 [source,bash]
 ----
  pveum pool add dev-pool --comment "IT development pool"
 ----
 
-Finally, we can assign permissions to that pool:
+最后，可以为该池分配权限：
 
 [source,bash]
 ----
  pveum acl modify /pool/dev-pool/ -group developers -role PVEAdmin
 ----
 
-Our software developers can now administer the resources assigned to
-that pool.
+现在，软件开发人员可以管理分配给该池的资源。
 
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]
 endif::manvolnum[]
-

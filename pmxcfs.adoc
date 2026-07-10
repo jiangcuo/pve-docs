@@ -1,144 +1,126 @@
 [[chapter_pmxcfs]]
 ifdef::manvolnum[]
-pmxcfs(8)
-=========
+= pmxcfs(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pmxcfs - Proxmox Cluster File System
+pmxcfs - Proxmox 集群文件系统
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pmxcfs.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Proxmox Cluster File System (pmxcfs)
-====================================
+= Proxmox Cluster File System (pmxcfs)
 :pve-toplevel:
 endif::manvolnum[]
 
-The Proxmox Cluster file system (``pmxcfs'') is a database-driven file
-system for storing configuration files, replicated in real time to all
-cluster nodes using `corosync`. We use this to store all {PVE} related
-configuration files.
+Proxmox Cluster file system（``pmxcfs''）是一个由数据库驱动的文件系统，
+用于存储配置文件，并通过 `corosync` 实时复制到所有集群节点。系统使用它来
+存储所有与 {pve} 相关的配置文件。
 
-Although the file system stores all data inside a persistent database on disk,
-a copy of the data resides in RAM. This imposes restrictions on the maximum
-size, which is currently 128 MiB. This is still enough to store the
-configuration of several thousand virtual machines.
+虽然该文件系统会将所有数据存储在磁盘上的持久数据库中，但数据副本也驻留在
+RAM 中。因此最大大小受到限制，目前为 128 MiB。对于存储数千台虚拟机的配置，
+这仍然足够。
 
-This system provides the following advantages:
+该系统提供以下优势：
 
-* Seamless replication of all configuration to all nodes in real time
-* Provides strong consistency checks to avoid duplicate VM IDs
-* Read-only when a node loses quorum
-* Automatic updates of the corosync cluster configuration to all nodes
-* Includes a distributed locking mechanism
+* 将所有配置实时无缝复制到所有节点
+* 提供强一致性检查，避免 VM ID 重复
+* 当节点失去 quorum 时进入只读状态
+* 自动将 corosync 集群配置更新到所有节点
+* 包含分布式锁机制
 
 
-POSIX Compatibility
--------------------
+== POSIX 兼容性
 
-The file system is based on FUSE, so the behavior is POSIX like. But
-some feature are simply not implemented, because we do not need them:
+该文件系统基于 FUSE，因此行为类似 POSIX。但有些功能并未实现，因为系统并不需要：
 
-* You can just generate normal files and directories, but no symbolic
-  links, ...
+* 可以生成普通文件和目录，但不能生成符号链接，等等
 
-* You can't rename non-empty directories (because this makes it easier
-  to guarantee that VMIDs are unique).
+* 不能重命名非空目录（因为这样更容易保证 VMID 唯一）。
 
-* You can't change file permissions (permissions are based on paths)
+* 不能更改文件权限（权限基于路径）
 
-* `O_EXCL` creates were not atomic (like old NFS)
+* `O_EXCL` 创建操作不是原子的（类似旧版 NFS）
 
-* `O_TRUNC` creates are not atomic (FUSE restriction)
+* `O_TRUNC` 创建操作不是原子的（FUSE 限制）
 
 
-File Access Rights
-------------------
+== 文件访问权限
 
-All files and directories are owned by user `root` and have group
-`www-data`. Only root has write permissions, but group `www-data` can
-read most files. Files below the following paths are only accessible by root:
+所有文件和目录的所有者均为用户 `root`，所属组为 `www-data`。只有 root
+拥有写权限，但 `www-data` 组可以读取大多数文件。以下路径下的文件仅 root
+可访问：
 
  /etc/pve/priv/
  /etc/pve/nodes/${NAME}/priv/
 
 
-Technology
-----------
+== 技术
 
-We use the https://www.corosync.org[Corosync Cluster Engine] for
-cluster communication, and https://www.sqlite.org[SQlite] for the
-database file. The file system is implemented in user space using
-https://github.com/libfuse/libfuse[FUSE].
+系统使用 https://www.corosync.org[Corosync Cluster Engine] 进行集群通信，
+并使用 https://www.sqlite.org[SQlite] 作为数据库文件。该文件系统通过
+https://github.com/libfuse/libfuse[FUSE] 在用户空间实现。
 
-File System Layout
-------------------
+== 文件系统布局
 
-The file system is mounted at:
+该文件系统挂载在：
 
  /etc/pve
 
-Files
-~~~~~
+=== 文件
 
 [width="100%",cols="m,d"]
 |=======
-|`authkey.pub`                          | Public key used by the ticket system
-|`ceph.conf`                            | Ceph configuration file (note: /etc/ceph/ceph.conf is a symbolic link to this)
-|`corosync.conf`                        | Corosync cluster configuration file (prior to {pve} 4.x, this file was called cluster.conf)
-|`datacenter.cfg`                       | {pve} datacenter-wide configuration (keyboard layout, proxy, ...)
-|`domains.cfg`                          | {pve} authentication domains
-|`firewall/cluster.fw`                  | Firewall configuration applied to all nodes
-|`firewall/<NAME>.fw`                   | Firewall configuration for individual nodes
-|`firewall/<VMID>.fw`                   | Firewall configuration for VMs and containers
-|`ha/crm_commands`                      | Displays HA operations that are currently being carried out by the CRM
-|`ha/manager_status`                    | JSON-formatted information regarding HA services on the cluster
-|`ha/resources.cfg`                     | Resources managed by high availability, and their current state
-|`nodes/<NAME>/config`                  | Node-specific configuration
-|`nodes/<NAME>/lxc/<VMID>.conf`         | VM configuration data for LXC containers
-|`nodes/<NAME>/openvz/`                 | Prior to {pve} 4.0, used for container configuration data (deprecated, removed soon)
-|`nodes/<NAME>/pve-ssl.key`             | Private SSL key for `pve-ssl.pem`
-|`nodes/<NAME>/pve-ssl.pem`             | Public SSL certificate for web server (signed by cluster CA)
-|`nodes/<NAME>/pveproxy-ssl.key`        | Private SSL key for `pveproxy-ssl.pem` (optional)
-|`nodes/<NAME>/pveproxy-ssl.pem`        | Public SSL certificate (chain) for web server (optional override for `pve-ssl.pem`)
-|`nodes/<NAME>/qemu-server/<VMID>.conf` | VM configuration data for KVM VMs
-|`priv/authkey.key`                     | Private key used by ticket system
-|`priv/authorized_keys`                 | SSH keys of cluster members for authentication
-|`priv/ceph*`                           | Ceph authentication keys and associated capabilities
-|`priv/known_hosts`                     | SSH keys of the cluster members for verification
-|`priv/lock/*`                          | Lock files used by various services to ensure safe cluster-wide operations
-|`priv/pve-root-ca.key`                 | Private key of cluster CA
-|`priv/shadow.cfg`                      | Shadow password file for PVE Realm users
-|`priv/storage/<STORAGE-ID>.pw`         | Contains the password of a storage in plain text
-|`priv/tfa.cfg`                         | Base64-encoded two-factor authentication configuration
-|`priv/token.cfg`                       | API token secrets of all tokens
-|`pve-root-ca.pem`                      | Public certificate of cluster CA
-|`pve-www.key`                          | Private key used for generating CSRF tokens
-|`sdn/*`                                | Shared configuration files for Software Defined Networking (SDN)
-|`status.cfg`                           | {pve} external metrics server configuration
-|`storage.cfg`                          | {pve} storage configuration
-|`user.cfg`                             | {pve} access control configuration (users/groups/...)
-|`virtual-guest/cpu-models.conf`        | For storing custom CPU models
-|`vzdump.cron`                          | Cluster-wide vzdump backup-job schedule
+|`authkey.pub`                          | ticket 系统使用的公钥
+|`ceph.conf`                            | Ceph 配置文件（注意：/etc/ceph/ceph.conf 是指向该文件的符号链接）
+|`corosync.conf`                        | Corosync 集群配置文件（在 {pve} 4.x 之前，该文件名为 cluster.conf）
+|`datacenter.cfg`                       | {pve} 数据中心范围配置（键盘布局、代理等）
+|`domains.cfg`                          | {pve} 认证域
+|`firewall/cluster.fw`                  | 应用于所有节点的防火墙配置
+|`firewall/<NAME>.fw`                   | 单个节点的防火墙配置
+|`firewall/<VMID>.fw`                   | 虚拟机和容器的防火墙配置
+|`ha/crm_commands`                      | 显示 CRM 当前正在执行的 HA 操作
+|`ha/manager_status`                    | 集群上 HA 服务的 JSON 格式信息
+|`ha/resources.cfg`                     | 由高可用管理的资源及其当前状态
+|`nodes/<NAME>/config`                  | 节点专用配置
+|`nodes/<NAME>/lxc/<VMID>.conf`         | LXC 容器的 VM 配置数据
+|`nodes/<NAME>/openvz/`                 | 在 {pve} 4.0 之前用于容器配置数据（已弃用，即将移除）
+|`nodes/<NAME>/pve-ssl.key`             | `pve-ssl.pem` 的私有 SSL 密钥
+|`nodes/<NAME>/pve-ssl.pem`             | Web 服务器的公共 SSL 证书（由集群 CA 签名）
+|`nodes/<NAME>/pveproxy-ssl.key`        | `pveproxy-ssl.pem` 的私有 SSL 密钥（可选）
+|`nodes/<NAME>/pveproxy-ssl.pem`        | Web 服务器的公共 SSL 证书（链）（用于可选覆盖 `pve-ssl.pem`）
+|`nodes/<NAME>/qemu-server/<VMID>.conf` | KVM 虚拟机的 VM 配置数据
+|`priv/authkey.key`                     | ticket 系统使用的私钥
+|`priv/authorized_keys`                 | 用于认证的集群成员 SSH 密钥
+|`priv/ceph*`                           | Ceph 认证密钥及相关能力
+|`priv/known_hosts`                     | 用于验证的集群成员 SSH 密钥
+|`priv/lock/*`                          | 各服务用于确保集群范围操作安全的锁文件
+|`priv/pve-root-ca.key`                 | 集群 CA 的私钥
+|`priv/shadow.cfg`                      | PVE Realm 用户的 shadow 密码文件
+|`priv/storage/<STORAGE-ID>.pw`         | 以明文包含存储密码
+|`priv/tfa.cfg`                         | Base64 编码的双因素认证配置
+|`priv/token.cfg`                       | 所有 token 的 API token secret
+|`pve-root-ca.pem`                      | 集群 CA 的公共证书
+|`pve-www.key`                          | 用于生成 CSRF token 的私钥
+|`sdn/*`                                | Software Defined Networking（SDN）的共享配置文件
+|`status.cfg`                           | {pve} 外部指标服务器配置
+|`storage.cfg`                          | {pve} 存储配置
+|`user.cfg`                             | {pve} 访问控制配置（用户/组等）
+|`virtual-guest/cpu-models.conf`        | 用于存储自定义 CPU 模型
+|`vzdump.cron`                          | 集群范围的 vzdump 备份作业计划
 |=======
 
 
-Symbolic links
-~~~~~~~~~~~~~~
+=== 符号链接
 
-Certain directories within the cluster file system use symbolic links, in order
-to point to a node's own configuration files. Thus, the files pointed to in the
-table below refer to different files on each node of the cluster.
+集群文件系统中的某些目录使用符号链接，以指向节点自身的配置文件。因此，下表中
+指向的文件在集群的每个节点上都对应不同文件。
 
 [width="100%",cols="m,m"]
 |=======
@@ -149,93 +131,80 @@ table below refer to different files on each node of the cluster.
 |=======
 
 
-Special status files for debugging (JSON)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 用于调试的特殊状态文件（JSON）
 
 [width="100%",cols="m,d"]
 |=======
-|`.version`    |File versions (to detect file modifications)
-|`.members`    |Info about cluster members
-|`.vmlist`     |List of all VMs
-|`.clusterlog` |Cluster log (last 50 entries)
-|`.rrd`        |RRD data (most recent entries)
+|`.version`    |文件版本（用于检测文件修改）
+|`.members`    |集群成员信息
+|`.vmlist`     |所有虚拟机列表
+|`.clusterlog` |集群日志（最近 50 条）
+|`.rrd`        |RRD 数据（最近条目）
 |=======
 
 
-Enable/Disable debugging
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 启用/禁用调试
 
-You can enable verbose syslog messages with:
+可以通过以下命令启用详细 syslog 消息：
 
  echo "1" >/etc/pve/.debug
 
-And disable verbose syslog messages with:
+并通过以下命令禁用详细 syslog 消息：
 
  echo "0" >/etc/pve/.debug
 
+常用命令示例：
 
-Recovery
---------
+----
+systemctl status pve-cluster
+pvecm status
+----
 
-If you have major problems with your {pve} host, for example hardware
-issues, it could be helpful to copy the pmxcfs database file
-`/var/lib/pve-cluster/config.db`, and move it to a new {pve}
-host. On the new host (with nothing running), you need to stop the
-`pve-cluster` service and replace the `config.db` file (required permissions
-`0600`). Following this, adapt `/etc/hostname` and `/etc/hosts` according to the
-lost {pve} host, then reboot and check (and don't forget your
-VM/CT data).
+== 恢复
+
+如果 {pve} 主机出现严重问题，例如硬件故障，复制 pmxcfs 数据库文件
+`/var/lib/pve-cluster/config.db` 并将其移动到新的 {pve} 主机可能会有所帮助。
+在新主机上（没有运行任何内容时），需要停止 `pve-cluster` 服务并替换
+`config.db` 文件（所需权限为 `0600`）。随后，根据丢失的 {pve} 主机调整
+`/etc/hostname` 和 `/etc/hosts`，然后重启并检查（不要忘记 VM/CT 数据）。
 
 
-Remove Cluster Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 移除集群配置
 
-The recommended way is to reinstall the node after you remove it from
-your cluster. This ensures that all secret cluster/ssh keys and any
-shared configuration data is destroyed.
+建议的方式是在将节点从集群中移除后重新安装该节点。这可以确保所有机密的
+集群/ssh 密钥以及任何共享配置数据都被销毁。
 
-In some cases, you might prefer to put a node back to local mode without
-reinstalling, which is described in
+在某些情况下，可能希望在不重新安装的情况下将节点恢复为本地模式，相关内容见
 <<pvecm_separate_node_without_reinstall,Separate A Node Without Reinstalling>>
 
 
-Recovering/Moving Guests from Failed Nodes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 从故障节点恢复/移动客户机
 
-For the guest configuration files in `nodes/<NAME>/qemu-server/` (VMs) and
-`nodes/<NAME>/lxc/` (containers), {pve} sees the containing node `<NAME>` as the
-owner of the respective guest. This concept enables the usage of local locks
-instead of expensive cluster-wide locks for preventing concurrent guest
-configuration changes.
+对于 `nodes/<NAME>/qemu-server/`（虚拟机）和 `nodes/<NAME>/lxc/`（容器）中的
+客户机配置文件，{pve} 会将包含这些文件的节点 `<NAME>` 视为相应客户机的
+所有者。该概念允许使用本地锁，而不必使用成本更高的集群范围锁，来防止并发
+客户机配置更改。
 
-As a consequence, if the owning node of a guest fails (for example, due to a power
-outage, fencing event, etc.), a regular migration is not possible (even if all
-the disks are located on shared storage), because such a local lock on the
-(offline) owning node is unobtainable. This is not a problem for HA-managed
-guests, as {pve}'s High Availability stack includes the necessary
-(cluster-wide) locking and watchdog functionality to ensure correct and
-automatic recovery of guests from fenced nodes.
+因此，如果某个客户机的所有者节点发生故障（例如断电、fencing 事件等），
+常规迁移将无法进行（即使所有磁盘都位于共享存储上），因为无法在（离线的）
+所有者节点上取得这种本地锁。对于由 HA 管理的客户机，这不是问题，因为
+{pve} 的 High Availability 栈包含必要的（集群范围）锁和 watchdog 功能，
+可确保从被 fenced 的节点正确、自动地恢复客户机。
 
-If a non-HA-managed guest has only shared disks (and no other local resources
-which are only available on the failed node), a manual recovery
-is possible by simply moving the guest configuration file from the failed
-node's directory in `/etc/pve/` to an online node's directory (which changes the
-logical owner or location of the guest).
+如果一个未由 HA 管理的客户机只有共享磁盘（且没有其他仅在故障节点上可用的
+本地资源），则可以通过手动恢复：只需将客户机配置文件从 `/etc/pve/` 中
+故障节点目录移动到在线节点目录即可（这会更改该客户机的逻辑所有者或位置）。
 
-For example, recovering the VM with ID `100` from an offline `node1` to another
-node `node2` works by running the following command as root on any member node
-of the cluster:
+例如，要将 ID 为 `100` 的虚拟机从离线的 `node1` 恢复到另一个节点 `node2`，
+可在集群任一成员节点上以 root 身份运行以下命令：
 
  mv /etc/pve/nodes/node1/qemu-server/100.conf /etc/pve/nodes/node2/qemu-server/
 
-WARNING: Before manually recovering a guest like this, make absolutely sure
-that the failed source node is really powered off/fenced. Otherwise {pve}'s
-locking principles are violated by the `mv` command, which can have unexpected
-consequences.
+WARNING: 以这种方式手动恢复客户机之前，务必确认故障源节点确实已经关机或
+被 fenced。否则，`mv` 命令会破坏 {pve} 的锁原则，可能产生不可预期的后果。
 
-WARNING: Guests with local disks (or other local resources which are only
-available on the offline node) are not recoverable like this. Either wait for the
-failed node to rejoin the cluster or restore such guests from backups.
+WARNING: 带有本地磁盘（或其他仅在离线节点上可用的本地资源）的客户机无法
+通过这种方式恢复。请等待故障节点重新加入集群，或从备份恢复这些客户机。
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

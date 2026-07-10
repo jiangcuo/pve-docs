@@ -1,60 +1,54 @@
 [[chapter_btrfs]]
-BTRFS
------
+== BTRFS
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-WARNING: BTRFS integration is currently a **technology preview** in {pve}.
+WARNING: BTRFS 集成目前在 {pve} 中仍是 **technology preview**。
 
-BTRFS is a modern copy on write file system natively supported by the Linux
-kernel, implementing features such as snapshots, built-in RAID and self healing
-via checksums for data and metadata. Starting with {pve} 7.0, BTRFS is
-introduced as optional selection for the root file system.
+BTRFS 是 Linux 内核原生支持的现代写时复制文件系统，实现了快照、内置 RAID，
+以及通过数据和元数据校验和进行自修复等特性。从 {pve} 7.0 开始，BTRFS
+作为根文件系统的可选项引入。
 
-.General BTRFS advantages
+.BTRFS 的一般优势
 
-* Main system setup almost identical to the traditional ext4 based setup
+* 主系统设置与传统基于 ext4 的设置几乎相同
 
-* Snapshots
+* 快照
 
-* Data compression on file system level
+* 文件系统级数据压缩
 
-* Copy-on-write clone
+* 写时复制克隆
 
 * RAID0, RAID1 and RAID10
 
-* Protection against data corruption
+* 防止数据损坏
 
-* Self healing
+* 自修复
 
-* Natively supported by the Linux kernel
+* Linux 内核原生支持
 
-.Caveats
+.注意事项
 
-* RAID levels 5/6 are experimental and dangerous, see https://btrfs.readthedocs.io/en/latest/Status.html[BTRFS Status]
+* RAID 级别 5/6 仍处于实验阶段且存在风险，请参见 https://btrfs.readthedocs.io/en/latest/Status.html[BTRFS Status]
 
-Installation as Root File System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 作为根文件系统安装
 
-When you install using the {pve} installer, you can choose BTRFS for the root
-file system. You need to select the RAID type at installation time:
+使用 {pve} 安装程序安装时，可以为根文件系统选择 BTRFS。需要在安装时选择
+RAID 类型：
 
 [horizontal]
-RAID0:: Also called ``striping''. The capacity of such volume is the sum
-of the capacities of all disks. But RAID0 does not add any redundancy,
-so the failure of a single drive makes the volume unusable.
+RAID0:: 也称为``条带化''。此类卷的容量是所有磁盘容量之和。但 RAID0 不提供
+任何冗余，因此单个驱动器故障就会使该卷不可用。
 
-RAID1:: Also called ``mirroring''. Data is written identically to all
-disks. This mode requires at least 2 disks with the same size. The
-resulting capacity is that of a single disk.
+RAID1:: 也称为``镜像''。数据会以相同方式写入所有磁盘。此模式至少需要 2
+块相同容量的磁盘。最终容量等同于单块磁盘容量。
 
-RAID10:: A combination of RAID0 and RAID1. Requires at least 4 disks.
+RAID10:: RAID0 和 RAID1 的组合。至少需要 4 块磁盘。
 
-The installer automatically partitions the disks and creates an additional
-subvolume at `/var/lib/pve/local-btrfs`.  In order to use that with the {pve}
-tools, the installer creates the following configuration entry in
-`/etc/pve/storage.cfg`:
+安装程序会自动对磁盘分区，并在 `/var/lib/pve/local-btrfs` 创建一个额外子卷。
+为了让 {pve} 工具使用该子卷，安装程序会在 `/etc/pve/storage.cfg` 中创建
+以下配置条目：
 
 ----
 dir: local
@@ -67,158 +61,145 @@ btrfs: local-btrfs
 	content iso,vztmpl,backup,images,rootdir
 ----
 
-This explicitly disables the default `local` storage in favor of a BTRFS
-specific storage entry on the additional subvolume.
+这会显式禁用默认的 `local` 存储，改用额外子卷上的 BTRFS 专用存储条目。
 
-The `btrfs` command is used to configure and manage the BTRFS file system,
-After the installation, the following command lists all additional subvolumes:
+`btrfs` 命令用于配置和管理 BTRFS 文件系统。安装完成后，以下命令会列出所有
+额外子卷：
 
 ----
 # btrfs subvolume list /
 ID 256 gen 6 top level 5 path var/lib/pve/local-btrfs
 ----
 
-BTRFS Administration
-~~~~~~~~~~~~~~~~~~~~
+=== BTRFS 管理
 
-This section gives you some usage examples for common tasks.
+本节给出一些常见任务的使用示例。
 
-Creating a BTRFS file system
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建 BTRFS 文件系统
 
-To create BTRFS file systems, `mkfs.btrfs` is used. The `-d` and `-m` parameters
-are used to set the profile for metadata and data respectively. With the
-optional `-L` parameter, a label can be set.
+创建 BTRFS 文件系统时使用 `mkfs.btrfs`。`-d` 和 `-m` 参数分别用于设置数据和
+元数据的 profile。可选的 `-L` 参数可用于设置标签。
 
-Generally, the following modes are supported: `single`, `raid0`, `raid1`,
-`raid10`.
+通常支持以下模式：`single`、`raid0`、`raid1`、`raid10`。
 
-Create a BTRFS file system on a single disk `/dev/sdb` with the label
-`My-Storage`:
+在单块磁盘 `/dev/sdb` 上创建标签为 `My-Storage` 的 BTRFS 文件系统：
 
 ----
  # mkfs.btrfs -m single -d single -L My-Storage /dev/sdb
 ----
 
-Or create a RAID1 on the two partitions `/dev/sdb1` and `/dev/sdc1`:
+或者在两个分区 `/dev/sdb1` 和 `/dev/sdc1` 上创建 RAID1：
 
 ----
  # mkfs.btrfs -m raid1 -d raid1 -L My-Storage /dev/sdb1 /dev/sdc1
 ----
 
-Mounting a BTRFS file system
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 挂载 BTRFS 文件系统
 
-The new file-system can then be mounted either manually, for example:
+随后可以手动挂载新的文件系统，例如：
 
 ----
  # mkdir /my-storage
  # mount /dev/sdb /my-storage
 ----
 
-A BTRFS can also be added to `/etc/fstab` like any other mount point,
-automatically mounting it on boot. It's recommended to avoid  using
-block-device paths but use the `UUID` value the `mkfs.btrfs` command printed,
-especially there is more than one disk in a BTRFS setup.
+BTRFS 也可以像其他挂载点一样添加到 `/etc/fstab`，从而在启动时自动挂载。
+建议避免使用块设备路径，而是使用 `mkfs.btrfs` 命令输出的 `UUID` 值，
+尤其是在 BTRFS 设置中包含多块磁盘时。
 
-For example:
+例如：
 
-.File `/etc/fstab`
+.文件 `/etc/fstab`
 ----
-# ... other mount points left out for brevity
+# ... 为简洁起见，省略其他挂载点
 
-# using the UUID from the mkfs.btrfs output is highly recommended
+# 强烈建议使用 mkfs.btrfs 输出中的 UUID
 UUID=e2c0c3ff-2114-4f54-b767-3a203e49f6f3 /my-storage btrfs defaults 0 0
 ----
 
-TIP: If you do not have the UUID available anymore you can use the `blkid` tool
- to list all properties of block-devices.
+TIP: 如果不再持有 UUID，可以使用 `blkid` 工具列出块设备的所有属性。
 
-Afterwards you can trigger the first mount by executing:
+之后可以通过执行以下命令触发首次挂载：
 
 ----
 mount /my-storage
 ----
-After the next reboot this will be automatically done by the system at boot.
+下一次重启后，系统会在启动时自动执行该挂载。
 
-Adding a BTRFS file system to {pve}
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 将 BTRFS 文件系统添加到 {pve}
 
-You can add an existing BTRFS file system to {pve} via the web interface, or
-using the CLI, for example:
+可以通过 Web 界面将现有 BTRFS 文件系统添加到 {pve}，也可以使用 CLI，例如：
 
 ----
 pvesm add btrfs my-storage --path /my-storage
 ----
 
-Creating a subvolume
-^^^^^^^^^^^^^^^^^^^^
+==== 创建子卷
 
-Creating a subvolume links it to a path in the BTRFS file system, where it will
-appear as a regular directory.
+创建子卷会将其关联到 BTRFS 文件系统中的某个路径，在该路径下它会表现为普通目录。
 
 ----
 # btrfs subvolume create /some/path
 ----
 
-Afterwards `/some/path` will act like a regular directory.
+之后 `/some/path` 会像普通目录一样工作。
 
-Deleting a subvolume
-^^^^^^^^^^^^^^^^^^^^
+==== 删除子卷
 
-Contrary to directories removed via `rmdir`, subvolumes do not need to be empty
-in order to be deleted via the `btrfs` command.
+与通过 `rmdir` 删除目录不同，使用 `btrfs` 命令删除子卷时，子卷不需要为空。
 
 ----
 # btrfs subvolume delete /some/path
 ----
 
-Creating a snapshot of a subvolume
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建子卷快照
 
-BTRFS does not actually distinguish between snapshots and normal subvolumes, so
-taking a snapshot can also be seen as creating an arbitrary copy of a subvolume.
-By convention, {pve} will use the read-only flag when creating snapshots of
-guest disks or subvolumes, but this flag can also be changed later on.
+BTRFS 实际上并不区分快照和普通子卷，因此创建快照也可以理解为创建一个子卷的
+任意副本。按照约定，{pve} 在为客户机磁盘或子卷创建快照时会使用只读标志，
+但该标志之后也可以更改。
 
 ----
 # btrfs subvolume snapshot -r /some/path /a/new/path
 ----
 
-This will create a read-only "clone" of the subvolume on `/some/path` at
-`/a/new/path`. Any future modifications to `/some/path` cause the modified data
-to be copied before modification.
+这会在 `/a/new/path` 创建 `/some/path` 上该子卷的只读“克隆”。以后对
+`/some/path` 的任何修改都会使被修改的数据在修改前先被复制。
 
-If the read-only (`-r`) option is left out, both subvolumes will be writable.
+如果省略只读（`-r`）选项，则两个子卷都将可写。
 
-Enabling compression
-^^^^^^^^^^^^^^^^^^^^
+==== 启用压缩
 
-By default, BTRFS does not compress data. To enable compression, the `compress`
-mount option can be added. Note that data already written will not be compressed
-after the fact.
+默认情况下，BTRFS 不会压缩数据。要启用压缩，可以添加 `compress` 挂载选项。
+注意，已经写入的数据不会在事后被压缩。
 
-By default, the rootfs will be listed in `/etc/fstab` as follows:
+默认情况下，rootfs 会在 `/etc/fstab` 中按如下方式列出：
 
 ----
 UUID=<uuid of your root file system> / btrfs defaults 0 1
 ----
 
-You can simply append `compress=zstd`, `compress=lzo`, or `compress=zlib` to the
-`defaults` above like so:
+可以直接在上面的 `defaults` 后追加 `compress=zstd`、`compress=lzo` 或
+`compress=zlib`，如下所示：
 
 ----
 UUID=<uuid of your root file system> / btrfs defaults,compress=zstd 0 1
 ----
 
-This change will take effect after rebooting.
+该更改会在重启后生效。
 
-Checking Space Usage
-^^^^^^^^^^^^^^^^^^^^
+==== 检查空间使用情况
 
-The classic `df` tool may output confusing values for some BTRFS setups.
-For a better estimate use the `btrfs filesystem usage /PATH` command, for example:
+传统的 `df` 工具在某些 BTRFS 设置中可能会输出令人困惑的数值。要获得更好的
+估算结果，请使用 `btrfs filesystem usage /PATH` 命令，例如：
 
 ----
 # btrfs fi usage /my-storage
+----
+
+常用命令示例：
+
+----
+# btrfs subvolume list /
+# btrfs filesystem usage /my-storage
+# pvesm status
 ----

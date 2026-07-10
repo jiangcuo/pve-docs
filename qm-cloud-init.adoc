@@ -1,62 +1,44 @@
 [[qm_cloud_init]]
-Cloud-Init Support
-------------------
+== Cloud-Init 支持
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-https://cloudinit.readthedocs.io[Cloud-Init] is the de facto
-multi-distribution package that handles early initialization of a
-virtual machine instance. Using Cloud-Init, configuration of network
-devices and ssh keys on the hypervisor side is possible. When the VM
-starts for the first time, the Cloud-Init software inside the VM will
-apply those settings.
+https://cloudinit.readthedocs.io[Cloud-Init] 是事实上的跨发行版软件包，用于处理
+虚拟机实例的早期初始化。借助 Cloud-Init，可以在虚拟化管理程序侧配置网络设备和
+ssh 密钥。当 VM 首次启动时，VM 内部的 Cloud-Init 软件会应用这些设置。
 
-Many Linux distributions provide ready-to-use Cloud-Init images, mostly
-designed for 'OpenStack'. These images will also work with {pve}. While
-it may seem convenient to get such ready-to-use images, we usually
-recommended to prepare the images by yourself. The advantage is that you
-will know exactly what you have installed, and this helps you later to
-easily customize the image for your needs.
+许多 Linux 发行版都提供可直接使用的 Cloud-Init 镜像，大多面向 'OpenStack' 设计。
+这些镜像同样可以在 {pve} 中使用。虽然获取这类即用镜像看起来很方便，但通常建议自行
+准备镜像。这样做的优势是你能确切知道安装了哪些内容，也便于之后按需自定义镜像。
 
-Once you have created such a Cloud-Init image we recommend to convert it
-into a VM template. From a VM template you can quickly create linked
-clones, so this is a fast method to roll out new VM instances. You just
-need to configure the network (and maybe the ssh keys) before you start
-the new VM.
+创建好 Cloud-Init 镜像后，建议将其转换为 VM 模板。通过 VM 模板可以快速创建链接克隆，
+因此这是快速部署新 VM 实例的方法。启动新 VM 前，只需配置网络（以及可能需要的 ssh
+密钥）。
 
-We recommend using SSH key-based authentication to login to the VMs
-provisioned by Cloud-Init. It is also possible to set a password, but
-this is not as safe as using SSH key-based authentication because {pve}
-needs to store an encrypted version of that password inside the
-Cloud-Init data.
+建议使用基于 SSH 密钥的认证登录由 Cloud-Init 置备的 VM。也可以设置密码，但这不如
+基于 SSH 密钥的认证安全，因为 {pve} 需要在 Cloud-Init 数据中保存该密码的加密版本。
 
-{pve} generates an ISO image to pass the Cloud-Init data to the VM. For
-that purpose, all Cloud-Init VMs need to have an assigned CD-ROM drive.
-Usually, a serial console should be added and used as a display. Many Cloud-Init
-images rely on this, it is a requirement for OpenStack. However, other images
-might have problems with this configuration. Switch back to the default display
-configuration if using a serial console doesn't work.
+{pve} 会生成一个 ISO 镜像，用于将 Cloud-Init 数据传递给 VM。因此，所有 Cloud-Init
+VM 都需要分配一个 CD-ROM 驱动器。通常还应添加串口控制台并将其用作显示设备。许多
+Cloud-Init 镜像依赖这一点，这也是 OpenStack 的要求。不过，其他镜像可能不适用于这种
+配置。如果串口控制台无法工作，请切回默认显示配置。
 
 
-Preparing Cloud-Init Templates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 准备 Cloud-Init 模板
 
-The first step is to prepare your VM. Basically you can use any VM.
-Simply install the Cloud-Init packages *inside the VM* that you want to
-prepare. On Debian/Ubuntu based systems this is as simple as:
+第一步是准备 VM。基本上可以使用任意 VM。只需在要准备的 VM *内部*安装 Cloud-Init
+软件包即可。在基于 Debian/Ubuntu 的系统中，操作如下：
 
 ----
 apt-get install cloud-init
 ----
 
-WARNING: This command is *not* intended to be executed on the {pve} host, but
-only inside the VM.
+WARNING: 该命令*不应*在 {pve} 主机上执行，只应在 VM 内部执行。
 
-Already many distributions provide ready-to-use Cloud-Init images (provided
-as `.qcow2` files), so alternatively you can simply download and
-import such images. For the following example, we will use the cloud
-image provided by Ubuntu at https://cloud-images.ubuntu.com.
+许多发行版已经提供可直接使用的 Cloud-Init 镜像（以 `.qcow2` 文件形式提供），因此也可以
+直接下载并导入这类镜像。下面的示例使用 Ubuntu 在 https://cloud-images.ubuntu.com
+提供的 cloud image。
 
 ----
 # download the image
@@ -69,174 +51,156 @@ qm create 9000 --memory 2048 --net0 virtio,bridge=vmbr0 --scsihw virtio-scsi-pci
 qm set 9000 --scsi0 local-lvm:0,import-from=/path/to/bionic-server-cloudimg-amd64.img
 ----
 
-NOTE: Ubuntu Cloud-Init images require the `virtio-scsi-pci`
-controller type for SCSI drives.
+NOTE: Ubuntu Cloud-Init 镜像要求 SCSI 驱动器使用 `virtio-scsi-pci` 控制器类型。
 
-.Add Cloud-Init CD-ROM drive
+.添加 Cloud-Init CD-ROM 驱动器
 
 [thumbnail="screenshot/gui-cloudinit-hardware.png"]
 
-The next step is to configure a CD-ROM drive, which will be used to pass
-the Cloud-Init data to the VM.
+下一步是配置 CD-ROM 驱动器，它将用于向 VM 传递 Cloud-Init 数据。
 
 ----
 qm set 9000 --ide2 local-lvm:cloudinit
 ----
 
-To be able to boot directly from the Cloud-Init image, set the `boot` parameter
-to `order=scsi0` to restrict BIOS to boot from this disk only. This will speed
-up booting, because VM BIOS skips the testing for a bootable CD-ROM.
+为能够直接从 Cloud-Init 镜像启动，将 `boot` 参数设置为 `order=scsi0`，限制 BIOS
+仅从此磁盘启动。这样可以加快启动速度，因为 VM BIOS 会跳过对可引导 CD-ROM 的检测。
 
 ----
 qm set 9000 --boot order=scsi0
 ----
 
-For many Cloud-Init images, it is required to configure a serial console and use
-it as a display. If the configuration doesn't work for a given image however,
-switch back to the default display instead.
+许多 Cloud-Init 镜像要求配置串口控制台并将其用作显示设备。但如果某个镜像无法使用该配置，
+请改回默认显示配置。
 
 ----
 qm set 9000 --serial0 socket --vga serial0
 ----
 
-In a last step, it is helpful to convert the VM into a template. From
-this template you can then quickly create linked clones.
-The deployment from VM templates is much faster than creating a full
-clone (copy).
+最后一步，将 VM 转换为模板会很有帮助。之后可以从该模板快速创建链接克隆。从 VM 模板部署
+比创建完整克隆（副本）快得多。
 ----
 qm template 9000
 ----
 
 
-Deploying Cloud-Init Templates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 部署 Cloud-Init 模板
 
 [thumbnail="screenshot/gui-cloudinit-config.png"]
 
-You can easily deploy such a template by cloning:
+可以通过克隆轻松部署此类模板：
 
 ----
 qm clone 9000 123 --name ubuntu2
 ----
 
-Then configure the SSH public key used for authentication, and configure
-the IP setup:
+然后配置用于认证的 SSH 公钥，并配置 IP 设置：
 
 ----
 qm set 123 --sshkey ~/.ssh/id_rsa.pub
 qm set 123 --ipconfig0 ip=10.0.10.123/24,gw=10.0.10.1
 ----
 
-You can also configure all the Cloud-Init options using a single command
-only. We have simply split the above example to separate the
-commands for reducing the line length. Also make sure to adopt the IP
-setup for your specific environment.
+也可以只用一条命令配置所有 Cloud-Init 选项。上面的示例只是为了缩短行长度而拆分为多条
+命令。还请确保根据你的具体环境调整 IP 设置。
 
 
-Custom Cloud-Init Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 自定义 Cloud-Init 配置
 
-The Cloud-Init integration also allows custom config files to be used instead
-of the automatically generated configs. This is done via the `cicustom`
-option on the command line:
+Cloud-Init 集成也允许使用自定义配置文件替代自动生成的配置。这可通过命令行中的
+`cicustom` 选项完成：
 
 ----
 qm set 9000 --cicustom "user=<volume>,network=<volume>,meta=<volume>"
 ----
 
-The custom config files have to be on a storage that supports snippets and have
-to be available on all nodes the VM is going to be migrated to. Otherwise the
-VM won't be able to start.
-For example:
+自定义配置文件必须位于支持 snippets 的存储上，并且必须在 VM 可能迁移到的所有节点上可用。
+否则 VM 将无法启动。例如：
 
 ----
 qm set 9000 --cicustom "user=local:snippets/userconfig.yaml"
 ----
 
-There are three kinds of configs for Cloud-Init. The first one is the `user`
-config as seen in the example above. The second is the `network` config and
-the third the `meta` config. They can all be specified together or mixed
-and matched however needed.
-The automatically generated config will be used for any that don't have a
-custom config file specified.
+Cloud-Init 有三类配置。第一类是上例中的 `user` 配置，第二类是 `network` 配置，第三类是
+`meta` 配置。它们可以一起指定，也可以按需组合。未指定自定义配置文件的部分，将使用自动
+生成的配置。
 
-The generated config can be dumped to serve as a base for custom configs:
+可以导出生成的配置，作为自定义配置的基础：
 
 ----
 qm cloudinit dump 9000 user
 ----
 
-The same command exists for `network` and `meta`.
+`network` 和 `meta` 也支持同样的命令。
+
+==== 常用命令示例
+
+在修改自定义配置前，可以先查看 {pve} 当前生成的 Cloud-Init 内容：
+
+----
+qm cloudinit dump 9000 user
+qm cloudinit dump 9000 network
+qm cloudinit dump 9000 meta
+----
 
 
-Cloud-Init on Windows
-~~~~~~~~~~~~~~~~~~~~~
+=== Windows 上的 Cloud-Init
 
-There is a reimplementation of Cloud-Init available for Windows called
-https://cloudbase.it/[cloudbase-init]. Not every feature of Cloud-Init is
-available with Cloudbase-Init, and some features differ compared to Cloud-Init.
+Windows 有一个 Cloud-Init 的重新实现，名为 https://cloudbase.it/[cloudbase-init]。
+Cloudbase-Init 并不具备 Cloud-Init 的所有功能，部分功能也与 Cloud-Init 有所不同。
 
-Cloudbase-Init requires both `ostype` set to any Windows version and the
-`citype` set to `configdrive2`, which is the default with any Windows
-`ostype`.
+Cloudbase-Init 要求将 `ostype` 设置为任意 Windows 版本，并将 `citype` 设置为
+`configdrive2`；对于任何 Windows `ostype`，后者都是默认值。
 
-There are no ready-made cloud images for Windows available for free. Using
-Cloudbase-Init requires manually installing and configuring a Windows guest.
+目前没有免费的 Windows 现成 cloud image。使用 Cloudbase-Init 需要手动安装并配置
+Windows 客户机。
 
 
-Preparing Cloudbase-Init Templates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 准备 Cloudbase-Init 模板
 
-The first step is to install Windows in a VM. Download and install
-Cloudbase-Init in the guest. It may be necessary to install the Beta version.
-Don't run Sysprep at the end of the installation. Instead configure
-Cloudbase-Init first.
+第一步是在 VM 中安装 Windows。然后在客户机中下载并安装 Cloudbase-Init。可能需要安装
+Beta 版本。安装结束时不要运行 Sysprep，而应先配置 Cloudbase-Init。
 
-A few common options to set would be:
+常见需要设置的选项包括：
 
-* 'username': This sets the username of the administrator
+* 'username': 设置管理员用户名
 
-* 'groups': This allows one to add the user to the `Administrators` group
+* 'groups': 允许将用户添加到 `Administrators` 组
 
-* 'inject_user_password': Set this to `true` to allow setting the password
-in the VM config
+* 'inject_user_password': 将其设置为 `true`，以允许在 VM 配置中设置密码
 
-* 'first_logon_behaviour': Set this to `no` to not require a new password on
-login
+* 'first_logon_behaviour': 将其设置为 `no`，登录时就不会要求设置新密码
 
-* 'rename_admin_user': Set this to `true` to allow renaming the default
-`Administrator` user to the username specified with `username`
+* 'rename_admin_user': 将其设置为 `true`，以允许将默认 `Administrator` 用户重命名为
+`username` 指定的用户名
 
-* 'metadata_services': Set this to
-`cloudbaseinit.metadata.services.configdrive.ConfigDriveService` for
-Cloudbase-Init to first check this service. Otherwise it may take a few minutes
-for Cloudbase-Init to configure the system after boot.
+* 'metadata_services': 将其设置为
+`cloudbaseinit.metadata.services.configdrive.ConfigDriveService`，使
+Cloudbase-Init 优先检查此服务。否则，Cloudbase-Init 在启动后可能需要几分钟才能完成
+系统配置。
 
-Some plugins, for example the SetHostnamePlugin, require reboots and will do
-so automatically. To disable automatic reboots by Cloudbase-Init, you can set
-`allow_reboot` to `false`.
+某些插件（例如 SetHostnamePlugin）需要重启，并会自动执行重启。要禁用 Cloudbase-Init
+自动重启，可以将 `allow_reboot` 设置为 `false`。
 
-A full set of configuration options can be found in the
-https://cloudbase-init.readthedocs.io/en/latest/config.html[official
-cloudbase-init documentation].
+完整配置选项可在
+https://cloudbase-init.readthedocs.io/en/latest/config.html[官方 cloudbase-init 文档]
+中查看。
 
-It can make sense to make a snapshot after configuring in case some parts of
-the config still need adjustments.
-After configuring Cloudbase-Init you can start creating the template. Shutdown
-the Windows guest, add a Cloud-Init disk and make it into a template.
+配置完成后创建一个快照通常很有意义，以便在部分配置仍需调整时回退。配置 Cloudbase-Init
+之后，就可以开始创建模板。关闭 Windows 客户机，添加 Cloud-Init 磁盘，并将其转换为模板。
 
 ----
 qm set 9000 --ide2 local-lvm:cloudinit
 qm template 9000
 ----
 
-Clone the template into a new VM:
+将模板克隆为新的 VM：
 
 ----
 qm clone 9000 123 --name windows123
 ----
 
-Then set the password, network config and SSH key:
+然后设置密码、网络配置和 SSH 密钥：
 
 ----
 qm set 123 --cipassword <password>
@@ -244,46 +208,39 @@ qm set 123 --ipconfig0 ip=10.0.10.123/24,gw=10.0.10.1
 qm set 123 --sshkey ~/.ssh/id_rsa.pub
 ----
 
-Make sure that the `ostype` is set to any Windows version before setting the
-password. Otherwise the password will be encrypted and Cloudbase-Init will use
-the encrypted password as plaintext password.
+设置密码前，请确保 `ostype` 已设置为任意 Windows 版本。否则密码会被加密，而
+Cloudbase-Init 会把加密后的密码当作明文密码使用。
 
-When everything is set, start the cloned guest. On the first boot the login
-won't work and it will reboot automatically for the changed hostname.
-After the reboot the new password should be set and login should work.
+全部设置完成后，启动克隆出的客户机。首次启动时登录不会成功，系统会因主机名变更而自动
+重启。重启后，新密码应已设置完成，并且可以正常登录。
 
 
-Cloudbase-Init and Sysprep
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Cloudbase-Init 与 Sysprep
 
-Sysprep is a feature to reset the configuration of Windows and provide a `new`
-system. This can be used in conjunction with Cloudbase-Init to create a clean
-template.
+Sysprep 是用于重置 Windows 配置并提供一个 `new` 系统的功能。它可以与
+Cloudbase-Init 配合使用，用于创建干净模板。
 
 
-When using Sysprep there are 2 configuration files that need to be adapted.
-The first one is the normal configuration file, the second one is the one
-ending in `-unattend.conf`.
+使用 Sysprep 时，需要调整 2 个配置文件。第一个是常规配置文件，第二个是以
+`-unattend.conf` 结尾的文件。
 
-Cloudbase-Init runs in 2 steps, first the Sysprep step using the
-`-unattend.conf` and then the regular step using the primary config file.
+Cloudbase-Init 分 2 步运行：首先是使用 `-unattend.conf` 的 Sysprep 阶段，然后是使用
+主配置文件的常规阶段。
 
-For `Windows Server` running Sysprep with the provided `Unattend.xml` file
-should work out of the box. Normal Windows versions however require additional
-steps:
+对于 `Windows Server`，使用随附的 `Unattend.xml` 文件运行 Sysprep 应该可以直接工作。
+普通 Windows 版本则需要额外步骤：
 
-. Open a PowerShell instance
+. 打开一个 PowerShell 实例
 
-. Enable the Administrator user:
+. 启用 Administrator 用户：
 +
 ----
 net user Administrator /active:yes`
 ----
 
-. Install Cloudbase-Init using the Administrator user
+. 使用 Administrator 用户安装 Cloudbase-Init
 
-. Modify `Unattend.xml` to include the command to enable the Administrator user
-on the first boot after sysprepping:
+. 修改 `Unattend.xml`，加入在 sysprep 后首次启动时启用 Administrator 用户的命令：
 +
 ----
 <RunSynchronousCommand wcm:action="add">
@@ -293,46 +250,41 @@ on the first boot after sysprepping:
 </RunSynchronousCommand>
 ----
 +
-Make sure the `<Order>` does not conflict with other synchronous commands.
-Modify `<Order>` of the Cloudbase-Init command to run after this one by
-increasing the number to a higher value: `<Order>2</Order>`
+确保 `<Order>` 不与其他同步命令冲突。将 Cloudbase-Init 命令的 `<Order>` 修改为更大的值，
+使其在该命令之后运行：`<Order>2</Order>`
 
-. (Windows 11 only) Remove the conflicting Microsoft.OneDriveSync package:
+. （仅 Windows 11）移除冲突的 Microsoft.OneDriveSync 软件包：
 +
 ----
 Get-AppxPackage -AllUsers Microsoft.OneDriveSync | Remove-AppxPackage -AllUsers
 ----
 
-. `cd` into the Cloudbase-Init config directory:
+. `cd` 进入 Cloudbase-Init 配置目录：
 +
 ----
 cd 'C:\Program Files\Cloudbase Solutions\Cloudbase-Init\conf'
 ----
 
-. (optional) Create a snapshot of the VM before Sysprep in case of a
-misconfiguration
+. （可选）在 Sysprep 前创建 VM 快照，以防配置错误
 
-. Run Sysprep:
+. 运行 Sysprep：
 +
 ----
 C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /unattend:Unattend.xml
 ----
 
-After following the above steps the VM should be in shut down state due to
-the Sysprep. Now you can make it into a template, clone it and configure
-it as needed.
+完成上述步骤后，VM 应因 Sysprep 而处于关机状态。现在可以将其转换为模板，克隆后再按需
+配置。
 
 
-Cloud-Init specific Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Cloud-Init 专用选项
 
 include::qm-cloud-init-opts.adoc[]
 
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Qemu/KVM_Virtual_Machines[Qemu/KVM Virtual Machines]
 

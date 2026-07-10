@@ -1,26 +1,21 @@
 [[chapter_virtual_machines]]
 ifdef::manvolnum[]
-qm(1)
-=====
+= qm(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-qm - QEMU/KVM Virtual Machine Manager
+qm - QEMU/KVM 虚拟机管理器
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::qm.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 ifndef::manvolnum[]
-QEMU/KVM Virtual Machines
-=========================
+= QEMU/KVM 虚拟机
 :pve-toplevel:
 endif::manvolnum[]
 
@@ -29,768 +24,578 @@ endif::manvolnum[]
 // http://pve.proxmox.com/wiki/KVM
 // http://pve.proxmox.com/wiki/Qemu_Server
 
-QEMU (short form for Quick Emulator) is an open source hypervisor that emulates a
-physical computer. From the perspective of the host system where QEMU is
-running, QEMU is a user program which has access to a number of local resources
-like partitions, files, network cards which are then passed to an
-emulated computer which sees them as if they were real devices.
+QEMU（Quick Emulator 的简称）是一个开源虚拟化管理程序，用于模拟一台物理计算机。
+从运行 QEMU 的主机系统角度看，QEMU 是一个用户程序，可以访问分区、文件、网卡等本地资源，
+并将这些资源传递给模拟出来的计算机；该计算机会像看到真实设备一样看到这些资源。
 
-A guest operating system running in the emulated computer accesses these
-devices, and runs as if it were running on real hardware. For instance, you can pass
-an ISO image as a parameter to QEMU, and the OS running in the emulated computer
-will see a real CD-ROM inserted into a CD drive.
+运行在模拟计算机中的客户操作系统会访问这些设备，并像运行在真实硬件上一样工作。
+例如，可以将 ISO 镜像作为参数传递给 QEMU，模拟计算机中的操作系统就会看到一张真实的 CD-ROM
+已插入 CD 驱动器。
 
-QEMU can emulate a great variety of hardware from ARM to Sparc, but {pve} is
-only concerned with 32 and 64 bits PC clone emulation, since it represents the
-overwhelming majority of server hardware. The emulation of PC clones is also one
-of the fastest due to the availability of processor extensions which greatly
-speed up QEMU when the emulated architecture is the same as the host
-architecture.
+QEMU 可以模拟从 ARM 到 Sparc 的多种硬件，但 {pve} 只关注 32 位和 64 位 PC 兼容机模拟，
+因为它代表了绝大多数服务器硬件。PC 兼容机模拟也是速度最快的模拟类型之一，
+这是因为当模拟架构与主机架构相同时，可用的处理器扩展可以显著加速 QEMU。
 
-NOTE: You may sometimes encounter the term _KVM_ (Kernel-based Virtual Machine).
-It means that QEMU is running with the support of the virtualization processor
-extensions, via the Linux KVM module. In the context of {pve} _QEMU_ and
-_KVM_ can be used interchangeably, as QEMU in {pve} will always try to load the KVM
-module.
+NOTE: 有时会遇到术语 _KVM_（Kernel-based Virtual Machine）。它表示 QEMU 通过
+Linux KVM 模块，在虚拟化处理器扩展的支持下运行。在 {pve} 语境中，_QEMU_ 和 _KVM_
+可以互换使用，因为 {pve} 中的 QEMU 总是会尝试加载 KVM 模块。
 
-QEMU inside {pve} runs as a root process, since this is required to access block
-and PCI devices.
+{pve} 中的 QEMU 以 root 进程运行，因为访问块设备和 PCI 设备需要这样的权限。
 
 
-Emulated devices and paravirtualized devices
---------------------------------------------
+== 模拟设备和半虚拟化设备
 
-The PC hardware emulated by QEMU includes a motherboard, network controllers,
-SCSI, IDE and SATA controllers, serial ports (the complete list can be seen in
-the `kvm(1)` man page) all of them emulated in software. All these devices
-are the exact software equivalent of existing hardware devices, and if the OS
-running in the guest has the proper drivers it will use the devices as if it
-were running on real hardware. This allows QEMU to run _unmodified_ operating
-systems.
+QEMU 模拟的 PC 硬件包括主板、网络控制器、SCSI、IDE 和 SATA 控制器、串口等
+（完整列表可见 `kvm(1)` 手册页），它们全部由软件模拟。这些设备都是现有硬件设备的精确软件等价物；
+如果客户机中运行的操作系统具备相应驱动，它就会像运行在真实硬件上一样使用这些设备。
+这使 QEMU 能够运行_未修改_的操作系统。
 
-This however has a performance cost, as running in software what was meant to
-run in hardware involves a lot of extra work for the host CPU. To mitigate this,
-QEMU can present to the guest operating system _paravirtualized devices_, where
-the guest OS recognizes it is running inside QEMU and cooperates with the
-hypervisor.
+不过这会带来性能成本，因为用软件运行原本应由硬件完成的工作，会让主机 CPU 承担大量额外任务。
+为缓解这一问题，QEMU 可以向客户操作系统呈现_半虚拟化设备_，使客户操作系统知道自己运行在
+QEMU 内部，并与虚拟化管理程序协作。
 
-QEMU relies on the virtio virtualization standard, and is thus able to present
-paravirtualized virtio devices, which includes a paravirtualized generic disk
-controller, a paravirtualized network card, a paravirtualized serial port,
-a paravirtualized SCSI controller, etc ...
+QEMU 依赖 virtio 虚拟化标准，因此能够呈现半虚拟化的 virtio 设备，包括半虚拟化通用磁盘控制器、
+半虚拟化网卡、半虚拟化串口、半虚拟化 SCSI 控制器等。
 
-TIP: It is *highly recommended* to use the virtio devices whenever you can, as
-they provide a big performance improvement and are generally better maintained.
-Using the virtio generic disk controller versus an emulated IDE controller will
-double the sequential write throughput, as measured with `bonnie++(8)`. Using
-the virtio network interface can deliver up to three times the throughput of an
-emulated Intel E1000 network card, as measured with `iperf(1)`. footnote:[See
-this benchmark on the KVM wiki https://www.linux-kvm.org/page/Using_VirtIO_NIC]
+TIP: 只要条件允许，*强烈建议*使用 virtio 设备，因为它们能显著提升性能，并且通常维护得更好。
+根据 `bonnie++(8)` 测量，与模拟 IDE 控制器相比，使用 virtio 通用磁盘控制器可使顺序写入吞吐量翻倍。
+根据 `iperf(1)` 测量，使用 virtio 网络接口最多可达到模拟 Intel E1000 网卡三倍的吞吐量。
+footnote:[参见 KVM wiki 上的此基准测试 https://www.linux-kvm.org/page/Using_VirtIO_NIC]
 
 
 [[qm_virtual_machines_settings]]
-Virtual Machines Settings
--------------------------
+== 虚拟机设置
 
-Generally speaking {pve} tries to choose sane defaults for virtual machines
-(VM). Make sure you understand the meaning of the settings you change, as it
-could incur a performance slowdown, or putting your data at risk.
+一般而言，{pve} 会尝试为虚拟机（VM）选择合理默认值。请确保理解所修改设置的含义，
+因为错误设置可能导致性能下降，或使数据面临风险。
 
 
 [[qm_general_settings]]
-General Settings
-~~~~~~~~~~~~~~~~
+=== 常规设置
 
 [thumbnail="screenshot/gui-create-vm-general.png"]
 
-General settings of a VM include
+虚拟机的常规设置包括：
 
-* the *Node* : the physical server on which the VM will run
-* the *VM ID*: a unique number in this {pve} installation used to identify your VM
-* *Name*: a free form text string you can use to describe the VM
-* *Resource Pool*: a logical group of VMs
+* *Node*：运行该 VM 的物理服务器
+* *VM ID*：此 {pve} 安装中用于标识该 VM 的唯一编号
+* *Name*：可用于描述该 VM 的自由格式文本字符串
+* *Resource Pool*：VM 的逻辑分组
 
 
 [[qm_os_settings]]
-OS Settings
-~~~~~~~~~~~
+=== 操作系统设置
 
 [thumbnail="screenshot/gui-create-vm-os.png"]
 
-When creating a virtual machine (VM), setting the proper Operating System(OS)
-allows {pve} to optimize some low level parameters. For instance Windows OS
-expect the BIOS clock to use the local time, while Unix based OS expect the
-BIOS clock to have the UTC time.
+创建虚拟机（VM）时，设置正确的操作系统（OS）可让 {pve} 优化一些低层参数。
+例如，Windows 操作系统期望 BIOS 时钟使用本地时间，而基于 Unix 的操作系统期望 BIOS 时钟使用 UTC 时间。
 
 [[qm_system_settings]]
-System Settings
-~~~~~~~~~~~~~~~
+=== 系统设置
 
-On VM creation you can change some basic system components of the new VM. You
-can specify which xref:qm_display[display type] you want to use.
+创建 VM 时，可以更改新 VM 的一些基础系统组件。可以指定要使用的 xref:qm_display[显示类型]。
 [thumbnail="screenshot/gui-create-vm-system.png"]
-Additionally, the xref:qm_hard_disk[SCSI controller] can be changed.
-If you plan to install the QEMU Guest Agent, or if your selected ISO image
-already ships and installs it automatically, you may want to tick the 'QEMU
-Agent' box, which lets {pve} know that it can use its features to show some
-more information, and complete some actions (for example, shutdown or
-snapshots) more intelligently.
+此外，也可以更改 xref:qm_hard_disk[SCSI 控制器]。
+如果计划安装 QEMU Guest Agent，或者所选 ISO 镜像已经附带并会自动安装它，
+可以勾选 'QEMU Agent' 选项，让 {pve} 知道可以使用其功能显示更多信息，
+并更智能地完成某些操作（例如关机或快照）。
 
-{pve} allows to boot VMs with different firmware and machine types, namely
-xref:qm_bios_and_uefi[SeaBIOS and OVMF]. In most cases you want to switch from
-the default SeaBIOS to OVMF only if you plan to use
-xref:qm_pci_passthrough[PCIe passthrough].
+{pve} 允许使用不同的固件和机器类型启动 VM，即 xref:qm_bios_and_uefi[SeaBIOS 和 OVMF]。
+在大多数情况下，只有计划使用 xref:qm_pci_passthrough[PCIe 直通]时，才需要从默认 SeaBIOS 切换到 OVMF。
 
 [[qm_machine_type]]
 
-Machine Type
-^^^^^^^^^^^^
+==== 机器类型
 
-A VM's 'Machine Type' defines the hardware layout of the VM's virtual
-motherboard. You can choose between the default
-https://en.wikipedia.org/wiki/Intel_440FX[Intel 440FX] or the
+VM 的 'Machine Type' 定义了 VM 虚拟主板的硬件布局。可以在默认的
+https://en.wikipedia.org/wiki/Intel_440FX[Intel 440FX] 与
 https://ark.intel.com/content/www/us/en/ark/products/31918/intel-82q35-graphics-and-memory-controller.html[Q35]
-chipset, which also provides a virtual PCIe bus, and thus may be
-desired if you want to pass through PCIe hardware.
-Additionally, you can select a xref:qm_pci_viommu[vIOMMU] implementation.
+芯片组之间选择；Q35 还提供虚拟 PCIe 总线，因此在需要直通 PCIe 硬件时可能更适合。
+此外，还可以选择一种 xref:qm_pci_viommu[vIOMMU] 实现。
 
-Machine Version
-+++++++++++++++
+===== 机器版本
 
-Each machine type is versioned in QEMU and a given QEMU binary supports many
-machine versions. New versions might bring support for new features, fixes or
-general improvements. However, they also change properties of the virtual
-hardware. To avoid sudden changes from the guest's perspective and ensure
-compatibility of the VM state, live-migration and snapshots with RAM will keep
-using the same machine version in the new QEMU instance.
+每种机器类型在 QEMU 中都有版本，一个给定的 QEMU 二进制文件支持多个机器版本。
+新版本可能带来新功能支持、修复或一般改进。不过，它们也会改变虚拟硬件属性。
+为了避免从客户机角度发生突然变化，并确保 VM 状态、在线迁移以及带 RAM 快照的兼容性，
+新的 QEMU 实例会继续使用相同机器版本。
 
-For Windows guests, the machine version is pinned during creation, because
-Windows is sensitive to changes in the virtual hardware - even between cold
-boots. For example, the enumeration of network devices might be different with
-different machine versions. Other OSes like Linux can usually deal with such
-changes just fine. For those, the 'Latest' machine version is used by default.
-This means that after a fresh start, the newest machine version supported by the
-QEMU binary is used (e.g. the newest machine version QEMU 8.1 supports is
-version 8.1 for each machine type).
+对于 Windows 客户机，机器版本会在创建期间固定，因为 Windows 对虚拟硬件变化很敏感，
+即使是在冷启动之间也是如此。例如，不同机器版本下网络设备枚举可能不同。
+Linux 等其他操作系统通常可以很好地处理这类变化。对于这些系统，默认使用 'Latest' 机器版本。
+这意味着在全新启动后，会使用 QEMU 二进制文件支持的最新机器版本
+（例如 QEMU 8.1 支持的最新机器版本是每种机器类型的 8.1 版本）。
 
-The machine version is also used as a safeguard when implementing new features
-or fixes that would change the hardware layout to ensure backward compatibility.
-For operations on a running VM, such as live migrations, the running machine
-version is saved to ensure that the VM can be recovered exactly as it was, not
-only from a QEMU virtualization perspective, but also in terms of how {pve} will
-create the QEMU virtual machine instance.
+在实现会改变硬件布局的新功能或修复时，机器版本也作为一种保护机制，用于确保向后兼容性。
+对于正在运行的 VM 上的操作（例如在线迁移），会保存运行中的机器版本，以确保 VM 能够精确恢复到原状态；
+这不仅从 QEMU 虚拟化角度如此，也包括 {pve} 如何创建 QEMU 虚拟机实例。
 
-.PVE Machine Revision
+.PVE 机器修订版
 
-Sometimes {pve} needs to make changes to the hardware layout or modify options
-without waiting for a new QEMU release. For this, {pve} has added an extra
-downstream revision in the form of `+pveX`.
-In these revisions, `X` is 0 for each new QEMU machine version and is omitted in
-this case, e.g. machine version `pc-q35-9.2` would be the same as machine
-version `pc-q35-9.2+pve0`.
+有时 {pve} 需要在不等待新 QEMU 发布的情况下更改硬件布局或修改选项。
+为此，{pve} 添加了一个额外的下游修订版，形式为 `+pveX`。
+在这些修订版中，每个新的 QEMU 机器版本的 `X` 为 0，并在这种情况下省略；
+例如机器版本 `pc-q35-9.2` 与机器版本 `pc-q35-9.2+pve0` 相同。
 
-If {pve} wants to change the hardware layout or a default option, the revision
-is incremented and used for newly created guests or on reboot for VMs that
-always use the latest machine version.
+如果 {pve} 要更改硬件布局或默认选项，则会递增修订版，并用于新创建的客户机，
+或用于始终使用最新机器版本的 VM 在重启后生效。
 
-QEMU Machine Version Deprecation
-++++++++++++++++++++++++++++++++
+===== QEMU 机器版本弃用
 
-Starting with QEMU 10.1, machine versions are removed from upstream QEMU after 6
-years. In {pve}, major releases happen approximately every 2 years, so a major
-{pve} release will support machine versions from approximately two previous
-major {pve} releases.
+从 QEMU 10.1 开始，机器版本会在 6 年后从上游 QEMU 中移除。在 {pve} 中，主版本大约每 2 年发布一次，
+因此一个 {pve} 主版本将支持大约前两个 {pve} 主版本中的机器版本。
 
-Before upgrading to a new major {pve} release, you should update VM
-configurations to avoid all machine versions that will be dropped during the
-next major {pve} release. This ensures that the guests can still be used
-throughout that release. See the section
-xref:qm_machine_update[Update to a Newer Machine Version].
+在升级到新的 {pve} 主版本之前，应更新 VM 配置，避免使用将在下一个 {pve} 主版本中被移除的所有机器版本。
+这可确保客户机在整个该版本周期内仍然可用。参见
+xref:qm_machine_update[更新到较新的机器版本]一节。
 
-The removal policy is not yet in effect for {pve} 8, so the baseline for
-supported machine versions is 2.4. The last QEMU binary version released for
-{pve} 9 is expected to be QEMU 11.2. This QEMU binary will remove support for
-machine versions older than 6.0, so 6.0 is the baseline for the {pve} 9 release
-life cycle. The baseline is expected to increase by 2 major versions for each
-major {pve} release, for example 8.0 for {pve} 10.
+该移除策略尚未对 {pve} 8 生效，因此受支持机器版本的基线为 2.4。
+预计 {pve} 9 发布的最后一个 QEMU 二进制版本为 QEMU 11.2。
+该 QEMU 二进制文件将移除对早于 6.0 的机器版本支持，因此 6.0 是 {pve} 9 发布生命周期的基线。
+预计每个 {pve} 主版本的基线都会提高 2 个主版本，例如 {pve} 10 的基线为 8.0。
 
 [[qm_machine_update]]
 
-Update to a Newer Machine Version
-+++++++++++++++++++++++++++++++++
+===== 更新到较新的机器版本
 
-If you see a deprecation warning, you should change the machine version to a
-newer one. Be sure to have a working backup first and be prepared for changes to
-how the guest sees hardware. In some scenarios, re-installing certain drivers
-might be required. You should also check for snapshots with RAM that were taken
-with these machine versions (i.e. the `runningmachine` configuration entry).
-Unfortunately, there is no way to change the machine version of a snapshot, so
-you'd need to load the snapshot to salvage any data from it.
+如果看到弃用警告，应将机器版本更改为较新的版本。请先确保有可用备份，并准备好处理客户机看到的硬件变化。
+在某些场景中，可能需要重新安装特定驱动。还应检查是否存在使用这些机器版本创建的带 RAM 快照
+（即 `runningmachine` 配置项）。遗憾的是，无法更改快照的机器版本，因此需要加载该快照来挽救其中的数据。
 
 [[qm_hard_disk]]
-Hard Disk
-~~~~~~~~~
+=== 硬盘
 
 [[qm_hard_disk_bus]]
-Bus/Controller
-^^^^^^^^^^^^^^
-QEMU can emulate a number of storage controllers:
+==== 总线/控制器
+QEMU 可以模拟多种存储控制器：
 
-TIP: It is highly recommended to use the *VirtIO SCSI* or *VirtIO Block*
-controller for performance reasons and because they are better maintained.
+TIP: 出于性能原因，也因为维护状况更好，强烈建议使用 *VirtIO SCSI* 或 *VirtIO Block* 控制器。
 
-* the *IDE* controller, has a design which goes back to the 1984 PC/AT disk
-controller. Even if this controller has been superseded by recent designs,
-each and every OS you can think of has support for it, making it a great choice
-if you want to run an OS released before 2003. You can connect up to 4 devices
-on this controller.
+* *IDE* 控制器的设计可追溯到 1984 年的 PC/AT 磁盘控制器。即使该控制器已被较新的设计取代，
+你能想到的几乎所有操作系统都支持它，因此如果要运行 2003 年之前发布的操作系统，它是一个很好的选择。
+该控制器最多可连接 4 个设备。
 
-* the *SATA* (Serial ATA) controller, dating from 2003, has a more modern
-design, allowing higher throughput and a greater number of devices to be
-connected. You can connect up to 6 devices on this controller.
+* *SATA*（Serial ATA）控制器出现于 2003 年，设计更现代，允许更高吞吐量并可连接更多设备。
+该控制器最多可连接 6 个设备。
 
-* the *NVME* controller, You can connect up to 6 devices on this controller.
+* *NVME* 控制器。该控制器最多可连接 6 个设备。
 
-* the *SCSI* controller, designed in 1985, is commonly found on server grade
-hardware, and can connect up to 14 storage devices. {pve} emulates by default a
-LSI 53C895A controller.
+* *SCSI* 控制器设计于 1985 年，常见于服务器级硬件，最多可连接 14 个存储设备。
+{pve} 默认模拟 LSI 53C895A 控制器。
 +
-A SCSI controller of type _VirtIO SCSI single_ and enabling the
-xref:qm_hard_disk_iothread[IO Thread] setting for the attached disks is
-recommended if you aim for performance. This is the default for newly created
-Linux VMs since {pve} 7.3. Each disk will have its own _VirtIO SCSI_ controller,
-and QEMU will handle the disks IO in a dedicated thread. Linux distributions
-have support for this controller since 2012, and FreeBSD since 2014. For Windows
-OSes, you need to provide an extra ISO containing the drivers during the
-installation.
+如果追求性能，建议使用 _VirtIO SCSI single_ 类型的 SCSI 控制器，并为附加磁盘启用
+xref:qm_hard_disk_iothread[IO Thread] 设置。从 {pve} 7.3 起，这是新建 Linux VM 的默认设置。
+每个磁盘都会拥有自己的 _VirtIO SCSI_ 控制器，QEMU 会在专用线程中处理磁盘 IO。
+Linux 发行版自 2012 年起支持该控制器，FreeBSD 自 2014 年起支持。
+对于 Windows 操作系统，在安装期间需要额外提供包含驱动程序的 ISO。
 // https://pve.proxmox.com/wiki/Paravirtualized_Block_Drivers_for_Windows#During_windows_installation.
 
-* The *VirtIO Block* controller, often just called VirtIO or virtio-blk,
-is an older type of paravirtualized controller. It has been superseded by the
-VirtIO SCSI Controller, in terms of features.
+* *VirtIO Block* 控制器通常简称为 VirtIO 或 virtio-blk，是一种较旧的半虚拟化控制器。
+从功能角度看，它已被 VirtIO SCSI 控制器取代。
 
 [thumbnail="screenshot/gui-create-vm-hard-disk.png"]
 
 [[qm_hard_disk_formats]]
-Image Format
-^^^^^^^^^^^^
-On each controller you attach a number of emulated hard disks, which are backed
-by a file or a block device residing in the configured storage. The choice of
-a storage type will determine the format of the hard disk image. Storages which
-present block devices (LVM, ZFS, Ceph) will require the *raw disk image format*,
-whereas files based storages (Ext4, NFS, CIFS, GlusterFS) will let you to choose
-either the *raw disk image format* or the *QEMU image format*.
+==== 镜像格式
+在每个控制器上，可以附加若干模拟硬盘；这些硬盘由位于已配置存储中的文件或块设备提供后端。
+存储类型的选择将决定硬盘镜像格式。呈现块设备的存储（LVM、ZFS、Ceph）需要使用
+*raw disk image format*，而基于文件的存储（Ext4、NFS、CIFS、GlusterFS）可在
+*raw disk image format* 和 *QEMU image format* 之间选择。
 
- * the *QEMU image format* is a copy on write format which allows snapshots, and
-  thin provisioning of the disk image.
- * the *raw disk image* is a bit-to-bit image of a hard disk, similar to what
- you would get when executing the `dd` command on a block device in Linux. This
- format does not support thin provisioning or snapshots by itself, requiring
- cooperation from the storage layer for these tasks. It may, however, be up to
- 10% faster than the *QEMU image format*. footnote:[See this benchmark for details
+ * *QEMU image format* 是一种写时复制格式，支持快照和磁盘镜像精简配置。
+ * *raw disk image* 是硬盘的逐位镜像，类似于在 Linux 中对块设备执行 `dd` 命令得到的结果。
+ 该格式本身不支持精简配置或快照，需要存储层配合完成这些任务。不过，它可能比
+ *QEMU image format* 快最多 10%。footnote:[详见此基准测试
  https://events.static.linuxfound.org/sites/events/files/slides/CloudOpen2013_Khoa_Huynh_v3.pdf]
- * the *VMware image format* only makes sense if you intend to import/export the
- disk image to other hypervisors.
+ * 只有在打算将磁盘镜像导入/导出到其他虚拟化管理程序时，*VMware image format* 才有意义。
 
 [[qm_hard_disk_cache]]
-Cache Mode
-^^^^^^^^^^
-Setting the *Cache* mode of the hard drive will impact how the host system will
-notify the guest systems of block write completions. The *No cache* default
-means that the guest system will be notified that a write is complete when each
-block reaches the physical storage write queue, ignoring the host page cache.
-This provides a good balance between safety and speed.
+==== 缓存模式
+设置硬盘的 *Cache* 模式会影响主机系统如何向客户系统通知块写入完成。
+默认的 *No cache* 表示当每个块到达物理存储写入队列时，客户系统会被通知写入完成，
+同时忽略主机页缓存。这在安全性和速度之间提供了良好平衡。
 
-If you want the {pve} backup manager to skip a disk when doing a backup of a VM,
-you can set the *No backup* option on that disk.
+如果希望 {pve} 备份管理器在备份 VM 时跳过某个磁盘，可以在该磁盘上设置 *No backup* 选项。
 
-If you want the {pve} storage replication mechanism to skip a disk when starting
- a replication job, you can set the *Skip replication* option on that disk.
-As of {pve} 5.0, replication requires the disk images to be on a storage of type
-`zfspool`, so adding a disk image to other storages when the VM has replication
-configured requires to skip replication for this disk image.
+如果希望 {pve} 存储复制机制在启动复制作业时跳过某个磁盘，可以在该磁盘上设置
+*Skip replication* 选项。从 {pve} 5.0 起，复制要求磁盘镜像位于 `zfspool` 类型的存储上；
+因此，在 VM 已配置复制的情况下，如果向其他存储添加磁盘镜像，就需要为该磁盘镜像跳过复制。
 
 [[qm_hard_disk_discard]]
-Trim/Discard
-^^^^^^^^^^^^
-If your storage supports _thin provisioning_ (see the storage chapter in the
-{pve} guide), you can activate the *Discard* option on a drive. With *Discard*
-set and a _TRIM_-enabled guest OS footnote:[TRIM, UNMAP, and discard
-https://en.wikipedia.org/wiki/Trim_%28computing%29], when the VM's filesystem
-marks blocks as unused after deleting files, the controller will relay this
-information to the storage, which will then shrink the disk image accordingly.
-For the guest to be able to issue _TRIM_ commands, you must enable the *Discard*
-option on the drive. Some guest operating systems may also require the
-*SSD Emulation* flag to be set. Note that *Discard* on *VirtIO Block* drives is
-only supported on guests using Linux Kernel 5.0 or higher.
+==== Trim/Discard
+如果存储支持_精简配置_（参见 {pve} 指南中的存储章节），可以在驱动器上启用 *Discard* 选项。
+设置 *Discard* 并使用支持 _TRIM_ 的客户操作系统 footnote:[TRIM, UNMAP, and discard
+https://en.wikipedia.org/wiki/Trim_%28computing%29] 时，当 VM 文件系统在删除文件后将块标记为未使用，
+控制器会将此信息转发给存储，随后存储会相应缩小磁盘镜像。
+为了让客户机能够发出 _TRIM_ 命令，必须在驱动器上启用 *Discard* 选项。
+某些客户操作系统可能还要求设置 *SSD Emulation* 标志。
+请注意，*VirtIO Block* 驱动器上的 *Discard* 仅支持使用 Linux Kernel 5.0 或更高版本的客户机。
 
-If you would like a drive to be presented to the guest as a solid-state drive
-rather than a rotational hard disk, you can set the *SSD emulation* option on
-that drive. There is no requirement that the underlying storage actually be
-backed by SSDs; this feature can be used with physical media of any type.
-Note that *SSD emulation* is not supported on *VirtIO Block* drives.
+如果希望某个驱动器在客户机中呈现为固态硬盘而不是旋转硬盘，可以在该驱动器上设置
+*SSD emulation* 选项。底层存储不要求实际由 SSD 支撑；此功能可用于任何类型的物理介质。
+请注意，*VirtIO Block* 驱动器不支持 *SSD emulation*。
 
 
 [[qm_hard_disk_iothread]]
-IO Thread
-^^^^^^^^^
-The option *IO Thread* can only be used when using a disk with the *VirtIO*
-controller, or with the *SCSI* controller, when the emulated controller type is
-*VirtIO SCSI single*. With *IO Thread* enabled, QEMU creates one I/O thread per
-storage controller rather than handling all I/O in the main event loop or vCPU
-threads. One benefit is better work distribution and utilization of the
-underlying storage. Another benefit is reduced latency (hangs) in the guest for
-very I/O-intensive host workloads, since neither the main thread nor a vCPU
-thread can be blocked by disk I/O.
+==== IO Thread
+选项 *IO Thread* 只能在使用 *VirtIO* 控制器的磁盘时使用；或者在使用 *SCSI* 控制器且模拟控制器类型为
+*VirtIO SCSI single* 时使用。启用 *IO Thread* 后，QEMU 会为每个存储控制器创建一个 I/O 线程，
+而不是在主事件循环或 vCPU 线程中处理所有 I/O。其好处之一是更好地分配工作并利用底层存储。
+另一个好处是在主机工作负载 I/O 非常密集时，减少客户机中的延迟（卡顿），因为主线程和 vCPU 线程都不会被磁盘 I/O 阻塞。
 
 [[qm_cpu]]
-CPU
-~~~
+=== CPU
 
 [thumbnail="screenshot/gui-create-vm-cpu.png"]
 
-A *CPU socket* is a physical slot on a PC motherboard where you can plug a CPU.
-This CPU can then contain one or many *cores*, which are independent
-processing units. Whether you have a single CPU socket with 4 cores, or two CPU
-sockets with two cores is mostly irrelevant from a performance point of view.
-However some software licenses depend on the number of sockets a machine has,
-in that case it makes sense to set the number of sockets to what the license
-allows you.
+*CPU socket* 是 PC 主板上可插入 CPU 的物理插槽。该 CPU 可以包含一个或多个 *core*，
+这些核心是独立处理单元。从性能角度看，一个包含 4 个核心的 CPU 插槽，和两个各包含 2 个核心的
+CPU 插槽通常差别不大。不过，某些软件许可证依赖机器拥有的插槽数量；在这种情况下，
+将插槽数量设置为许可证允许的数量是有意义的。
 
-Increasing the number of virtual CPUs (cores and sockets) will usually provide a
-performance improvement though that is heavily dependent on the use of the VM.
-Multi-threaded applications will of course benefit from a large number of
-virtual CPUs, as for each virtual cpu you add, QEMU will create a new thread of
-execution on the host system. If you're not sure about the workload of your VM,
-it is usually a safe bet to set the number of *Total cores* to 2.
+增加虚拟 CPU（核心和插槽）数量通常会提升性能，但这高度依赖 VM 的用途。
+多线程应用当然会受益于大量虚拟 CPU，因为每增加一个虚拟 CPU，QEMU 都会在主机系统上创建一个新的执行线程。
+如果不确定 VM 的工作负载，通常将 *Total cores* 设置为 2 是比较稳妥的选择。
 
-NOTE: It is perfectly safe if the _overall_ number of cores of all your VMs
-is greater than the number of cores on the server (for example, 4 VMs each with
-4 cores (= total 16) on a machine with only 8 cores). In that case the host
-system will balance the QEMU execution threads between your server cores, just
-like if you were running a standard multi-threaded application. However, {pve}
-will prevent you from starting VMs with more virtual CPU cores than physically
-available, as this will only bring the performance down due to the cost of
-context switches.
+NOTE: 如果所有 VM 的_总_核心数大于服务器核心数，这是完全安全的
+（例如，在只有 8 个核心的机器上运行 4 个 VM，每个 VM 4 个核心，总计 16 个核心）。
+在这种情况下，主机系统会在服务器核心之间平衡 QEMU 执行线程，就像运行标准多线程应用一样。
+不过，{pve} 会阻止启动虚拟 CPU 核心数超过物理可用核心数的 VM，
+因为这只会由于上下文切换成本而降低性能。
 
 [[qm_cpu_resource_limits]]
-Resource Limits
-^^^^^^^^^^^^^^^
+==== 资源限制
 
 *cpulimit*
 
-In addition to the number of virtual cores, the total available ``Host CPU
-Time'' for the VM can be set with the *cpulimit* option. It is a floating point
-value representing CPU time in percent, so `1.0` is equal to `100%`, `2.5` to
-`250%` and so on. If a single process would fully use one single core it would
-have `100%` CPU Time usage. If a VM with four cores utilizes all its cores
-fully it would theoretically use `400%`. In reality the usage may be even a bit
-higher as QEMU can have additional threads for VM peripherals besides the vCPU
-core ones.
+除了虚拟核心数量之外，还可以通过 *cpulimit* 选项设置 VM 可用的总 ``Host CPU Time''。
+这是一个表示 CPU 时间百分比的浮点值，因此 `1.0` 等于 `100%`，`2.5` 等于 `250%`，依此类推。
+如果单个进程完全使用一个核心，它的 CPU Time 使用率为 `100%`。
+如果一个具有四个核心的 VM 完全使用所有核心，理论上会使用 `400%`。
+实际使用率可能还会略高，因为除 vCPU 核心线程外，QEMU 还可能为 VM 外设创建额外线程。
 
-This setting can be useful when a VM should have multiple vCPUs because it is
-running some processes in parallel, but the VM as a whole should not be able to
-run all vCPUs at 100% at the same time.
+当 VM 因并行运行某些进程而需要多个 vCPU，但整体上不应同时让所有 vCPU 以 100% 运行时，此设置很有用。
 
-For example, suppose you have a virtual machine that would benefit from having 8
-virtual CPUs, but you don't want the VM to be able to max out all 8 cores
-running at full load - because that would overload the server and leave other
-virtual machines and containers with too little CPU time. To solve this, you
-could set *cpulimit* to `4.0` (=400%). This means that if the VM fully utilizes
-all 8 virtual CPUs by running 8 processes simultaneously, each vCPU will receive
-a maximum of 50% CPU time from the physical cores. However, if the VM workload
-only fully utilizes 4 virtual CPUs, it could still receive up to 100% CPU time
-from a physical core, for a total of 400%.
+例如，假设某个虚拟机拥有 8 个虚拟 CPU 会受益，但你不希望它能够在满负载下占满全部 8 个核心，
+因为这会使服务器过载，并让其他虚拟机和容器获得过少 CPU 时间。
+为解决此问题，可以将 *cpulimit* 设置为 `4.0`（=400%）。
+这意味着如果 VM 通过同时运行 8 个进程完全利用全部 8 个虚拟 CPU，每个 vCPU 最多会从物理核心获得 50% CPU 时间。
+但是，如果 VM 工作负载只完全利用 4 个虚拟 CPU，它仍可从物理核心获得最多 100% CPU 时间，总计 400%。
 
-NOTE: VMs can, depending on their configuration, use additional threads, such
-as for networking or IO operations but also live migration. Thus a VM can show
-up to use more CPU time than just its virtual CPUs could use. To ensure that a
-VM never uses more CPU time than vCPUs assigned, set the *cpulimit* to
-the same value as the total core count.
+NOTE: 根据配置不同，VM 可能会使用额外线程，例如用于网络或 IO 操作，也可能用于在线迁移。
+因此，VM 显示的 CPU 时间可能超过其虚拟 CPU 本身可使用的时间。要确保 VM 使用的 CPU 时间永不超过分配的 vCPU，
+请将 *cpulimit* 设置为与总核心数相同的值。
 
 *cpuunits*
 
-With the *cpuunits* option, nowadays often called CPU shares or CPU weight, you
-can control how much CPU time a VM gets compared to other running VMs. It is a
-relative weight which defaults to `100` (or `1024` if the host uses legacy
-cgroup v1). If you increase this for a VM it will be prioritized by the
-scheduler in comparison to other VMs with lower weight.
+通过 *cpuunits* 选项（现在通常称为 CPU shares 或 CPU weight），可以控制某个 VM 相对于其他正在运行的
+VM 获得多少 CPU 时间。它是一个相对权重，默认值为 `100`（如果主机使用旧版 cgroup v1，则为 `1024`）。
+如果为某个 VM 增大该值，调度器会相对于权重较低的其他 VM 优先调度它。
 
-For example, if VM 100 has set the default `100` and VM 200 was changed to
-`200`, the latter VM 200 would receive twice the CPU bandwidth than the first
-VM 100.
+例如，如果 VM 100 设置为默认值 `100`，而 VM 200 改为 `200`，后者 VM 200 将获得前者
+VM 100 两倍的 CPU 带宽。
 
-For more information see `man systemd.resource-control`, here `CPUQuota`
-corresponds to `cpulimit` and `CPUWeight` to our `cpuunits` setting. Visit its
-Notes section for references and implementation details.
+更多信息请参见 `man systemd.resource-control`，其中 `CPUQuota` 对应 `cpulimit`，
+`CPUWeight` 对应这里的 `cpuunits` 设置。参见其 Notes 章节以了解参考资料和实现细节。
 
 *affinity*
 
-With the *affinity* option, you can specify the physical CPU cores that are used
-to run the VM's vCPUs. Peripheral VM processes, such as those for I/O, are not
-affected by this setting. Note that the *CPU affinity is not a security
-feature*.
+通过 *affinity* 选项，可以指定用于运行 VM vCPU 的物理 CPU 核心。
+VM 外围进程（例如用于 I/O 的进程）不受此设置影响。请注意，*CPU affinity 不是安全功能*。
 
-Forcing a CPU *affinity* can make sense in certain cases but is accompanied by
-an increase in complexity and maintenance effort. For example, if you want to
-add more VMs later or migrate VMs to nodes with fewer CPU cores. It can also
-easily lead to asynchronous and therefore limited system performance if some
-CPUs are fully utilized while others are almost idle.
+在某些情况下强制 CPU *affinity* 是有意义的，但会增加复杂性和维护工作量。
+例如，稍后想要添加更多 VM，或将 VM 迁移到 CPU 核心更少的节点时。
+如果某些 CPU 被完全占用而其他 CPU 几乎空闲，也很容易导致异步且受限的系统性能。
 
-The *affinity* is set through the `taskset` CLI tool. It accepts the host CPU
-numbers (see `lscpu`) in the `List Format` from `man cpuset`. This ASCII decimal
-list can contain numbers but also number ranges. For example, the *affinity*
-`0-1,8-11` (expanded `0, 1, 8, 9, 10, 11`) would allow the VM to run on only
-these six specific host cores.
+*affinity* 通过 `taskset` CLI 工具设置。它接受主机 CPU 编号（见 `lscpu`），格式为
+`man cpuset` 中的 `List Format`。这个 ASCII 十进制列表可以包含数字，也可以包含数字范围。
+例如，*affinity* `0-1,8-11`（展开为 `0, 1, 8, 9, 10, 11`）将只允许 VM 在这六个特定主机核心上运行。
 
-CPU Type
-^^^^^^^^
+==== CPU 类型
 
-QEMU can emulate a number different of *CPU types* from 486 to the latest Xeon
-processors. Each new processor generation adds new features, like hardware
-assisted 3d rendering, random number generation, memory protection, etc. Also,
-a current generation can be upgraded through
-xref:chapter_firmware_updates[microcode update] with bug or security fixes.
+QEMU 可以模拟从 486 到最新 Xeon 处理器的多种 *CPU types*。
+每一代新处理器都会增加新功能，例如硬件辅助 3D 渲染、随机数生成、内存保护等。
+当前代处理器也可以通过 xref:chapter_firmware_updates[微码更新]获得缺陷修复或安全修复。
 
-Usually you should select for your VM a processor type which closely matches the
-CPU of the host system, as it means that the host CPU features (also called _CPU
-flags_ ) will be available in your VMs. If you want an exact match, you can set
-the CPU type to *host* in which case the VM will have exactly the same CPU flags
-as your host system.
+通常应为 VM 选择与主机系统 CPU 非常接近的处理器类型，因为这意味着主机 CPU 功能
+（也称为 _CPU flags_）将在 VM 中可用。如果想要精确匹配，可以将 CPU 类型设置为
+*host*，此时 VM 将拥有与主机系统完全相同的 CPU flags。
 
-This has a downside though. If you want to do a live migration of VMs between
-different hosts, your VM might end up on a new system with a different CPU type
-or a different microcode version.
-If the CPU flags passed to the guest are missing, the QEMU process will stop. To
-remedy this QEMU has also its own virtual CPU types, that {pve} uses by default.
+不过这也有缺点。如果要在不同主机之间对 VM 执行在线迁移，VM 可能最终运行在具有不同 CPU 类型或不同微码版本的新系统上。
+如果传递给客户机的 CPU flags 缺失，QEMU 进程将停止。为解决此问题，QEMU 也提供自己的虚拟 CPU 类型，
+{pve} 默认使用这些类型。
 
-The backend default is 'kvm64' which works on essentially all x86_64 host CPUs
-and the UI default when creating a new VM is 'x86-64-v2-AES', which requires a
-host CPU starting from Westmere for Intel or at least a fourth generation
-Opteron for AMD.
+后端默认值为 'kvm64'，它基本适用于所有 x86_64 主机 CPU；在 UI 中创建新 VM 时的默认值为
+'x86-64-v2-AES'，该值要求主机 CPU 对 Intel 至少为 Westmere，对 AMD 至少为第四代 Opteron。
 
-In short:
+简而言之：
 
-If you don’t care about live migration or have a homogeneous cluster where all
-nodes have the same CPU and same microcode version, set the CPU type to host, as
-in theory this will give your guests maximum performance.
+如果不关心在线迁移，或者拥有同构集群，其中所有节点具有相同 CPU 和相同微码版本，则将 CPU 类型设置为 host；
+理论上这会为客户机提供最高性能。
 
-If you care about live migration and security, and you have only Intel CPUs or
-only AMD CPUs, choose the lowest generation CPU model of your cluster.
+如果关心在线迁移和安全性，并且只有 Intel CPU 或只有 AMD CPU，则选择集群中最低代的 CPU 型号。
 
-If you care about live migration without security, or have mixed Intel/AMD
-cluster, choose the lowest compatible virtual QEMU CPU type.
+如果关心在线迁移但不关心安全性，或者拥有混合 Intel/AMD 集群，则选择最低兼容的虚拟 QEMU CPU 类型。
 
-NOTE: Live migrations between Intel and AMD host CPUs have no guarantee to work.
+NOTE: Intel 和 AMD 主机 CPU 之间的在线迁移不保证可以工作。
 
-See also
-xref:chapter_qm_vcpu_list[List of AMD and Intel CPU Types as Defined in QEMU].
+另请参见
+xref:chapter_qm_vcpu_list[QEMU 中定义的 AMD 和 Intel CPU 类型列表]。
 
-QEMU CPU Types
-^^^^^^^^^^^^^^
+==== QEMU CPU 类型
 
-QEMU also provide virtual CPU types, compatible with both Intel and AMD host
-CPUs.
+QEMU 还提供虚拟 CPU 类型，同时兼容 Intel 和 AMD 主机 CPU。
 
-NOTE: To mitigate the Spectre vulnerability for virtual CPU types, you need to
-add the relevant CPU flags, see
-xref:qm_meltdown_spectre[Meltdown / Spectre related CPU flags].
+NOTE: 要为虚拟 CPU 类型缓解 Spectre 漏洞，需要添加相关 CPU flags，参见
+xref:qm_meltdown_spectre[Meltdown / Spectre 相关 CPU flags]。
 
-Historically, {pve} had the 'kvm64' CPU model, with CPU flags at the level of
-Pentium 4 enabled, so performance was not great for certain workloads.
+历史上，{pve} 使用 'kvm64' CPU 型号，启用的 CPU flags 处于 Pentium 4 水平，
+因此对某些工作负载而言性能并不理想。
 
-In the summer of 2020, AMD, Intel, Red Hat, and SUSE collaborated to define
-three x86-64 microarchitecture levels on top of the x86-64 baseline, with modern
-flags enabled. For details, see the
-https://gitlab.com/x86-psABIs/x86-64-ABI[x86-64-ABI specification].
+2020 年夏季，AMD、Intel、Red Hat 和 SUSE 协作，在 x86-64 基线之上定义了三个
+x86-64 微架构级别，并启用现代 flags。详情参见
+https://gitlab.com/x86-psABIs/x86-64-ABI[x86-64-ABI specification]。
 
-NOTE: Some newer distributions like CentOS 9 are now built with 'x86-64-v2'
-flags as a minimum requirement.
+NOTE: 一些较新的发行版（如 CentOS 9）现在以 'x86-64-v2' flags 作为最低构建要求。
 
-* 'kvm64 (x86-64-v1)': Compatible with Intel CPU >= Pentium 4, AMD CPU >=
-Phenom.
+* 'kvm64 (x86-64-v1)'：兼容 Intel CPU >= Pentium 4、AMD CPU >= Phenom。
 +
-* 'x86-64-v2': Compatible with Intel CPU >= Nehalem, AMD CPU >= Opteron_G3.
-Added CPU flags compared to 'x86-64-v1': '+cx16', '+lahf-lm', '+popcnt', '+pni',
-'+sse4.1', '+sse4.2', '+ssse3'.
+* 'x86-64-v2'：兼容 Intel CPU >= Nehalem、AMD CPU >= Opteron_G3。
+与 'x86-64-v1' 相比新增 CPU flags：'+cx16'、'+lahf-lm'、'+popcnt'、'+pni'、
+'+sse4.1'、'+sse4.2'、'+ssse3'。
 +
-* 'x86-64-v2-AES': Compatible with Intel CPU >= Westmere, AMD CPU >= Opteron_G4.
-Added CPU flags compared to 'x86-64-v2': '+aes'.
+* 'x86-64-v2-AES'：兼容 Intel CPU >= Westmere、AMD CPU >= Opteron_G4。
+与 'x86-64-v2' 相比新增 CPU flags：'+aes'。
 +
-* 'x86-64-v3': Compatible with Intel CPU >= Broadwell, AMD CPU >= EPYC. Added
-CPU flags compared to 'x86-64-v2-AES': '+avx', '+avx2', '+bmi1', '+bmi2',
-'+f16c', '+fma', '+movbe', '+xsave'.
+* 'x86-64-v3'：兼容 Intel CPU >= Broadwell、AMD CPU >= EPYC。
+与 'x86-64-v2-AES' 相比新增 CPU flags：'+avx'、'+avx2'、'+bmi1'、'+bmi2'、
+'+f16c'、'+fma'、'+movbe'、'+xsave'。
 +
-* 'x86-64-v4': Compatible with Intel CPU >= Skylake, AMD CPU >= EPYC v4 Genoa.
-Added CPU flags compared to 'x86-64-v3': '+avx512f', '+avx512bw', '+avx512cd',
-'+avx512dq', '+avx512vl'.
+* 'x86-64-v4'：兼容 Intel CPU >= Skylake、AMD CPU >= EPYC v4 Genoa。
+与 'x86-64-v3' 相比新增 CPU flags：'+avx512f'、'+avx512bw'、'+avx512cd'、
+'+avx512dq'、'+avx512vl'。
 
-Custom CPU Types
-^^^^^^^^^^^^^^^^
+==== 自定义 CPU 类型
 
-You can specify custom CPU types with a configurable set of features. These are
-maintained in the configuration file `/etc/pve/virtual-guest/cpu-models.conf` by
-an administrator. See `man cpu-models.conf` for format details.
+可以指定包含可配置功能集的自定义 CPU 类型。这些类型由管理员在配置文件
+`/etc/pve/virtual-guest/cpu-models.conf` 中维护。格式详情参见 `man cpu-models.conf`。
 
-Specified custom types can be selected by any user with the `Sys.Audit`
-privilege on `/nodes`. When configuring a custom CPU type for a VM via the CLI
-or API, the name needs to be prefixed with 'custom-'.
+任何在 `/nodes` 上具有 `Sys.Audit` 权限的用户都可以选择已指定的自定义类型。
+通过 CLI 或 API 为 VM 配置自定义 CPU 类型时，名称需要带有 'custom-' 前缀。
 
 [[qm_meltdown_spectre]]
-Meltdown / Spectre related CPU flags
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== Meltdown / Spectre 相关 CPU flags
 
-There are several CPU flags related to the Meltdown and Spectre vulnerabilities
-footnote:[Meltdown Attack https://meltdownattack.com/] which need to be set
-manually unless the selected CPU type of your VM already enables them by default.
+有几个 CPU flags 与 Meltdown 和 Spectre 漏洞 footnote:[Meltdown Attack https://meltdownattack.com/]
+相关；除非 VM 所选 CPU 类型已经默认启用这些 flags，否则需要手动设置。
 
-There are two requirements that need to be fulfilled in order to use these
-CPU flags:
+要使用这些 CPU flags，需要满足两个要求：
 
-* The host CPU(s) must support the feature and propagate it to the guest's virtual CPU(s)
-* The guest operating system must be updated to a version which mitigates the
-  attacks and is able to utilize the CPU feature
+* 主机 CPU 必须支持该功能，并将其传播给客户机的虚拟 CPU
+* 客户操作系统必须更新到能够缓解这些攻击并使用该 CPU 功能的版本
 
-Otherwise you need to set the desired CPU flag of the virtual CPU, either by
-editing the CPU options in the web UI, or by setting the 'flags' property of the
-'cpu' option in the VM configuration file.
+否则，需要设置虚拟 CPU 所需的 CPU flag，可以通过在 Web UI 中编辑 CPU 选项，
+或在 VM 配置文件中设置 'cpu' 选项的 'flags' 属性。
 
-For Spectre v1,v2,v4 fixes, your CPU or system vendor also needs to provide a
-so-called ``microcode update'' for your CPU, see
-xref:chapter_firmware_updates[chapter Firmware Updates]. Note that not all
-affected CPUs can be updated to support spec-ctrl.
+对于 Spectre v1、v2、v4 修复，CPU 或系统厂商还需要为你的 CPU 提供所谓的
+``microcode update''，参见 xref:chapter_firmware_updates[固件更新章节]。
+请注意，并非所有受影响 CPU 都可以更新到支持 spec-ctrl。
 
 
-To check if the {pve} host is vulnerable, execute the following command as root:
+要检查 {pve} 主机是否存在漏洞，请以 root 身份执行以下命令：
 
 ----
 for f in /sys/devices/system/cpu/vulnerabilities/*; do echo "${f##*/} -" $(cat "$f"); done
 ----
 
-A community script is also available to detect if the host is still vulnerable.
+也可以使用社区脚本检测主机是否仍然存在漏洞。
 footnote:[spectre-meltdown-checker https://meltdown.ovh/]
 
-Intel processors
-^^^^^^^^^^^^^^^^
+==== Intel 处理器
 
 * 'pcid'
 +
-This reduces the performance impact of the Meltdown (CVE-2017-5754) mitigation
-called 'Kernel Page-Table Isolation (KPTI)', which effectively hides
-the Kernel memory from the user space. Without PCID, KPTI is quite an expensive
-mechanism footnote:[PCID is now a critical performance/security feature on x86
-https://groups.google.com/forum/m/#!topic/mechanical-sympathy/L9mHTbeQLNU].
+这会降低名为 'Kernel Page-Table Isolation (KPTI)' 的 Meltdown (CVE-2017-5754)
+缓解措施带来的性能影响；KPTI 会有效地向用户空间隐藏内核内存。
+没有 PCID 时，KPTI 是一种成本相当高的机制 footnote:[PCID is now a critical performance/security feature on x86
+https://groups.google.com/forum/m/#!topic/mechanical-sympathy/L9mHTbeQLNU]。
 +
-To check if the {pve} host supports PCID, execute the following command as root:
+要检查 {pve} 主机是否支持 PCID，请以 root 身份执行以下命令：
 +
 ----
 # grep ' pcid ' /proc/cpuinfo
 ----
 +
-If this does not return empty your host's CPU has support for 'pcid'.
+如果返回结果不为空，则主机 CPU 支持 'pcid'。
 
 * 'spec-ctrl'
 +
-Required to enable the Spectre v1 (CVE-2017-5753) and Spectre v2 (CVE-2017-5715) fix,
-in cases where retpolines are not sufficient.
-Included by default in Intel CPU models with -IBRS suffix.
-Must be explicitly turned on for Intel CPU models without -IBRS suffix.
-Requires an updated host CPU microcode (intel-microcode >= 20180425).
+在 retpolines 不足的情况下，需要该标志以启用 Spectre v1 (CVE-2017-5753) 和
+Spectre v2 (CVE-2017-5715) 修复。
+带 -IBRS 后缀的 Intel CPU 型号默认包含该标志。
+对于不带 -IBRS 后缀的 Intel CPU 型号，必须显式启用。
+需要更新后的主机 CPU 微码（intel-microcode >= 20180425）。
 +
 * 'ssbd'
 +
-Required to enable the Spectre V4 (CVE-2018-3639) fix. Not included by default in any Intel CPU model.
-Must be explicitly turned on for all Intel CPU models.
-Requires an updated host CPU microcode(intel-microcode >= 20180703).
+需要该标志以启用 Spectre V4 (CVE-2018-3639) 修复。任何 Intel CPU 型号默认都不包含它。
+所有 Intel CPU 型号都必须显式启用。
+需要更新后的主机 CPU 微码（intel-microcode >= 20180703）。
 
 
-AMD processors
-^^^^^^^^^^^^^^
+==== AMD 处理器
 
 * 'ibpb'
 +
-Required to enable the Spectre v1 (CVE-2017-5753) and Spectre v2 (CVE-2017-5715) fix,
-in cases where retpolines are not sufficient.
-Included by default in AMD CPU models with -IBPB suffix.
-Must be explicitly turned on for AMD CPU models without -IBPB suffix.
-Requires the host CPU microcode to support this feature before it can be used for guest CPUs.
+在 retpolines 不足的情况下，需要该标志以启用 Spectre v1 (CVE-2017-5753) 和
+Spectre v2 (CVE-2017-5715) 修复。
+带 -IBPB 后缀的 AMD CPU 型号默认包含该标志。
+对于不带 -IBPB 后缀的 AMD CPU 型号，必须显式启用。
+在可供客户 CPU 使用前，需要主机 CPU 微码支持此功能。
 
 
 
 * 'virt-ssbd'
 +
-Required to enable the Spectre v4 (CVE-2018-3639) fix.
-Not included by default in any AMD CPU model.
-Must be explicitly turned on for all AMD CPU models.
-This should be provided to guests, even if amd-ssbd is also provided, for maximum guest compatibility.
-Note that this must be explicitly enabled when when using the "host" cpu model,
-because this is a virtual feature which does not exist in the physical CPUs.
+需要该标志以启用 Spectre v4 (CVE-2018-3639) 修复。
+任何 AMD CPU 型号默认都不包含它。
+所有 AMD CPU 型号都必须显式启用。
+为了最大化客户机兼容性，即使也提供了 amd-ssbd，也应向客户机提供此标志。
+请注意，使用 "host" CPU 型号时必须显式启用它，因为这是一个不存在于物理 CPU 中的虚拟功能。
 
 
 * 'amd-ssbd'
 +
-Required to enable the Spectre v4 (CVE-2018-3639) fix.
-Not included by default in any AMD CPU model. Must be explicitly turned on for all AMD CPU models.
-This provides higher performance than virt-ssbd, therefore a host supporting this should always expose this to guests if possible.
-virt-ssbd should none the less also be exposed for maximum guest compatibility as some kernels only know about virt-ssbd.
+需要该标志以启用 Spectre v4 (CVE-2018-3639) 修复。
+任何 AMD CPU 型号默认都不包含它。所有 AMD CPU 型号都必须显式启用。
+它提供的性能高于 virt-ssbd，因此支持该功能的主机应尽可能始终将其暴露给客户机。
+尽管如此，为了最大化客户机兼容性，也应暴露 virt-ssbd，因为某些内核只识别 virt-ssbd。
 
 
 * 'amd-no-ssb'
 +
-Recommended to indicate the host is not vulnerable to Spectre V4 (CVE-2018-3639).
-Not included by default in any AMD CPU model.
-Future hardware generations of CPU will not be vulnerable to CVE-2018-3639,
-and thus the guest should be told not to enable its mitigations, by exposing amd-no-ssb.
-This is mutually exclusive with virt-ssbd and amd-ssbd.
+建议使用该标志来表明主机不受 Spectre V4 (CVE-2018-3639) 影响。
+任何 AMD CPU 型号默认都不包含它。
+未来硬件代际的 CPU 将不受 CVE-2018-3639 影响，因此应通过暴露 amd-no-ssb 告知客户机不要启用其缓解措施。
+它与 virt-ssbd 和 amd-ssbd 互斥。
 
 
-NUMA
-^^^^
-You can also optionally emulate a *NUMA*
-footnote:[https://en.wikipedia.org/wiki/Non-uniform_memory_access] architecture
-in your VMs. The basics of the NUMA architecture mean that instead of having a
-global memory pool available to all your cores, the memory is spread into local
-banks close to each socket.
-This can bring speed improvements as the memory bus is not a bottleneck
-anymore. If your system has a NUMA architecture footnote:[if the command
-`numactl --hardware | grep available` returns more than one node, then your host
-system has a NUMA architecture] we recommend to activate the option, as this
-will allow proper distribution of the VM resources on the host system.
-This option is also required to hot-plug cores or RAM in a VM.
+==== NUMA
+也可以选择在 VM 中模拟 *NUMA*
+footnote:[https://en.wikipedia.org/wiki/Non-uniform_memory_access] 架构。
+NUMA 架构的基本含义是，内存不是作为所有核心都可访问的全局内存池存在，
+而是分布在靠近每个插槽的本地内存区中。
+由于内存总线不再是瓶颈，这可以带来速度提升。如果系统具有 NUMA 架构
+footnote:[如果命令 `numactl --hardware | grep available` 返回多个节点，则主机系统具有 NUMA 架构]，
+建议启用该选项，因为这允许在主机系统上合理分配 VM 资源。
+在 VM 中热插拔核心或 RAM 时也需要该选项。
 
-If the NUMA option is used, it is recommended to set the number of sockets to
-the number of nodes of the host system.
+如果使用 NUMA 选项，建议将插槽数量设置为主机系统的节点数量。
 
-vCPU hot-plug
-^^^^^^^^^^^^^
+==== vCPU 热插拔
 
-Modern operating systems introduced the capability to hot-plug and, to a
-certain extent, hot-unplug CPUs in a running system. Virtualization allows us
-to avoid a lot of the (physical) problems real hardware can cause in such
-scenarios.
-Still, this is a rather new and complicated feature, so its use should be
-restricted to cases where its absolutely needed. Most of the functionality can
-be replicated with other, well tested and less complicated, features, see
-xref:qm_cpu_resource_limits[Resource Limits].
+现代操作系统引入了在运行中系统内热插拔 CPU，并在一定程度上热移除 CPU 的能力。
+虚拟化让我们能够避免真实硬件在这些场景中可能导致的许多（物理）问题。
+不过，这仍是一个相当新且复杂的功能，因此应仅限于确实需要的场景。
+大部分功能都可以用其他经过充分测试且复杂度更低的功能复现，参见
+xref:qm_cpu_resource_limits[资源限制]。
 
-In {pve} the maximal number of plugged CPUs is always `cores * sockets`.
-To start a VM with less than this total core count of CPUs you may use the
-*vcpus* setting, it denotes how many vCPUs should be plugged in at VM start.
+在 {pve} 中，可插入 CPU 的最大数量始终为 `cores * sockets`。
+要以少于该总核心数的 CPU 启动 VM，可以使用 *vcpus* 设置；
+它表示 VM 启动时应插入多少个 vCPU。
 
-Currently this feature is only supported on Linux, a kernel newer than 3.10 is
-needed, a kernel newer than 4.7 is recommended.
+目前此功能仅在 Linux 上受支持，需要高于 3.10 的内核，建议使用高于 4.7 的内核。
 
-You can use a udev rule as follow to automatically set new CPUs as online in
-the guest:
+可以使用如下 udev 规则，在客户机中自动将新 CPU 设置为 online：
 
 ----
 SUBSYSTEM=="cpu", ACTION=="add", TEST=="online", ATTR{online}=="0", ATTR{online}="1"
 ----
 
-Save this under /etc/udev/rules.d/ as a file ending in `.rules`.
+将其保存在 /etc/udev/rules.d/ 下，并使用以 `.rules` 结尾的文件名。
 
-Note: CPU hot-remove is machine dependent and requires guest cooperation.  The
-deletion command does not guarantee CPU removal to actually happen, typically
-it's a request forwarded to guest OS using target dependent mechanism, such as
-ACPI on x86/amd64.
+注意：CPU 热移除依赖机器类型，并需要客户机配合。删除命令并不保证 CPU 移除实际发生；
+通常它只是通过依赖目标的机制（例如 x86/amd64 上的 ACPI）转发给客户操作系统的请求。
 
 
 [[qm_memory]]
-Memory
-~~~~~~
+=== 内存
 
-For each VM you have the option to set a fixed size memory or asking
-{pve} to dynamically allocate memory based on the current RAM usage of the
-host.
+对于每个 VM，可以选择设置固定大小的内存，或让 {pve} 根据主机当前 RAM 使用情况动态分配内存。
 
-.Fixed Memory Allocation
+.固定内存分配
 [thumbnail="screenshot/gui-create-vm-memory.png"]
 
-When setting memory and minimum memory to the same amount
-{pve} will simply allocate what you specify to your VM.
+当将 memory 和 minimum memory 设置为相同数值时，{pve} 会直接为 VM 分配指定内存。
 
-Even when using a fixed memory size, the ballooning device gets added to the
-VM, because it delivers useful information such as how much memory the guest
-really uses.
-In general, you should leave *ballooning* enabled, but if you want to disable
-it (like for debugging purposes), simply uncheck *Ballooning Device* or set
+即使使用固定内存大小，ballooning 设备也会被添加到 VM 中，因为它会提供有用信息，
+例如客户机实际使用了多少内存。
+一般来说，应保持 *ballooning* 启用；但如果想要禁用它（例如用于调试），只需取消勾选
+*Ballooning Device* 或设置
 
  balloon: 0
 
-in the configuration.
+到配置中。
 
 [[qm_ballooning]]
-.Automatic Memory Allocation
+.自动内存分配
 
 // see autoballoon() in pvestatd.pm
-When setting the minimum memory lower than memory, {pve} will make sure that
-the minimum amount you specified is always available to the VM, and if RAM
-usage on the host is below a certain target percentage, will dynamically add
-memory to the guest up to the maximum memory specified. The target percentage
-defaults to 80% and can be configured xref:ballooning-target[in the node options].
+当 minimum memory 设置为低于 memory 时，{pve} 会确保指定的最低内存始终可供 VM 使用；
+如果主机 RAM 使用率低于某个目标百分比，则会动态向客户机添加内存，直到达到指定的最大内存。
+目标百分比默认为 80%，可以 xref:ballooning-target[在节点选项中]配置。
 
-When the host is running low on RAM, the VM will then release some memory
-back to the host, swapping running processes if needed and starting the oom
-killer in last resort. The passing around of memory between host and guest is
-done via a special `balloon` kernel driver running inside the guest, which will
-grab or release memory pages from the host.
-footnote:[A good explanation of the inner workings of the balloon driver can be found here https://rwmj.wordpress.com/2010/07/17/virtio-balloon/]
+当主机 RAM 不足时，VM 会将部分内存释放回主机；必要时会交换正在运行的进程，并在最后手段下启动 oom killer。
+主机和客户机之间的内存传递通过运行在客户机内部的特殊 `balloon` 内核驱动完成，
+该驱动会从主机获取或释放内存页。
+footnote:[这里有一篇对 balloon 驱动内部工作原理的良好说明 https://rwmj.wordpress.com/2010/07/17/virtio-balloon/]
 
-When multiple VMs use the autoallocate facility, it is possible to set a
-*Shares* coefficient which indicates the relative amount of the free host memory
-that each VM should take. Suppose for instance you have four VMs, three of them
-running an HTTP server and the last one is a database server.
-The host is configured to target 80% RAM usage. To cache more
-database blocks in the database server RAM, you would like to prioritize the
-database VM when spare RAM is available. For this you assign a Shares property
-of 3000 to the database VM, leaving the other VMs to the Shares default setting
-of 1000. The host server has 32GB of RAM, and is currently using 16GB, leaving 32
-* 80/100 - 16 = 9GB RAM to be allocated to the VMs on top of their configured
-minimum memory amount. The database VM will benefit from 9 * 3000 / (3000
-+ 1000 + 1000 + 1000) = 4.5 GB extra RAM and each HTTP server from 1.5 GB.
+当多个 VM 使用自动分配功能时，可以设置 *Shares* 系数，用于表示每个 VM 应获取的空闲主机内存相对份额。
+例如，假设有四个 VM，其中三个运行 HTTP 服务器，最后一个运行数据库服务器。
+主机配置为目标 RAM 使用率 80%。为了在有空闲 RAM 时让数据库服务器 RAM 缓存更多数据库块，
+希望优先考虑数据库 VM。为此，可以为数据库 VM 分配 3000 的 Shares 属性，
+其他 VM 保持默认 Shares 设置 1000。主机服务器有 32GB RAM，当前使用 16GB，
+因此在已配置最低内存之外，还有 32 * 80/100 - 16 = 9GB RAM 可分配给 VM。
+数据库 VM 将获得 9 * 3000 / (3000 + 1000 + 1000 + 1000) = 4.5 GB 额外 RAM，
+每个 HTTP 服务器获得 1.5 GB。
 
-All Linux distributions released after 2010 have the balloon kernel driver
-included. For Windows OSes, the balloon driver needs to be added manually and can
-incur a slowdown of the guest, so we don't recommend using it on critical
-systems.
+2010 年之后发布的所有 Linux 发行版都包含 balloon 内核驱动。
+对于 Windows 操作系统，需要手动添加 balloon 驱动，并且可能导致客户机变慢，
+因此不建议在关键系统上使用它。
 // see https://forum.proxmox.com/threads/solved-hyper-threading-vs-no-hyper-threading-fixed-vs-variable-memory.20265/
 
-When allocating RAM to your VMs, a good rule of thumb is always to leave 1GB
-of RAM available to the host.
+为 VM 分配 RAM 时，一个良好的经验规则是始终为主机保留 1GB 可用 RAM。
 
 [[qm_memory_encryption]]
-Memory Encryption
-~~~~~~~~~~~~~~~~~
+=== 内存加密
 
 [[qm_memory_encryption_sev]]
-AMD SEV
-^^^^^^^
+==== AMD SEV
 
-SEV (Secure Encrypted Virtualization) enables memory encryption per VM using
-AES-128 encryption and the AMD Secure Processor.
+SEV（Secure Encrypted Virtualization）使用 AES-128 加密和 AMD Secure Processor 为每个 VM 启用内存加密。
 
-SEV-ES (Secure Encrypted Virtualization - Encrypted State) in addition encrypts
-all CPU register contents, to prevent leakage of information to the hypervisor.
+SEV-ES（Secure Encrypted Virtualization - Encrypted State）还会加密所有 CPU 寄存器内容，
+以防止信息泄露给虚拟化管理程序。
 
-SEV-SNP (Secure Encrypted Virtualization - Secure Nested Paging) also attempts
-to prevent software-based integrity attacks. See the
+SEV-SNP（Secure Encrypted Virtualization - Secure Nested Paging）还尝试防止基于软件的完整性攻击。
+更多信息参见
 https://www.amd.com/content/dam/amd/en/documents/epyc-business-docs/white-papers/SEV-SNP-strengthening-vm-isolation-with-integrity-protection-and-more.pdf[
-AMD SEV SNP white paper] for more information.
+AMD SEV SNP white paper]。
 
-*Host Requirements:*
+*主机要求：*
 
 * AMD EPYC CPU
-* SEV-ES is only supported on AMD EPYC 7002 series and newer EPYC CPUs
-* SEV-SNP is only supported on AMD EPYC 7003 series and newer EPYC CPUs
-* SEV-SNP requires host kernel version 6.11 or higher.
-* configure AMD memory encryption in the BIOS settings of the host machine
-* add "kvm_amd.sev=1" to kernel parameters if not enabled by default
-* add "mem_encrypt=on" to kernel parameters if you want to encrypt memory on the
-host (SME) see https://www.kernel.org/doc/Documentation/x86/amd-memory-encryption.txt
-* maybe increase SWIOTLB see https://github.com/AMDESE/AMDSEV#faq-4
+* SEV-ES 仅支持 AMD EPYC 7002 系列及更新的 EPYC CPU
+* SEV-SNP 仅支持 AMD EPYC 7003 系列及更新的 EPYC CPU
+* SEV-SNP 要求主机内核版本为 6.11 或更高。
+* 在主机 BIOS 设置中配置 AMD memory encryption
+* 如果默认未启用，请向内核参数添加 "kvm_amd.sev=1"
+* 如果希望在主机上加密内存（SME），请向内核参数添加 "mem_encrypt=on"，
+参见 https://www.kernel.org/doc/Documentation/x86/amd-memory-encryption.txt
+* 可能需要增大 SWIOTLB，参见 https://github.com/AMDESE/AMDSEV#faq-4
 
-To check if SEV is enabled on the host search for `sev` in dmesg and print out
-the SEV kernel parameter of kvm_amd:
+要检查主机上是否启用了 SEV，请在 dmesg 中搜索 `sev`，并打印 kvm_amd 的 SEV 内核参数：
 
 ----
 # dmesg | grep -i sev
@@ -802,57 +607,53 @@ the SEV kernel parameter of kvm_amd:
 Y
 ----
 
-*Guest Requirements:*
+*客户机要求：*
 
 * edk2-OVMF
-* advisable to use Q35
-* The guest operating system must contain SEV-support.
+* 建议使用 Q35
+* 客户操作系统必须包含 SEV 支持。
 
-*Limitations:*
+*限制：*
 
-* Because the memory is encrypted the memory usage on host is always wrong.
-* Operations that involve saving or restoring memory like snapshots & live
-migration do not work yet or are
-https://github.com/PSPReverse/amd-sev-migration-attack[attackable].
-* PCI passthrough is not supported.
-* SEV-ES & SEV-SNP are very experimental.
-* EFI disks are not supported with SEV-SNP.
-* With SEV-SNP, the `reboot` command inside a VM simply shuts down the VM.
+* 由于内存已加密，主机上的内存使用量始终不准确。
+* 涉及保存或还原内存的操作（如快照和在线迁移）尚不能工作，或是
+https://github.com/PSPReverse/amd-sev-migration-attack[可被攻击]的。
+* 不支持 PCI 直通。
+* SEV-ES 和 SEV-SNP 都非常实验性。
+* SEV-SNP 不支持 EFI 磁盘。
+* 使用 SEV-SNP 时，VM 内部的 `reboot` 命令只会关闭 VM。
 
-*Example Configuration (SEV):*
+*示例配置 (SEV)：*
 
 ----
 # qm set <vmid> -amd-sev type=std,no-debug=1,no-key-sharing=1,kernel-hashes=1
 ----
 
-The *type* defines the encryption technology ("type=" is not necessary).
-Available options are std, es & snp.
+*type* 定义加密技术（"type=" 不是必需的）。可用选项为 std、es 和 snp。
 
-The QEMU *policy* parameter gets calculated with the *no-debug* and
-*no-key-sharing* parameters. These parameters correspond to policy-bit 0 and 1.
-If *type* is *es* the policy-bit 2 is set to 1 so that SEV-ES is enabled.
-Policy-bit 3 (nosend) is always set to 1 to prevent migration-attacks. For more
-information on how to calculate the policy see:
+QEMU *policy* 参数通过 *no-debug* 和 *no-key-sharing* 参数计算。
+这些参数对应 policy-bit 0 和 1。如果 *type* 为 *es*，则 policy-bit 2 设置为 1，从而启用 SEV-ES。
+Policy-bit 3（nosend）始终设置为 1，以防止迁移攻击。
+有关如何计算 policy 的更多信息，请参见：
 https://www.amd.com/system/files/TechDocs/55766_SEV-KM_API_Specification.pdf[AMD SEV API Specification Chapter 3]
 
-The *kernel-hashes* option is off per default for backward compatibility with
-older OVMF images and guests that do not measure the kernel/initrd.
-See https://lists.gnu.org/archive/html/qemu-devel/2021-11/msg02598.html
+为了与较旧 OVMF 镜像以及不测量 kernel/initrd 的客户机保持向后兼容，*kernel-hashes* 选项默认关闭。
+参见 https://lists.gnu.org/archive/html/qemu-devel/2021-11/msg02598.html
 
-*Check if SEV is working in the VM*
+*检查 VM 中 SEV 是否工作*
 
-Method 1 - dmesg:
+方法 1 - dmesg：
 
-Output should look like this.
+输出应类似如下：
 
 ----
 # dmesg | grep -i sev
 AMD Memory Encryption Features active: SEV
 ----
 
-Method 2 - MSR 0xc0010131 (MSR_AMD64_SEV):
+方法 2 - MSR 0xc0010131 (MSR_AMD64_SEV)：
 
-Output should be 1.
+输出应为 1。
 
 ----
 # apt install msr-tools
@@ -861,16 +662,16 @@ Output should be 1.
 1
 ----
 
-*Example Configuration (SEV-SNP):*
+*示例配置 (SEV-SNP)：*
 
 ----
 # qm set <vmid> -amd-sev type=snp,allow-smt=1,no-debug=1,kernel-hashes=1
 ----
 
-The `allow-smt` policy-bit is set by default. If you disable it by setting
-`allow-smt` to `0`, SMT must be disabled on the host in order for the VM to run.
+`allow-smt` policy-bit 默认已设置。如果通过将 `allow-smt` 设置为 `0` 来禁用它，
+则必须在主机上禁用 SMT，VM 才能运行。
 
-*Check if SEV-SNP is working in the VM*
+*检查 VM 中 SEV-SNP 是否工作*
 
 ----
 # dmesg | grep -i snp
@@ -879,7 +680,7 @@ SEV: Using SNP CPUID table, 29 entries present.
 SEV: SNP guest platform device initialized.
 ----
 
-Links:
+链接：
 
 * https://developer.amd.com/sev/
 * https://github.com/AMDESE/AMDSEV
@@ -890,421 +691,318 @@ Links:
 SEV Secure Nested Paging Firmware ABI Specification]
 
 [[qm_network_device]]
-Network Device
-~~~~~~~~~~~~~~
+=== 网络设备
 
 [thumbnail="screenshot/gui-create-vm-network.png"]
 
-Each VM can have many _Network interface controllers_ (NIC), of four different
-types:
+每个 VM 可以有多个_网络接口控制器_（NIC），共有四种不同类型：
 
- * *Intel E1000* is the default, and emulates an Intel Gigabit network card.
- * the *VirtIO* paravirtualized NIC should be used if you aim for maximum
-performance. Like all VirtIO devices, the guest OS should have the proper driver
-installed.
- * the *Realtek 8139* emulates an older 100 MB/s network card, and should
-only be used when emulating older operating systems ( released before 2002 )
- * the *vmxnet3* is another paravirtualized device, which should only be used
-when importing a VM from another hypervisor.
+ * *Intel E1000* 是默认值，模拟 Intel 千兆网卡。
+ * 如果追求最高性能，应使用 *VirtIO* 半虚拟化 NIC。与所有 VirtIO 设备一样，
+客户操作系统应安装相应驱动。
+ * *Realtek 8139* 模拟较旧的 100 MB/s 网卡，仅应在模拟较旧操作系统（2002 年之前发布）时使用。
+ * *vmxnet3* 是另一种半虚拟化设备，只应在从其他虚拟化管理程序导入 VM 时使用。
 
-{pve} will generate for each NIC a random *MAC address*, so that your VM is
-addressable on Ethernet networks.
+{pve} 会为每个 NIC 生成随机 *MAC address*，使 VM 可以在以太网网络中被寻址。
 
-The NIC you added to the VM can follow one of two different models:
+添加到 VM 的 NIC 可以采用以下两种模式之一：
 
- * in the default *Bridged mode* each virtual NIC is backed on the host by a
-_tap device_, ( a software loopback device simulating an Ethernet NIC ). This
-tap device is added to a bridge, by default vmbr0 in {pve}. In this mode, VMs
-have direct access to the Ethernet LAN on which the host is located.
- * in the alternative *NAT mode*, each virtual NIC will only communicate with
-the QEMU user networking stack, where a built-in router and DHCP server can
-provide network access. This built-in DHCP will serve addresses in the private
-10.0.2.0/24 range. The NAT mode is much slower than the bridged mode, and
-should only be used for testing. This mode is only available via CLI or the API,
-but not via the web UI.
+ * 在默认 *Bridged mode* 下，每个虚拟 NIC 在主机上由一个 _tap device_
+（模拟以太网 NIC 的软件回环设备）提供后端。该 tap 设备会加入一个网桥，在 {pve} 中默认为 vmbr0。
+在此模式下，VM 可直接访问主机所在的以太网 LAN。
+ * 在替代的 *NAT mode* 下，每个虚拟 NIC 只会与 QEMU 用户态网络栈通信；
+其中内置路由器和 DHCP 服务器可以提供网络访问。该内置 DHCP 会在私有 10.0.2.0/24 范围内提供地址。
+NAT 模式比桥接模式慢得多，应仅用于测试。此模式只能通过 CLI 或 API 使用，不能通过 Web UI 使用。
 
-You can also skip adding a network device when creating a VM by selecting *No
-network device*.
+创建 VM 时，也可以选择 *No network device* 来跳过添加网络设备。
 
-You can overwrite the *MTU* setting for each VM network device. The option
-`mtu=1` represents a special case, in which the MTU value will be inherited
-from the underlying bridge.
-This option is only available for *VirtIO* network devices.
+可以覆盖每个 VM 网络设备的 *MTU* 设置。选项 `mtu=1` 表示一种特殊情况，
+其中 MTU 值会从底层网桥继承。此选项仅适用于 *VirtIO* 网络设备。
 
-.Multiqueue
-If you are using the VirtIO driver, you can optionally activate the
-*Multiqueue* option. This option allows the guest OS to process networking
-packets using multiple virtual CPUs, providing an increase in the total number
-of packets transferred.
+.多队列
+如果使用 VirtIO 驱动，可以选择启用 *Multiqueue* 选项。
+该选项允许客户操作系统使用多个虚拟 CPU 处理网络数据包，从而增加传输的数据包总量。
 
 //http://blog.vmsplice.net/2011/09/qemu-internals-vhost-architecture.html
-When using the VirtIO driver with {pve}, each NIC network queue is passed to the
-host kernel, where the queue will be processed by a kernel thread spawned by the
-vhost driver. With this option activated, it is possible to pass _multiple_
-network queues to the host kernel for each NIC.
+在 {pve} 中使用 VirtIO 驱动时，每个 NIC 网络队列都会传递给主机内核，
+该队列会由 vhost 驱动生成的内核线程处理。启用此选项后，可以为每个 NIC 向主机内核传递_多个_网络队列。
 
 //https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Tuning_and_Optimization_Guide/sect-Virtualization_Tuning_Optimization_Guide-Networking-Techniques.html#sect-Virtualization_Tuning_Optimization_Guide-Networking-Multi-queue_virtio-net
-When using Multiqueue, it is recommended to set it to a value equal to the
-number of vCPUs of your guest. Remember that the number of vCPUs is the number
-of sockets times the number of cores configured for the VM. You also need to set
-the number of multi-purpose channels on each VirtIO NIC in the VM with this
-ethtool command:
+使用 Multiqueue 时，建议将其设置为等于客户机 vCPU 数量的值。
+请记住，vCPU 数量等于为 VM 配置的插槽数乘以核心数。
+还需要使用以下 ethtool 命令，在 VM 中为每个 VirtIO NIC 设置多用途通道数量：
 
 `ethtool -L ens1 combined X`
 
-where X is the number of the number of vCPUs of the VM.
+其中 X 是 VM 的 vCPU 数量。
 
-To configure a Windows guest for Multiqueue install the
+要为 Windows 客户机配置 Multiqueue，请安装
 https://pve.proxmox.com/wiki/Windows_VirtIO_Drivers[Redhat VirtIO Ethernet
-Adapter drivers], then adapt the NIC's configuration as follows. Open the
-device manager, right click the NIC under "Network adapters", and select
-"Properties". Then open the "Advanced" tab and select "Receive Side Scaling"
-from the list on the left. Make sure it is set to "Enabled". Next, navigate to
-"Maximum number of RSS Queues" in the list and set it to the number of vCPUs of
-your VM. Once you verified that the settings are correct, click "OK" to confirm
-them.
+Adapter drivers]，然后按如下方式调整 NIC 配置。打开设备管理器，右键点击
+"Network adapters" 下的 NIC，并选择 "Properties"。然后打开 "Advanced" 选项卡，
+在左侧列表中选择 "Receive Side Scaling"。确保它设置为 "Enabled"。
+接着在列表中找到 "Maximum number of RSS Queues"，并将其设置为 VM 的 vCPU 数量。
+确认设置正确后，点击 "OK" 进行确认。
 
-You should note that setting the Multiqueue parameter to a value greater
-than one will increase the CPU load on the host and guest systems as the
-traffic increases. We recommend to set this option only when the VM has to
-process a great number of incoming connections, such as when the VM is running
-as a router, reverse proxy or a busy HTTP server doing long polling.
+请注意，将 Multiqueue 参数设置为大于 1 的值时，随着流量增加，主机和客户系统的 CPU 负载也会增加。
+建议仅在 VM 必须处理大量传入连接时设置此选项，例如 VM 用作路由器、反向代理，
+或作为繁忙的 HTTP 服务器执行长轮询时。
 
 [[qm_display]]
-Display
-~~~~~~~
+=== 显示
 
-QEMU can virtualize a few types of VGA hardware. Some examples are:
+QEMU 可以虚拟化几种 VGA 硬件。示例如下：
 
-* *std*, the default, emulates a card with Bochs VBE extensions.
-* *cirrus*, this was once the default, it emulates a very old hardware module
-with all its problems. This display type should only be used if really
-necessary footnote:[https://www.kraxel.org/blog/2014/10/qemu-using-cirrus-considered-harmful/
-qemu: using cirrus considered harmful], for example, if using Windows XP or
-earlier
-* *vmware*, is a VMWare SVGA-II compatible adapter.
-* *ramfb*, is a qemu ramfb adapter.
-* *mdev*, is a vga display function by vfio-pci.Selecting this will enable vgpu device display theri fb.Support nvidia & mthreads vgpu.
-* *qxl*, is the QXL paravirtualized graphics card. Selecting this also
-enables https://www.spice-space.org/[SPICE] (a remote viewer protocol) for the
-VM.
-* *virtio-gl*, often named VirGL is a virtual 3D GPU for use inside VMs that
-  can offload workloads to the host GPU without requiring special (expensive)
-  models and drivers and neither binding the host GPU completely, allowing
-  reuse between multiple guests and or the host.
+* *std*，默认值，模拟带有 Bochs VBE 扩展的显卡。
+* *cirrus*，曾经是默认值，它模拟一个非常旧且带有各种问题的硬件模块。
+此显示类型仅应在确有必要时使用 footnote:[https://www.kraxel.org/blog/2014/10/qemu-using-cirrus-considered-harmful/
+qemu: using cirrus considered harmful]，例如使用 Windows XP 或更早版本时。
+* *vmware*，兼容 VMWare SVGA-II 的适配器。
+* *ramfb*，qemu ramfb 适配器。
+* *mdev*，由 vfio-pci 提供的 VGA 显示功能。选择它会启用 vGPU 设备显示其 framebuffer。
+支持 NVIDIA 和 mthreads vGPU。
+* *qxl*，QXL 半虚拟化显卡。选择它还会为 VM 启用
+https://www.spice-space.org/[SPICE]（一种远程查看器协议）。
+* *virtio-gl*，通常称为 VirGL，是供 VM 内部使用的虚拟 3D GPU；
+  它可以将工作负载卸载到主机 GPU，而不需要特殊（昂贵）的型号和驱动，
+  也不会完全绑定主机 GPU，从而允许在多个客户机和/或主机之间复用。
 +
-NOTE: VirGL support needs some extra libraries that aren't installed by
-default due to being relatively big and also not available as open source for
-all GPU models/vendors. For most setups you'll just need to do:
+NOTE: VirGL 支持需要一些额外库；由于这些库相对较大，并且并非所有 GPU 型号/厂商都提供开源版本，
+因此默认不会安装。对于大多数设置，只需执行：
 `apt install libgl1 libegl1`
 
-You can edit the amount of memory given to the virtual GPU, by setting
-the 'memory' option. This can enable higher resolutions inside the VM,
-especially with SPICE/QXL.
+可以通过设置 'memory' 选项来编辑分配给虚拟 GPU 的内存量。
+这可以在 VM 内启用更高分辨率，尤其是在使用 SPICE/QXL 时。
 
-As the memory is reserved by display device, selecting Multi-Monitor mode
-for SPICE (such as `qxl2` for dual monitors) has some implications:
+由于内存由显示设备预留，为 SPICE 选择 Multi-Monitor 模式（例如用于双显示器的 `qxl2`）会带来一些影响：
 
-* Windows needs a device for each monitor, so if your 'ostype' is some
-version of Windows, {pve} gives the VM an extra device per monitor.
-Each device gets the specified amount of memory.
+* Windows 需要为每个显示器提供一个设备，因此如果 'ostype' 是某个 Windows 版本，
+{pve} 会为 VM 的每个显示器额外提供一个设备。每个设备都会获得指定内存量。
 
-* Linux VMs, can always enable more virtual monitors, but selecting
-a Multi-Monitor mode multiplies the memory given to the device with
-the number of monitors.
+* Linux VM 始终可以启用更多虚拟显示器，但选择 Multi-Monitor 模式会将分配给设备的内存乘以显示器数量。
 
-Selecting `serialX` as display 'type' disables the VGA output, and redirects
-the Web Console to the selected serial port. A configured display 'memory'
-setting will be ignored in that case.
+选择 `serialX` 作为显示 'type' 会禁用 VGA 输出，并将 Web Console 重定向到所选串口。
+在这种情况下，已配置的显示 'memory' 设置会被忽略。
 
-.VNC clipboard
-You can enable the VNC clipboard by setting `clipboard` to `vnc`.
+.VNC 剪贴板
+可以通过将 `clipboard` 设置为 `vnc` 来启用 VNC 剪贴板。
 
 ----
 # qm set <vmid> -vga <displaytype>,clipboard=vnc
 ----
 
-In order to use the clipboard feature, you must first install the
-SPICE guest tools. On Debian-based distributions, this can be achieved
-by installing `spice-vdagent`. For other Operating Systems search for it
-in the official repositories or see: https://www.spice-space.org/download.html
+要使用剪贴板功能，必须先安装 SPICE guest tools。在基于 Debian 的发行版上，
+可以通过安装 `spice-vdagent` 实现。对于其他操作系统，请在官方仓库中搜索它，
+或参见：https://www.spice-space.org/download.html
 
-Once you have installed the spice guest tools, you can use the VNC clipboard
-function (e.g. in the noVNC console panel). However, if you're using
-SPICE, virtio or virgl, you'll need to choose which clipboard to use.
-This is because the default *SPICE* clipboard will be replaced by the
-*VNC* clipboard, if `clipboard` is set to `vnc`.
+安装 spice guest tools 后，就可以使用 VNC 剪贴板功能（例如在 noVNC 控制台面板中）。
+不过，如果使用 SPICE、virtio 或 virgl，需要选择要使用的剪贴板。
+这是因为当 `clipboard` 设置为 `vnc` 时，默认 *SPICE* 剪贴板会被 *VNC* 剪贴板替换。
 
 [[qm_usb_passthrough]]
-USB Passthrough
-~~~~~~~~~~~~~~~
+=== USB 直通
 
-There are two different types of USB passthrough devices:
+USB 直通设备有两种不同类型：
 
-* Host USB passthrough
-* SPICE USB passthrough
+* 主机 USB 直通
+* SPICE USB 直通
 
-Host USB passthrough works by giving a VM a USB device of the host.
-This can either be done via the vendor- and product-id, or
-via the host bus and port.
+主机 USB 直通通过将主机的 USB 设备提供给 VM 来工作。
+这既可以通过 vendor-id 和 product-id 完成，也可以通过主机总线和端口完成。
 
-The vendor/product-id looks like this: *0123:abcd*,
-where *0123* is the id of the vendor, and *abcd* is the id
-of the product, meaning two pieces of the same usb device
-have the same id.
+vendor/product-id 形如 *0123:abcd*，其中 *0123* 是厂商 ID，*abcd* 是产品 ID；
+这意味着同一款 USB 设备的两个实体具有相同 ID。
 
-The bus/port looks like this: *1-2.3.4*, where *1* is the bus
-and *2.3.4* is the port path. This represents the physical
-ports of your host (depending of the internal order of the
-usb controllers).
+bus/port 形如 *1-2.3.4*，其中 *1* 是总线，*2.3.4* 是端口路径。
+它表示主机的物理端口（取决于 USB 控制器的内部顺序）。
 
-If a device is present in a VM configuration when the VM starts up,
-but the device is not present in the host, the VM can boot without problems.
-As soon as the device/port is available in the host, it gets passed through.
+如果 VM 启动时某个设备存在于 VM 配置中，但该设备不存在于主机上，VM 仍可正常启动。
+一旦该设备/端口在主机上可用，它就会被直通给 VM。
 
-WARNING: Using this kind of USB passthrough means that you cannot move
-a VM online to another host, since the hardware is only available
-on the host the VM is currently residing.
+WARNING: 使用这种 USB 直通意味着无法将 VM 在线迁移到另一台主机，
+因为该硬件只在 VM 当前所在主机上可用。
 
-The second type of passthrough is SPICE USB passthrough. If you add one or more
-SPICE USB ports to your VM, you can dynamically pass a local USB device from
-your SPICE client through to the VM. This can be useful to redirect an input
-device or hardware dongle temporarily.
+第二种直通类型是 SPICE USB 直通。如果向 VM 添加一个或多个 SPICE USB 端口，
+就可以从 SPICE 客户端动态地将本地 USB 设备直通给 VM。
+这对于临时重定向输入设备或硬件加密狗很有用。
 
-It is also possible to map devices on a cluster level, so that they can be
-properly used with HA and hardware changes are detected and non root users
-can configure them. See xref:resource_mapping[Resource Mapping]
-for details on that.
+也可以在集群级别映射设备，使其能够与 HA 正确配合使用，检测硬件变化，并允许非 root 用户配置。
+详情参见 xref:resource_mapping[资源映射]。
 
 [[qm_bios_and_uefi]]
-BIOS and UEFI
-~~~~~~~~~~~~~
+=== BIOS 和 UEFI
 
-In order to properly emulate a computer, QEMU needs to use a firmware.
-Which, on common PCs often known as BIOS or (U)EFI, is executed as one of the
-first steps when booting a VM. It is responsible for doing basic hardware
-initialization and for providing an interface to the firmware and hardware for
-the operating system. By default QEMU uses *SeaBIOS* for this, which is an
-open-source, x86 BIOS implementation. SeaBIOS is a good choice for most
-standard setups.
+为了正确模拟计算机，QEMU 需要使用固件。在常见 PC 上，这通常称为 BIOS 或 (U)EFI，
+并在 VM 启动初期执行。它负责执行基本硬件初始化，并为操作系统提供访问固件和硬件的接口。
+默认情况下，QEMU 使用 *SeaBIOS* 完成此任务；SeaBIOS 是一种开源 x86 BIOS 实现。
+对于大多数标准设置，SeaBIOS 是不错的选择。
 
-Some operating systems (such as Windows 11) may require use of an UEFI
-compatible implementation. In such cases, you must use *OVMF* instead,
-which is an open-source UEFI implementation. footnote:[See the OVMF Project https://github.com/tianocore/tianocore.github.io/wiki/OVMF]
+某些操作系统（例如 Windows 11）可能要求使用兼容 UEFI 的实现。
+在这种情况下，必须改用 *OVMF*，它是开源 UEFI 实现。footnote:[参见 OVMF 项目 https://github.com/tianocore/tianocore.github.io/wiki/OVMF]
 
-For arm64/riscv64/loongarch64 device , must use *OVMF* to boot os.
+对于 arm64/riscv64/loongarch64 设备，必须使用 *OVMF* 启动操作系统。
 
-There are other scenarios in which the SeaBIOS may not be the ideal firmware to
-boot from, for example if you want to do VGA passthrough. footnote:[Alex
-Williamson has a good blog entry about this
+还有其他场景中 SeaBIOS 可能不是理想的启动固件，例如想要进行 VGA 直通时。footnote:[Alex
+Williamson 有一篇关于此主题的优秀博客文章
 https://vfio.blogspot.co.at/2014/08/primary-graphics-assignment-without-vga.html]
 
-If you want to use OVMF, there are several things to consider:
+如果想要使用 OVMF，需要考虑几件事：
 
-In order to save things like the *boot order*, there needs to be an EFI Disk.
-This disk will be included in backups and snapshots, and there can only be one.
+为了保存 *boot order* 等内容，需要有一个 EFI Disk。
+该磁盘会包含在备份和快照中，并且只能有一个。
 
-You can create such a disk with the following command:
+可以使用以下命令创建这样的磁盘：
 
 ----
 # qm set <vmid> -efidisk0 <storage>:1,format=<format>,efitype=4m,pre-enrolled-keys=1
 ----
 
-Where *<storage>* is the storage where you want to have the disk, and
-*<format>* is a format which the storage supports. Alternatively, you can
-create such a disk through the web interface with 'Add' -> 'EFI Disk' in the
-hardware section of a VM.
+其中 *<storage>* 是要放置磁盘的存储，*<format>* 是该存储支持的格式。
+也可以通过 Web 界面，在 VM 硬件部分使用 'Add' -> 'EFI Disk' 创建此类磁盘。
 
-The *efitype* option specifies which version of the OVMF firmware should be
-used. For new VMs, this should always be '4m', as it supports Secure Boot and
-has more space allocated to support future development (this is the default in
-the GUI).
+*efitype* 选项指定应使用哪个版本的 OVMF 固件。对于新 VM，应始终使用 '4m'，
+因为它支持 Secure Boot，并分配了更多空间以支持未来发展（这也是 GUI 中的默认值）。
 
-*pre-enroll-keys* specifies if the efidisk should come pre-loaded with
-distribution-specific and Microsoft Standard Secure Boot keys. It also enables
-Secure Boot by default (though it can still be disabled in the OVMF menu within
-the VM).
+*pre-enroll-keys* 指定 efidisk 是否应预加载发行版专用和 Microsoft Standard Secure Boot 密钥。
+它还会默认启用 Secure Boot（不过仍可在 VM 内的 OVMF 菜单中禁用）。
 
-NOTE: If you want to start using Secure Boot in an existing VM (that still uses
-a '2m' efidisk), you need to recreate the efidisk. To do so, delete the old one
-(`qm set <vmid> -delete efidisk0`) and add a new one as described above. This
-will reset any custom configurations you have made in the OVMF menu!
+NOTE: 如果想在现有 VM 中开始使用 Secure Boot（该 VM 仍使用 '2m' efidisk），需要重新创建 efidisk。
+为此，请删除旧磁盘（`qm set <vmid> -delete efidisk0`），并按上文所述添加新磁盘。
+这会重置你在 OVMF 菜单中进行的所有自定义配置！
 
-When using OVMF with a virtual display (without VGA passthrough),
-you need to set the client resolution in the OVMF menu (which you can reach
-with a press of the ESC button during boot), or you have to choose
-SPICE as the display type.
+使用 OVMF 和虚拟显示（不使用 VGA 直通）时，需要在 OVMF 菜单中设置客户端分辨率
+（启动期间按 ESC 键可进入该菜单），或者必须选择 SPICE 作为显示类型。
 
 [[qm_tpm]]
-Trusted Platform Module (TPM)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 可信平台模块 (TPM)
 
-A *Trusted Platform Module* is a device which stores secret data - such as
-encryption keys - securely and provides tamper-resistance functions for
-validating system boot.
+*Trusted Platform Module* 是一种安全存储密钥等秘密数据的设备，并提供用于验证系统启动的防篡改功能。
 
-Certain operating systems (such as Windows 11) require such a device to be
-attached to a machine (be it physical or virtual).
+某些操作系统（例如 Windows 11）要求机器（无论物理机还是虚拟机）附加此类设备。
 
-A TPM is added by specifying a *tpmstate* volume. This works similar to an
-efidisk, in that it cannot be changed (only removed) once created. You can add
-one via the following command:
+通过指定 *tpmstate* 卷来添加 TPM。其工作方式类似 efidisk，一旦创建就不能更改（只能移除）。
+可以通过以下命令添加：
 
 ----
 # qm set <vmid> -tpmstate0 <storage>:1,version=<version>
 ----
 
-Where *<storage>* is the storage you want to put the state on, and *<version>*
-is either 'v1.2' or 'v2.0'. You can also add one via the web interface, by
-choosing 'Add' -> 'TPM State' in the hardware section of a VM.
+其中 *<storage>* 是要存放状态的存储，*<version>* 为 'v1.2' 或 'v2.0'。
+也可以通过 Web 界面，在 VM 硬件部分选择 'Add' -> 'TPM State' 添加。
 
-The 'v2.0' TPM spec is newer and better supported, so unless you have a specific
-implementation that requires a 'v1.2' TPM, it should be preferred.
+'v2.0' TPM 规范更新且支持更好，因此除非有特定实现要求 'v1.2' TPM，否则应优先使用它。
 
-NOTE: Compared to a physical TPM, an emulated one does *not* provide any real
-security benefits. The point of a TPM is that the data on it cannot be modified
-easily, except via commands specified as part of the TPM spec. Since with an
-emulated device the data storage happens on a regular volume, it can potentially
-be edited by anyone with access to it.
+NOTE: 与物理 TPM 相比，模拟 TPM *不会*提供任何真正的安全收益。
+TPM 的意义在于其上的数据不能被轻易修改，除非通过 TPM 规范指定的命令。
+而对于模拟设备，数据存储在普通卷上，因此任何有访问权限的人都可能编辑它。
 
 [[qm_ivshmem]]
-Inter-VM shared memory
-~~~~~~~~~~~~~~~~~~~~~~
+=== VM 间共享内存
 
-You can add an Inter-VM shared memory device (`ivshmem`), which allows one to
-share memory between the host and a guest, or also between multiple guests.
+可以添加 VM 间共享内存设备（`ivshmem`），它允许在主机和客户机之间共享内存，
+也允许在多个客户机之间共享内存。
 
-To add such a device, you can use `qm`:
+可以使用 `qm` 添加此类设备：
 
 ----
 # qm set <vmid> -ivshmem size=32,name=foo
 ----
 
-Where the size is in MiB. The file will be located under
-`/dev/shm/pve-shm-$name` (the default name is the vmid).
+其中大小单位为 MiB。文件将位于 `/dev/shm/pve-shm-$name` 下（默认名称为 vmid）。
 
-NOTE: Currently the device will get deleted as soon as any VM using it got
-shutdown or stopped. Open connections will still persist, but new connections
-to the exact same device cannot be made anymore.
+NOTE: 目前，一旦任何使用该设备的 VM 关闭或停止，该设备就会被删除。
+已打开的连接仍会保留，但无法再建立到同一设备的新连接。
 
-A use case for such a device is the Looking Glass
-footnote:[Looking Glass: https://looking-glass.io/] project, which enables high
-performance, low-latency display mirroring between host and guest.
+此类设备的一个用例是 Looking Glass footnote:[Looking Glass: https://looking-glass.io/] 项目，
+它支持主机与客户机之间的高性能、低延迟显示镜像。
 
 [[qm_audio_device]]
-Audio Device
-~~~~~~~~~~~~
+=== 音频设备
 
-To add an audio device run the following command:
+要添加音频设备，请运行以下命令：
 
 ----
 qm set <vmid> -audio0 device=<device>
 ----
 
-Supported audio devices are:
+支持的音频设备包括：
 
-* `ich9-intel-hda`: Intel HD Audio Controller, emulates ICH9
-* `intel-hda`: Intel HD Audio Controller, emulates ICH6
-* `AC97`: Audio Codec '97, useful for older operating systems like Windows XP
+* `ich9-intel-hda`：Intel HD Audio Controller，模拟 ICH9
+* `intel-hda`：Intel HD Audio Controller，模拟 ICH6
+* `AC97`：Audio Codec '97，适用于 Windows XP 等较旧操作系统
 
-There are two backends available:
+有两个可用后端：
 
 * 'spice'
 * 'none'
 
-The 'spice' backend can be used in combination with xref:qm_display[SPICE] while
-the 'none' backend can be useful if an audio device is needed in the VM for some
-software to work. To use the physical audio device of the host use device
-passthrough (see xref:qm_pci_passthrough[PCI Passthrough] and
-xref:qm_usb_passthrough[USB Passthrough]). Remote protocols like Microsoft’s RDP
-have options to play sound.
+'spice' 后端可以与 xref:qm_display[SPICE] 结合使用；如果某些软件需要 VM 中存在音频设备才能工作，
+'none' 后端也可能有用。要使用主机的物理音频设备，请使用设备直通
+（参见 xref:qm_pci_passthrough[PCI 直通] 和 xref:qm_usb_passthrough[USB 直通]）。
+Microsoft RDP 等远程协议也提供播放声音的选项。
 
 
 [[qm_virtio_rng]]
-VirtIO RNG
-~~~~~~~~~~
+=== VirtIO RNG
 
-A RNG (Random Number Generator) is a device providing entropy ('randomness') to
-a system. A virtual hardware-RNG can be used to provide such entropy from the
-host system to a guest VM. This helps to avoid entropy starvation problems in
-the guest (a situation where not enough entropy is available and the system may
-slow down or run into problems), especially during the guests boot process.
+RNG（Random Number Generator）是一种向系统提供熵（'randomness'）的设备。
+虚拟硬件 RNG 可用于从主机系统向客户 VM 提供这种熵。
+这有助于避免客户机中的熵耗尽问题（即可用熵不足，系统可能变慢或出现问题），尤其是在客户机启动过程中。
 
-To add a VirtIO-based emulated RNG, run the following command:
+要添加基于 VirtIO 的模拟 RNG，请运行以下命令：
 
 ----
 qm set <vmid> -rng0 source=<source>[,max_bytes=X,period=Y]
 ----
 
-`source` specifies where entropy is read from on the host and has to be one of
-the following:
+`source` 指定在主机上从何处读取熵，必须是以下之一：
 
-* `/dev/urandom`: Non-blocking kernel entropy pool (preferred)
-* `/dev/random`: Blocking kernel pool (not recommended, can lead to entropy
-  starvation on the host system)
-* `/dev/hwrng`: To pass through a hardware RNG attached to the host (if multiple
-  are available, the one selected in
-  `/sys/devices/virtual/misc/hw_random/rng_current` will be used)
+* `/dev/urandom`：非阻塞内核熵池（首选）
+* `/dev/random`：阻塞内核池（不推荐，可能导致主机系统熵耗尽）
+* `/dev/hwrng`：直通附加到主机的硬件 RNG（如果有多个可用，将使用
+  `/sys/devices/virtual/misc/hw_random/rng_current` 中选择的一个）
 
-A limit can be specified via the `max_bytes` and `period` parameters, they are
-read as `max_bytes` per `period` in milliseconds. However, it does not represent
-a linear relationship: 1024B/1000ms would mean that up to 1 KiB of data becomes
-available on a 1 second timer, not that 1 KiB is streamed to the guest over the
-course of one second. Reducing the `period` can thus be used to inject entropy
-into the guest at a faster rate.
+可以通过 `max_bytes` 和 `period` 参数指定限制，它们表示每 `period` 毫秒读取 `max_bytes`。
+不过，这并不代表线性关系：1024B/1000ms 表示最多 1 KiB 数据会按 1 秒定时器变为可用，
+而不是在一秒内向客户机流式传输 1 KiB。因此，减少 `period` 可用于以更快速度向客户机注入熵。
 
-By default, the limit is set to 1024 bytes per 1000 ms (1 KiB/s). It is
-recommended to always use a limiter to avoid guests using too many host
-resources. If desired, a value of '0' for `max_bytes` can be used to disable
-all limits.
+默认情况下，限制设置为每 1000 ms 1024 字节（1 KiB/s）。
+建议始终使用限制器，以避免客户机使用过多主机资源。如果需要，可以将 `max_bytes` 设置为 '0' 以禁用所有限制。
 
 [[qm_virtiofs]]
-Virtiofs
-~~~~~~~~
+=== Virtiofs
 
-Virtiofs is a shared filesystem designed for virtual environments. It allows to
-share a directory tree available on the host by mounting it within VMs. It does
-not use the network stack and aims to offer similar performance and semantics as
-the source filesystem.
+Virtiofs 是为虚拟环境设计的共享文件系统。它允许通过在 VM 内挂载主机上可用的目录树来共享该目录树。
+它不使用网络栈，目标是提供与源文件系统相近的性能和语义。
 
-To use virtiofs, the https://gitlab.com/virtio-fs/virtiofsd[virtiofsd] daemon
-needs to run in the background. This happens automatically in {pve} when
-starting a VM using a virtiofs mount.
+要使用 virtiofs，需要在后台运行 https://gitlab.com/virtio-fs/virtiofsd[virtiofsd] 守护进程。
+在 {pve} 中，启动使用 virtiofs 挂载的 VM 时会自动完成此操作。
 
-Linux VMs with kernel >=5.4 support virtiofs by default
-(https://www.kernelconfig.io/CONFIG_VIRTIO_FS[virtiofs kernel module]), but some
-features require a newer kernel.
+使用 kernel >=5.4 的 Linux VM 默认支持 virtiofs
+（https://www.kernelconfig.io/CONFIG_VIRTIO_FS[virtiofs kernel module]），但某些功能需要更新的内核。
 
-To use virtiofs, ensure that virtiofsd is installed on the {pve} host:
+要使用 virtiofs，请确保 {pve} 主机上已安装 virtiofsd：
 
 ----
 apt install virtiofsd
 ----
 
-There is a
+有一份
 https://github.com/virtio-win/kvm-guest-drivers-windows/wiki/Virtiofs:-Shared-file-system[guide]
-available on how to utilize virtiofs in Windows VMs.
+说明如何在 Windows VM 中使用 virtiofs。
 
-Known Limitations
-^^^^^^^^^^^^^^^^^
+==== 已知限制
 
-* If virtiofsd crashes, its mount point will hang in the VM until the VM
-  is completely stopped.
-* virtiofsd not responding may result in a hanging mount in the VM, similar to
-  an unreachable NFS.
-* Memory hotplug does not work in combination with virtiofs (also results in
-  hanging access).
-* Memory related features such as live migration, snapshots, and hibernate are
-  not available with virtiofs devices.
-* Windows cannot understand ACLs in the context of virtiofs. Therefore, do not
-  expose ACLs for Windows VMs, otherwise the virtiofs device will not be visible
-  within the VM.
+* 如果 virtiofsd 崩溃，其挂载点会在 VM 中挂起，直到 VM 完全停止。
+* virtiofsd 无响应可能导致 VM 中的挂载挂起，类似不可达的 NFS。
+* 内存热插拔不能与 virtiofs 组合使用（也会导致访问挂起）。
+* 与内存相关的功能，例如在线迁移、快照和休眠，不适用于 virtiofs 设备。
+* Windows 无法理解 virtiofs 上下文中的 ACL。因此，不要为 Windows VM 暴露 ACL，
+  否则 virtiofs 设备在 VM 内不可见。
 
-Add Mapping for Shared Directories
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 为共享目录添加映射
 
-To add a mapping for a shared directory, you can use the API directly with
-`pvesh` as described in the xref:resource_mapping[Resource Mapping] section:
+要为共享目录添加映射，可以按 xref:resource_mapping[资源映射]一节所述，直接使用 `pvesh` 调用 API：
 
 ----
 pvesh create /cluster/mapping/dir --id dir1 \
@@ -1312,29 +1010,22 @@ pvesh create /cluster/mapping/dir --id dir1 \
     --map node=node2,path=/path/to/share2 \
 ----
 
-Add virtiofs to a VM
-^^^^^^^^^^^^^^^^^^^^
+==== 向 VM 添加 virtiofs
 
-To share a directory using virtiofs, add the parameter `virtiofs<N>` (N can be
-anything between 0 and 9) to the VM config and use a directory ID (dirid) that
-has been configured in the resource mapping. Additionally, you can set the
-`cache` option to either `always`, `never`, `metadata`, or `auto` (default:
-`auto`), depending on your requirements. How the different caching modes behave
-can be read https://lwn.net/Articles/774495/[here under the "Caching Modes"
-section].
+要使用 virtiofs 共享目录，请向 VM 配置添加参数 `virtiofs<N>`（N 可以是 0 到 9 之间的任意值），
+并使用已在资源映射中配置的目录 ID（dirid）。此外，可以根据需求将 `cache` 选项设置为
+`always`、`never`、`metadata` 或 `auto`（默认值：`auto`）。不同缓存模式的行为可在
+https://lwn.net/Articles/774495/[这里的 "Caching Modes" 章节]阅读。
 
-The `virtiofsd` supports ACL and xattr passthrough (can be enabled with the
-`expose-acl` and `expose-xattr` options), allowing the guest to access ACLs and
-xattrs if the underlying host filesystem supports them, but they must also be
-compatible with the guest filesystem (for example most Linux filesystems support
-ACLs, while Windows filesystems do not).
+`virtiofsd` 支持 ACL 和 xattr 直通（可通过 `expose-acl` 和 `expose-xattr` 选项启用），
+如果底层主机文件系统支持它们，则允许客户机访问 ACL 和 xattr；但它们也必须与客户文件系统兼容
+（例如，大多数 Linux 文件系统支持 ACL，而 Windows 文件系统不支持）。
 
-The `expose-acl` option automatically implies `expose-xattr`, that is, it makes
-no difference if you set `expose-xattr` to `0` if `expose-acl` is set to `1`.
+`expose-acl` 选项会自动隐含 `expose-xattr`，也就是说，如果 `expose-acl` 设置为 `1`，
+再将 `expose-xattr` 设置为 `0` 不会产生差异。
 
-If you want virtiofs to honor the `O_DIRECT` flag, you can set the `direct-io`
-parameter to `1` (default: `0`). This will degrade performance, but is useful if
-applications do their own caching.
+如果希望 virtiofs 遵守 `O_DIRECT` 标志，可以将 `direct-io` 参数设置为 `1`（默认值：`0`）。
+这会降低性能，但如果应用程序自行缓存，则很有用。
 
 ----
 qm set <vmid> -virtiofs0 dirid=<dirid>,cache=always,direct-io=1
@@ -1342,31 +1033,28 @@ qm set <vmid> -virtiofs1 <dirid>,cache=never,expose-xattr=1
 qm set <vmid> -virtiofs2 <dirid>,expose-acl=1
 ----
 
-To temporarily mount virtiofs in a guest VM with the Linux kernel virtiofs
-driver, run the following command inside the guest:
+要在带有 Linux 内核 virtiofs 驱动的客户 VM 中临时挂载 virtiofs，请在客户机内运行以下命令：
 
 ----
 mount -t virtiofs <dirid> <mount point>
 ----
 
-To have a persistent virtiofs mount, you can create an fstab entry:
+要持久挂载 virtiofs，可以创建 fstab 条目：
 
 ----
 <dirid> <mount point> virtiofs rw,relatime 0 0
 ----
 
-The dirid associated with the path on the current node is also used as the mount
-tag (name used to mount the device on the guest).
+与当前节点路径关联的 dirid 也会用作挂载标签（客户机上用于挂载设备的名称）。
 
-For more information on available virtiofsd parameters, see the
-https://gitlab.com/virtio-fs/virtiofsd[GitLab virtiofsd project page].
+有关可用 virtiofsd 参数的更多信息，请参见
+https://gitlab.com/virtio-fs/virtiofsd[GitLab virtiofsd 项目页面]。
 
 [[qm_bootorder]]
-Device Boot Order
-~~~~~~~~~~~~~~~~~
+=== 设备启动顺序
 
-QEMU can tell the guest which devices it should boot from, and in which order.
-This can be specified in the config via the `boot` property, for example:
+QEMU 可以告知客户机应从哪些设备启动以及启动顺序。
+这可以通过配置中的 `boot` 属性指定，例如：
 
 ----
 boot: order=scsi0;net0;hostpci0
@@ -1374,585 +1062,434 @@ boot: order=scsi0;net0;hostpci0
 
 [thumbnail="screenshot/gui-qemu-edit-bootorder.png"]
 
-This way, the guest would first attempt to boot from the disk `scsi0`, if that
-fails, it would go on to attempt network boot from `net0`, and in case that
-fails too, finally attempt to boot from a passed through PCIe device (seen as
-disk in case of NVMe, otherwise tries to launch into an option ROM).
+这样，客户机会首先尝试从磁盘 `scsi0` 启动；如果失败，则继续尝试从 `net0` 网络启动；
+如果也失败，最后尝试从直通 PCIe 设备启动（如果是 NVMe，则视为磁盘；否则尝试进入 option ROM）。
 
-On the GUI you can use a drag-and-drop editor to specify the boot order, and use
-the checkbox to enable or disable certain devices for booting altogether.
+在 GUI 中，可以使用拖放编辑器指定启动顺序，并使用复选框整体启用或禁用某些设备的启动能力。
 
-NOTE: If your guest uses multiple disks to boot the OS or load the bootloader,
-all of them must be marked as 'bootable' (that is, they must have the checkbox
-enabled or appear in the list in the config) for the guest to be able to boot.
-This is because recent SeaBIOS and OVMF versions only initialize disks if they
-are marked 'bootable'.
+NOTE: 如果客户机使用多个磁盘启动操作系统或加载引导加载器，则所有这些磁盘都必须标记为 'bootable'
+（即必须启用复选框，或出现在配置列表中），客户机才能启动。
+这是因为较新的 SeaBIOS 和 OVMF 版本只会初始化标记为 'bootable' 的磁盘。
 
-In any case, even devices not appearing in the list or having the checkmark
-disabled will still be available to the guest, once it's operating system has
-booted and initialized them. The 'bootable' flag only affects the guest BIOS and
-bootloader.
+无论如何，即使设备未出现在列表中或复选框被禁用，一旦客户机操作系统启动并初始化它们，
+这些设备仍会对客户机可用。'bootable' 标志只影响客户机 BIOS 和引导加载器。
 
 
 [[qm_startup_and_shutdown]]
-Automatic Start and Shutdown of Virtual Machines
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 虚拟机自动启动和关闭
 
-After creating your VMs, you probably want them to start automatically
-when the host system boots. For this you need to select the option 'Start at
-boot' from the 'Options' Tab of your VM in the web interface, or set it with
-the following command:
+创建 VM 后，可能希望它们在主机系统启动时自动启动。
+为此，需要在 Web 界面中 VM 的 'Options' 选项卡选择 'Start at boot'，或使用以下命令设置：
 
 ----
 # qm set <vmid> -onboot 1
 ----
 
-.Start and Shutdown Order
+.启动和关闭顺序
 
 [thumbnail="screenshot/gui-qemu-edit-start-order.png"]
 
-In some case you want to be able to fine tune the boot order of your
-VMs, for instance if one of your VM is providing firewalling or DHCP
-to other guest systems.  For this you can use the following
-parameters:
+在某些情况下，需要精细调整 VM 的启动顺序，例如某个 VM 为其他客户系统提供防火墙或 DHCP。
+为此，可以使用以下参数：
 
-* *Start/Shutdown order*: Defines the start order priority. For example, set it
-to 1 if you want the VM to be the first to be started. (We use the reverse
-startup order for shutdown, so a machine with a start order of 1 would be the
-last to be shut down). If multiple VMs have the same order defined on a host,
-they will additionally be ordered by 'VMID' in ascending order.
-* *Startup delay*: Defines the interval between this VM start and subsequent
-VMs starts. For example, set it to 240 if you want to wait 240 seconds before
-starting other VMs.
-* *Shutdown timeout*: Defines the duration in seconds {pve} should wait
-for the VM to be offline after issuing a shutdown command. By default this
-value is set to 180, which means that {pve} will issue a shutdown request and
-wait 180 seconds for the machine to be offline. If the machine is still online
-after the timeout it will be stopped forcefully.
+* *Start/Shutdown order*：定义启动顺序优先级。例如，如果希望 VM 第一个启动，请将其设置为 1。
+（关闭时使用相反的启动顺序，因此启动顺序为 1 的机器会最后关闭。）
+如果一台主机上的多个 VM 定义了相同顺序，它们还会按 'VMID' 升序排序。
+* *Startup delay*：定义此 VM 启动与后续 VM 启动之间的间隔。例如，如果希望在启动其他 VM 前等待
+240 秒，请将其设置为 240。
+* *Shutdown timeout*：定义 {pve} 在发出关闭命令后等待 VM 离线的秒数。
+默认值为 180，这意味着 {pve} 会发出关闭请求，并等待机器离线 180 秒。
+如果超时后机器仍在线，将被强制停止。
 
-NOTE: VMs managed by the HA stack do not follow the 'start on boot' and
-'boot order' options currently. Those VMs will be skipped by the startup and
-shutdown algorithm as the HA manager itself ensures that VMs get started and
-stopped.
+NOTE: 目前，由 HA 栈管理的 VM 不遵循 'start on boot' 和 'boot order' 选项。
+这些 VM 会被启动和关闭算法跳过，因为 HA 管理器本身会确保 VM 启动和停止。
 
-Please note that machines without a Start/Shutdown order parameter will always
-start after those where the parameter is set. Further, this parameter can only
-be enforced between virtual machines running on the same host, not
-cluster-wide.
+请注意，未设置 Start/Shutdown order 参数的机器始终会在已设置该参数的机器之后启动。
+此外，该参数只能在运行于同一主机上的虚拟机之间强制执行，不能在整个集群范围内强制执行。
 
-If you require a delay between the host boot and the booting of the first VM,
-see the section on xref:first_guest_boot_delay[Proxmox VE Node Management].
+如果需要在主机启动和第一个 VM 启动之间设置延迟，请参见
+xref:first_guest_boot_delay[Proxmox VE 节点管理]章节。
 
 
 [[qm_qemu_agent]]
-QEMU Guest Agent
-~~~~~~~~~~~~~~~~
+=== QEMU Guest Agent
 
-The QEMU Guest Agent is a service which runs inside the VM, providing a
-communication channel between the host and the guest. It is used to exchange
-information and allows the host to issue commands to the guest.
+QEMU Guest Agent 是运行在 VM 内部的服务，在主机和客户机之间提供通信通道。
+它用于交换信息，并允许主机向客户机发出命令。
 
-For example, the IP addresses in the VM summary panel are fetched via the guest
-agent.
+例如，VM 摘要面板中的 IP 地址就是通过 guest agent 获取的。
 
-Or when starting a backup, the guest is told via the guest agent to sync
-outstanding writes via the 'fs-freeze' and 'fs-thaw' commands.
+又如，在启动备份时，会通过 guest agent 告知客户机使用 'fs-freeze' 和 'fs-thaw' 命令同步未完成写入。
 
-For the guest agent to work properly the following steps must be taken:
+要让 guest agent 正常工作，必须执行以下步骤：
 
-* install the agent in the guest and make sure it is running
-* enable the communication via the agent in {pve}
+* 在客户机中安装 agent，并确保它正在运行
+* 在 {pve} 中启用通过 agent 的通信
 
-Install Guest Agent
-^^^^^^^^^^^^^^^^^^^
+==== 安装 Guest Agent
 
-For most Linux distributions, the guest agent is available. The package is
-usually named `qemu-guest-agent`.
+对于大多数 Linux 发行版，都可以使用 guest agent。软件包通常名为 `qemu-guest-agent`。
 
-For Windows, it can be installed from the
+对于 Windows，可以从
 https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso[Fedora
-VirtIO driver ISO].
+VirtIO 驱动 ISO] 安装。
 
 [[qm_qga_enable]]
-Enable Guest Agent Communication
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 启用 Guest Agent 通信
 
-Communication from {pve} with the guest agent can be enabled in the VM's
-*Options* panel. A fresh start of the VM is necessary for the changes to take
-effect.
+可以在 VM 的 *Options* 面板中启用 {pve} 与 guest agent 的通信。
+需要重新启动 VM，变更才会生效。
 
 [[qm_qga_auto_trim]]
-Automatic TRIM Using QGA
-^^^^^^^^^^^^^^^^^^^^^^^^
+==== 使用 QGA 自动 TRIM
 
-It is possible to enable the 'Run guest-trim' option. With this enabled,
-{pve} will issue a trim command to the guest after the following
-operations that have the potential to write out zeros to the storage:
+可以启用 'Run guest-trim' 选项。启用后，在以下可能向存储写出零的操作之后，
+{pve} 会向客户机发出 trim 命令：
 
-* moving a disk to another storage
-* live migrating a VM to another node with local storage
+* 将磁盘移动到另一个存储
+* 将带本地存储的 VM 在线迁移到另一个节点
 
-On a thin provisioned storage, this can help to free up unused space.
+在精简配置存储上，这有助于释放未使用空间。
 
-NOTE: There is a caveat with ext4 on Linux, because it uses an in-memory
-optimization to avoid issuing duplicate TRIM requests. Since the guest doesn't
-know about the change in the underlying storage, only the first guest-trim will
-run as expected. Subsequent ones, until the next reboot, will only consider
-parts of the filesystem that changed since then.
+NOTE: Linux 上的 ext4 有一个注意事项，因为它使用内存中优化来避免发出重复的 TRIM 请求。
+由于客户机不知道底层存储变化，只有第一次 guest-trim 会按预期运行。
+在下次重启之前，后续操作只会考虑此后发生变化的文件系统部分。
 
 [[qm_qga_fsfreeze]]
-Filesystem Freeze & Thaw on Backup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 备份时文件系统 Freeze 和 Thaw
 
-By default, guest filesystems are synced via the 'fs-freeze' QEMU Guest Agent
-Command when a backup is performed, to provide consistency.
+默认情况下，执行备份时会通过 'fs-freeze' QEMU Guest Agent 命令同步客户文件系统，以提供一致性。
 
-On Windows guests, some applications might handle consistent backups themselves
-by hooking into the Windows VSS (Volume Shadow Copy Service) layer, a
-'fs-freeze' then might interfere with that. For example, it has been observed
-that calling 'fs-freeze' with some SQL Servers triggers VSS to call the SQL
-Writer VSS module in a mode that breaks the SQL Server backup chain for
-differential backups.
+在 Windows 客户机上，某些应用程序可能通过接入 Windows VSS（Volume Shadow Copy Service）层自行处理一致性备份；
+此时 'fs-freeze' 可能会干扰它们。例如，已观察到在某些 SQL Server 上调用 'fs-freeze' 会触发
+VSS 以破坏 SQL Server 差异备份链的模式调用 SQL Writer VSS 模块。
 
-There are two options on how to handle such a situation.
+处理这种情况有两个选项。
 
-1. Configure the QEMU Guest Agent to use a different VSS variant that does not
-interfere with other VSS users. The https://pve.proxmox.com/wiki/VM_Backup_Consistency[{pve} wiki]
-has more details.
-2. Alternatively, you can configure {pve} to not issue a freeze-and-thaw cycle on
-backup by setting the `freeze-fs-on-backup` QGA option to `0`. This can also be
-done via the GUI with the 'Freeze/thaw guest filesystems on backup for
-consistency' option.
+1. 配置 QEMU Guest Agent 使用不会干扰其他 VSS 用户的不同 VSS 变体。
+https://pve.proxmox.com/wiki/VM_Backup_Consistency[{pve} wiki] 中有更多详情。
+2. 或者，可以通过将 `freeze-fs-on-backup` QGA 选项设置为 `0`，
+配置 {pve} 在备份时不发出 freeze-and-thaw 周期。
+也可以通过 GUI 中的 'Freeze/thaw guest filesystems on backup for consistency' 选项完成。
 +
-IMPORTANT: Disabling this option can potentially lead to backups with
-inconsistent filesystems. Therefore, adapting the QEMU Guest Agent
-configuration in the guest is the preferred option.
+IMPORTANT: 禁用此选项可能导致备份中的文件系统不一致。因此，首选方式是在客户机中调整
+QEMU Guest Agent 配置。
 
-Troubleshooting
-^^^^^^^^^^^^^^^
+==== 故障排查
 
-.VM does not shut down
+.VM 无法关闭
 
-Make sure the guest agent is installed and running.
+确保 guest agent 已安装并正在运行。
 
-Once the guest agent is enabled, {pve} will send power commands like
-'shutdown' via the guest agent. If the guest agent is not running, commands
-cannot get executed properly and the shutdown command will run into a timeout.
+一旦启用 guest agent，{pve} 会通过 guest agent 发送 'shutdown' 等电源命令。
+如果 guest agent 未运行，命令无法正确执行，关闭命令会超时。
 
 [[qm_spice_enhancements]]
-SPICE Enhancements
-~~~~~~~~~~~~~~~~~~
+=== SPICE 增强
 
-SPICE Enhancements are optional features that can improve the remote viewer
-experience.
+SPICE 增强是可选功能，可改善远程查看器体验。
 
-To enable them via the GUI go to the *Options* panel of the virtual machine. Run
-the following command to enable them via the CLI:
+要通过 GUI 启用它们，请进入虚拟机的 *Options* 面板。
+要通过 CLI 启用它们，请运行以下命令：
 
 ----
 qm set <vmid> -spice_enhancements foldersharing=1,videostreaming=all
 ----
 
-NOTE: To use these features the <<qm_display,*Display*>> of the virtual machine
-must be set to SPICE (qxl).
+NOTE: 要使用这些功能，虚拟机的 <<qm_display,*Display*>> 必须设置为 SPICE (qxl)。
 
-Folder Sharing
-^^^^^^^^^^^^^^
+==== 文件夹共享
 
-Share a local folder with the guest. The `spice-webdavd` daemon needs to be
-installed in the guest. It makes the shared folder available through a local
-WebDAV server located at http://localhost:9843.
+与客户机共享本地文件夹。客户机中需要安装 `spice-webdavd` 守护进程。
+它会通过位于 http://localhost:9843 的本地 WebDAV 服务器提供共享文件夹。
 
-For Windows guests the installer for the 'Spice WebDAV daemon' can be downloaded
-from the
-https://www.spice-space.org/download.html#windows-binaries[official SPICE website].
+对于 Windows 客户机，可以从
+https://www.spice-space.org/download.html#windows-binaries[官方 SPICE 网站]
+下载 'Spice WebDAV daemon' 安装程序。
 
-Most Linux distributions have a package called `spice-webdavd` that can be
-installed.
+大多数 Linux 发行版都有名为 `spice-webdavd` 的可安装软件包。
 
-To share a folder in Virt-Viewer (Remote Viewer) go to 'File -> Preferences'.
-Select the folder to share and then enable the checkbox.
+要在 Virt-Viewer（Remote Viewer）中共享文件夹，请转到 'File -> Preferences'。
+选择要共享的文件夹，然后启用复选框。
 
-NOTE: Folder sharing currently only works in the Linux version of Virt-Viewer.
+NOTE: 文件夹共享目前仅适用于 Linux 版本的 Virt-Viewer。
 
-CAUTION: Experimental! Currently this feature does not work reliably.
+CAUTION: 实验性功能！目前此功能工作并不可靠。
 
-Video Streaming
-^^^^^^^^^^^^^^^
+==== 视频流
 
-Fast refreshing areas are encoded into a video stream. Two options exist:
+快速刷新的区域会被编码为视频流。有两个选项：
 
-* *all*: Any fast refreshing area will be encoded into a video stream.
-* *filter*: Additional filters are used to decide if video streaming should be
-  used (currently only small window surfaces are skipped).
+* *all*：任何快速刷新的区域都会被编码为视频流。
+* *filter*：使用额外过滤器决定是否应使用视频流（目前只跳过小窗口表面）。
 
-A general recommendation if video streaming should be enabled and which option
-to choose from cannot be given. Your mileage may vary depending on the specific
-circumstances.
+无法给出是否应启用视频流以及应选择哪个选项的一般性建议。实际效果会因具体情况而异。
 
-Troubleshooting
-^^^^^^^^^^^^^^^
+==== 故障排查
 
-.Shared folder does not show up
+.共享文件夹未显示
 
-Make sure the WebDAV service is enabled and running in the guest. On Windows it
-is called 'Spice webdav proxy'. In Linux the name is 'spice-webdavd' but can be
-different depending on the distribution.
+确保客户机中的 WebDAV 服务已启用并正在运行。在 Windows 上，它名为 'Spice webdav proxy'。
+在 Linux 中，名称为 'spice-webdavd'，但可能因发行版而异。
 
-If the service is running, check the WebDAV server by opening
-http://localhost:9843 in a browser in the guest.
+如果服务正在运行，请在客户机浏览器中打开 http://localhost:9843 来检查 WebDAV 服务器。
 
-It can help to restart the SPICE session.
+重启 SPICE 会话可能会有所帮助。
 
 [[qm_migration]]
-Migration
----------
+== 迁移
 
 [thumbnail="screenshot/gui-qemu-migrate.png"]
 
-If you have a cluster, you can migrate your VM to another host with
+如果有集群，可以使用以下命令将 VM 迁移到另一台主机：
 
 ----
 # qm migrate <vmid> <target>
 ----
 
-There are generally two mechanisms for this
+通常有两种机制：
 
-* Online Migration (aka Live Migration)
-* Offline Migration
+* 在线迁移（也称 Live Migration）
+* 离线迁移
 
-Online Migration
-~~~~~~~~~~~~~~~~
+=== 在线迁移
 
-If your VM is running and no locally bound resources are configured (such as
-devices that are passed through), you can initiate a live migration with the `--online`
-flag in the `qm migration` command evocation. The web interface defaults to
-live migration when the VM is running.
+如果 VM 正在运行且未配置本地绑定资源（例如直通设备），可以在 `qm migration` 命令调用中使用
+`--online` 标志发起在线迁移。VM 运行时，Web 界面默认使用在线迁移。
 
-How it works
-^^^^^^^^^^^^
+==== 工作原理
 
-Online migration first starts a new QEMU process on the target host with the
-'incoming' flag, which performs only basic initialization with the guest vCPUs
-still paused and then waits for the guest memory and device state data streams
-of the source Virtual Machine.
-All other resources, such as disks, are either shared or got already sent
-before runtime state migration of the VMs begins; so only the memory content
-and device state remain to be transferred.
+在线迁移首先在目标主机上以 'incoming' 标志启动新的 QEMU 进程。
+该进程只执行基本初始化，客户 vCPU 仍保持暂停，然后等待源虚拟机的客户内存和设备状态数据流。
+所有其他资源（例如磁盘）要么是共享的，要么已在 VM 运行时状态迁移开始前发送完成；
+因此剩下需要传输的只有内存内容和设备状态。
 
-Once this connection is established, the source begins asynchronously sending
-the memory content to the target. If the guest memory on the source changes,
-those sections are marked dirty and another pass is made to send the guest
-memory data.
-This loop is repeated until the data difference between running source VM
-and incoming target VM is small enough to be sent in a few milliseconds,
-because then the source VM can be paused completely, without a user or program
-noticing the pause, so that the remaining data can be sent to the target, and
-then unpause the targets VM's CPU to make it the new running VM in well under a
-second.
+建立此连接后，源端开始异步向目标端发送内存内容。如果源端的客户内存发生变化，
+这些区域会被标记为 dirty，并再次发送客户内存数据。
+该循环会重复执行，直到正在运行的源 VM 与 incoming 目标 VM 之间的数据差异足够小，
+可以在几毫秒内发送完成；此时源 VM 可以完全暂停，且用户或程序不会察觉暂停，
+随后将剩余数据发送到目标端，并恢复目标 VM 的 CPU，使其在远低于一秒的时间内成为新的运行 VM。
 
-Requirements
-^^^^^^^^^^^^
+==== 要求
 
-For Live Migration to work, there are some things required:
+要使 Live Migration 正常工作，需要满足以下条件：
 
-* The VM has no local resources that cannot be migrated. For example,
-  PCI or USB devices that are passed through currently block live-migration.
-  Local Disks, on the other hand, can be migrated by sending them to the target
-  just fine.
-* The hosts are located in the same {pve} cluster.
-* The hosts have a working (and reliable) network connection between them.
-* The target host must have the same, or higher versions of the
-  {pve} packages. Although it can sometimes work the other way around, this
-  cannot be guaranteed.
-* The hosts have CPUs from the same vendor with similar capabilities. Different
-  vendor  *might* work depending on the actual models and VMs CPU type
-  configured, but it cannot be guaranteed - so please test before deploying
-  such a setup in production.
+* VM 没有无法迁移的本地资源。例如，当前直通的 PCI 或 USB 设备会阻止在线迁移。
+  另一方面，本地磁盘可以通过发送到目标端来正常迁移。
+* 主机位于同一个 {pve} 集群中。
+* 主机之间具有可用且可靠的网络连接。
+* 目标主机必须具有相同或更高版本的 {pve} 软件包。
+  虽然有时反向也能工作，但无法保证。
+* 主机 CPU 来自同一厂商，并具有相似能力。不同厂商的 CPU 根据实际型号和配置的 VM CPU 类型
+  *可能* 可以工作，但无法保证，因此在将此类设置部署到生产环境之前请先测试。
 
-Offline Migration
-~~~~~~~~~~~~~~~~~
+=== 离线迁移
 
-If you have local resources, you can still migrate your VMs offline as long as
-all disk are on storage defined on both hosts.
-Migration then copies the disks to the target host over the network, as with
-online migration. Note that any hardware passthrough configuration may need to
-be adapted to the device location on the target host.
+如果有本地资源，只要所有磁盘都位于两台主机都定义的存储上，仍可离线迁移 VM。
+迁移随后会像在线迁移一样，通过网络将磁盘复制到目标主机。
+请注意，任何硬件直通配置都可能需要适配目标主机上的设备位置。
 
 // TODO: mention hardware map IDs as better way to solve that, once available
 
 [[qm_copy_and_clone]]
-Copies and Clones
------------------
+== 复制和克隆
 
 [thumbnail="screenshot/gui-qemu-full-clone.png"]
 
-VM installation is usually done using an installation media (CD-ROM)
-from the operating system vendor. Depending on the OS, this can be a
-time consuming task one might want to avoid.
+VM 安装通常使用操作系统厂商提供的安装介质（CD-ROM）完成。
+根据操作系统不同，这可能是一个耗时任务，用户可能希望避免重复执行。
 
-An easy way to deploy many VMs of the same type is to copy an existing
-VM. We use the term 'clone' for such copies, and distinguish between
-'linked' and 'full' clones.
+部署大量同类型 VM 的一种简单方法是复制现有 VM。
+我们使用术语 'clone' 表示这类副本，并区分 'linked' 克隆和 'full' 克隆。
 
-Full Clone::
+完整克隆::
 
-The result of such copy is an independent VM. The
-new VM does not share any storage resources with the original.
+这种复制的结果是一个独立 VM。新 VM 不与原始 VM 共享任何存储资源。
 +
 
-It is possible to select a *Target Storage*, so one can use this to
-migrate a VM to a totally different storage. You can also change the
-disk image *Format* if the storage driver supports several formats.
+可以选择 *Target Storage*，因此可利用它将 VM 迁移到完全不同的存储。
+如果存储驱动支持多种格式，也可以更改磁盘镜像 *Format*。
 +
 
-NOTE: A full clone needs to read and copy all VM image data. This is
-usually much slower than creating a linked clone.
+NOTE: 完整克隆需要读取并复制所有 VM 镜像数据。这通常比创建链接克隆慢得多。
 +
 
-Some storage types allows to copy a specific *Snapshot*, which
-defaults to the 'current' VM data. This also means that the final copy
-never includes any additional snapshots from the original VM.
+某些存储类型允许复制特定 *Snapshot*，默认是 'current' VM 数据。
+这也意味着最终副本不会包含原始 VM 的任何额外快照。
 
 
-Linked Clone::
+链接克隆::
 
-Modern storage drivers support a way to generate fast linked
-clones. Such a clone is a writable copy whose initial contents are the
-same as the original data. Creating a linked clone is nearly
-instantaneous, and initially consumes no additional space.
+现代存储驱动支持生成快速链接克隆的方式。这种克隆是一个可写副本，其初始内容与原始数据相同。
+创建链接克隆几乎是瞬时完成的，并且最初不消耗额外空间。
 +
 
-They are called 'linked' because the new image still refers to the
-original. Unmodified data blocks are read from the original image, but
-modification are written (and afterwards read) from a new
-location. This technique is called 'Copy-on-write'.
+它们称为 'linked'，是因为新镜像仍引用原始镜像。未修改的数据块从原始镜像读取，
+而修改会写入（之后也从中读取）新的位置。该技术称为 'Copy-on-write'。
 +
 
-This requires that the original volume is read-only. With {pve} one
-can convert any VM into a read-only <<qm_templates, Template>>). Such
-templates can later be used to create linked clones efficiently.
+这要求原始卷为只读。在 {pve} 中，可以将任何 VM 转换为只读 <<qm_templates, 模板>>。
+之后可使用此类模板高效创建链接克隆。
 +
 
-NOTE: You cannot delete an original template while linked clones
-exist.
+NOTE: 当链接克隆存在时，不能删除原始模板。
 +
 
-It is not possible to change the *Target storage* for linked clones,
-because this is a storage internal feature.
+无法更改链接克隆的 *Target storage*，因为这是存储内部功能。
 
 
-The *Target node* option allows you to create the new VM on a
-different node. The only restriction is that the VM is on shared
-storage, and that storage is also available on the target node.
+*Target node* 选项允许在不同节点上创建新 VM。唯一限制是 VM 位于共享存储上，
+并且该存储在目标节点上也可用。
 
-To avoid resource conflicts, all network interface MAC addresses get
-randomized, and we generate a new 'UUID' for the VM BIOS (smbios1)
-setting.
+为避免资源冲突，所有网络接口 MAC 地址都会随机化，并且会为 VM BIOS（smbios1）设置生成新的 'UUID'。
 
 
 [[qm_templates]]
-Virtual Machine Templates
--------------------------
+== 虚拟机模板
 
-One can convert a VM into a Template. Such templates are read-only,
-and you can use them to create linked clones.
+可以将 VM 转换为模板。此类模板是只读的，可用于创建链接克隆。
 
-PXVIRT has two templates. pxvditemplate && template. The Pxvditemplate type can be started. This is often used in vdi scenarios.
+PXVIRT 有两种模板：pxvditemplate 和 template。Pxvditemplate 类型可以启动，常用于 VDI 场景。
 
-NOTE: It is not possible to start templates, because this would modify
-the disk images. If you want to change the template, create a linked
-clone and modify that.
+NOTE: 不能启动模板，因为这会修改磁盘镜像。如果想更改模板，请创建链接克隆并修改该克隆。
 
-VM Generation ID
-----------------
+== VM Generation ID
 
-{pve} supports Virtual Machine Generation ID ('vmgenid') footnote:[Official
-'vmgenid' Specification
+{pve} 支持虚拟机 Generation ID（'vmgenid'）footnote:[官方
+'vmgenid' 规范
 https://docs.microsoft.com/en-us/windows/desktop/hyperv_v2/virtual-machine-generation-identifier]
-for virtual machines.
-This can be used by the guest operating system to detect any event resulting
-in a time shift event, for example, restoring a backup or a snapshot rollback.
+。客户操作系统可以使用它检测导致时间偏移事件的任何事件，例如还原备份或回滚快照。
 
-When creating new VMs, a 'vmgenid' will be automatically generated and saved
-in its configuration file.
+创建新 VM 时，会自动生成 'vmgenid' 并保存到其配置文件中。
 
-To create and add a 'vmgenid' to an already existing VM one can pass the
-special value `1' to let {pve} autogenerate one or manually set the 'UUID'
-footnote:[Online GUID generator http://guid.one/] by using it as value, for
-example:
+要为已存在 VM 创建并添加 'vmgenid'，可以传递特殊值 `1' 让 {pve} 自动生成，
+也可以手动设置 'UUID' footnote:[在线 GUID 生成器 http://guid.one/] 作为其值，例如：
 
 ----
 # qm set VMID -vmgenid 1
 # qm set VMID -vmgenid 00000000-0000-0000-0000-000000000000
 ----
 
-NOTE: The initial addition of a 'vmgenid' device to an existing VM, may result
-in the same effects as a change on snapshot rollback, backup restore, etc., has
-as the VM can interpret this as generation change.
+NOTE: 首次向现有 VM 添加 'vmgenid' 设备，可能产生与快照回滚、备份还原等变更相同的效果，
+因为 VM 可能将其解释为代际变化。
 
-In the rare case the 'vmgenid' mechanism is not wanted one can pass `0' for
-its value on VM creation, or retroactively delete the property in the
-configuration with:
+在少数不需要 'vmgenid' 机制的情况下，可以在创建 VM 时为其值传递 `0'，
+或事后使用以下命令从配置中删除该属性：
 
 ----
 # qm set VMID -delete vmgenid
 ----
 
-The most prominent use case for 'vmgenid' are newer Microsoft Windows
-operating systems, which use it to avoid problems in time sensitive or
-replicate services (such as databases or domain controller
-footnote:[https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/virtualized-domain-controller-architecture])
-on snapshot rollback, backup restore or a whole VM clone operation.
+'vmgenid' 最突出的用例是较新的 Microsoft Windows 操作系统；它们使用该机制避免在快照回滚、
+备份还原或整个 VM 克隆操作中，对时间敏感或复制服务（例如数据库或域控制器
+footnote:[https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/virtualized-domain-controller-architecture]）
+产生问题。
 
 [[qm_import_virtual_machines]]
-Importing Virtual Machines
---------------------------
+== 导入虚拟机
 
-Importing existing virtual machines from foreign hypervisors or other {pve}
-clusters can be achieved through various methods, the most common ones are:
+可以通过多种方法从外部虚拟化管理程序或其他 {pve} 集群导入现有虚拟机，最常见的方法包括：
 
-* Using the native import wizard, which utilizes the 'import' content type, such
-  as provided by the ESXi special storage.
-* Performing a backup on the source and then restoring on the target. This
-  method works best when migrating from another {pve} instance.
-* using the OVF-specific import command of the `qm` command-line tool.
+* 使用原生导入向导，它利用 'import' 内容类型，例如由 ESXi 特殊存储提供的内容类型。
+* 在源端执行备份，然后在目标端还原。该方法在从另一个 {pve} 实例迁移时效果最好。
+* 使用 `qm` 命令行工具中专用于 OVF 的导入命令。
 
-If you import VMs to {pve} from other hypervisors, it’s recommended to
-familiarize yourself with the
-https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE#Concepts[concepts of {pve}].
+如果要从其他虚拟化管理程序将 VM 导入 {pve}，建议先熟悉
+https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE#Concepts[{pve} 的概念]。
 
-Import Wizard
-~~~~~~~~~~~~~
+=== 导入向导
 
 [thumbnail="screenshot/gui-import-wizard-general.png"]
 
-{pve} provides an integrated VM importer using the storage plugin system for
-native integration into the API and web-based user interface. You can use this
-to import the VM as a whole, with most of its config mapped to {pve}'s config
-model and reduced downtime.
+{pve} 提供了一个集成式 VM 导入器，使用存储插件系统原生集成到 API 和基于 Web 的用户界面中。
+可以使用它整体导入 VM，并将大部分配置映射到 {pve} 配置模型，同时减少停机时间。
 
-NOTE: The import wizard was added during the {pve} 8.2 development cycle and is
-in tech preview state. While it's already promising and working stable, it's
-still under active development.
+NOTE: 导入向导是在 {pve} 8.2 开发周期中添加的，目前处于技术预览状态。
+虽然它已经很有前景且工作稳定，但仍在积极开发中。
 
-To use the import wizard you have to first set up a new storage for an import
-source, you can do so on the web-interface under _Datacenter -> Storage -> Add_.
+要使用导入向导，必须先为导入源设置一个新存储；可以在 Web 界面中通过
+_Datacenter -> Storage -> Add_ 完成。
 
-Then you can select the new storage in the resource tree and use the 'Virtual
-Guests' content tab to see all available guests that can be imported.
+然后，可以在资源树中选择新存储，并使用 'Virtual Guests' 内容选项卡查看所有可导入的客户机。
 
 [thumbnail="screenshot/gui-import-wizard-advanced.png"]
 
-Select one and use the 'Import' button (or double-click) to open the import
-wizard. You can modify a subset of the available options here and then start the
-import. Please note that you can do more advanced modifications after the import
-finished.
+选择其中一个，并使用 'Import' 按钮（或双击）打开导入向导。
+可以在此修改可用选项的子集，然后启动导入。
+请注意，导入完成后还可以进行更高级的修改。
 
-TIP: The ESXi import wizard  has been tested with ESXi versions 6.5 through
-8.0. Note that guests using vSAN storage cannot be directly imported directly;
-their disks must first be moved to another storage. While it is possible to use
-a vCenter as the import source, performance is dramatically degraded (5 to 10
-times slower).
+TIP: ESXi 导入向导已经使用 ESXi 6.5 到 8.0 版本测试。
+请注意，使用 vSAN 存储的客户机不能直接导入；必须先将其磁盘移动到其他存储。
+虽然可以使用 vCenter 作为导入源，但性能会显著下降（慢 5 到 10 倍）。
 
-For a step-by-step guide and tips for how to adapt the virtual guest to the new
-hyper-visor see our
-https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE#Migration[migrate to {pve}
-wiki article].
+关于如何让虚拟客户机适配新的虚拟化管理程序的分步指南和提示，请参见我们的
+https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE#Migration[迁移到 {pve} wiki 文章]。
 
-OVA/OVF Import
-^^^^^^^^^^^^^^
+==== OVA/OVF 导入
 
-To import OVA/OVF files, you first need a File-based storage with the 'import'
-content type. On this storage, there will be an 'import' folder where you can
-put OVA files or OVF files with the corresponding images in a flat structure.
-Alternatively you can use the web UI to upload or download OVA files directly.
-You can then use the web UI to select those and use the import wizard to import
-the guests.
+要导入 OVA/OVF 文件，首先需要一个具有 'import' 内容类型的基于文件的存储。
+在该存储上，会有一个 'import' 文件夹，可将 OVA 文件或带有相应镜像且采用扁平结构的 OVF 文件放入其中。
+也可以使用 Web UI 直接上传或下载 OVA 文件。随后可以使用 Web UI 选择这些文件，
+并使用导入向导导入客户机。
 
-For OVA files, there is additional space needed to temporarily extract the
-image. This needs a file-based storage that has the 'images' content type
-configured. By default the source storage is selected for this, but you can
-specify a 'Import Working Storage' on which the images will be extracted before
-importing to the actual target storage.
+对于 OVA 文件，需要额外空间临时提取镜像。这需要一个配置了 'images' 内容类型的基于文件的存储。
+默认选择源存储用于此目的，但也可以指定一个 'Import Working Storage'，
+在导入到实际目标存储之前先在该存储上提取镜像。
 
-NOTE: Since OVA/OVF file structure and content are not always well maintained
-or defined, it might be necessary to adapt some guest settings manually. For
-example the SCSI controller type is almost never defined in OVA/OVF files, but
-the default is unbootable with OVMF (UEFI), so you should select 'Virtio SCSI'
-or 'VMware PVSCSI' for these cases.
+NOTE: 由于 OVA/OVF 文件结构和内容并不总是维护良好或定义清晰，可能需要手动调整某些客户机设置。
+例如，SCSI 控制器类型几乎从不会在 OVA/OVF 文件中定义，但默认值无法使用 OVMF (UEFI) 启动，
+因此在这些情况下应选择 'Virtio SCSI' 或 'VMware PVSCSI'。
 
-Import OVF/OVA Through CLI
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通过 CLI 导入 OVF/OVA
 
-A VM export from a foreign hypervisor takes usually the form of one or more disk
- images, with a configuration file describing the settings of the VM (RAM,
- number of cores). +
-The disk images can be in the vmdk format, if the disks come from
-VMware or VirtualBox, or qcow2 if the disks come from a KVM hypervisor.
-The most popular configuration format for VM exports is the OVF standard, but in
-practice interoperation is limited because many settings are not implemented in
-the standard itself, and hypervisors export the supplementary information
-in non-standard extensions.
+来自外部虚拟化管理程序的 VM 导出通常采用一个或多个磁盘镜像的形式，并附带描述 VM 设置
+（RAM、核心数量）的配置文件。+
+如果磁盘来自 VMware 或 VirtualBox，磁盘镜像可以是 vmdk 格式；如果磁盘来自 KVM 虚拟化管理程序，
+则可以是 qcow2 格式。VM 导出最流行的配置格式是 OVF 标准，但实际互操作性有限，
+因为许多设置未在标准本身中实现，虚拟化管理程序会在非标准扩展中导出补充信息。
 
-Besides the problem of format, importing disk images from other hypervisors
-may fail if the emulated hardware changes too much from one hypervisor to
-another. Windows VMs are particularly concerned by this, as the OS is very
-picky about any changes of hardware. This problem may be solved by
-installing the MergeIDE.zip utility available from the Internet before exporting
-and choosing a hard disk type of *IDE* before booting the imported Windows VM.
+除格式问题外，从其他虚拟化管理程序导入磁盘镜像时，如果不同虚拟化管理程序之间模拟硬件变化过大，
+也可能失败。Windows VM 尤其受此影响，因为该操作系统对任何硬件变化都非常敏感。
+可以在导出前安装互联网上可用的 MergeIDE.zip 实用工具，并在启动导入的 Windows VM 前选择
+*IDE* 硬盘类型，以解决此问题。
 
-Finally there is the question of paravirtualized drivers, which improve the
-speed of the emulated system and are specific to the hypervisor.
-GNU/Linux and other free Unix OSes have all the necessary drivers installed by
-default and you can switch to the paravirtualized drivers right after importing
-the VM. For Windows VMs, you need to install the Windows paravirtualized
-drivers by yourself.
+最后还有半虚拟化驱动问题；这些驱动可提升模拟系统速度，并且特定于虚拟化管理程序。
+GNU/Linux 和其他自由 Unix 操作系统默认已安装所有必要驱动，因此可以在导入 VM 后立即切换到半虚拟化驱动。
+对于 Windows VM，需要自行安装 Windows 半虚拟化驱动。
 
-GNU/Linux and other free Unix can usually be imported without hassle. Note
-that we cannot guarantee a successful import/export of Windows VMs in all
-cases due to the problems above.
+GNU/Linux 和其他自由 Unix 通常可以顺利导入。请注意，由于上述问题，我们无法保证所有情况下都能成功导入/导出
+Windows VM。
 
-Step-by-step example of a Windows OVF import
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== Windows OVF 导入分步示例
 
-Microsoft provides
+Microsoft 提供
 https://developer.microsoft.com/en-us/windows/downloads/virtual-machines/[Virtual Machines downloads]
- to get started with Windows development.We are going to use one of these
-to demonstrate the OVF import feature.
+以便开始 Windows 开发。我们将使用其中一个来演示 OVF 导入功能。
 
-Download the Virtual Machine zip
-++++++++++++++++++++++++++++++++
+===== 下载虚拟机 zip
 
-After getting informed about the user agreement, choose the _Windows 10
-Enterprise (Evaluation - Build)_ for the VMware platform, and download the zip.
+了解用户协议后，为 VMware 平台选择 _Windows 10 Enterprise (Evaluation - Build)_，并下载 zip。
 
-Extract the disk image from the zip
-+++++++++++++++++++++++++++++++++++
+===== 从 zip 中提取磁盘镜像
 
-Using the `unzip` utility or any archiver of your choice, unpack the zip,
-and copy via ssh/scp the ovf and vmdk files to your {pve} host.
+使用 `unzip` 工具或任意归档工具解压 zip，并通过 ssh/scp 将 ovf 和 vmdk 文件复制到 {pve} 主机。
 
-Import the Virtual Machine
-++++++++++++++++++++++++++
+===== 导入虚拟机
 
-This will create a new virtual machine, using cores, memory and
-VM name as read from the OVF manifest, and import the disks to the +local-lvm+
- storage. You have to configure the network manually.
+这会创建一个新虚拟机，使用从 OVF manifest 中读取的核心数、内存和 VM 名称，
+并将磁盘导入到 +local-lvm+ 存储。必须手动配置网络。
 
 ----
 # qm importovf 999 WinDev1709Eval.ovf local-lvm
 ----
 
-The VM is ready to be started.
+VM 已准备好启动。
 
-Adding an external disk image to a Virtual Machine
-++++++++++++++++++++++++++++++++++++++++++++++++++
+===== 向虚拟机添加外部磁盘镜像
 
-You can also add an existing disk image to a VM, either coming from a
-foreign hypervisor, or one that you created yourself.
+也可以向 VM 添加现有磁盘镜像，该镜像可以来自外部虚拟化管理程序，也可以是自行创建的镜像。
 
-Suppose you created a Debian/Ubuntu disk image with the 'vmdebootstrap' tool:
+假设使用 'vmdebootstrap' 工具创建了 Debian/Ubuntu 磁盘镜像：
 
  vmdebootstrap --verbose \
   --size 10GiB --serial-console \
@@ -1964,8 +1501,7 @@ Suppose you created a Debian/Ubuntu disk image with the 'vmdebootstrap' tool:
   --customize=./copy_pub_ssh.sh \
   --sparse --image vm600.raw
 
-You can now create a new target VM, importing the image to the storage `pvedir`
-and attaching it to the VM's SCSI controller:
+现在可以创建新的目标 VM，将镜像导入到存储 `pvedir`，并将其附加到 VM 的 SCSI 控制器：
 
 ----
 # qm create 600 --net0 virtio,bridge=vmbr0 --name vm600 --serial0 socket \
@@ -1973,7 +1509,7 @@ and attaching it to the VM's SCSI controller:
    --scsi0 pvedir:0,import-from=/path/to/dir/vm600.raw
 ----
 
-The VM is ready to be started.
+VM 已准备好启动。
 
 
 ifndef::wiki[]
@@ -1984,66 +1520,54 @@ ifndef::wiki[]
 include::qm-pci-passthrough.adoc[]
 endif::wiki[]
 
-Hookscripts
------------
+== Hook 脚本
 
-You can add a hook script to VMs with the config property `hookscript`.
+可以通过配置属性 `hookscript` 向 VM 添加 hook 脚本。
 
 ----
 # qm set 100 --hookscript local:snippets/hookscript.pl
 ----
 
-It will be called during various phases of the guests lifetime.
-For an example and documentation see the example script under
-`/usr/share/pve-docs/examples/guest-example-hookscript.pl`.
+它会在客户机生命周期的不同阶段被调用。
+示例和文档见 `/usr/share/pve-docs/examples/guest-example-hookscript.pl` 下的示例脚本。
 
 [[qm_hibernate]]
-Hibernation
------------
+== 休眠
 
-You can suspend a VM to disk with the GUI option `Hibernate` or with
+可以通过 GUI 选项 `Hibernate` 将 VM 挂起到磁盘，或使用：
 
 ----
 # qm suspend ID --todisk
 ----
 
-That means that the current content of the memory will be saved onto disk
-and the VM gets stopped. On the next start, the memory content will be
-loaded and the VM can continue where it was left off.
+这意味着当前内存内容会保存到磁盘，并停止 VM。下次启动时会加载内存内容，VM 可以从离开的位置继续运行。
 
 [[qm_vmstatestorage]]
-.State storage selection
-If no target storage for the memory is given, it will be automatically
-chosen, the first of:
+.状态存储选择
+如果没有为内存指定目标存储，将按以下顺序自动选择第一个可用项：
 
-1. The storage `vmstatestorage` from the VM config.
-2. The first shared storage from any VM disk.
-3. The first non-shared storage from any VM disk.
-4. The storage `local` as a fallback.
+1. VM 配置中的存储 `vmstatestorage`。
+2. 任意 VM 磁盘中的第一个共享存储。
+3. 任意 VM 磁盘中的第一个非共享存储。
+4. 作为回退的存储 `local`。
 
 [[resource_mapping]]
-Resource Mapping
-----------------
+== 资源映射
 
 [thumbnail="screenshot/gui-datacenter-resource-mappings.png"]
 
-When using or referencing local resources (e.g. address of a pci device), using
-the raw address or id is sometimes problematic, for example:
+使用或引用本地资源（例如 PCI 设备地址）时，直接使用原始地址或 ID 有时会产生问题，例如：
 
-* when using HA, a different device with the same id or path may exist on the
-  target node, and if one is not careful when assigning such guests to HA
-  groups, the wrong device could be used, breaking configurations.
+* 使用 HA 时，目标节点上可能存在具有相同 ID 或路径的不同设备；
+  如果将此类客户机分配到 HA 组时不够谨慎，可能会使用错误设备，从而破坏配置。
 
-* changing hardware can change ids and paths, so one would have to check all
-  assigned devices and see if the path or id is still correct.
+* 更改硬件可能改变 ID 和路径，因此必须检查所有已分配设备，确认路径或 ID 是否仍然正确。
 
-To handle this better, one can define cluster wide resource mappings, such that
-a resource has a cluster unique, user selected identifier which can correspond
-to different devices on different hosts. With this, HA won't start a guest with
-a wrong device, and hardware changes can be detected.
+为了更好地处理此问题，可以定义集群范围资源映射，使资源具有集群唯一且由用户选择的标识符，
+该标识符可以对应不同主机上的不同设备。这样，HA 不会使用错误设备启动客户机，并且可以检测硬件变化。
 
-Creating such a mapping can be done with the {pve} web GUI under `Datacenter`
-in the relevant tab in the `Resource Mappings` category, or on the cli with
+可以在 {pve} Web GUI 的 `Datacenter` 下，通过 `Resource Mappings` 类别中的相关选项卡创建此类映射，
+也可以在 CLI 中使用：
 
 ----
 # pvesh create /cluster/mapping/<type> <options>
@@ -2051,17 +1575,14 @@ in the relevant tab in the `Resource Mappings` category, or on the cli with
 
 [thumbnail="screenshot/gui-datacenter-mapping-pci-edit.png"]
 
-Where `<type>` is the hardware type (currently either `pci`, `usb` or
-xref:qm_virtiofs[dir]) and `<options>` are the device mappings and other
-configuration parameters.
+其中 `<type>` 是硬件类型（目前为 `pci`、`usb` 或 xref:qm_virtiofs[dir]），
+`<options>` 是设备映射和其他配置参数。
 
-Note that the options must include a map property with all identifying
-properties of that hardware, so that it's possible to verify the hardware did
-not change and the correct device is passed through.
+请注意，选项必须包含带有该硬件所有识别属性的 map 属性，
+以便验证硬件未发生变化，并且直通的是正确设备。
 
-For example to add a PCI device as `device1` with the path `0000:01:00.0` that
-has the device id `0001` and the vendor id `0002` on the node `node1`, and
-`0000:02:00.0` on `node2` you can add it with:
+例如，要添加一个 PCI 设备作为 `device1`，它在节点 `node1` 上的路径为 `0000:01:00.0`，
+设备 ID 为 `0001`，厂商 ID 为 `0002`，并且在 `node2` 上为 `0000:02:00.0`，可以使用：
 
 ----
 # pvesh create /cluster/mapping/pci --id device1 \
@@ -2069,128 +1590,107 @@ has the device id `0001` and the vendor id `0002` on the node `node1`, and
  --map node=node2,path=0000:02:00.0,id=0002:0001
 ----
 
-You must repeat the `map` parameter for each node where that device should have
-a mapping (note that you can currently only map one USB device per node per
-mapping).
+必须为该设备应具有映射的每个节点重复 `map` 参数（请注意，目前每个映射中每个节点只能映射一个 USB 设备）。
 
-Using the GUI makes this much easier, as the correct properties are
-automatically picked up and sent to the API.
+使用 GUI 会更简单，因为正确属性会被自动选取并发送到 API。
 
 [thumbnail="screenshot/gui-datacenter-mapping-usb-edit.png"]
 
-It's also possible for PCI devices to provide multiple devices per node with
-multiple map properties for the nodes. If such a device is assigned to a guest,
-the first free one will be used when the guest is started. The order of the
-paths given is also the order in which they are tried, so arbitrary allocation
-policies can be implemented.
+对于 PCI 设备，也可以通过节点的多个 map 属性为每个节点提供多个设备。
+如果将此类设备分配给客户机，客户机启动时会使用第一个空闲设备。
+给定路径的顺序也是尝试顺序，因此可以实现任意分配策略。
 
-This is useful for devices with SR-IOV, since some times it is not important
-which exact virtual function is passed through.
+这对具有 SR-IOV 的设备很有用，因为有时具体直通哪个虚拟功能并不重要。
 
-You can assign such a device to a guest either with the GUI or with
+可以通过 GUI 或以下命令将此类设备分配给客户机：
 
 ----
 # qm set ID -hostpci0 <name>
 ----
 
-for PCI devices, or
+对于 PCI 设备，或：
 
 ----
 # qm set <vmid> -usb0 <name>
 ----
 
-for USB devices.
+对于 USB 设备。
 
-Where `<vmid>` is the guests id and `<name>` is the chosen name for the created
-mapping. All usual options for passing through the devices are allowed, such as
-`mdev`.
+其中 `<vmid>` 是客户机 ID，`<name>` 是为已创建映射选择的名称。
+允许使用设备直通的所有常规选项，例如 `mdev`。
 
-To create mappings `Mapping.Modify` on `/mapping/<type>/<name>` is necessary
-(where `<type>` is the device type and `<name>` is the name of the mapping).
+要创建映射，需要在 `/mapping/<type>/<name>` 上具有 `Mapping.Modify`
+（其中 `<type>` 是设备类型，`<name>` 是映射名称）。
 
-To use these mappings, `Mapping.Use` on `/mapping/<type>/<name>` is necessary
-(in addition to the normal guest privileges to edit the configuration).
+要使用这些映射，需要在 `/mapping/<type>/<name>` 上具有 `Mapping.Use`
+（此外还需要用于编辑配置的常规客户机权限）。
 
-.Additional Options
+.附加选项
 
-There are additional options when defining a cluster wide resource mapping.
-Currently there are the following options:
+定义集群范围资源映射时还有一些附加选项。目前包括以下选项：
 
-* `mdev` (PCI): This marks the PCI device as being capable of providing
-  `mediated devices`. When this is enabled, you can select a type when
-  configuring it on the guest. If multiple PCI devices are selected for the
-  mapping, the mediated device will be created on the first one where there are
-  any available instances of the selected type.
+* `mdev` (PCI)：这会将 PCI 设备标记为能够提供 `mediated devices`。
+  启用后，在客户机上配置时可以选择类型。如果为映射选择了多个 PCI 设备，
+  mediated device 会在第一个具有所选类型可用实例的设备上创建。
 
-* `live-migration-capable` (PCI): This marks the PCI device as being capable of
-  being live migrated between nodes. This requires driver and hardware support.
-  Only NVIDIA GPUs with recent kernel are known to support this. Note that live
-  migrating passed through devices is an experimental feature and may not work
-  or cause issues.
+* `live-migration-capable` (PCI)：这会将 PCI 设备标记为能够在节点之间在线迁移。
+  这需要驱动和硬件支持。目前已知只有使用较新内核的 NVIDIA GPU 支持此功能。
+  请注意，在线迁移直通设备是实验性功能，可能无法工作或导致问题。
 
 
-Managing Virtual Machines with `qm`
-------------------------------------
+== 使用 `qm` 管理虚拟机
 
-qm is the tool to manage QEMU/KVM virtual machines on {pve}. You can
-create and destroy virtual machines, and control execution
-(start/stop/suspend/resume). Besides that, you can use qm to set
-parameters in the associated config file. It is also possible to
-create and delete virtual disks.
+qm 是在 {pve} 上管理 QEMU/KVM 虚拟机的工具。可以创建和销毁虚拟机，并控制其执行
+（start/stop/suspend/resume）。此外，还可以使用 qm 在关联配置文件中设置参数。
+也可以创建和删除虚拟磁盘。
 
-CLI Usage Examples
-~~~~~~~~~~~~~~~~~~
+=== CLI 使用示例
 
-Using an iso file uploaded on the 'local' storage, create a VM
-with a 4 GB IDE disk on the 'local-lvm' storage
+使用上传到 'local' 存储的 iso 文件，创建一个在 'local-lvm' 存储上具有 4 GB IDE 磁盘的 VM：
 
 ----
 # qm create 300 -ide0 local-lvm:4 -net0 e1000 -cdrom local:iso/proxmox-mailgateway_2.1.iso
 ----
 
-Start the new VM
+启动新 VM：
 
 ----
 # qm start 300
 ----
 
-Send a shutdown request, then wait until the VM is stopped.
+发送关闭请求，然后等待 VM 停止。
 
 ----
 # qm shutdown 300 && qm wait 300
 ----
 
-Same as above, but only wait for 40 seconds.
+与上面相同，但只等待 40 秒。
 
 ----
 # qm shutdown 300 && qm wait 300 -timeout 40
 ----
 
-If the VM does not shut down, force-stop it and overrule any running shutdown
-tasks. As stopping VMs may incur data loss, use it with caution.
+如果 VM 未关闭，请强制停止它并覆盖任何正在运行的关闭任务。停止 VM 可能导致数据丢失，请谨慎使用。
 
 ----
 # qm stop 300 -overrule-shutdown 1
 ----
 
-Destroying a VM always removes it from Access Control Lists and it always
-removes the firewall configuration of the VM. You have to activate
-'--purge', if you want to additionally remove the VM from replication jobs,
-backup jobs and HA resource configurations.
+销毁 VM 始终会将其从访问控制列表中移除，并始终移除该 VM 的防火墙配置。
+如果还想将 VM 从复制作业、备份作业和 HA 资源配置中移除，必须启用 '--purge'。
 
 ----
 # qm destroy 300 --purge
 ----
 
-Move a disk image to a different storage.
+将磁盘镜像移动到其他存储。
 
 ----
 # qm move-disk 300 scsi0 other-storage
 ----
 
-Reassign a disk image to a different VM. This will remove the disk `scsi1` from
-the source VM and attaches it as `scsi3` to the target VM. In the background
-the disk image is being renamed so that the name matches the new owner.
+将磁盘镜像重新分配给其他 VM。这会从源 VM 移除磁盘 `scsi1`，并将其作为 `scsi3` 附加到目标 VM。
+后台会重命名磁盘镜像，使其名称与新的所有者匹配。
 
 ----
 # qm move-disk 300 scsi1 --target-vmid 400 --target-disk scsi3
@@ -2198,18 +1698,14 @@ the disk image is being renamed so that the name matches the new owner.
 
 
 [[qm_configuration]]
-Configuration
--------------
+== 配置
 
-VM configuration files are stored inside the Proxmox cluster file
-system, and can be accessed at `/etc/pve/qemu-server/<VMID>.conf`.
-Like other files stored inside `/etc/pve/`, they get automatically
-replicated to all other cluster nodes.
+VM 配置文件存储在 Proxmox 集群文件系统中，可通过 `/etc/pve/qemu-server/<VMID>.conf` 访问。
+与存储在 `/etc/pve/` 中的其他文件一样，它们会自动复制到所有其他集群节点。
 
-NOTE: VMIDs < 100 are reserved for internal purposes, and VMIDs need to be
-unique cluster wide.
+NOTE: VMID < 100 保留用于内部用途，VMID 需要在整个集群范围内唯一。
 
-.Example VM Configuration
+.VM 配置示例
 ----
 boot: order=virtio0;net0
 cores: 1
@@ -2221,43 +1717,33 @@ net0: e1000=EE:D2:28:5F:B6:3E,bridge=vmbr0
 virtio0: local:vm-100-disk-1,size=32G
 ----
 
-Those configuration files are simple text files, and you can edit them
-using a normal text editor (`vi`, `nano`, ...). This is sometimes
-useful to do small corrections, but keep in mind that you need to
-restart the VM to apply such changes.
+这些配置文件是简单文本文件，可以使用普通文本编辑器（`vi`、`nano` 等）编辑。
+这有时对进行小幅修正很有用，但请记住，需要重启 VM 才能应用此类更改。
 
-For that reason, it is usually better to use the `qm` command to
-generate and modify those files, or do the whole thing using the GUI.
-Our toolkit is smart enough to instantaneously apply most changes to
-running VM. This feature is called "hot plug", and there is no
-need to restart the VM in that case.
+因此，通常最好使用 `qm` 命令生成和修改这些文件，或直接使用 GUI 完成全部操作。
+我们的工具集足够智能，可以将大多数更改即时应用到正在运行的 VM。
+此功能称为 "hot plug"，在这种情况下不需要重启 VM。
 
 
-File Format
-~~~~~~~~~~~
+=== 文件格式
 
-VM configuration files use a simple colon separated key/value
-format. Each line has the following format:
+VM 配置文件使用简单的冒号分隔键/值格式。每行采用以下格式：
 
 -----
 # this is a comment
 OPTION: value
 -----
 
-Blank lines in those files are ignored, and lines starting with a `#`
-character are treated as comments and are also ignored.
+这些文件中的空行会被忽略，以 `#` 字符开头的行会被视为注释并同样被忽略。
 
 
 [[qm_snapshots]]
-Snapshots
-~~~~~~~~~
+=== 快照
 
-When you create a snapshot, `qm` stores the configuration at snapshot
-time into a separate snapshot section within the same configuration
-file. For example, after creating a snapshot called ``testsnapshot'',
-your configuration file will look like this:
+创建快照时，`qm` 会将快照时的配置存储到同一配置文件中的单独快照区段。
+例如，创建名为 ``testsnapshot'' 的快照后，配置文件会类似如下：
 
-.VM configuration with snapshot
+.带快照的 VM 配置
 ----
 memory: 512
 swap: 512
@@ -2271,41 +1757,33 @@ snaptime: 1457170803
 ...
 ----
 
-There are a few snapshot related properties like `parent` and
-`snaptime`. The `parent` property is used to store the parent/child
-relationship between snapshots. `snaptime` is the snapshot creation
-time stamp (Unix epoch).
+有几个与快照相关的属性，例如 `parent` 和 `snaptime`。
+`parent` 属性用于存储快照之间的父/子关系。`snaptime` 是快照创建时间戳（Unix epoch）。
 
-You can optionally save the memory of a running VM with the option `vmstate`.
-For details about how the target storage gets chosen for the VM state, see
-xref:qm_vmstatestorage[State storage selection] in the chapter
-xref:qm_hibernate[Hibernation].
+也可以使用选项 `vmstate` 保存正在运行的 VM 的内存。
+有关如何为 VM 状态选择目标存储的详情，请参见
+xref:qm_hibernate[休眠]章节中的 xref:qm_vmstatestorage[状态存储选择]。
 
 [[qm_options]]
-Options
-~~~~~~~
+=== 选项
 
 include::qm.conf.5-opts.adoc[]
 
 
-Locks
------
+== 锁定
 
-Online migrations, snapshots and backups (`vzdump`) set a lock to prevent
-incompatible concurrent actions on the affected VMs. Sometimes you need to
-remove such a lock manually (for example after a power failure).
+在线迁移、快照和备份（`vzdump`）会设置锁，以防止对受影响 VM 执行不兼容的并发操作。
+有时需要手动移除此类锁（例如断电后）。
 
 ----
 # qm unlock <vmid>
 ----
 
-CAUTION: Only do that if you are sure the action which set the lock is
-no longer running.
+CAUTION: 只有在确定设置该锁的操作已不再运行时，才执行此操作。
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Cloud-Init_Support[Cloud-Init Support]
 
@@ -2314,12 +1792,11 @@ endif::wiki[]
 
 ifdef::manvolnum[]
 
-Files
-------
+== 文件
 
 `/etc/pve/qemu-server/<VMID>.conf`::
 
-Configuration file for the VM '<VMID>'.
+VM '<VMID>' 的配置文件。
 
 
 include::pve-copyright.adoc[]

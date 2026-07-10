@@ -1,16 +1,13 @@
 [[chapter_lvm]]
-Logical Volume Manager (LVM)
-----------------------------
+== 逻辑卷管理器 (LVM)
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-Most people install {pve} directly on a local disk. The {pve}
-installation CD offers several options for local disk management, and
-the current default setup uses LVM. The installer lets you select a
-single disk for such setup, and uses that disk as physical volume for
-the **V**olume **G**roup (VG) `pve`. The following output is from a
-test installation using a small 8GB disk:
+多数用户会将 {pve} 直接安装到本地磁盘上。{pve} 安装 CD 为本地磁盘管理提供了多种选项，
+当前默认配置使用 LVM。安装程序允许你为这种配置选择一块单独的磁盘，并将该磁盘作为
+**卷组**（**V**olume **G**roup，VG）`pve` 的物理卷。以下输出来自一套使用小型 8GB
+磁盘的测试安装：
 
 ----
 # pvs
@@ -22,8 +19,7 @@ test installation using a small 8GB disk:
   pve    1   3   0 wz--n- 7.87g 876.00m
 ----
 
-The installer allocates three **L**ogical **V**olumes (LV) inside this
-VG:
+安装程序会在该 VG 中分配三个**逻辑卷**（**L**ogical **V**olumes，LV）：
 
 ----
 # lvs
@@ -33,107 +29,99 @@ VG:
   swap pve  -wi-ao---- 896.00m     
 ----
 
-root:: Formatted as `ext4`, and contains the operating system.
+root:: 格式化为 `ext4`，并包含操作系统。
 
-swap:: Swap partition
+swap:: 交换分区。
 
-data:: This volume uses LVM-thin, and is used to store VM
-images. LVM-thin is preferable for this task, because it offers
-efficient support for snapshots and clones.
+data:: 该卷使用 LVM-thin，用于存储虚拟机镜像。LVM-thin 更适合这类用途，因为它能高效支持快照和克隆。
 
-For {pve} versions up to 4.1, the installer creates a standard logical
-volume called ``data'', which is mounted at `/var/lib/vz`.
+对于 {pve} 4.1 及更早版本，安装程序会创建名为 ``data'' 的标准逻辑卷，并挂载到
+`/var/lib/vz`。
 
-Starting from version 4.2, the logical volume ``data'' is a LVM-thin pool,
-used to store block based guest images, and `/var/lib/vz` is simply a
-directory on the root file system.
+从 4.2 版本开始，逻辑卷 ``data'' 是一个 LVM-thin 池，用于存储基于块的客户机镜像，
+而 `/var/lib/vz` 只是根文件系统上的一个目录。
 
-Hardware
-~~~~~~~~
+=== 硬件
 
-We highly recommend to use a hardware RAID controller (with BBU) for
-such setups. This increases performance, provides redundancy, and make
-disk replacements easier (hot-pluggable).
+强烈建议在此类配置中使用硬件 RAID 控制器（带 BBU）。这可以提升性能、提供冗余，
+并让磁盘更换更容易（支持热插拔）。
 
-LVM itself does not need any special hardware, and memory requirements
-are very low.
+LVM 本身不需要任何特殊硬件，内存需求也很低。
 
 
-Bootloader
-~~~~~~~~~~
+=== 引导加载器
 
-We install two boot loaders by default. The first partition contains
-the standard GRUB boot loader. The second partition is an **E**FI **S**ystem
-**P**artition (ESP), which makes it possible to boot on EFI systems and to
-apply xref:sysadmin_firmware_persistent[persistent firmware updates] from the
-user space.
+默认会安装两个引导加载器。第一个分区包含标准 GRUB 引导加载器。第二个分区是
+**E**FI **S**ystem **P**artition（ESP），用于在 EFI 系统上启动，并允许从用户空间应用
+xref:sysadmin_firmware_persistent[持久化固件更新]。
 
 
-Creating a Volume Group
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 创建卷组
 
-Let's assume we have an empty disk `/dev/sdb`, onto which we want to
-create a volume group named ``vmdata''.
+假设有一块空磁盘 `/dev/sdb`，我们希望在其上创建名为 ``vmdata'' 的卷组。
 
-CAUTION: Please note that the following commands will destroy all
-existing data on `/dev/sdb`.
+CAUTION: 请注意，以下命令会销毁 `/dev/sdb` 上的所有现有数据。
 
-First create a partition.
+首先创建一个分区。
 
  # sgdisk -N 1 /dev/sdb
 
 
-Create a **P**hysical **V**olume (PV) without confirmation and 250K
-metadatasize.
+创建一个**物理卷**（**P**hysical **V**olume，PV），不要求确认，并使用 250K 元数据大小。
 
  # pvcreate --metadatasize 250k -y -ff /dev/sdb1
 
 
-Create a volume group named ``vmdata'' on `/dev/sdb1`
+在 `/dev/sdb1` 上创建名为 ``vmdata'' 的卷组。
 
  # vgcreate vmdata /dev/sdb1
 
 
-Creating an extra LV for `/var/lib/vz`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 为 `/var/lib/vz` 创建额外 LV
 
-This can be easily done by creating a new thin LV.
+可以通过创建新的 thin LV 轻松完成。
 
  # lvcreate -n <Name> -V <Size[M,G,T]> <VG>/<LVThin_pool>
 
-A real world example:
+实际示例：
 
  # lvcreate -n vz -V 10G pve/data
 
-Now a filesystem must be created on the LV.
+现在必须在该 LV 上创建文件系统。
 
  # mkfs.ext4 /dev/pve/vz
 
-At last this has to be mounted.
+最后需要将其挂载。
 
-WARNING: be sure that `/var/lib/vz` is empty. On a default
-installation it's not.
+WARNING: 请确保 `/var/lib/vz` 为空。在默认安装中，它并不是空目录。
 
-To make it always accessible add the following line in `/etc/fstab`.
+要使其始终可访问，请将以下行添加到 `/etc/fstab`。
 
  # echo '/dev/pve/vz /var/lib/vz ext4 defaults 0 2' >> /etc/fstab
 
 
-Resizing the thin pool
-~~~~~~~~~~~~~~~~~~~~~~
+=== 调整 thin 池大小
 
-Resize the LV and the metadata pool with the following command:
+使用以下命令调整 LV 和元数据池大小：
 
  # lvresize --size +<size[\M,G,T]> --poolmetadatasize +<size[\M,G]> <VG>/<LVThin_pool>
 
-NOTE: When extending the data pool, the metadata pool must also be
-extended.
+NOTE: 扩展数据池时，也必须同时扩展元数据池。
 
 
-Create a LVM-thin pool
-~~~~~~~~~~~~~~~~~~~~~~
+=== 创建 LVM-thin 池
 
-A thin pool has to be created on top of a volume group.
-How to create a volume group see Section LVM.
+thin 池必须创建在卷组之上。关于如何创建卷组，请参见 LVM 章节。
 
  # lvcreate -L 80G -T -n vmstore vmdata
+
+=== 常用命令示例
+
+以下命令可用于查看本地 LVM 状态和 thin 池使用情况：
+
+----
+# pvs
+# vgs
+# lvs
+# lvs -a
+----

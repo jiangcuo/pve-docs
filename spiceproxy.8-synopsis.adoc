@@ -2,34 +2,41 @@
 
 *spiceproxy help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助信息。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助信息
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *spiceproxy restart*
 
-Restart the daemon (or start if not running).
+重启守护进程（如果尚未运行则启动）。
 
 *spiceproxy start* `[OPTIONS]`
 
-Start the daemon.
+启动守护进程。
 
 `--debug` `<boolean>` ('default =' `0`)::
 
-Debug mode - stay in foreground
+调试模式 - 保持在前台运行
 
 *spiceproxy status*
 
-Get daemon status.
+获取守护进程状态。
 
 *spiceproxy stop*
 
-Stop the daemon.
+停止守护进程。
 
+=== 常用命令示例
+
+查看 `spiceproxy` 状态：
+
+----
+# spiceproxy status
+----
 

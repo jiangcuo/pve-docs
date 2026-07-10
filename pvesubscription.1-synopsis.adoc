@@ -2,47 +2,50 @@
 
 *pvesubscription delete*
 
-Delete subscription key of this node.
+删除此节点的订阅密钥。
 
 *pvesubscription get*
 
-Read subscription info.
+读取订阅信息。
 
 *pvesubscription help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助信息。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助信息。
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *pvesubscription set* `<key>`
 
-Set subscription key.
+设置订阅密钥。
 
 `<key>`: `\s*pve([1248])([cbsp])-[0-9a-f]{10}\s*` ::
 
-Proxmox VE subscription key
+Proxmox VE 订阅密钥
 
 *pvesubscription set-offline-key* `<data>`
 
-Internal use only! To set an offline key, use the package
-proxmox-offline-mirror-helper instead.
+仅供内部使用！要设置离线密钥，请改用 proxmox-offline-mirror-helper 软件包。
 
 `<data>`: `<string>` ::
 
-A signed subscription info blob
+已签名的订阅信息 blob
 
 *pvesubscription update* `[OPTIONS]`
 
-Update subscription info.
+更新订阅信息。
 
 `--force` `<boolean>` ('default =' `0`)::
 
-Always connect to server, even if local cache is still valid.
+即使本地缓存仍然有效，也始终连接到服务器。
 
-
+.常用命令示例
+----
+# pvesubscription get
+# pvesubscription update
+----

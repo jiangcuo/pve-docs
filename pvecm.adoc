@@ -1,237 +1,179 @@
 [[chapter_pvecm]]
 ifdef::manvolnum[]
-pvecm(1)
-========
+= pvecm(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvecm - Proxmox VE Cluster Manager
+pvecm - Proxmox VE 集群管理器
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvecm.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Cluster Manager
-===============
+= 集群管理器
 :pve-toplevel:
 endif::manvolnum[]
 
-The {pve} cluster manager `pvecm` is a tool to create a group of
-physical servers. Such a group is called a *cluster*. We use the
-http://www.corosync.org[Corosync Cluster Engine] for reliable group
-communication. There's no explicit limit for the number of nodes in a cluster.
-In practice, the actual possible node count may be limited by the host and
-network performance. Currently (2021), there are reports of clusters (using
-high-end enterprise hardware) with over 50 nodes in production.
+{pve} 集群管理器 `pvecm` 是用于创建一组物理服务器的工具。这类服务器组称为
+*集群*。我们使用 http://www.corosync.org[Corosync Cluster Engine] 实现可靠的组通信。
+集群中的节点数量没有明确的硬性限制。实践中，实际可支持的节点数量可能受主机和网络性能限制。
+目前（2021 年）已有使用高端企业硬件、超过 50 个节点的生产集群案例。
 
-`pvecm` can be used to create a new cluster, join nodes to a cluster,
-leave the cluster, get status information, and do various other cluster-related
-tasks. The **P**rox**m**o**x** **C**luster **F**ile **S**ystem (``pmxcfs'')
-is used to transparently distribute the cluster configuration to all cluster
-nodes.
+`pvecm` 可用于创建新集群、将节点加入集群、离开集群、获取状态信息，以及执行各种其他集群相关任务。
+**P**rox**m**o**x** **C**luster **F**ile **S**ystem（``pmxcfs''）用于将集群配置透明地分发到所有集群节点。
 
-Grouping nodes into a cluster has the following advantages:
+将节点组织为集群具有以下优势：
 
-* Centralized, web-based management
+* 集中式、基于 Web 的管理
 
-* Multi-master clusters: each node can do all management tasks
+* 多主集群：每个节点都可以执行所有管理任务
 
-* Use of `pmxcfs`, a database-driven file system, for storing configuration
-  files, replicated in real-time on all nodes using `corosync`
+* 使用 `pmxcfs` 这个数据库驱动的文件系统存储配置文件，并通过 `corosync` 在所有节点上实时复制
 
-* Easy migration of virtual machines and containers between physical
-  hosts
+* 可在物理主机之间轻松迁移虚拟机和容器
 
-* Fast deployment
+* 快速部署
 
-* Cluster-wide services like firewall and HA
+* 提供防火墙和 HA 等集群范围服务
 
 
-Requirements
-------------
+== 要求
 
-* All nodes must be able to connect to each other via UDP ports 5405-5412
- for corosync to work.
+* 所有节点之间必须能够通过 UDP 端口 5405-5412 互相连接，corosync 才能正常工作。
 
-* Date and time must be synchronized.
+* 日期和时间必须同步。
 
-* An SSH tunnel on TCP port 22 between nodes is required.
+* 节点之间需要 TCP 端口 22 上的 SSH 隧道。
 
-* If you are interested in High Availability, you need to have at
-  least three nodes for reliable quorum. All nodes should have the
-  same version.
+* 如果需要高可用，至少需要三个节点才能获得可靠仲裁。所有节点应使用相同版本。
 
-* We recommend a dedicated NIC for the cluster traffic, especially if
-  you use shared storage.
+* 建议为集群流量使用专用 NIC，尤其是在使用共享存储时。
 
-* The root password of a cluster node is required for adding nodes.
+* 添加节点时需要集群节点的 root 密码。
 
-* Online migration of virtual machines is only supported when nodes have CPUs
-  from the same vendor. It might work otherwise, but this is never guaranteed.
+* 虚拟机在线迁移仅在各节点 CPU 来自同一厂商时受支持。其他情况下可能可以工作，但绝不保证。
 
-NOTE: It is not possible to mix {pve} 3.x and earlier with {pve} 4.X cluster
-nodes.
+NOTE: 不能将 {pve} 3.x 及更早版本与 {pve} 4.X 集群节点混用。
 
-NOTE: While it's possible to mix {pve} 4.4 and {pve} 5.0 nodes, doing so is
-not supported as a production configuration and should only be done temporarily,
-during an upgrade of the whole cluster from one major version to another.
+NOTE: 虽然可以混用 {pve} 4.4 和 {pve} 5.0 节点，但这种做法不支持作为生产配置，
+只应在整个集群从一个主版本升级到另一个主版本期间临时使用。
 
-NOTE: Running a cluster of {pve} 6.x with earlier versions is not possible. The
-cluster protocol (corosync) between {pve} 6.x and earlier versions changed
-fundamentally. The corosync 3 packages for {pve} 5.4 are only intended for the
-upgrade procedure to {pve} 6.0.
+NOTE: 无法将 {pve} 6.x 与更早版本组成集群。{pve} 6.x 与更早版本之间的集群协议
+（corosync）发生了根本变化。{pve} 5.4 的 corosync 3 软件包仅用于升级到 {pve} 6.0 的过程。
 
 
-Preparing Nodes
----------------
+== 准备节点
 
-First, install {pve} on all nodes. Make sure that each node is
-installed with the final hostname and IP configuration. Changing the
-hostname and IP is not possible after cluster creation.
+首先，在所有节点上安装 {pve}。确保每个节点都使用最终的主机名和 IP 配置进行安装。
+集群创建后无法更改主机名和 IP。
 
-While it's common to reference all node names and their IPs in `/etc/hosts` (or
-make their names resolvable through other means), this is not necessary for a
-cluster to work. It may be useful however, as you can then connect from one node
-to another via SSH, using the easier to remember node name (see also
-xref:pvecm_corosync_addresses[Link Address Types]). Note that we always
-recommend referencing nodes by their IP addresses in the cluster configuration.
+通常会在 `/etc/hosts` 中记录所有节点名称及其 IP（或通过其他方式让这些名称可解析），
+但这并不是集群正常工作的必要条件。不过这样可能比较方便，因为可以使用更容易记住的节点名，
+通过 SSH 从一个节点连接到另一个节点（另见 xref:pvecm_corosync_addresses[Link Address Types]）。
+请注意，我们始终建议在集群配置中通过 IP 地址引用节点。
 
 
 [[pvecm_create_cluster]]
-Create a Cluster
-----------------
+== 创建集群
 
-You can either create a cluster on the console (login via `ssh`), or through
-the API using the {pve} web interface (__Datacenter -> Cluster__).
+可以在控制台上创建集群（通过 `ssh` 登录），也可以使用 {pve} Web 界面
+（__Datacenter -> Cluster__）通过 API 创建集群。
 
-NOTE: Use a unique name for your cluster. This name cannot be changed later.
-The cluster name follows the same rules as node names.
+NOTE: 请为集群使用唯一名称。该名称之后无法更改。集群名称遵循与节点名称相同的规则。
 
 [[pvecm_cluster_create_via_gui]]
-Create via Web GUI
-~~~~~~~~~~~~~~~~~~
+=== 通过 Web GUI 创建
 
 [thumbnail="screenshot/gui-cluster-create.png"]
 
-Under __Datacenter -> Cluster__, click on *Create Cluster*. Enter the cluster
-name and select a network connection from the drop-down list to serve as the
-main cluster network (Link 0). It defaults to the IP resolved via the node's
-hostname.
+在 __Datacenter -> Cluster__ 下，点击 *Create Cluster*。输入集群名称，并从下拉列表中选择一个网络连接作为主集群网络（Link 0）。
+默认情况下，它使用通过节点主机名解析得到的 IP。
 
-As of {pve} 6.2, up to 8 fallback links can be added to a cluster. To add a
-redundant link, click the 'Add' button and select a link number and IP address
-from the respective fields. Prior to {pve} 6.2, to add a second link as
-fallback, you can select the 'Advanced' checkbox and choose an additional
-network interface (Link 1, see also xref:pvecm_redundancy[Corosync Redundancy]).
+从 {pve} 6.2 开始，一个集群最多可以添加 8 个备用链路。要添加冗余链路，请点击 'Add'
+按钮，并在相应字段中选择链路编号和 IP 地址。在 {pve} 6.2 之前，要添加第二条链路作为备用链路，
+可以勾选 'Advanced' 复选框，并选择额外网络接口（Link 1，另见 xref:pvecm_redundancy[Corosync Redundancy]）。
 
-NOTE: Ensure that the network selected for cluster communication is not used for
-any high traffic purposes, like network storage or live-migration.
-While the cluster network itself produces small amounts of data, it is very
-sensitive to latency. Check out full
-xref:pvecm_cluster_network_requirements[cluster network requirements].
+NOTE: 请确保用于集群通信的网络没有用于网络存储或在线迁移等高流量用途。
+集群网络本身产生的数据量很小，但对延迟非常敏感。请查看完整的
+xref:pvecm_cluster_network_requirements[集群网络要求]。
 
 [[pvecm_cluster_create_via_cli]]
-Create via the Command Line
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通过命令行创建
 
-Login via `ssh` to the first {pve} node and run the following command:
+通过 `ssh` 登录到第一个 {pve} 节点，并运行以下命令：
 
 ----
  hp1# pvecm create CLUSTERNAME
 ----
 
-To check the state of the new cluster use:
+要检查新集群状态，请使用：
 
 ----
  hp1# pvecm status
 ----
 
-Multiple Clusters in the Same Network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 同一网络中的多个集群
 
-It is possible to create multiple clusters in the same physical or logical
-network. In this case, each cluster must have a unique name to avoid possible
-clashes in the cluster communication stack. Furthermore, this helps avoid human
-confusion by making clusters clearly distinguishable.
+可以在同一物理或逻辑网络中创建多个集群。在这种情况下，每个集群都必须拥有唯一名称，
+以避免集群通信栈中可能出现的冲突。此外，这也能让集群清晰区分，避免人为混淆。
 
-While the bandwidth requirement of a corosync cluster is relatively low, the
-latency of packets and the packets per second (PPS) rate is the limiting
-factor. Different clusters in the same network can compete with each other for
-these resources, so it may still make sense to use separate physical network
-infrastructure for bigger clusters.
+虽然 corosync 集群的带宽需求相对较低，但数据包延迟和每秒包数（PPS）才是限制因素。
+同一网络中的不同集群可能会竞争这些资源，因此对于较大的集群，使用独立的物理网络基础设施仍然有意义。
 
 [[pvecm_join_node_to_cluster]]
-Adding Nodes to the Cluster
----------------------------
+== 向集群添加节点
 
-CAUTION: All existing configuration in `/etc/pve` is overwritten when joining a
-cluster. In particular, a joining node cannot hold any guests, since guest IDs
-could otherwise conflict, and the node will inherit the cluster's storage
-configuration. To join a node with existing guest, as a workaround, you can
-create a backup of each guest (using `vzdump`) and restore it under a different
-ID after joining. If the node's storage layout differs, you will need to re-add
-the node's storages, and adapt each storage's node restriction to reflect on
-which nodes the storage is actually available.
+CAUTION: 加入集群时，`/etc/pve` 中的所有现有配置都会被覆盖。尤其是，加入的节点不能承载任何客户机，
+否则客户机 ID 可能冲突，并且该节点会继承集群的存储配置。若要加入一个已有客户机的节点，
+可作为变通方式先为每个客户机创建备份（使用 `vzdump`），加入集群后再用不同 ID 还原。
+如果该节点的存储布局不同，则需要重新添加该节点的存储，并调整每个存储的节点限制，
+以反映该存储实际在哪些节点上可用。
 
-Join Node to Cluster via GUI
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通过 GUI 将节点加入集群
 
 [thumbnail="screenshot/gui-cluster-join-information.png"]
 
-Log in to the web interface on an existing cluster node. Under __Datacenter ->
-Cluster__, click the *Join Information* button at the top. Then, click on the
-button *Copy Information*. Alternatively, copy the string from the 'Information'
-field manually.
+登录到已有集群节点的 Web 界面。在 __Datacenter -> Cluster__ 下，点击顶部的
+*Join Information* 按钮。然后点击 *Copy Information* 按钮。也可以手动复制
+'Information' 字段中的字符串。
 
 [thumbnail="screenshot/gui-cluster-join.png"]
 
-Next, log in to the web interface on the node you want to add.
-Under __Datacenter -> Cluster__, click on *Join Cluster*. Fill in the
-'Information' field with the 'Join Information' text you copied earlier.
-Most settings required for joining the cluster will be filled out
-automatically. For security reasons, the cluster password has to be entered
-manually.
+接下来，登录要添加节点的 Web 界面。在 __Datacenter -> Cluster__ 下，点击
+*Join Cluster*。将之前复制的 'Join Information' 文本填入 'Information' 字段。
+加入集群所需的大多数设置都会自动填写。出于安全原因，集群密码必须手动输入。
 
-NOTE: To enter all required data manually, you can disable the 'Assisted Join'
-checkbox.
+NOTE: 要手动输入所有必需数据，可以禁用 'Assisted Join' 复选框。
 
-After clicking the *Join* button, the cluster join process will start
-immediately. After the node has joined the cluster, its current node certificate
-will be replaced by one signed from the cluster certificate authority (CA).
-This means that the current session will stop working after a few seconds. You
-then might need to force-reload the web interface and log in again with the
-cluster credentials.
+点击 *Join* 按钮后，集群加入流程会立即开始。节点加入集群后，其当前节点证书会被替换为由集群证书颁发机构（CA）签名的证书。
+这意味着当前会话会在几秒后停止工作。之后可能需要强制重新加载 Web 界面，并使用集群凭据重新登录。
 
-Now your node should be visible under __Datacenter -> Cluster__.
+现在，该节点应该可以在 __Datacenter -> Cluster__ 下看到。
 
-Join Node to Cluster via Command Line
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通过命令行将节点加入集群
 
-Log in to the node you want to join into an existing cluster via `ssh`.
+通过 `ssh` 登录要加入现有集群的节点。
 
 ----
  # pvecm add IP-ADDRESS-CLUSTER
 ----
 
-For `IP-ADDRESS-CLUSTER`, use the IP or hostname of an existing cluster node.
-An IP address is recommended (see xref:pvecm_corosync_addresses[Link Address Types]).
+对于 `IP-ADDRESS-CLUSTER`，请使用现有集群节点的 IP 或主机名。建议使用 IP 地址
+（见 xref:pvecm_corosync_addresses[Link Address Types]）。
 
 
-To check the state of the cluster use:
+要检查集群状态，请使用：
 
 ----
  # pvecm status
 ----
 
-.Cluster status after adding 4 nodes
+.添加 4 个节点后的集群状态
 ----
  # pvecm status
 Cluster information
@@ -267,13 +209,13 @@ Membership information
 0x00000004          1 192.168.15.94
 ----
 
-If you only want a list of all nodes, use:
+如果只想获取所有节点列表，请使用：
 
 ----
  # pvecm nodes
 ----
 
-.List nodes in a cluster
+.列出集群中的节点
 ----
  # pvecm nodes
 
@@ -287,90 +229,71 @@ Membership information
 ----
 
 [[pvecm_adding_nodes_with_separated_cluster_network]]
-Adding Nodes with Separated Cluster Network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用独立集群网络添加节点
 
-When adding a node to a cluster with a separated cluster network, you need to
-use the 'link0' parameter to set the nodes address on that network:
+向使用独立集群网络的集群添加节点时，需要使用 'link0' 参数设置该节点在该网络上的地址：
 
 [source,bash]
 ----
 # pvecm add IP-ADDRESS-CLUSTER --link0 LOCAL-IP-ADDRESS-LINK0
 ----
 
-If you want to use the built-in xref:pvecm_redundancy[redundancy] of the
-Kronosnet transport layer, also use the 'link1' parameter.
+如果要使用 Kronosnet 传输层内置的 xref:pvecm_redundancy[冗余]，还需要使用 'link1' 参数。
 
-Using the GUI, you can select the correct interface from the corresponding
-'Link X' fields in the *Cluster Join* dialog.
+使用 GUI 时，可以在 *Cluster Join* 对话框中相应的 'Link X' 字段选择正确接口。
 
-Remove a Cluster Node
----------------------
+== 移除集群节点
 
-CAUTION: Read the procedure carefully before proceeding, as it may
-not be what you want or need.
+CAUTION: 继续之前请仔细阅读该流程，因为它可能并不是你想要或需要的操作。
 
-Move all virtual machines from the node. Ensure that you have made copies of any
-local data or backups that you want to keep. In addition, make sure to remove
-any scheduled replication jobs to the node to be removed.
+将该节点上的所有虚拟机移走。确保已复制任何需要保留的本地数据或备份。
+此外，确保移除所有指向待移除节点的计划复制任务。
 
-CAUTION: Failure to remove replication jobs to a node before removing said node
-will result in the replication job becoming irremovable. Especially note that
-replication automatically switches direction if a replicated VM is migrated, so
-by migrating a replicated VM from a node to be deleted, replication jobs will be
-set up to that node automatically.
+CAUTION: 如果在移除节点之前没有移除指向该节点的复制任务，会导致复制任务变得无法移除。
+尤其要注意，如果迁移已复制的虚拟机，复制会自动切换方向；因此，从待删除节点迁移已复制虚拟机后，
+复制任务会自动设置为指向该节点。
 
-If the node to be removed has been configured for
-xref:chapter_pveceph[Ceph]:
+如果待移除节点配置了 xref:chapter_pveceph[Ceph]：
 
-. Ensure that sufficient {pve} nodes with running OSDs (`up` and `in`)
-continue to exist.
+. 确保仍有足够的 {pve} 节点运行 OSD（`up` 且 `in`）。
 +
-NOTE: By default, Ceph pools have a `size/min_size` of `3/2` and a
-full node as `failure domain` at the object balancer
-xref:pve_ceph_device_classes[CRUSH]. So if less than `size` (`3`)
-nodes with running OSDs are online, data redundancy will be degraded.
-If less than `min_size` are online, pool I/O will be blocked and
-affected guests may crash.
+NOTE: 默认情况下，Ceph 池的 `size/min_size` 为 `3/2`，并在对象均衡器
+xref:pve_ceph_device_classes[CRUSH] 中以完整节点作为 `failure domain`。
+因此，如果在线且运行 OSD 的节点少于 `size`（`3`），数据冗余会降级。
+如果在线节点少于 `min_size`，池 I/O 会被阻塞，受影响的客户机可能崩溃。
 
-. Ensure that sufficient xref:pve_ceph_monitors[monitors],
-xref:pve_ceph_manager[managers] and, if using CephFS,
-xref:pveceph_fs_mds[metadata servers] remain available.
+. 确保仍有足够的 xref:pve_ceph_monitors[monitors]、
+xref:pve_ceph_manager[managers]，以及在使用 CephFS 时的
+xref:pveceph_fs_mds[metadata servers] 可用。
 
-. To maintain data redundancy, each destruction of an OSD, especially
-the last one on a node, will trigger a data rebalance. Therefore,
-ensure that the OSDs on the remaining nodes have sufficient free space
-left.
+. 为维持数据冗余，每次销毁 OSD（尤其是节点上的最后一个 OSD）都会触发数据再均衡。
+因此，请确保剩余节点上的 OSD 有足够可用空间。
 
-. To remove Ceph from the node to be deleted, start by
-xref:pve_ceph_osd_destroy[destroying] its OSDs, one after the other.
+. 要从待删除节点移除 Ceph，请先逐个 xref:pve_ceph_osd_destroy[销毁] 其 OSD。
 
-. Once the xref:pve_ceph_mon_and_ts[CEPH status] is `HEALTH_OK` again,
-proceed by:
+. 一旦 xref:pve_ceph_mon_and_ts[CEPH status] 再次变为 `HEALTH_OK`，继续执行：
 
 [arabic]
-.. destroying its xref:pveceph_fs_mds[metadata server] via web
-interface at __Ceph -> CephFS__ or by running:
+.. 通过 Web 界面的 __Ceph -> CephFS__ 或运行以下命令，销毁其
+xref:pveceph_fs_mds[metadata server]：
 +
 ----
 # pveceph mds destroy <local hostname>
 ----
 
-.. xref:pveceph_destroy_mon[destroying its monitor]
+.. xref:pveceph_destroy_mon[销毁其 monitor]
 
-.. xref:pveceph_destroy_mgr[destroying its manager]
+.. xref:pveceph_destroy_mgr[销毁其 manager]
 
-. Finally, remove the now empty bucket ({pve} node to be removed) from
-the CRUSH hierarchy by running:
+. 最后，运行以下命令从 CRUSH 层次结构中移除现在已经为空的 bucket（待移除的 {pve} 节点）：
 +
 ----
 # ceph osd crush remove <hostname>
 ----
 
-In the following example, we will remove the node hp4 from the cluster.
+在以下示例中，我们将从集群中移除节点 hp4。
 
-Log in to a *different* cluster node (not hp4), and issue a `pvecm nodes`
-command to identify the node ID to remove:
+登录到*另一个*集群节点（不是 hp4），并执行 `pvecm nodes` 命令以确定要移除的节点 ID：
 
 ----
  hp1# pvecm nodes
@@ -385,29 +308,22 @@ Membership information
 ----
 
 
-At this point, you must power off hp4 and ensure that it will not power on
-again (in the network) with its current configuration.
+此时，必须关闭 hp4，并确保它不会以当前配置再次在该网络中启动。
 
-IMPORTANT: As mentioned above, it is critical to power off the node
-*before* removal, and make sure that it will *not* power on again
-(in the existing cluster network) with its current configuration.
-If you power on the node as it is, the cluster could end up broken,
-and it could be difficult to restore it to a functioning state.
+IMPORTANT: 如上所述，在移除*之前*关闭节点非常关键，并且要确保它不会以当前配置在现有集群网络中再次启动。
+如果按原样启动该节点，集群可能损坏，并且可能难以恢复到可用状态。
 
-After powering off the node hp4, we can safely remove it from the cluster.
+关闭节点 hp4 后，即可安全地将其从集群中移除。
 
 ----
  hp1# pvecm delnode hp4
  Killing node 4
 ----
 
-NOTE: At this point, it is possible that you will receive an error message
-stating `Could not kill node (error = CS_ERR_NOT_EXIST)`. This does not
-signify an actual failure in the deletion of the node, but rather a failure in
-corosync trying to kill an offline node. Thus, it can be safely ignored.
+NOTE: 此时可能会收到 `Could not kill node (error = CS_ERR_NOT_EXIST)` 错误消息。
+这并不表示节点删除实际失败，而只是 corosync 尝试 kill 一个离线节点时失败。因此可以安全忽略。
 
-Use `pvecm nodes` or `pvecm status` to check the node list again. It should
-look something like:
+再次使用 `pvecm nodes` 或 `pvecm status` 检查节点列表。它应类似如下：
 
 ----
 hp1# pvecm status
@@ -430,223 +346,173 @@ Membership information
 0x00000003          1 192.168.15.92
 ----
 
-If, for whatever reason, you want this server to join the same cluster again,
-you have to:
+如果出于任何原因想让该服务器再次加入同一集群，必须：
 
-* do a fresh install of {pve} on it,
+* 在其上全新安装 {pve}，
 
-* then join it, as explained in the previous section.
+* 然后按上一节说明将其加入集群。
 
-The configuration files for the removed node will still reside in
-'/etc/pve/nodes/hp4'. Recover any configuration you still need and remove the
-directory afterwards.
+已移除节点的配置文件仍会保留在 '/etc/pve/nodes/hp4' 中。请恢复仍需要的任何配置，
+之后移除该目录。
 
-NOTE: After removal of the node, its SSH fingerprint will still reside in the
-'known_hosts' of the other nodes. If you receive an SSH error after rejoining
-a node with the same IP or hostname, run `pvecm updatecerts` once on the
-re-added node to update its fingerprint cluster wide.
+NOTE: 移除节点后，其 SSH 指纹仍会保留在其他节点的 'known_hosts' 中。
+如果使用相同 IP 或主机名重新加入节点后收到 SSH 错误，请在重新添加的节点上运行一次
+`pvecm updatecerts`，以在集群范围内更新其指纹。
 
 [[pvecm_separate_node_without_reinstall]]
-Separate a Node Without Reinstalling
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 不重装而分离节点
 
-CAUTION: This is *not* the recommended method, proceed with caution. Use the
-previous method if you're unsure.
+CAUTION: 这*不是*推荐方法，请谨慎操作。如果不确定，请使用前一种方法。
 
-You can also separate a node from a cluster without reinstalling it from
-scratch. But after removing the node from the cluster, it will still have
-access to any shared storage. This must be resolved before you start removing
-the node from the cluster. A {pve} cluster cannot share the exact same
-storage with another cluster, as storage locking doesn't work over the cluster
-boundary. Furthermore, it may also lead to VMID conflicts.
+也可以在不从头重装的情况下将节点从集群中分离出来。但从集群移除该节点后，它仍然可以访问任何共享存储。
+在开始从集群移除节点之前，必须先解决这一点。一个 {pve} 集群不能与另一个集群共享完全相同的存储，
+因为存储锁无法跨集群边界工作。此外，这还可能导致 VMID 冲突。
 
-It's suggested that you create a new storage, where only the node which you want
-to separate has access. This can be a new export on your NFS or a new Ceph
-pool, to name a few examples. It's just important that the exact same storage
-does not get accessed by multiple clusters. After setting up this storage, move
-all data and VMs from the node to it. Then you are ready to separate the
-node from the cluster.
+建议创建一个新存储，仅允许要分离的节点访问。举例来说，这可以是 NFS 上的新导出，
+也可以是新的 Ceph 池。关键是不能让多个集群访问完全相同的存储。设置好该存储后，
+将该节点上的所有数据和虚拟机移动到其中。之后即可准备将该节点从集群中分离。
 
-WARNING: Ensure that all shared resources are cleanly separated! Otherwise you
-will run into conflicts and problems.
+WARNING: 请确保所有共享资源都已清晰分离！否则会遇到冲突和问题。
 
-First, stop the corosync and pve-cluster services on the node:
+首先，在该节点上停止 corosync 和 pve-cluster 服务：
 [source,bash]
 ----
 systemctl stop pve-cluster
 systemctl stop corosync
 ----
 
-Start the cluster file system again in local mode:
+以本地模式重新启动集群文件系统：
 [source,bash]
 ----
 pmxcfs -l
 ----
 
-Delete the corosync configuration files:
+删除 corosync 配置文件：
 [source,bash]
 ----
 rm /etc/pve/corosync.conf
 rm -r /etc/corosync/*
 ----
 
-You can now start the file system again as a normal service:
+现在可以再次将文件系统作为普通服务启动：
 [source,bash]
 ----
 killall pmxcfs
 systemctl start pve-cluster
 ----
 
-The node is now separated from the cluster. You can deleted it from any
-remaining node of the cluster with:
+该节点现在已经从集群中分离。可以在集群中任一剩余节点上使用以下命令将其删除：
 [source,bash]
 ----
 pvecm delnode oldnode
 ----
 
-If the command fails due to a loss of quorum in the remaining node, you can set
-the expected votes to 1 as a workaround:
+如果命令因剩余节点丢失仲裁而失败，可以将预期票数设置为 1 作为临时处理：
 [source,bash]
 ----
 pvecm expected 1
 ----
 
-And then repeat the 'pvecm delnode' command.
+然后再次执行 'pvecm delnode' 命令。
 
-Now switch back to the separated node and delete all the remaining cluster
-files on it. This ensures that the node can be added to another cluster again
-without problems.
+现在切回已分离的节点，删除其上所有剩余的集群文件。这可以确保该节点之后能顺利加入其他集群。
 
 [source,bash]
 ----
 rm /var/lib/corosync/*
 ----
 
-As the configuration files from the other nodes are still in the cluster
-file system, you may want to clean those up too. After making absolutely sure
-that you have the correct node name, you can simply remove the entire
-directory recursively from '/etc/pve/nodes/NODENAME'.
+由于其他节点的配置文件仍在集群文件系统中，你可能也希望清理它们。在完全确认节点名称正确后，
+可以直接从 '/etc/pve/nodes/NODENAME' 递归移除整个目录。
 
-CAUTION: The node's SSH keys will remain in the 'authorized_key' file. This
-means that the nodes can still connect to each other with public key
-authentication. You should fix this by removing the respective keys from the
-'/etc/pve/priv/authorized_keys' file.
+CAUTION: 该节点的 SSH 密钥会保留在 'authorized_key' 文件中。
+这意味着节点之间仍然可以使用公钥认证互相连接。应通过从
+'/etc/pve/priv/authorized_keys' 文件中移除相应密钥来修正这一点。
 
 
-Quorum
-------
+== 仲裁
 
-{pve} use a quorum-based technique to provide a consistent state among
-all cluster nodes.
+{pve} 使用基于仲裁的技术，在所有集群节点之间提供一致状态。
 
-[quote, from Wikipedia, Quorum (distributed computing)]
+[quote, 来自 Wikipedia, Quorum (distributed computing)]
 ____
-A quorum is the minimum number of votes that a distributed transaction
-has to obtain in order to be allowed to perform an operation in a
-distributed system.
+仲裁是分布式事务为了获准在分布式系统中执行某项操作而必须获得的最小票数。
 ____
 
-In case of network partitioning, state changes requires that a
-majority of nodes are online. The cluster switches to read-only mode
-if it loses quorum.
+在发生网络分区时，状态变更要求多数节点在线。如果集群失去仲裁，就会切换到只读模式。
 
-NOTE: {pve} assigns a single vote to each node by default.
+NOTE: {pve} 默认给每个节点分配一票。
 
 
 [[pvecm_cluster_network]]
-Cluster Network
----------------
+== 集群网络
 
-The cluster network is the core of a cluster. All messages sent over it have to
-be delivered reliably to all nodes in their respective order. In {pve} this
-part is done by corosync, an implementation of a high performance, low overhead,
-high availability development toolkit. It serves our decentralized configuration
-file system (`pmxcfs`).
+集群网络是集群的核心。所有通过它发送的消息都必须按各自顺序可靠地传递到所有节点。
+在 {pve} 中，这部分由 corosync 完成；corosync 是一个高性能、低开销、高可用开发工具包的实现。
+它服务于我们的去中心化配置文件系统（`pmxcfs`）。
 
 [[pvecm_cluster_network_requirements]]
-Network Requirements
-~~~~~~~~~~~~~~~~~~~~
+=== 网络要求
 
-The {pve} cluster stack requires a reliable network with latencies under 5
-milliseconds (LAN performance) between all nodes to operate stably. While on
-setups with a small node count a network with higher latencies _may_ work, this
-is not guaranteed and gets rather unlikely with more than three nodes and
-latencies above around 10 ms.
+{pve} 集群栈要求所有节点之间具备可靠网络，并且延迟低于 5 毫秒（LAN 性能），才能稳定运行。
+在节点数量较少的配置中，延迟更高的网络_可能_可以工作，但这并不保证；
+当节点超过三个且延迟高于约 10 ms 时，成功可能性会明显降低。
 
-The network should not be used heavily by other members, as while corosync does
-not uses much bandwidth it is sensitive to latency jitters; ideally corosync
-runs on its own physically separated network.  Especially do not use a shared
-network for corosync and storage (except as a potential low-priority fallback
-in a xref:pvecm_redundancy[redundant] configuration).
+该网络不应被其他成员大量使用，因为 corosync 虽然不需要太多带宽，但对延迟抖动很敏感；
+理想情况下，corosync 应运行在物理隔离的专用网络上。尤其不要让 corosync 和存储共享同一网络
+（除非在 xref:pvecm_redundancy[冗余]配置中作为潜在的低优先级备用链路）。
 
-Before setting up a cluster, it is good practice to check if the network is fit
-for that purpose. To ensure that the nodes can connect to each other on the
-cluster network, you can test the connectivity between them with the `ping`
-tool.
+设置集群前，最佳实践是检查网络是否适合该用途。为确保各节点能在集群网络上互相连接，
+可以使用 `ping` 工具测试它们之间的连通性。
 
-If the {pve} firewall is enabled, ACCEPT rules for corosync will automatically
-be generated - no manual action is required.
+如果启用了 {pve} 防火墙，将自动生成 corosync 的 ACCEPT 规则，无需手动操作。
 
-NOTE: Corosync used Multicast before version 3.0 (introduced in {pve} 6.0).
-Modern versions rely on https://kronosnet.org/[Kronosnet] for cluster
-communication, which, for now, only supports regular UDP unicast.
+NOTE: Corosync 在 3.0 版本之前使用组播（该版本在 {pve} 6.0 中引入）。
+现代版本依赖 https://kronosnet.org/[Kronosnet] 进行集群通信，目前它只支持常规 UDP 单播。
 
-CAUTION: You can still enable Multicast or legacy unicast by setting your
-transport to `udp` or `udpu` in your xref:pvecm_edit_corosync_conf[corosync.conf],
-but keep in mind that this will disable all cryptography and redundancy support.
-This is therefore not recommended.
+CAUTION: 仍然可以在 xref:pvecm_edit_corosync_conf[corosync.conf] 中将 transport 设置为
+`udp` 或 `udpu` 来启用组播或旧式单播，但请记住，这会禁用所有加密和冗余支持。
+因此不推荐这样做。
 
-Separate Cluster Network
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 独立集群网络
 
-When creating a cluster without any parameters, the corosync cluster network is
-generally shared with the web interface and the VMs' network. Depending on
-your setup, even storage traffic may get sent over the same network. It's
-recommended to change that, as corosync is a time-critical, real-time
-application.
+在不带任何参数创建集群时，corosync 集群网络通常会与 Web 界面和虚拟机网络共享。
+根据配置，甚至存储流量也可能通过同一网络发送。建议更改这种配置，因为 corosync
+是对时间敏感的实时应用。
 
-Setting Up a New Network
-^^^^^^^^^^^^^^^^^^^^^^^^
+==== 设置新网络
 
-First, you have to set up a new network interface. It should be on a physically
-separate network. Ensure that your network fulfills the
-xref:pvecm_cluster_network_requirements[cluster network requirements].
+首先，必须设置新的网络接口。它应位于物理隔离的网络上。请确保该网络满足
+xref:pvecm_cluster_network_requirements[集群网络要求]。
 
-Separate On Cluster Creation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 在创建集群时分离
 
-This is possible via the 'linkX' parameters of the 'pvecm create'
-command, used for creating a new cluster.
+可以通过用于创建新集群的 'pvecm create' 命令的 'linkX' 参数实现。
 
-If you have set up an additional NIC with a static address on 10.10.10.1/25,
-and want to send and receive all cluster communication over this interface,
-you would execute:
+如果已经设置了一个静态地址为 10.10.10.1/25 的额外 NIC，并希望通过该接口收发所有集群通信，
+则可以执行：
 
 [source,bash]
 ----
 pvecm create test --link0 10.10.10.1
 ----
 
-To check if everything is working properly, execute:
+要检查一切是否正常工作，请执行：
 [source,bash]
 ----
 systemctl status corosync
 ----
 
-Afterwards, proceed as described above to
-xref:pvecm_adding_nodes_with_separated_cluster_network[add nodes with a separated cluster network].
+之后，按上文说明继续 xref:pvecm_adding_nodes_with_separated_cluster_network[使用独立集群网络添加节点]。
 
 [[pvecm_separate_cluster_net_after_creation]]
-Separate After Cluster Creation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 在创建集群后分离
 
-You can do this if you have already created a cluster and want to switch
-its communication to another network, without rebuilding the whole cluster.
-This change may lead to short periods of quorum loss in the cluster, as nodes
-have to restart corosync and come up one after the other on the new network.
+如果已经创建了集群，并希望在不重建整个集群的情况下将通信切换到另一个网络，可以执行该操作。
+由于节点必须重启 corosync，并在新网络上逐个恢复运行，此变更可能导致集群短暂丢失仲裁。
 
-Check how to xref:pvecm_edit_corosync_conf[edit the corosync.conf file] first.
-Then, open it and you should see a file similar to:
+请先查看如何 xref:pvecm_edit_corosync_conf[编辑 corosync.conf 文件]。
+然后打开该文件，应能看到类似如下内容：
 
 ----
 logging {
@@ -696,27 +562,20 @@ totem {
 }
 ----
 
-NOTE: `ringX_addr` actually specifies a corosync *link address*. The name "ring"
-is a remnant of older corosync versions that is kept for backwards
-compatibility.
+NOTE: `ringX_addr` 实际上指定的是 corosync *链路地址*。名称 "ring" 是旧版 corosync
+遗留下来的叫法，为向后兼容而保留。
 
-The first thing you want to do is add the 'name' properties in the node entries,
-if you do not see them already. Those *must* match the node name.
+首先，如果节点条目中尚未包含 'name' 属性，请添加它们。这些属性*必须*与节点名称匹配。
 
-Then replace all addresses from the 'ring0_addr' properties of all nodes with
-the new addresses. You may use plain IP addresses or hostnames here. If you use
-hostnames, ensure that they are resolvable from all nodes (see also
-xref:pvecm_corosync_addresses[Link Address Types]).
+然后，将所有节点 'ring0_addr' 属性中的地址替换为新地址。这里可以使用普通 IP 地址或主机名。
+如果使用主机名，请确保所有节点都能解析这些主机名（另见 xref:pvecm_corosync_addresses[Link Address Types]）。
 
-In this example, we want to switch cluster communication to the
-10.10.10.0/25 network, so we change the 'ring0_addr' of each node respectively.
+在本示例中，我们希望将集群通信切换到 10.10.10.0/25 网络，因此相应修改每个节点的 'ring0_addr'。
 
-NOTE: The exact same procedure can be used to change other 'ringX_addr' values
-as well. However, we recommend only changing one link address at a time, so
-that it's easier to recover if something goes wrong.
+NOTE: 完全相同的流程也可用于更改其他 'ringX_addr' 值。不过建议一次只更改一个链路地址，
+这样在出现问题时更容易恢复。
 
-After we increase the 'config_version' property, the new configuration file
-should look like:
+增加 'config_version' 属性后，新的配置文件应如下所示：
 
 ----
 logging {
@@ -766,118 +625,89 @@ totem {
 }
 ----
 
-Then, after a final check to see that all changed information is correct, we
-save it and once again follow the
-xref:pvecm_edit_corosync_conf[edit corosync.conf file] section to bring it into
-effect.
+然后，最后检查所有变更信息是否正确，保存文件，并再次按照
+xref:pvecm_edit_corosync_conf[编辑 corosync.conf 文件]一节使其生效。
 
-The changes will be applied live, so restarting corosync is not strictly
-necessary. If you changed other settings as well, or notice corosync
-complaining, you can optionally trigger a restart.
+这些变更会实时应用，因此并不严格要求重启 corosync。如果还更改了其他设置，
+或注意到 corosync 报错，可以选择触发一次重启。
 
-On a single node execute:
+在单个节点上执行：
 
 [source,bash]
 ----
 systemctl restart corosync
 ----
 
-Now check if everything is okay:
+现在检查一切是否正常：
 
 [source,bash]
 ----
 systemctl status corosync
 ----
 
-If corosync begins to work again, restart it on all other nodes too.
-They will then join the cluster membership one by one on the new network.
+如果 corosync 重新开始工作，也在所有其他节点上重启它。
+随后这些节点会在新网络上逐个加入集群成员关系。
 
 [[pvecm_corosync_addresses]]
-Corosync Addresses
-~~~~~~~~~~~~~~~~~~
+=== Corosync 地址
 
-A corosync link address (for backwards compatibility denoted by 'ringX_addr' in
-`corosync.conf`) can be specified in two ways:
+corosync 链路地址（为向后兼容，在 `corosync.conf` 中表示为 'ringX_addr'）可以通过两种方式指定：
 
-* **IPv4/v6 addresses** can be used directly. They are recommended, since they
-are static and usually not changed carelessly.
+* **IPv4/v6 地址**可以直接使用。建议使用它们，因为它们是静态的，通常不会被随意更改。
 
-* **Hostnames** will be resolved using `getaddrinfo`, which means that by
-default, IPv6 addresses will be used first, if available (see also
-`man gai.conf`). Keep this in mind, especially when upgrading an existing
-cluster to IPv6.
+* **主机名**会使用 `getaddrinfo` 解析，这意味着默认情况下，如果 IPv6 地址可用，会优先使用 IPv6 地址
+（另见 `man gai.conf`）。请记住这一点，尤其是在将现有集群升级到 IPv6 时。
 
-CAUTION: Hostnames should be used with care, since the addresses they
-resolve to can be changed without touching corosync or the node it runs on -
-which may lead to a situation where an address is changed without thinking
-about implications for corosync.
+CAUTION: 应谨慎使用主机名，因为它们解析到的地址可以在不触碰 corosync 或其所在节点的情况下被更改，
+这可能导致地址变更时没有考虑对 corosync 的影响。
 
-A separate, static hostname specifically for corosync is recommended, if
-hostnames are preferred. Also, make sure that every node in the cluster can
-resolve all hostnames correctly.
+如果偏好使用主机名，建议为 corosync 使用单独的静态主机名。同时确保集群中的每个节点都能正确解析所有主机名。
 
-Since {pve} 5.1, while supported, hostnames will be resolved at the time of
-entry. Only the resolved IP is saved to the configuration.
+自 {pve} 5.1 起，虽然仍支持主机名，但主机名会在录入时解析，只有解析后的 IP 会保存到配置中。
 
-Nodes that joined the cluster on earlier versions likely still use their
-unresolved hostname in `corosync.conf`. It might be a good idea to replace
-them with IPs or a separate hostname, as mentioned above.
+在更早版本中加入集群的节点，可能仍在 `corosync.conf` 中使用未解析的主机名。
+按上文所述，将其替换为 IP 或单独主机名可能是个好做法。
 
 
 [[pvecm_redundancy]]
-Corosync Redundancy
--------------------
+== Corosync 冗余
 
-Corosync supports redundant networking via its integrated Kronosnet layer by
-default (it is not supported on the legacy udp/udpu transports). It can be
-enabled by specifying more than one link address, either via the '--linkX'
-parameters of `pvecm`, in the GUI as **Link 1** (while creating a cluster or
-adding a new node) or by specifying more than one 'ringX_addr' in
-`corosync.conf`.
+Corosync 默认通过其集成的 Kronosnet 层支持冗余网络（旧式 udp/udpu 传输不支持）。
+可以通过指定多个链路地址启用该功能：使用 `pvecm` 的 '--linkX' 参数、
+在 GUI 中指定 **Link 1**（创建集群或添加新节点时），或在 `corosync.conf`
+中指定多个 'ringX_addr'。
 
-NOTE: To provide useful failover, every link should be on its own
-physical network connection.
+NOTE: 为提供有效故障切换，每条链路都应位于自己的物理网络连接上。
 
-Links are used according to a priority setting. You can configure this priority
-by setting 'knet_link_priority' in the corresponding interface section in
-`corosync.conf`, or, preferably, using the 'priority' parameter when creating
-your cluster with `pvecm`:
+链路会根据优先级设置使用。可以通过在 `corosync.conf` 中相应 interface 段设置
+'knet_link_priority' 来配置优先级，或者更推荐在使用 `pvecm` 创建集群时使用
+'priority' 参数：
 
 ----
  # pvecm create CLUSTERNAME --link0 10.10.10.1,priority=15 --link1 10.20.20.1,priority=20
 ----
 
-This would cause 'link1' to be used first, since it has the higher priority.
+这会使 'link1' 优先使用，因为它拥有更高优先级。
 
-If no priorities are configured manually (or two links have the same priority),
-links will be used in order of their number, with the lower number having higher
-priority.
+如果没有手动配置优先级（或两条链路优先级相同），链路会按编号顺序使用，编号较低者优先级更高。
 
-Even if all links are working, only the one with the highest priority will see
-corosync traffic. Link priorities cannot be mixed, meaning that links with
-different priorities will not be able to communicate with each other.
+即使所有链路都正常工作，也只有最高优先级链路会承载 corosync 流量。
+链路优先级不能混用，这意味着优先级不同的链路无法彼此通信。
 
-Since lower priority links will not see traffic unless all higher priorities
-have failed, it becomes a useful strategy to specify networks used for
-other tasks (VMs, storage, etc.) as low-priority links. If worst comes to
-worst, a higher latency or more congested connection might be better than no
-connection at all.
+由于低优先级链路只有在所有更高优先级链路都失败时才会承载流量，因此将用于其他任务
+（虚拟机、存储等）的网络指定为低优先级链路是一种实用策略。在最坏情况下，
+高延迟或更拥塞的连接也可能好过完全没有连接。
 
-Adding Redundant Links To An Existing Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 向现有集群添加冗余链路
 
-To add a new link to a running configuration, first check how to
-xref:pvecm_edit_corosync_conf[edit the corosync.conf file].
+要向运行中的配置添加新链路，请先查看如何 xref:pvecm_edit_corosync_conf[编辑 corosync.conf 文件]。
 
-Then, add a new 'ringX_addr' to every node in the `nodelist` section. Make
-sure that your 'X' is the same for every node you add it to, and that it is
-unique for each node.
+然后，在 `nodelist` 段中为每个节点添加新的 'ringX_addr'。确保为所有节点添加时使用相同的 'X'，
+并且该地址对每个节点都是唯一的。
 
-Lastly, add a new 'interface', as shown below, to your `totem`
-section, replacing 'X' with the link number chosen above.
+最后，如下所示，在 `totem` 段中添加新的 'interface'，并将 'X' 替换为上面选择的链路编号。
 
-Assuming you added a link with number 1, the new configuration file could look
-like this:
+假设添加的是编号为 1 的链路，新的配置文件可能如下所示：
 
 ----
 logging {
@@ -932,76 +762,63 @@ totem {
 }
 ----
 
-The new link will be enabled as soon as you follow the last steps to
-xref:pvecm_edit_corosync_conf[edit the corosync.conf file]. A restart should not
-be necessary. You can check that corosync loaded the new link using:
+按照 xref:pvecm_edit_corosync_conf[编辑 corosync.conf 文件]的最后步骤操作后，新链路会立即启用。
+应不需要重启。可以使用以下命令检查 corosync 是否加载了新链路：
 
 ----
 journalctl -b -u corosync
 ----
 
-It might be a good idea to test the new link by temporarily disconnecting the
-old link on one node and making sure that its status remains online while
-disconnected:
+可以通过临时断开一个节点上的旧链路，并确认断开期间其状态仍保持在线，来测试新链路：
 
 ----
 pvecm status
 ----
 
-If you see a healthy cluster state, it means that your new link is being used.
+如果看到健康的集群状态，说明正在使用新链路。
 
 
-Role of SSH in {pve} Clusters
------------------------------
+== SSH 在 {pve} 集群中的作用
 
-{pve} utilizes SSH tunnels for various features.
+{pve} 将 SSH 隧道用于多种功能。
 
-* Proxying console/shell sessions (node and guests)
+* 代理控制台/shell 会话（节点和客户机）
 +
-When using the shell for node B while being connected to node A, connects to a
-terminal proxy on node A, which is in turn connected to the login shell on node
-B via a non-interactive SSH tunnel.
+连接到节点 A 时使用节点 B 的 shell，会连接到节点 A 上的终端代理，
+该代理再通过非交互式 SSH 隧道连接到节点 B 上的登录 shell。
 
-* VM and CT memory and local-storage migration in 'secure' mode.
+* 在 'secure' 模式下迁移虚拟机和 CT 内存及本地存储。
 +
-During the migration, one or more SSH tunnel(s) are established between the
-source and target nodes, in order to exchange migration information and
-transfer memory and disk contents.
+迁移期间，会在源节点和目标节点之间建立一个或多个 SSH 隧道，用于交换迁移信息并传输内存和磁盘内容。
 
-* Storage replication
+* 存储复制
 
-SSH setup
-~~~~~~~~~
+=== SSH 设置
 
-On {pve} systems, the following changes are made to the SSH configuration/setup:
+在 {pve} 系统上，会对 SSH 配置/设置进行以下更改：
 
-* the `root` user's SSH client config gets setup to prefer `AES` over `ChaCha20`
+* `root` 用户的 SSH 客户端配置会设置为优先使用 `AES` 而不是 `ChaCha20`
 
-* the `root` user's `authorized_keys` file gets linked to
-  `/etc/pve/priv/authorized_keys`, merging all authorized keys within a cluster
+* `root` 用户的 `authorized_keys` 文件会链接到 `/etc/pve/priv/authorized_keys`，
+  以合并集群内的所有授权密钥
 
-* `sshd` is configured to allow logging in as root with a password
+* `sshd` 会配置为允许使用密码以 root 身份登录
 
-NOTE: Older systems might also have `/etc/ssh/ssh_known_hosts` set up as symlink
-pointing to `/etc/pve/priv/known_hosts`, containing a merged version of all
-node host keys. This system was replaced with explicit host key pinning in
-`pve-cluster <<INSERT VERSION>>`, the symlink can be deconfigured if still in
-place by running `pvecm updatecerts --unmerge-known-hosts`.
+NOTE: 较旧系统还可能将 `/etc/ssh/ssh_known_hosts` 设置为指向
+`/etc/pve/priv/known_hosts` 的符号链接，其中包含所有节点主机密钥的合并版本。
+该机制已在 `pve-cluster <<INSERT VERSION>>` 中由显式 host key pinning 取代；
+如果该符号链接仍存在，可以运行 `pvecm updatecerts --unmerge-known-hosts` 解除配置。
 
-Pitfalls due to automatic execution of `.bashrc` and siblings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 自动执行 `.bashrc` 及类似文件带来的陷阱
 
-In case you have a custom `.bashrc`, or similar files that get executed on
-login by the configured shell, `ssh` will automatically run it once the session
-is established successfully. This can cause some unexpected behavior, as those
-commands may be executed with root permissions on any of the operations
-described above. This can cause possible problematic side-effects!
+如果存在自定义 `.bashrc`，或配置的 shell 在登录时会执行的类似文件，`ssh` 会在会话成功建立后自动运行它。
+这可能导致一些意外行为，因为这些命令可能会在上述任一操作中以 root 权限执行，
+从而可能产生有问题的副作用。
 
-In order to avoid such complications, it's recommended to add a check in
-`/root/.bashrc` to make sure the session is interactive, and only then run
-`.bashrc` commands.
+为避免这类复杂情况，建议在 `/root/.bashrc` 中添加检查，确保会话是交互式会话后，
+才运行 `.bashrc` 命令。
 
-You can add this snippet at the beginning of your `.bashrc` file:
+可以将以下片段添加到 `.bashrc` 文件开头：
 
 ----
 # Early exit if not running interactively to avoid side-effects!
@@ -1011,122 +828,91 @@ case $- in
 esac
 ----
 
-Corosync External Vote Support
-------------------------------
+== Corosync 外部投票支持
 
-This section describes a way to deploy an external voter in a {pve} cluster.
-When configured, the cluster can sustain more node failures without
-violating safety properties of the cluster communication.
+本节介绍在 {pve} 集群中部署外部投票者的方法。配置后，集群可以承受更多节点故障，
+同时不破坏集群通信的安全属性。
 
-For this to work, there are two services involved:
+该功能涉及两个服务：
 
-* A QDevice daemon which runs on each {pve} node
+* 运行在每个 {pve} 节点上的 QDevice 守护进程
 
-* An external vote daemon which runs on an independent server
+* 运行在独立服务器上的外部投票守护进程
 
-As a result, you can achieve higher availability, even in smaller setups (for
-example 2+1 nodes).
+这样即使在较小配置中（例如 2+1 节点），也可以实现更高可用性。
 
-QDevice Technical Overview
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== QDevice 技术概览
 
-The Corosync Quorum Device (QDevice) is a daemon which runs on each cluster
-node. It provides a configured number of votes to the cluster's quorum
-subsystem, based on an externally running third-party arbitrator's decision.
-Its primary use is to allow a cluster to sustain more node failures than
-standard quorum rules allow. This can be done safely as the external device
-can see all nodes and thus choose only one set of nodes to give its vote.
-This will only be done if said set of nodes can have quorum (again) after
-receiving the third-party vote.
+Corosync Quorum Device（QDevice）是运行在每个集群节点上的守护进程。
+它会根据外部运行的第三方仲裁者的决策，为集群的仲裁子系统提供配置数量的票数。
+其主要用途是让集群能够承受超过标准仲裁规则允许数量的节点故障。这样做是安全的，
+因为外部设备可以看到所有节点，因此只会选择一组节点给予投票。
+只有当该节点集合在获得第三方投票后能够（重新）达到仲裁时，才会执行这一操作。
 
-Currently, only 'QDevice Net' is supported as a third-party arbitrator. This is
-a daemon which provides a vote to a cluster partition, if it can reach the
-partition members over the network. It will only give votes to one partition
-of a cluster at any time.
-It's designed to support multiple clusters and is almost configuration and
-state free. New clusters are handled dynamically and no configuration file
-is needed on the host running a QDevice.
+目前，仅支持 'QDevice Net' 作为第三方仲裁者。它是一个守护进程：如果能够通过网络访问某个集群分区的成员，
+就向该分区提供一票。在任意时刻，它只会给集群的一个分区投票。
+它设计为支持多个集群，并且几乎不需要配置和状态。新集群会被动态处理，运行 QDevice 的主机上不需要配置文件。
 
-The only requirements for the external host are that it needs network access to
-the cluster and to have a corosync-qnetd package available. We provide a package
-for Debian based hosts, and other Linux distributions should also have a package
-available through their respective package manager.
+外部主机的唯一要求是能够通过网络访问集群，并且有可用的 corosync-qnetd 软件包。
+我们为基于 Debian 的主机提供软件包，其他 Linux 发行版也应可通过各自的软件包管理器获得相应软件包。
 
-NOTE: Unlike corosync itself, a QDevice connects to the cluster over TCP/IP.
-The daemon can also run outside the LAN of the cluster and isn't limited to the
-low latencies requirements of corosync.
+NOTE: 与 corosync 本身不同，QDevice 通过 TCP/IP 连接到集群。
+该守护进程也可以运行在集群 LAN 之外，并不受 corosync 低延迟要求限制。
 
-Supported Setups
-~~~~~~~~~~~~~~~~
+=== 支持的配置
 
-We support QDevices for clusters with an even number of nodes and recommend
-it for 2 node clusters, if they should provide higher availability.
-For clusters with an odd node count, we currently discourage the use of
-QDevices. The reason for this is the difference in the votes which the QDevice
-provides for each cluster type. Even numbered clusters get a single additional
-vote, which only increases availability, because if the QDevice
-itself fails, you are in the same position as with no QDevice at all.
+我们支持在偶数节点集群中使用 QDevice；如果 2 节点集群需要提供更高可用性，也建议使用它。
+对于奇数节点集群，目前不建议使用 QDevice。原因在于 QDevice 为不同集群类型提供的票数不同。
+偶数节点集群会获得额外的一票，这只会提高可用性，因为如果 QDevice 本身失败，
+你所处的位置与完全没有 QDevice 时相同。
 
-On the other hand, with an odd numbered cluster size, the QDevice provides
-'(N-1)' votes -- where 'N' corresponds to the cluster node count. This
-alternative behavior makes sense; if it had only one additional vote, the
-cluster could get into a split-brain situation. This algorithm allows for all
-nodes but one (and naturally the QDevice itself) to fail. However, there are two
-drawbacks to this:
+另一方面，对于奇数节点规模的集群，QDevice 会提供 '(N-1)' 票，其中 'N' 对应集群节点数。
+这种替代行为是有意义的；如果它只提供一张额外票，集群可能进入脑裂状态。
+该算法允许除一个节点外的所有节点（自然也包括 QDevice 本身）发生故障。不过，这有两个缺点：
 
-* If the QNet daemon itself fails, no other node may fail or the cluster
-  immediately loses quorum. For example, in a cluster with 15 nodes, 7
-  could fail before the cluster becomes inquorate. But, if a QDevice is
-  configured here and it itself fails, **no single node** of the 15 may fail.
-  The QDevice acts almost as a single point of failure in this case.
+* 如果 QNet 守护进程本身失败，则不能再有任何其他节点失败，否则集群会立即失去仲裁。
+  例如，在 15 节点集群中，集群失去仲裁前可以有 7 个节点失败。但如果这里配置了 QDevice，
+  且 QDevice 本身失败，则 15 个节点中**任何单个节点**都不能失败。
+  在这种情况下，QDevice 几乎相当于单点故障。
 
-* The fact that all but one node plus QDevice may fail sounds promising at
-  first, but this may result in a mass recovery of HA services, which could
-  overload the single remaining node. Furthermore, a Ceph server will stop
-  providing services if only '((N-1)/2)' nodes or less remain online.
+* 除一个节点外所有节点加 QDevice 都可以失败，这一点乍看很有吸引力，
+  但它可能导致 HA 服务大规模恢复，从而压垮唯一剩余的节点。此外，如果只剩下
+  '((N-1)/2)' 个或更少节点在线，Ceph 服务器会停止提供服务。
 
-If you understand the drawbacks and implications, you can decide yourself if
-you want to use this technology in an odd numbered cluster setup.
+如果理解这些缺点和影响，可以自行决定是否在奇数节点集群配置中使用该技术。
 
-QDevice-Net Setup
-~~~~~~~~~~~~~~~~~
+=== QDevice-Net 设置
 
-We recommend running any daemon which provides votes to corosync-qdevice as an
-unprivileged user. {pve} and Debian provide a package which is already
-configured to do so.
-The traffic between the daemon and the cluster must be encrypted to ensure a
-safe and secure integration of the QDevice in {pve}.
+建议将任何为 corosync-qdevice 提供票数的守护进程以非特权用户身份运行。
+{pve} 和 Debian 提供的软件包已经配置为这样运行。
+守护进程与集群之间的流量必须加密，以确保 QDevice 安全地集成到 {pve} 中。
 
-First, install the 'corosync-qnetd' package on your external server
+首先，在外部服务器上安装 'corosync-qnetd' 软件包：
 
 ----
 external# apt install corosync-qnetd
 ----
 
-and the 'corosync-qdevice' package on all cluster nodes
+并在所有集群节点上安装 'corosync-qdevice' 软件包：
 
 ----
 pve# apt install corosync-qdevice
 ----
 
-After doing this, ensure that all the nodes in the cluster are online.
+完成后，确保集群中的所有节点都在线。
 
-You can now set up your QDevice by running the following command on one
-of the {pve} nodes:
+现在可以在其中一个 {pve} 节点上运行以下命令设置 QDevice：
 
 ----
 pve# pvecm qdevice setup <QDEVICE-IP>
 ----
 
-The SSH key from the cluster will be automatically copied to the QDevice.
+集群中的 SSH 密钥会自动复制到 QDevice。
 
-NOTE: Make sure to setup key-based access for the root user on your external
-server, or temporarily allow root login with password during the setup phase.
-If you receive an error such as 'Host key verification failed.' at this
-stage, running `pvecm updatecerts` could fix the issue.
+NOTE: 请确保在外部服务器上为 root 用户设置基于密钥的访问，或在设置阶段临时允许 root 使用密码登录。
+如果此阶段收到类似 'Host key verification failed.' 的错误，运行 `pvecm updatecerts` 可能可以修复该问题。
 
-After all the steps have successfully completed, you will see "Done". You can
-verify that the QDevice has been set up with:
+所有步骤成功完成后，会看到 "Done"。可以使用以下命令验证 QDevice 是否已设置：
 
 ----
 pve# pvecm status
@@ -1151,58 +937,41 @@ Membership information
 ----
 
 [[pvecm_qdevice_status_flags]]
-QDevice Status Flags
-^^^^^^^^^^^^^^^^^^^^
+==== QDevice 状态标志
 
-The status output of the QDevice, as seen above, will usually contain three
-columns:
+如上所示，QDevice 的状态输出通常包含三列：
 
-* `A` / `NA`: Alive or Not Alive. Indicates if the communication to the external
-    `corosync-qnetd` daemon works.
-* `V` / `NV`: If the QDevice will cast a vote for the node. In a split-brain
-    situation, where the corosync connection between the nodes is down, but they
-    both can still communicate with the external `corosync-qnetd` daemon,
-    only one node will get the vote.
-* `MW` / `NMW`: Master wins (`MV`) or not (`NMW`). Default is `NMW`, see
+* `A` / `NA`：Alive 或 Not Alive。表示与外部 `corosync-qnetd` 守护进程的通信是否正常。
+* `V` / `NV`：QDevice 是否会为该节点投票。在脑裂情况下，如果节点之间的 corosync 连接中断，
+    但它们仍都能与外部 `corosync-qnetd` 守护进程通信，则只有一个节点会获得投票。
+* `MW` / `NMW`：Master wins（`MV`）或 not（`NMW`）。默认值为 `NMW`，见
    footnote:[`votequorum_qdevice_master_wins` manual page
-   https://manpages.debian.org/bookworm/libvotequorum-dev/votequorum_qdevice_master_wins.3.en.html].
-* `NR`: QDevice is not registered.
+   https://manpages.debian.org/bookworm/libvotequorum-dev/votequorum_qdevice_master_wins.3.en.html]。
+* `NR`：QDevice 未注册。
 
-NOTE: If your QDevice is listed as `Not Alive` (`NA` in the output above),
-ensure that port `5403` (the default port of the qnetd server) of your external
-server is reachable via TCP/IP!
+NOTE: 如果 QDevice 显示为 `Not Alive`（上方输出中的 `NA`），请确保外部服务器的端口
+`5403`（qnetd 服务器默认端口）可通过 TCP/IP 访问。
 
 
-Frequently Asked Questions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 常见问题
 
-Tie Breaking
-^^^^^^^^^^^^
+==== 平局决胜
 
-In case of a tie, where two same-sized cluster partitions cannot see each other
-but can see the QDevice, the QDevice chooses one of those partitions randomly
-and provides a vote to it.
+当出现平局时，即两个大小相同的集群分区无法互相看到、但都能看到 QDevice，
+QDevice 会随机选择其中一个分区并向其提供投票。
 
-Possible Negative Implications
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 可能的负面影响
 
-For clusters with an even node count, there are no negative implications when
-using a QDevice. If it fails to work, it is the same as not having a QDevice
-at all.
+对于偶数节点集群，使用 QDevice 没有负面影响。如果它无法工作，效果与完全没有 QDevice 相同。
 
-Adding/Deleting Nodes After QDevice Setup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== QDevice 设置后添加/删除节点
 
-If you want to add a new node or remove an existing one from a cluster with a
-QDevice setup, you need to remove the QDevice first. After that, you can add or
-remove nodes normally. Once you have a cluster with an even node count again,
-you can set up the QDevice again as described previously.
+如果要在已配置 QDevice 的集群中添加新节点或移除现有节点，需要先移除 QDevice。
+之后即可正常添加或移除节点。一旦集群再次拥有偶数节点数量，就可以按前文所述重新设置 QDevice。
 
-Removing the QDevice
-^^^^^^^^^^^^^^^^^^^^
+==== 移除 QDevice
 
-If you used the official `pvecm` tool to add the QDevice, you can remove it
-by running:
+如果使用官方 `pvecm` 工具添加了 QDevice，可以通过运行以下命令将其移除：
 
 ----
 pve# pvecm qdevice remove
@@ -1213,85 +982,71 @@ pve# pvecm qdevice remove
 //There is still stuff to add here
 
 
-Corosync Configuration
-----------------------
+== Corosync 配置
 
-The `/etc/pve/corosync.conf` file plays a central role in a {pve} cluster. It
-controls the cluster membership and its network.
-For further information about it, check the corosync.conf man page:
+`/etc/pve/corosync.conf` 文件在 {pve} 集群中具有核心作用。它控制集群成员关系和集群网络。
+更多信息请查看 corosync.conf 手册页：
 [source,bash]
 ----
 man corosync.conf
 ----
 
-For node membership, you should always use the `pvecm` tool provided by {pve}.
-You may have to edit the configuration file manually for other changes.
-Here are a few best practice tips for doing this.
+对于节点成员关系，应始终使用 {pve} 提供的 `pvecm` 工具。
+对于其他变更，可能需要手动编辑配置文件。以下是执行该操作的一些最佳实践建议。
 
 [[pvecm_edit_corosync_conf]]
-Edit corosync.conf
-~~~~~~~~~~~~~~~~~~
+=== 编辑 corosync.conf
 
-Editing the corosync.conf file is not always very straightforward. There are
-two on each cluster node, one in `/etc/pve/corosync.conf` and the other in
-`/etc/corosync/corosync.conf`. Editing the one in our cluster file system will
-propagate the changes to the local one, but not vice versa.
+编辑 corosync.conf 文件并不总是很直接。每个集群节点上有两个该文件：
+一个在 `/etc/pve/corosync.conf`，另一个在 `/etc/corosync/corosync.conf`。
+编辑集群文件系统中的文件会将变更传播到本地文件，但反过来不会。
 
-The configuration will get updated automatically, as soon as the file changes.
-This means that changes which can be integrated in a running corosync will take
-effect immediately. Thus, you should always make a copy and edit that instead,
-to avoid triggering unintended changes when saving the file while editing.
+文件一旦变更，配置就会自动更新。这意味着能够集成到运行中 corosync 的变更会立即生效。
+因此，应始终先复制一份并编辑副本，以避免在编辑过程中保存文件时触发非预期变更。
 
 [source,bash]
 ----
 cp /etc/pve/corosync.conf /etc/pve/corosync.conf.new
 ----
 
-Then, open the config file with your favorite editor, such as `nano` or
-`vim.tiny`, which come pre-installed on every {pve} node.
+然后，使用喜欢的编辑器打开配置文件，例如每个 {pve} 节点上预安装的 `nano` 或 `vim.tiny`。
 
-NOTE: Always increment the 'config_version' number after configuration changes;
-omitting this can lead to problems.
+NOTE: 配置变更后始终递增 'config_version' 数字；遗漏这一步可能导致问题。
 
-After making the necessary changes, create another copy of the current working
-configuration file. This serves as a backup if the new configuration fails to
-apply or causes other issues.
+完成必要变更后，再创建一份当前工作配置文件的副本。如果新配置应用失败或导致其他问题，
+该副本可作为备份。
 
 [source,bash]
 ----
 cp /etc/pve/corosync.conf /etc/pve/corosync.conf.bak
 ----
 
-Then replace the old configuration file with the new one:
+然后使用新配置文件替换旧配置文件：
 [source,bash]
 ----
 mv /etc/pve/corosync.conf.new /etc/pve/corosync.conf
 ----
 
-You can check if the changes could be applied automatically, using the following
-commands:
+可以使用以下命令检查变更是否已自动应用：
 [source,bash]
 ----
 systemctl status corosync
 journalctl -b -u corosync
 ----
 
-If the changes could not be applied automatically, you may have to restart the
-corosync service via:
+如果变更无法自动应用，可能需要通过以下命令重启 corosync 服务：
 [source,bash]
 ----
 systemctl restart corosync
 ----
 
-On errors, check the troubleshooting section below.
+如发生错误，请查看下面的故障排查章节。
 
-Troubleshooting
-~~~~~~~~~~~~~~~
+=== 故障排查
 
-Issue: 'quorum.expected_votes must be configured'
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 问题：'quorum.expected_votes must be configured'
 
-When corosync starts to fail and you get the following message in the system log:
+当 corosync 启动失败，并在系统日志中看到以下消息时：
 
 ----
 [...]
@@ -1301,147 +1056,101 @@ corosync[1647]:  [SERV  ] Service engine 'corosync_quorum' failed to load for re
 [...]
 ----
 
-It means that the hostname you set for a corosync 'ringX_addr' in the
-configuration could not be resolved.
+这意味着配置中为 corosync 'ringX_addr' 设置的主机名无法解析。
 
-Write Configuration When Not Quorate
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 在无仲裁时写入配置
 
-If you need to change '/etc/pve/corosync.conf' on a node with no quorum, and you
-understand what you are doing, use:
+如果需要在无仲裁节点上更改 '/etc/pve/corosync.conf'，并且清楚自己在做什么，请使用：
 [source,bash]
 ----
 pvecm expected 1
 ----
 
-This sets the expected vote count to 1 and makes the cluster quorate. You can
-then fix your configuration, or revert it back to the last working backup.
+这会将预期票数设置为 1，并使集群达到仲裁。随后可以修复配置，或将其还原到最后一个可工作的备份。
 
-This is not enough if corosync cannot start anymore. In that case, it is best to
-edit the local copy of the corosync configuration in
-'/etc/corosync/corosync.conf', so that corosync can start again. Ensure that on
-all nodes, this configuration has the same content to avoid split-brain
-situations.
+如果 corosync 已经无法启动，这还不够。在这种情况下，最好编辑
+'/etc/corosync/corosync.conf' 中 corosync 配置的本地副本，让 corosync 能重新启动。
+请确保所有节点上的该配置内容一致，以避免脑裂情况。
 
 
 [[pvecm_corosync_conf_glossary]]
-Corosync Configuration Glossary
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Corosync 配置术语表
 
 ringX_addr::
-This names the different link addresses for the Kronosnet connections between
-nodes.
+这表示节点之间 Kronosnet 连接的不同链路地址。
 
 
-Cluster Cold Start
-------------------
+== 集群冷启动
 
-It is obvious that a cluster is not quorate when all nodes are
-offline. This is a common case after a power failure.
+显然，当所有节点都离线时，集群不具备仲裁。这是断电后常见的情况。
 
-NOTE: It is always a good idea to use an uninterruptible power supply
-(``UPS'', also called ``battery backup'') to avoid this state, especially if
-you want HA.
+NOTE: 使用不间断电源（``UPS''，也称为 ``battery backup''）来避免这种状态始终是好做法，
+尤其是在需要 HA 时。
 
-On node startup, the `pve-guests` service is started and waits for
-quorum. Once quorate, it starts all guests which have the `onboot`
-flag set.
+节点启动时，`pve-guests` 服务会启动并等待仲裁。一旦具备仲裁，它会启动所有设置了
+`onboot` 标志的客户机。
 
-When you turn on nodes, or when power comes back after power failure,
-it is likely that some nodes will boot faster than others. Please keep in
-mind that guest startup is delayed until you reach quorum.
+打开节点电源，或断电后恢复供电时，某些节点可能会比其他节点启动得更快。
+请记住，客户机启动会延迟到达到仲裁之后。
 
 
 [[pvecm_next_id_range]]
-Guest VMID Auto-Selection
-------------------------
+== 客户机 VMID 自动选择
 
-When creating new guests the web interface will ask the backend for a free VMID
-automatically. The default range for searching is `100` to `1000000` (lower
-than the maximal allowed VMID enforced by the schema).
+创建新客户机时，Web 界面会自动向后端请求一个空闲 VMID。默认搜索范围为 `100`
+到 `1000000`（低于 schema 强制执行的最大允许 VMID）。
 
-Sometimes admins either want to allocate new VMIDs in a separate range, for
-example to easily separate temporary VMs with ones that choose a VMID manually.
-Other times its just desired to provided a stable length VMID, for which
-setting the lower boundary to, for example, `100000` gives much more room for.
+有时管理员希望在单独范围内分配新 VMID，例如便于将临时虚拟机与手动选择 VMID 的虚拟机区分开。
+有时只是希望提供长度稳定的 VMID；例如将下边界设置为 `100000`，可留出更多空间。
 
-To accommodate this use case one can set either lower, upper or both boundaries
-via the `datacenter.cfg` configuration file, which can be edited in the web
-interface under 'Datacenter' -> 'Options'.
+为满足这一用例，可以通过 `datacenter.cfg` 配置文件设置下边界、上边界或同时设置两者。
+该文件可在 Web 界面 'Datacenter' -> 'Options' 下编辑。
 
-NOTE: The range is only used for the next-id API call, so it isn't a hard
-limit.
+NOTE: 该范围仅用于 next-id API 调用，因此不是硬性限制。
 
-Guest Migration
----------------
+== 客户机迁移
 
-Migrating virtual guests to other nodes is a useful feature in a
-cluster. There are settings to control the behavior of such
-migrations. This can be done via the configuration file
-`datacenter.cfg` or for a specific migration via API or command-line
-parameters.
+将虚拟客户机迁移到其他节点是集群中的一项有用功能。有一些设置可以控制这类迁移的行为。
+可以通过 `datacenter.cfg` 配置文件进行设置，也可以针对特定迁移通过 API 或命令行参数设置。
 
-It makes a difference if a guest is online or offline, or if it has
-local resources (like a local disk).
+客户机处于在线还是离线状态，或者是否具有本地资源（如本地磁盘），都会造成差异。
 
-For details about virtual machine migration, see the
-xref:qm_migration[QEMU/KVM Migration Chapter].
+关于虚拟机迁移的详细信息，请参见 xref:qm_migration[QEMU/KVM Migration Chapter]。
 
-For details about container migration, see the
-xref:pct_migration[Container Migration Chapter].
+关于容器迁移的详细信息，请参见 xref:pct_migration[Container Migration Chapter]。
 
-Migration Type
-~~~~~~~~~~~~~~
+=== 迁移类型
 
-The migration type defines if the migration data should be sent over an
-encrypted (`secure`) channel or an unencrypted (`insecure`) one.
-Setting the migration type to `insecure` means that the RAM content of a
-virtual guest is also transferred unencrypted, which can lead to
-information disclosure of critical data from inside the guest (for
-example, passwords or encryption keys).
+迁移类型定义迁移数据应通过加密（`secure`）通道还是未加密（`insecure`）通道发送。
+将迁移类型设置为 `insecure` 意味着虚拟客户机的 RAM 内容也会以未加密方式传输，
+这可能导致客户机内部关键数据（例如密码或加密密钥）的信息泄露。
 
-Therefore, we strongly recommend using the secure channel if you do
-not have full control over the network and can not guarantee that no
-one is eavesdropping on it.
+因此，如果不能完全控制网络，且无法保证无人窃听，强烈建议使用安全通道。
 
-NOTE: Storage migration does not follow this setting. Currently, it
-always sends the storage content over a secure channel.
+NOTE: 存储迁移不遵循该设置。目前，它始终通过安全通道发送存储内容。
 
-Encryption requires a lot of computing power, so this setting is often
-changed to `insecure` to achieve better performance. The impact on
-modern systems is lower because they implement AES encryption in
-hardware. The performance impact is particularly evident in fast
-networks, where you can transfer 10 Gbps or more.
+加密需要大量计算能力，因此该设置经常被改为 `insecure` 以获得更好性能。
+现代系统的影响较低，因为它们在硬件中实现 AES 加密。在高速网络中，
+性能影响尤其明显，例如可以传输 10 Gbps 或更高的网络。
 
 [[pvecm_migration_network]]
-Migration Network
-~~~~~~~~~~~~~~~~~
+=== 迁移网络
 
-By default, {pve} uses the network in which cluster communication
-takes place to send the migration traffic. This is not optimal both because
-sensitive cluster traffic can be disrupted and this network may not
-have the best bandwidth available on the node.
+默认情况下，{pve} 使用承载集群通信的网络发送迁移流量。这并不理想，
+因为敏感的集群流量可能受到干扰，而且该网络未必具有节点上可用的最佳带宽。
 
-Setting the migration network parameter allows the use of a dedicated
-network for all migration traffic. In addition to the memory,
-this also affects the storage traffic for offline migrations.
+设置迁移网络参数后，可以为所有迁移流量使用专用网络。除内存外，这也会影响离线迁移的存储流量。
 
-The migration network is set as a network using CIDR notation. This
-has the advantage that you don't have to set individual IP addresses
-for each node. {pve} can determine the real address on the
-destination node from the network specified in the CIDR form. To
-enable this, the network must be specified so that each node has exactly one
-IP in the respective network.
+迁移网络以 CIDR 表示法作为网络来设置。这样做的优点是无需为每个节点设置单独 IP 地址。
+{pve} 可以根据 CIDR 形式指定的网络，确定目标节点上的实际地址。要启用这一点，
+必须以每个节点在相应网络中恰好拥有一个 IP 的方式指定网络。
 
-Example
-^^^^^^^
+==== 示例
 
-We assume that we have a three-node setup, with three separate
-networks. One for public communication with the Internet, one for
-cluster communication, and a very fast one, which we want to use as a
-dedicated network for migration.
+假设有一个三节点配置，并具有三个独立网络。一个用于与 Internet 的公共通信，
+一个用于集群通信，还有一个非常快的网络，希望将其用作迁移专用网络。
 
-A network configuration for such a setup might look as follows:
+这种配置的网络配置可能如下所示：
 
 ----
 iface eno1 inet manual
@@ -1466,25 +1175,32 @@ iface eno3 inet static
     address  10.1.2.1/24
 ----
 
-Here, we will use the network 10.1.2.0/24 as a migration network. For
-a single migration, you can do this using the `migration_network`
-parameter of the command-line tool:
+这里，我们将网络 10.1.2.0/24 用作迁移网络。对于单次迁移，可以使用命令行工具的
+`migration_network` 参数完成：
 
 ----
 # qm migrate 106 tre --online --migration_network 10.1.2.0/24
 ----
 
-To configure this as the default network for all migrations in the
-cluster, set the `migration` property of the `/etc/pve/datacenter.cfg`
-file:
+要将其配置为集群中所有迁移的默认网络，请设置 `/etc/pve/datacenter.cfg` 文件的
+`migration` 属性：
 
 ----
 # use dedicated migration network
 migration: secure,network=10.1.2.0/24
 ----
 
-NOTE: The migration type must always be set when the migration network
-is set in `/etc/pve/datacenter.cfg`.
+NOTE: 在 `/etc/pve/datacenter.cfg` 中设置迁移网络时，必须始终设置迁移类型。
+
+=== 常用命令示例
+
+以下命令可用于查看集群、节点和迁移相关状态：
+
+----
+# pvecm status
+# pvecm nodes
+# qm migrate <vmid> <target-node> --online
+----
 
 
 ifdef::manvolnum[]

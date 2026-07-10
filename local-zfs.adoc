@@ -1,110 +1,84 @@
 [[chapter_zfs]]
-ZFS on Linux
-------------
+== Linux 上的 ZFS
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-ZFS is a combined file system and logical volume manager designed by
-Sun Microsystems. Starting with {pve} 3.4, the native Linux
-kernel port of the ZFS file system is introduced as optional
-file system and also as an additional selection for the root
-file system. There is no need for manually compile ZFS modules - all
-packages are included.
+ZFS 是由 Sun Microsystems 设计的文件系统与逻辑卷管理器组合。从 {pve} 3.4
+开始，ZFS 文件系统的原生 Linux 内核移植版本作为可选文件系统引入，同时也可作为根文件系统的额外选择。无需手动编译 ZFS 模块，所有软件包均已包含。
 
-By using ZFS, its possible to achieve maximum enterprise features with
-low budget hardware, but also high performance systems by leveraging
-SSD caching or even SSD only setups. ZFS can replace cost intense
-hardware raid cards by moderate CPU and memory load combined with easy
-management.
+通过使用 ZFS，可以在低预算硬件上获得丰富的企业级功能，也可以借助 SSD 缓存甚至纯 SSD
+部署构建高性能系统。ZFS 可以用适度的 CPU 和内存负载以及易于管理的方式，替代成本较高的硬件 RAID 卡。
 
-.General ZFS advantages
+.ZFS 的一般优势
 
-* Easy configuration and management with {pve} GUI and CLI.
+* 可通过 {pve} GUI 和 CLI 轻松配置和管理。
 
-* Reliable
+* 可靠。
 
-* Protection against data corruption
+* 防止数据损坏。
 
-* Data compression on file system level
+* 文件系统级数据压缩。
 
-* Snapshots
+* 快照。
 
-* Copy-on-write clone
+* 写时复制克隆。
 
-* Various raid levels: RAID0, RAID1, RAID10, RAIDZ-1, RAIDZ-2, RAIDZ-3,
+* 多种 RAID 级别：RAID0、RAID1、RAID10、RAIDZ-1、RAIDZ-2、RAIDZ-3、
 dRAID, dRAID2, dRAID3
 
-* Can use SSD for cache
+* 可使用 SSD 作为缓存。
 
-* Self healing
+* 自愈能力。
 
-* Continuous integrity checking
+* 持续完整性检查。
 
-* Designed for high storage capacities
+* 面向大容量存储设计。
 
-* Asynchronous replication over network
+* 通过网络进行异步复制。
 
-* Open Source
+* 开源。
 
-* Encryption
+* 加密。
 
 * ...
 
 
-Hardware
-~~~~~~~~
+=== 硬件
 
-ZFS depends heavily on memory, so you need at least 8GB to start. In
-practice, use as much as you can get for your hardware/budget. To prevent
-data corruption, we recommend the use of high quality ECC RAM.
+ZFS 对内存依赖较高，因此起步至少需要 8GB。实践中，应在硬件和预算允许的范围内尽量配置更多内存。为防止数据损坏，建议使用高质量 ECC RAM。
 
-If you use a dedicated cache and/or log disk, you should use an
-enterprise class SSD. This can
-increase the overall performance significantly.
+如果使用专用缓存盘和/或日志盘，应使用企业级 SSD。这可以显著提升整体性能。
 
-IMPORTANT: Do not use ZFS on top of a hardware RAID controller which has its
-own cache management. ZFS needs to communicate directly with the disks. An
-HBA adapter or something like an LSI controller flashed in ``IT'' mode is more
-appropriate.
+IMPORTANT: 不要在带有自身缓存管理的硬件 RAID 控制器之上使用 ZFS。ZFS 需要直接与磁盘通信。HBA
+适配器，或刷入 ``IT'' 模式的 LSI 控制器一类设备更合适。
 
-If you are experimenting with an installation of {pve} inside a VM
-(Nested Virtualization), don't use `virtio` for disks of that VM,
-as they are not supported by ZFS. Use IDE or SCSI instead (also works
-with the `virtio` SCSI controller type).
+如果是在虚拟机中实验安装 {pve}（嵌套虚拟化），不要为该虚拟机的磁盘使用 `virtio`，因为 ZFS 不支持这种磁盘。请改用 IDE 或
+SCSI（也可使用 `virtio` SCSI 控制器类型）。
 
 
-Installation as Root File System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 作为根文件系统安装
 
-When you install using the {pve} installer, you can choose ZFS for the
-root file system. You need to select the RAID type at installation
-time:
+使用 {pve} 安装程序安装时，可以为根文件系统选择 ZFS。安装时需要选择 RAID 类型：
 
 [horizontal]
-RAID0:: Also called ``striping''. The capacity of such volume is the sum
-of the capacities of all disks. But RAID0 does not add any redundancy,
-so the failure of a single drive makes the volume unusable.
+RAID0:: 也称为 ``striping''。此类卷的容量是所有磁盘容量之和。但 RAID0 不提供任何冗余，因此单块磁盘故障就会导致该卷不可用。
 
-RAID1:: Also called ``mirroring''. Data is written identically to all
-disks. This mode requires at least 2 disks with the same size. The
-resulting capacity is that of a single disk.
+RAID1:: 也称为 ``mirroring''。数据会以相同方式写入所有磁盘。此模式至少需要 2 块同等大小的磁盘，最终容量等同于单块磁盘。
 
-RAID10:: A combination of RAID0 and RAID1. Requires at least 4 disks.
+RAID10:: RAID0 与 RAID1 的组合。至少需要 4 块磁盘。
 
-RAIDZ-1:: A variation on RAID-5, single parity. Requires at least 3 disks.
+RAIDZ-1:: RAID-5 的变体，单校验。至少需要 3 块磁盘。
 
-RAIDZ-2:: A variation on RAID-5, double parity. Requires at least 4 disks.
+RAIDZ-2:: RAID-5 的变体，双校验。至少需要 4 块磁盘。
 
-RAIDZ-3:: A variation on RAID-5, triple parity. Requires at least 5 disks.
+RAIDZ-3:: RAID-5 的变体，三重校验。至少需要 5 块磁盘。
 
-The installer automatically partitions the disks, creates a ZFS pool
-called `rpool`, and installs the root file system on the ZFS subvolume
-`rpool/ROOT/pve-1`.
+安装程序会自动对磁盘分区，创建名为 `rpool` 的 ZFS pool，并将根文件系统安装到 ZFS 子卷
+`rpool/ROOT/pve-1` 上。
 
-Another subvolume called `rpool/data` is created to store VM
-images. In order to use that with the {pve} tools, the installer
-creates the following configuration entry in `/etc/pve/storage.cfg`:
+安装程序还会创建名为 `rpool/data` 的子卷用于存储虚拟机镜像。为了让 {pve} 工具使用该子卷，安装程序会在
+`/etc/pve/storage.cfg` 中创建以下配置项：
 
 ----
 zfspool: local-zfs
@@ -113,8 +87,7 @@ zfspool: local-zfs
 	content images,rootdir
 ----
 
-After installation, you can view your ZFS pool status using the
-`zpool` command:
+安装完成后，可以使用 `zpool` 命令查看 ZFS pool 状态：
 
 ----
 # zpool status
@@ -135,8 +108,7 @@ config:
 errors: No known data errors
 ----
 
-The `zfs` command is used to configure and manage your ZFS file systems. The
-following command lists all file systems after installation:
+`zfs` 命令用于配置和管理 ZFS 文件系统。以下命令会列出安装后的所有文件系统：
 
 ----
 # zfs list
@@ -150,170 +122,124 @@ rpool/swap        4.25G  7.69T    64K  -
 
 
 [[sysadmin_zfs_raid_considerations]]
-ZFS RAID Level Considerations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== ZFS RAID 级别考量
 
-There are a few factors to take into consideration when choosing the layout of
-a ZFS pool. The basic building block of a ZFS pool is the virtual device, or
-`vdev`. All vdevs in a pool are used equally and the data is striped among them
-(RAID0). Check the `zpoolconcepts(7)` manpage for more details on vdevs.
+选择 ZFS pool 布局时，需要考虑几个因素。ZFS pool 的基本构建块是虚拟设备，即 `vdev`。pool
+中的所有 vdev 都会被均衡使用，数据会在它们之间条带化（RAID0）。有关 vdev 的更多详情，请查看
+`zpoolconcepts(7)` manpage。
 
 [[sysadmin_zfs_raid_performance]]
-Performance
-^^^^^^^^^^^
+==== 性能
 
-Each `vdev` type has different performance behaviors. The two
-parameters of interest are the IOPS (Input/Output Operations per Second) and
-the bandwidth with which data can be written or read.
+每种 `vdev` 类型都有不同的性能行为。主要关注的两个参数是 IOPS（每秒输入/输出操作数）以及数据读写带宽。
 
-A 'mirror' vdev (RAID1) will approximately behave like a single disk in regard
-to both parameters when writing data. When reading data the performance will
-scale linearly with the number of disks in the mirror.
+写入数据时，'mirror' vdev（RAID1）在这两个参数上的表现大致类似单块磁盘。读取数据时，性能会随 mirror
+中磁盘数量线性扩展。
 
-A common situation is to have 4 disks. When setting it up as 2 mirror vdevs
-(RAID10) the pool will have the write characteristics as two single disks in
-regard to IOPS and bandwidth. For read operations it will resemble 4 single
-disks.
+一种常见场景是有 4 块磁盘。将其设置为 2 个 mirror vdev（RAID10）时，从 IOPS
+和带宽角度看，该 pool 的写入特性相当于两块单盘。读取操作则接近 4 块单盘。
 
-A 'RAIDZ' of any redundancy level will approximately behave like a single disk
-in regard to IOPS with a lot of bandwidth. How much bandwidth depends on the
-size of the RAIDZ vdev and the redundancy level.
+任意冗余级别的 'RAIDZ' 在 IOPS 方面大致类似单块磁盘，但具有较高带宽。具体带宽取决于
+RAIDZ vdev 的大小和冗余级别。
 
-A 'dRAID' pool should match the performance of an equivalent 'RAIDZ' pool.
+'dRAID' pool 的性能应与等价的 'RAIDZ' pool 相当。
 
-For running VMs, IOPS is the more important metric in most situations.
+对于运行虚拟机而言，在多数情况下 IOPS 是更重要的指标。
 
 
 [[sysadmin_zfs_raid_size_space_usage_redundancy]]
-Size, Space usage and Redundancy
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 大小、空间使用和冗余
 
-While a pool made of 'mirror' vdevs will have the best performance
-characteristics, the usable space will be 50% of the disks available. Less if a
-mirror vdev consists of more than 2 disks, for example in a 3-way mirror. At
-least one healthy disk per mirror is needed for the pool to stay functional.
+由 'mirror' vdev 组成的 pool 具有最佳性能特性，但可用空间只有可用磁盘容量的 50%。如果一个
+mirror vdev 由超过 2 块磁盘组成，例如 3-way mirror，则可用空间更少。每个 mirror 至少需要一块健康磁盘，pool 才能保持可用。
 
-The usable space of a 'RAIDZ' type vdev of N disks is roughly N-P, with P being
-the RAIDZ-level. The RAIDZ-level indicates how many arbitrary disks can fail
-without losing data. A special case is a 4 disk pool with RAIDZ2. In this
-situation it is usually better to use 2 mirror vdevs for the better performance
-as the usable space will be the same.
+由 N 块磁盘组成的 'RAIDZ' 类型 vdev 可用空间大致为 N-P，其中 P 为 RAIDZ 级别。RAIDZ
+级别表示在不丢失数据的情况下可任意故障的磁盘数量。4 块磁盘的 RAIDZ2 pool 是一个特殊场景；这种情况下通常最好使用
+2 个 mirror vdev，因为可用空间相同但性能更好。
 
-Another important factor when using any RAIDZ level is how ZVOL datasets, which
-are used for VM disks, behave. For each data block the pool needs parity data
-which is at least the size of the minimum block size defined by the `ashift`
-value of the pool. With an ashift of 12 the block size of the pool is 4k.  The
-default block size for a ZVOL is 8k. Therefore, in a RAIDZ2 each 8k block
-written will cause two additional 4k parity blocks to be written,
-8k + 4k + 4k = 16k.  This is of course a simplified approach and the real
-situation will be slightly different with metadata, compression and such not
-being accounted for in this example.
+使用任意 RAIDZ 级别时，另一个重要因素是用于虚拟机磁盘的 ZVOL dataset 的行为。对于每个数据块，pool
+都需要校验数据，其大小至少为 pool 的 `ashift` 值所定义的最小块大小。`ashift` 为 12 时，pool
+块大小为 4k。ZVOL 的默认块大小为 8k。因此，在 RAIDZ2 中，每写入一个 8k
+块，就会额外写入两个 4k 校验块，即 8k + 4k + 4k = 16k。当然这是简化说明，实际情况会因元数据、压缩等因素而略有不同，本示例未将这些因素计入。
 
-This behavior can be observed when checking the following properties of the
-ZVOL:
+检查 ZVOL 的以下属性时，可以观察到这种行为：
 
  * `volsize`
- * `refreservation` (if the pool is not thin provisioned)
- * `used` (if the pool is thin provisioned and without snapshots present)
+ * `refreservation`（如果 pool 未使用 thin provisioning）
+ * `used`（如果 pool 使用 thin provisioning 且不存在快照）
 
 ----
 # zfs get volsize,refreservation,used <pool>/vm-<vmid>-disk-X
 ----
 
-`volsize` is the size of the disk as it is presented to the VM, while
-`refreservation` shows the reserved space on the pool which includes the
-expected space needed for the parity data. If the pool is thin provisioned, the
-`refreservation` will be set to 0. Another way to observe the behavior is to
-compare the used disk space within the VM and the `used` property. Be aware
-that snapshots will skew the value.
+`volsize` 是呈现给虚拟机的磁盘大小，而 `refreservation` 显示 pool 上的预留空间，其中包含校验数据预计需要的空间。如果
+pool 使用 thin provisioning，则 `refreservation` 会设置为 0。另一种观察方式是比较虚拟机内部已用磁盘空间与
+`used` 属性。请注意，快照会影响该值。
 
-There are a few options to counter the increased use of space:
+有几种方式可以抵消空间使用增加的问题：
 
-* Increase the `volblocksize` to improve the data to parity ratio
-* Use 'mirror' vdevs instead of 'RAIDZ'
-* Use `ashift=9` (block size of 512 bytes)
+* 增大 `volblocksize` 以改善数据与校验的比例
+* 使用 'mirror' vdev 替代 'RAIDZ'
+* 使用 `ashift=9`（块大小为 512 字节）
 
-The `volblocksize` property can only be set when creating a ZVOL. The default
-value can be changed in the storage configuration. When doing this, the guest
-needs to be tuned accordingly and depending on the use case, the problem of
-write amplification is just moved from the ZFS layer up to the guest.
+`volblocksize` 属性只能在创建 ZVOL 时设置。默认值可以在存储配置中修改。这样做时，需要对客户机进行相应调优；并且根据使用场景，写放大问题可能只是从 ZFS 层转移到了客户机内部。
 
-Using `ashift=9` when creating the pool can lead to bad
-performance, depending on the disks underneath, and cannot be changed later on.
+创建 pool 时使用 `ashift=9` 可能会导致性能较差，具体取决于底层磁盘，并且之后无法更改。
 
-Mirror vdevs (RAID1, RAID10) have favorable behavior for VM workloads. Use
-them, unless your environment has specific needs and characteristics where
-RAIDZ performance characteristics are acceptable.
+Mirror vdev（RAID1、RAID10）对虚拟机工作负载更友好。除非环境有特定需求和特性，且 RAIDZ
+性能特征可以接受，否则应优先使用 mirror vdev。
 
 
-ZFS dRAID
-~~~~~~~~~
+=== ZFS dRAID
 
-In a ZFS dRAID (declustered RAID) the hot spare drive(s) participate in the RAID.
-Their spare capacity is reserved and used for rebuilding when one drive fails.
-This provides, depending on the configuration, faster rebuilding compared to a
-RAIDZ in case of drive failure. More information can be found in the official
-OpenZFS documentation. footnote:[OpenZFS dRAID
+在 ZFS dRAID（declustered RAID）中，热备盘会参与 RAID。其备用容量会被保留，并在某块磁盘故障时用于重建。根据配置不同，发生磁盘故障时，这可以比
+RAIDZ 提供更快的重建速度。更多信息请参见官方 OpenZFS 文档。 footnote:[OpenZFS dRAID
 https://openzfs.github.io/openzfs-docs/Basic%20Concepts/dRAID%20Howto.html]
 
-NOTE: dRAID is intended for more than 10-15 disks in a dRAID. A RAIDZ
-setup should be better for a lower amount of disks in most use cases.
+NOTE: dRAID 适用于一个 dRAID 中包含超过 10-15 块磁盘的场景。在大多数使用场景中，磁盘数量较少时 RAIDZ
+配置通常更合适。
 
-NOTE: The GUI requires one more disk than the minimum (i.e. dRAID1 needs 3). It
-expects that a spare disk is added as well.
+NOTE: GUI 要求的磁盘数量比最低要求多一块（例如 dRAID1 需要 3 块）。它会假定同时添加一块备用磁盘。
 
- * `dRAID1` or `dRAID`: requires at least 2 disks, one can fail before data is
-lost
- * `dRAID2`: requires at least 3 disks, two can fail before data is lost
- * `dRAID3`: requires at least 4 disks, three can fail before data is lost
+ * `dRAID1` 或 `dRAID`：至少需要 2 块磁盘，可在丢失数据前容忍 1 块磁盘故障
+ * `dRAID2`：至少需要 3 块磁盘，可在丢失数据前容忍 2 块磁盘故障
+ * `dRAID3`：至少需要 4 块磁盘，可在丢失数据前容忍 3 块磁盘故障
 
 
-Additional information can be found on the manual page:
+更多信息可在 manual page 中找到：
 
 ----
 # man zpoolconcepts
 ----
 
-Spares and Data
-^^^^^^^^^^^^^^^
-The number of `spares` tells the system how many disks it should keep ready in
-case of a disk failure. The default value is 0 `spares`. Without spares,
-rebuilding won't get any speed benefits.
+==== Spares 和 Data
+`spares` 的数量告诉系统在磁盘故障时应预留多少块磁盘。默认值为 0 `spares`。没有 spare 时，重建不会获得速度优势。
 
-`data` defines the number of devices in a redundancy group. The default value is
-8. Except when `disks - parity - spares` equal something less than 8, the lower
-number is used. In general, a smaller number of `data` devices leads to higher
-IOPS, better compression ratios and faster resilvering, but defining fewer data
-devices reduces the available storage capacity of the pool.
+`data` 定义冗余组中的设备数量。默认值为 8。除非 `disks - parity - spares`
+小于 8，此时会使用较小值。通常，较少的 `data` 设备会带来更高 IOPS、更好的压缩率和更快的 resilvering，但定义较少 data
+设备会降低 pool 的可用存储容量。
 
 
-Bootloader
-~~~~~~~~~~
+=== Bootloader
 
-{pve} uses xref:sysboot_proxmox_boot_tool[`proxmox-boot-tool`] to manage the
-bootloader configuration.
-See the chapter on xref:sysboot[{pve} host bootloaders] for details.
+{pve} 使用 xref:sysboot_proxmox_boot_tool[`proxmox-boot-tool`] 管理 bootloader
+配置。详情请参见 xref:sysboot[{pve} 主机 bootloader] 章节。
 
 
-ZFS Administration
-~~~~~~~~~~~~~~~~~~
+=== ZFS 管理
 
-This section gives you some usage examples for common tasks. ZFS
-itself is really powerful and provides many options. The main commands
-to manage ZFS are `zfs` and `zpool`. Both commands come with great
-manual pages, which can be read with:
+本节给出一些常见任务的使用示例。ZFS 本身功能非常强大，并提供大量选项。管理 ZFS 的主要命令是
+`zfs` 和 `zpool`。这两个命令都带有完善的 manual page，可以通过以下命令阅读：
 
 ----
 # man zpool
 # man zfs
------
+----
 
 [[sysadmin_zfs_create_new_zpool]]
-Create a new zpool
-^^^^^^^^^^^^^^^^^^
+==== 创建新的 zpool
 
-To create a new pool, at least one disk is needed. The `ashift` should have the
-same sector-size (2 power of `ashift`) or larger as the underlying disk.
+创建新 pool 至少需要一块磁盘。`ashift` 应与底层磁盘的扇区大小（2 的 `ashift` 次方）相同或更大。
 
 ----
 # zpool create -f -o ashift=12 <pool> <device>
@@ -321,195 +247,159 @@ same sector-size (2 power of `ashift`) or larger as the underlying disk.
 
 [TIP]
 ====
-Pool names must adhere to the following rules:
+Pool 名称必须遵循以下规则：
 
-* begin with a letter (a-z or A-Z)
-* contain only alphanumeric, `-`, `_`, `.`, `:` or ` ` (space) characters
-* must *not begin* with one of `mirror`, `raidz`, `draid` or `spare`
-* must not be `log`
+* 以字母开头（a-z 或 A-Z）
+* 仅包含字母数字、`-`、`_`、`.`、`:` 或 ` `（空格）字符
+* *不得以* `mirror`、`raidz`、`draid` 或 `spare` 开头
+* 不得为 `log`
 ====
 
-To activate compression (see section <<zfs_compression,Compression in ZFS>>):
+要启用压缩（参见 <<zfs_compression,ZFS 中的压缩>> 章节）：
 
 ----
 # zfs set compression=lz4 <pool>
 ----
 
 [[sysadmin_zfs_create_new_zpool_raid0]]
-Create a new pool with RAID-0
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带 RAID-0 的新 pool
 
-Minimum 1 disk
+至少 1 块磁盘
 
 ----
 # zpool create -f -o ashift=12 <pool> <device1> <device2>
 ----
 
 [[sysadmin_zfs_create_new_zpool_raid1]]
-Create a new pool with RAID-1
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带 RAID-1 的新 pool
 
-Minimum 2 disks
+至少 2 块磁盘
 
 ----
 # zpool create -f -o ashift=12 <pool> mirror <device1> <device2>
 ----
 
 [[sysadmin_zfs_create_new_zpool_raid10]]
-Create a new pool with RAID-10
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带 RAID-10 的新 pool
 
-Minimum 4 disks
+至少 4 块磁盘
 
 ----
 # zpool create -f -o ashift=12 <pool> mirror <device1> <device2> mirror <device3> <device4>
 ----
 
 [[sysadmin_zfs_create_new_zpool_raidz1]]
-Create a new pool with RAIDZ-1
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带 RAIDZ-1 的新 pool
 
-Minimum 3 disks
+至少 3 块磁盘
 
 ----
 # zpool create -f -o ashift=12 <pool> raidz1 <device1> <device2> <device3>
 ----
 
-Create a new pool with RAIDZ-2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带 RAIDZ-2 的新 pool
 
-Minimum 4 disks
+至少 4 块磁盘
 
 ----
 # zpool create -f -o ashift=12 <pool> raidz2 <device1> <device2> <device3> <device4>
 ----
 
-Please read the section for
-xref:sysadmin_zfs_raid_considerations[ZFS RAID Level Considerations]
-to get a rough estimate on how IOPS and bandwidth expectations before setting up
-a pool, especially when wanting to use a RAID-Z mode.
+设置 pool 前，请阅读 xref:sysadmin_zfs_raid_considerations[ZFS RAID 级别考量] 章节，以粗略估算
+IOPS 和带宽预期，特别是在计划使用 RAID-Z 模式时。
 
 [[sysadmin_zfs_create_new_zpool_with_cache]]
-Create a new pool with cache (L2ARC)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带缓存（L2ARC）的新 pool
 
-It is possible to use a dedicated device, or partition, as second-level cache to
-increase the performance. Such a cache device will especially help with
-random-read workloads of data that is mostly static. As it acts as additional
-caching layer between the actual storage, and the in-memory ARC, it can also
-help if the ARC must be reduced due to memory constraints.
+可以使用专用设备或分区作为二级缓存以提升性能。此类缓存设备尤其有助于大部分为静态数据的随机读取工作负载。由于它作为实际存储与内存中 ARC
+之间的额外缓存层，如果由于内存约束必须降低 ARC，也能提供帮助。
 
-.Create ZFS pool with a on-disk cache
+.创建带磁盘缓存的 ZFS pool
 ----
 # zpool create -f -o ashift=12 <pool> <device> cache <cache-device>
 ----
 
-Here only a single `<device>` and a single `<cache-device>` was used, but it is
-possible to use more devices, like it's shown in
-xref:sysadmin_zfs_create_new_zpool_raid0[Create a new pool with RAID].
+这里仅使用了单个 `<device>` 和单个 `<cache-device>`，但也可以使用更多设备，如
+xref:sysadmin_zfs_create_new_zpool_raid0[创建带 RAID 的新 pool] 中所示。
 
-Note that for cache devices no mirror or raid modi exist, they are all simply
-accumulated.
+请注意，缓存设备不存在 mirror 或 RAID 模式，它们只是简单累加。
 
-If any cache device produces errors on read, ZFS will transparently divert that
-request to the underlying storage layer.
+如果任何缓存设备在读取时产生错误，ZFS 会透明地将该请求转向底层存储层。
 
 
 [[sysadmin_zfs_create_new_zpool_with_log]]
-Create a new pool with log (ZIL)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 创建带日志（ZIL）的新 pool
 
-It is possible to use a dedicated drive, or partition, for the ZFS Intent Log
-(ZIL), it is mainly used to provide safe synchronous transactions, so often in
-performance critical paths like databases, or other programs that issue `fsync`
-operations more frequently.
+可以为 ZFS Intent Log（ZIL）使用专用磁盘或分区。它主要用于提供安全的同步事务，因此常用于数据库等性能关键路径，或其他频繁发出
+`fsync` 操作的程序。
 
-The pool is used as default ZIL location, diverting the ZIL IO load to a
-separate device can, help to reduce transaction latencies while relieving the
-main pool at the same time, increasing overall performance.
+pool 是默认的 ZIL 位置。将 ZIL I/O 负载转移到独立设备，可以在减轻主 pool 负载的同时降低事务延迟，从而提升整体性能。
 
-For disks to be used as log devices, directly or through a partition, it's
-recommend to:
+对于直接作为日志设备或通过分区作为日志设备的磁盘，建议：
 
-- use fast SSDs with power-loss protection, as those have much smaller commit
-  latencies.
+- 使用具备掉电保护的快速 SSD，因为这类设备的提交延迟更低。
 
-- Use at least a few GB for the partition (or whole device), but using more than
-  half of your installed memory won't provide you with any real advantage.
+- 为分区（或整个设备）至少使用几 GB 空间，但超过已安装内存的一半不会带来实际优势。
 
-.Create ZFS pool with separate log device
+.创建带独立日志设备的 ZFS pool
 ----
 # zpool create -f -o ashift=12 <pool> <device> log <log-device>
 ----
 
-In the example above, a single `<device>` and a single `<log-device>` is used,
-but you can also combine this with other RAID variants, as described in the
-xref:sysadmin_zfs_create_new_zpool_raid0[Create a new pool with RAID] section.
+上例使用了单个 `<device>` 和单个 `<log-device>`，但也可以结合其他 RAID 变体使用，如
+xref:sysadmin_zfs_create_new_zpool_raid0[创建带 RAID 的新 pool] 章节所述。
 
-You can also mirror the log device to multiple devices, this is mainly useful to
-ensure that performance doesn't immediately degrades if a single log device
-fails.
+也可以将日志设备 mirror 到多个设备。这主要用于确保单个日志设备故障时，性能不会立即下降。
 
-If all log devices fail the ZFS main pool itself will be used again, until the
-log device(s) get replaced.
+如果所有日志设备均故障，ZFS 会重新使用主 pool 本身，直到日志设备被替换。
 
 [[sysadmin_zfs_add_cache_and_log_dev]]
-Add cache and log to an existing pool
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 向现有 pool 添加缓存和日志
 
-If you have a pool without cache and log you can still add both, or just one of
-them, at any time.
+如果某个 pool 没有缓存和日志，也可以在任何时候添加二者或其中之一。
 
-For example, let's assume you got a good enterprise SSD with power-loss
-protection that you want to use for improving the overall performance of your
-pool.
+例如，假设有一块具备掉电保护的优质企业级 SSD，并希望用它提升 pool 的整体性能。
 
-As the maximum size of a log device should be about half the size of the
-installed physical memory, it means that the ZIL will most likely only take up
-a relatively small part of the SSD, the remaining space can be used as cache.
+由于日志设备最大大小应约为已安装物理内存的一半，这意味着 ZIL 很可能只占用 SSD 的一小部分，剩余空间可以用作缓存。
 
-First you have to create two GPT partitions on the SSD with `parted` or `gdisk`.
+首先需要使用 `parted` 或 `gdisk` 在 SSD 上创建两个 GPT 分区。
 
-Then you're ready to add them to a pool:
+然后即可将它们添加到 pool：
 
-.Add both, a separate log device and a second-level cache, to an existing pool
+.向现有 pool 同时添加独立日志设备和二级缓存
 ----
 # zpool add -f <pool> log <device-part1> cache <device-part2>
 ----
 
-Just replace `<pool>`, `<device-part1>` and `<device-part2>` with the pool name
-and the two `/dev/disk/by-id/` paths to the partitions.
+只需将 `<pool>`、`<device-part1>` 和 `<device-part2>` 替换为 pool 名称以及两个分区的
+`/dev/disk/by-id/` 路径。
 
-You can also add ZIL and cache separately.
+也可以分别添加 ZIL 和缓存。
 
-.Add a log device to an existing ZFS pool
+.向现有 ZFS pool 添加日志设备
 ----
 # zpool add <pool> log <log-device>
 ----
 
 
 [[sysadmin_zfs_change_failed_dev]]
-Changing a failed device
-^^^^^^^^^^^^^^^^^^^^^^^^
+==== 更换故障设备
 
 ----
 # zpool replace -f <pool> <old-device> <new-device>
 ----
 
-.Changing a failed bootable device
+.更换故障的可启动设备
 
-Depending on how {pve} was installed it is either using `systemd-boot` or GRUB
-through `proxmox-boot-tool` footnote:[Systems installed with {pve} 6.4 or later,
-EFI systems installed with {pve} 5.4 or later] or plain GRUB as bootloader (see
-xref:sysboot[Host Bootloader]). You can check by running:
+根据 {pve} 的安装方式，它会通过 `proxmox-boot-tool` footnote:[Systems installed with {pve} 6.4 or later,
+EFI systems installed with {pve} 5.4 or later] 使用 `systemd-boot` 或 GRUB，或者使用普通 GRUB 作为 bootloader（参见
+xref:sysboot[主机 Bootloader]）。可以通过运行以下命令检查：
 
 ----
 # proxmox-boot-tool status
 ----
 
-The first steps of copying the partition table, reissuing GUIDs and replacing
-the ZFS partition are the same. To make the system bootable from the new disk,
-different steps are needed which depend on the bootloader in use.
+复制分区表、重新生成 GUID 并替换 ZFS 分区的前几个步骤相同。为了让系统能够从新磁盘启动，还需要根据所使用的 bootloader 执行不同步骤。
 
 ----
 # sgdisk <healthy bootable device> -R <new device>
@@ -517,165 +407,134 @@ different steps are needed which depend on the bootloader in use.
 # zpool replace -f <pool> <old zfs partition> <new zfs partition>
 ----
 
-NOTE: Use the `zpool status -v` command to monitor how far the resilvering
-process of the new disk has progressed.
+NOTE: 使用 `zpool status -v` 命令监控新磁盘 resilvering 过程的进度。
 
-.With `proxmox-boot-tool`:
+.使用 `proxmox-boot-tool`：
 
 ----
 # proxmox-boot-tool format <new disk's ESP>
 # proxmox-boot-tool init <new disk's ESP> [grub]
 ----
 
-NOTE: `ESP` stands for EFI System Partition, which is set up as partition #2 on
-bootable disks when using the {pve} installer since version 5.4. For details,
-see
-xref:sysboot_proxmox_boot_setup[Setting up a new partition for use as synced ESP].
+NOTE: `ESP` 表示 EFI System Partition。从版本 5.4 起，使用 {pve} 安装程序时，它会在可启动磁盘上设置为第
+2 个分区。详情请参见 xref:sysboot_proxmox_boot_setup[设置新分区以用作同步 ESP]。
 
-NOTE: Make sure to pass 'grub' as mode to `proxmox-boot-tool init` if
-`proxmox-boot-tool status` indicates your current disks are using GRUB,
-especially if Secure Boot is enabled!
+NOTE: 如果 `proxmox-boot-tool status` 表明当前磁盘使用 GRUB，请确保将 'grub' 作为模式传递给
+`proxmox-boot-tool init`，尤其是在启用 Secure Boot 时。
 
-.With plain GRUB:
+.使用普通 GRUB：
 
 ----
 # grub-install <new disk>
 ----
-NOTE: Plain GRUB is only used on systems installed with {pve} 6.3 or earlier,
-which have not been manually migrated to use `proxmox-boot-tool` yet.
+NOTE: 普通 GRUB 仅用于使用 {pve} 6.3 或更早版本安装且尚未手动迁移到 `proxmox-boot-tool`
+的系统。
 
 
-Configure E-Mail Notification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 配置电子邮件通知
 
-ZFS comes with an event daemon `ZED`, which monitors events generated by the ZFS
-kernel module. The daemon can also send emails on ZFS events like pool errors.
-Newer ZFS packages ship the daemon in a separate `zfs-zed` package, which should
-already be installed by default in {pve}.
+ZFS 带有事件守护进程 `ZED`，用于监控 ZFS 内核模块生成的事件。该守护进程也可以在发生 pool
+错误等 ZFS 事件时发送电子邮件。较新的 ZFS 软件包将该守护进程放在独立的 `zfs-zed` 软件包中，该软件包应已在
+{pve} 中默认安装。
 
-You can configure the daemon via the file `/etc/zfs/zed.d/zed.rc` with your
-favorite editor. The required setting for email notification is
-`ZED_EMAIL_ADDR`, which is set to `root` by default.
+可以使用喜欢的编辑器通过 `/etc/zfs/zed.d/zed.rc` 文件配置该守护进程。电子邮件通知所需设置为
+`ZED_EMAIL_ADDR`，默认设置为 `root`。
 
 --------
 ZED_EMAIL_ADDR="root"
 --------
 
-Please note {pve} forwards mails to `root` to the email address
-configured for the root user.
+请注意，{pve} 会将发往 `root` 的邮件转发到为 root 用户配置的电子邮件地址。
 
 
 [[sysadmin_zfs_limit_memory_usage]]
-Limit ZFS Memory Usage
-~~~~~~~~~~~~~~~~~~~~~~
+=== 限制 ZFS 内存使用
 
-ZFS uses '50 %' of the host memory for the **A**daptive **R**eplacement
-**C**ache (ARC) by default. For new installations starting with {pve} 8.1, the
-ARC usage limit will be set to '10 %' of the installed physical memory, clamped
-to a maximum of +16 GiB+. This value is written to `/etc/modprobe.d/zfs.conf`.
+默认情况下，ZFS 使用主机内存的 '50 %' 作为 **A**daptive **R**eplacement **C**ache
+（ARC）。从 {pve} 8.1 开始的新安装中，ARC 使用上限会设置为已安装物理内存的 '10 %'，最大限制为
++16 GiB+。该值写入 `/etc/modprobe.d/zfs.conf`。
 
-Allocating enough memory for the ARC is crucial for IO performance, so reduce it
-with caution. As a general rule of thumb, allocate at least +2 GiB Base + 1
-GiB/TiB-Storage+. For example, if you have a pool with +8 TiB+ of available
-storage space then you should use +10 GiB+ of memory for the ARC.
+为 ARC 分配足够内存对 I/O 性能至关重要，因此降低该值时应谨慎。一般经验是至少分配 +2 GiB Base + 1
+GiB/TiB-Storage+。例如，如果 pool 有 +8 TiB+ 可用存储空间，则应为 ARC 使用 +10 GiB+
+内存。
 
-ZFS also enforces a minimum value of +64 MiB+.
+ZFS 还会强制执行 +64 MiB+ 的最小值。
 
-You can change the ARC usage limit for the current boot (a reboot resets this
-change again) by writing to the +zfs_arc_max+ module parameter directly:
+可以通过直接写入 +zfs_arc_max+ 模块参数，为当前启动周期修改 ARC 使用上限（重启会重置该更改）：
 
 ----
  echo "$[10 * 1024*1024*1024]" >/sys/module/zfs/parameters/zfs_arc_max
 ----
 
-To *permanently change* the ARC limits, add (or change if already present) the
-following line to `/etc/modprobe.d/zfs.conf`:
+要*永久更改* ARC 限制，请在 `/etc/modprobe.d/zfs.conf` 中添加（或修改已有的）以下行：
 
 --------
 options zfs zfs_arc_max=8589934592
 --------
 
-This example setting limits the usage to 8 GiB ('8 * 2^30^').
+此示例设置会将使用量限制为 8 GiB（'8 * 2^30^'）。
 
-IMPORTANT: In case your desired +zfs_arc_max+ value is lower than or equal to
-+zfs_arc_min+ (which defaults to 1/32 of the system memory), +zfs_arc_max+ will
-be ignored unless you also set +zfs_arc_min+ to at most +zfs_arc_max - 1+.
+IMPORTANT: 如果期望的 +zfs_arc_max+ 值小于或等于 +zfs_arc_min+（默认为系统内存的 1/32），则
++zfs_arc_max+ 会被忽略，除非同时将 +zfs_arc_min+ 设置为至多 +zfs_arc_max - 1+。
 
 ----
 echo "$[8 * 1024*1024*1024 - 1]" >/sys/module/zfs/parameters/zfs_arc_min
 echo "$[8 * 1024*1024*1024]" >/sys/module/zfs/parameters/zfs_arc_max
 ----
 
-This example setting (temporarily) limits the usage to 8 GiB ('8 * 2^30^') on
-systems with more than 256 GiB of total memory, where simply setting
-+zfs_arc_max+ alone would not work.
+在总内存超过 256 GiB 的系统上，此示例设置会将使用量（临时）限制为 8 GiB（'8 * 2^30^'）。在这种情况下，单独设置
++zfs_arc_max+ 不会生效。
 
 [IMPORTANT]
 ====
-If your root file system is ZFS, you must update your initramfs every
-time this value changes:
+如果根文件系统是 ZFS，每次该值变化后都必须更新 initramfs：
 
 ----
 # update-initramfs -u -k all
 ----
 
-You *must reboot* to activate these changes.
+必须*重启*才能激活这些更改。
 ====
 
 
 [[zfs_swap]]
-SWAP on ZFS
-~~~~~~~~~~~
+=== ZFS 上的 SWAP
 
-Swap-space created on a zvol may generate some troubles, like blocking the
-server or generating a high IO load, often seen when starting a Backup
-to an external Storage.
+在 zvol 上创建的 swap 空间可能会产生一些问题，例如阻塞服务器或造成高 I/O 负载，这种情况常见于开始向外部存储执行备份时。
 
-We strongly recommend to use enough memory, so that you normally do not
-run into low memory situations. Should you need or want to add swap, it is
-preferred to create a partition on a physical disk and use it as a swap device.
-You can leave some space free for this purpose in the advanced options of the
-installer. Additionally, you can lower the
-``swappiness'' value. A good value for servers is 10:
+强烈建议使用足够内存，使系统通常不会遇到低内存情况。如果需要或希望添加 swap，首选是在物理磁盘上创建分区并将其用作 swap 设备。可以在安装程序高级选项中为此预留一些空间。此外，还可以降低
+``swappiness'' 值。服务器上的一个较好取值是 10：
 
 ----
 # sysctl -w vm.swappiness=10
 ----
 
-To make the swappiness persistent, open `/etc/sysctl.conf` with
-an editor of your choice and add the following line:
+要使 swappiness 持久化，请使用喜欢的编辑器打开 `/etc/sysctl.conf` 并添加以下行：
 
 --------
 vm.swappiness = 10
 --------
 
-.Linux kernel `swappiness` parameter values
+.Linux 内核 `swappiness` 参数值
 [width="100%",cols="<m,2d",options="header"]
 |===========================================================
-| Value               | Strategy
-| vm.swappiness = 0   | The kernel will swap only to avoid
-an 'out of memory' condition
-| vm.swappiness = 1   | Minimum amount of swapping without
-disabling it entirely.
-| vm.swappiness = 10  | This value is sometimes recommended to
-improve performance when sufficient memory exists in a system.
-| vm.swappiness = 60  | The default value.
-| vm.swappiness = 100 | The kernel will swap aggressively.
+|值                  |策略
+| vm.swappiness = 0   |内核只会为了避免 'out of memory' 情况而使用 swap
+| vm.swappiness = 1   |在不完全禁用 swap 的情况下，尽量减少 swap 使用量。
+| vm.swappiness = 10  |当系统内存充足时，有时建议使用该值以改善性能。
+| vm.swappiness = 60  |默认值。
+| vm.swappiness = 100 |内核会积极使用 swap。
 |===========================================================
 
 [[zfs_encryption]]
-Encrypted ZFS Datasets
-~~~~~~~~~~~~~~~~~~~~~~
+=== 加密的 ZFS Dataset
 
-WARNING: Native ZFS encryption in {pve} is experimental. Known limitations and
-issues include Replication with encrypted datasets
-footnote:[https://bugzilla.proxmox.com/show_bug.cgi?id=2350],
-as well as checksum errors when using Snapshots or ZVOLs.
-footnote:[https://github.com/openzfs/zfs/issues/11688]
+WARNING: {pve} 中的原生 ZFS 加密仍处于实验阶段。已知限制和问题包括加密 dataset 的复制
+footnote:[https://bugzilla.proxmox.com/show_bug.cgi?id=2350[Bugzilla #2350]]，以及使用快照或 ZVOL
+时的 checksum 错误。footnote:[https://github.com/openzfs/zfs/issues/11688[OpenZFS issue #11688]]
 
-ZFS on Linux version 0.8.0 introduced support for native encryption of
-datasets. After an upgrade from previous ZFS on Linux versions, the encryption
-feature can be enabled per pool:
+ZFS on Linux 0.8.0 版本引入了对 dataset 原生加密的支持。从较早 ZFS on Linux
+版本升级后，可以按 pool 启用加密特性：
 
 ----
 # zpool get feature@encryption tank
@@ -689,23 +548,17 @@ NAME  PROPERTY            VALUE            SOURCE
 tank  feature@encryption  enabled         local
 ----
 
-WARNING: There is currently no support for booting from pools with encrypted
-datasets using GRUB, and only limited support for automatically unlocking
-encrypted datasets on boot. Older versions of ZFS without encryption support
-will not be able to decrypt stored data.
+WARNING: 目前不支持使用 GRUB 从包含加密 dataset 的 pool 启动，并且对启动时自动解锁加密 dataset
+仅提供有限支持。不支持加密的旧版 ZFS 将无法解密已存储数据。
 
-NOTE: It is recommended to either unlock storage datasets manually after
-booting, or to write a custom unit to pass the key material needed for
-unlocking on boot to `zfs load-key`.
+NOTE: 建议在启动后手动解锁存储 dataset，或编写自定义 unit，在启动时将解锁所需 key material 传递给
+`zfs load-key`。
 
-WARNING: Establish and test a backup procedure before enabling encryption of
-production data. If the associated key material/passphrase/keyfile has been
-lost, accessing the encrypted data is no longer possible.
+WARNING: 在为生产数据启用加密前，请建立并测试备份流程。如果相关 key material/passphrase/keyfile
+丢失，将无法再访问加密数据。
 
-Encryption needs to be setup when creating datasets/zvols, and is inherited by
-default to child datasets. For example, to create an encrypted dataset
-`tank/encrypted_data` and configure it as storage in {pve}, run the following
-commands:
+加密需要在创建 dataset/zvol 时设置，并默认由子 dataset 继承。例如，要创建加密 dataset
+`tank/encrypted_data` 并将其配置为 {pve} 中的存储，请运行以下命令：
 
 ----
 # zfs create -o encryption=on -o keyformat=passphrase tank/encrypted_data
@@ -715,20 +568,17 @@ Re-enter passphrase:
 # pvesm add zfspool encrypted_zfs -pool tank/encrypted_data
 ----
 
-All guest volumes/disks create on this storage will be encrypted with the
-shared key material of the parent dataset.
+在该存储上创建的所有客户机卷/磁盘都会使用父 dataset 的共享 key material 加密。
 
-To actually use the storage, the associated key material needs to be loaded
-and the dataset needs to be mounted. This can be done in one step with:
+要实际使用该存储，需要加载关联的 key material 并挂载 dataset。可以通过以下命令一步完成：
 
 ----
 # zfs mount -l tank/encrypted_data
 Enter passphrase for 'tank/encrypted_data':
 ----
 
-It is also possible to use a (random) keyfile instead of prompting for a
-passphrase by setting the `keylocation` and `keyformat` properties, either at
-creation time or with `zfs change-key` on existing datasets:
+也可以通过设置 `keylocation` 和 `keyformat` 属性，使用（随机）keyfile 替代交互式输入 passphrase。这既可以在创建时设置，也可以通过
+`zfs change-key` 对现有 dataset 设置：
 
 ----
 # dd if=/dev/urandom of=/path/to/keyfile bs=32 count=1
@@ -736,144 +586,130 @@ creation time or with `zfs change-key` on existing datasets:
 # zfs change-key -o keyformat=raw -o keylocation=file:///path/to/keyfile tank/encrypted_data
 ----
 
-WARNING: When using a keyfile, special care needs to be taken to secure the
-keyfile against unauthorized access or accidental loss. Without the keyfile, it
-is not possible to access the plaintext data!
+WARNING: 使用 keyfile 时，必须特别注意保护 keyfile，避免未授权访问或意外丢失。没有 keyfile，就无法访问明文数据。
 
-A guest volume created underneath an encrypted dataset will have its
-`encryptionroot` property set accordingly. The key material only needs to be
-loaded once per encryptionroot to be available to all encrypted datasets
-underneath it.
+在加密 dataset 下创建的客户机卷会相应设置其 `encryptionroot` 属性。每个 encryptionroot 只需加载一次 key
+material，其下所有加密 dataset 即可使用。
 
-See the `encryptionroot`, `encryption`, `keylocation`, `keyformat` and
-`keystatus` properties, the `zfs load-key`, `zfs unload-key` and `zfs
-change-key` commands and the `Encryption` section from `man zfs` for more
-details and advanced usage.
+更多详情和高级用法，请参见 `encryptionroot`、`encryption`、`keylocation`、`keyformat` 和
+`keystatus` 属性，`zfs load-key`、`zfs unload-key`、`zfs change-key` 命令，以及
+`man zfs` 中的 `Encryption` 章节。
 
 
 [[zfs_compression]]
-Compression in ZFS
-~~~~~~~~~~~~~~~~~~
+=== ZFS 中的压缩
 
-When compression is enabled on a dataset, ZFS tries to compress all *new*
-blocks before writing them and decompresses them on reading. Already
-existing data will not be compressed retroactively.
+在 dataset 上启用压缩后，ZFS 会尝试在写入所有*新*块之前压缩它们，并在读取时解压缩。已存在的数据不会被追溯压缩。
 
-You can enable compression with:
+可以使用以下命令启用压缩：
 
 ----
 # zfs set compression=<algorithm> <dataset>
 ----
 
-We recommend using the `lz4` algorithm, because it adds very little CPU
-overhead. Other algorithms like `lzjb` and `gzip-N`, where `N` is an
-integer from `1` (fastest) to `9` (best compression ratio), are also
-available. Depending on the algorithm and how compressible the data is,
-having compression enabled can even increase I/O performance.
+建议使用 `lz4` 算法，因为它只会带来很小的 CPU 开销。也可以使用其他算法，例如 `lzjb` 和
+`gzip-N`，其中 `N` 是从 `1`（最快）到 `9`（最佳压缩率）的整数。根据算法和数据可压缩性不同，启用压缩甚至可能提升
+I/O 性能。
 
-You can disable compression at any time with:
+可以随时使用以下命令禁用压缩：
 
 ----
 # zfs set compression=off <dataset>
 ----
 
-Again, only new blocks will be affected by this change.
+同样，只有新块会受到该更改影响。
 
 
 [[sysadmin_zfs_special_device]]
-ZFS Special Device
-~~~~~~~~~~~~~~~~~~
+=== ZFS Special Device
 
-Since version 0.8.0 ZFS supports `special` devices. A `special` device in a
-pool is used to store metadata, deduplication tables, and optionally small
-file blocks.
+自 0.8.0 版本起，ZFS 支持 `special` 设备。pool 中的 `special` 设备用于存储元数据、去重表，并可选择存储小文件块。
 
-A `special` device can improve the speed of a pool consisting of slow spinning
-hard disks with a lot of metadata changes. For example workloads that involve
-creating, updating or deleting a large number of files will benefit from the
-presence of a `special` device. ZFS datasets can also be configured to store
-whole small files on the `special` device which can further improve the
-performance. Use fast SSDs for the `special` device.
+对于由慢速机械硬盘组成且存在大量元数据变更的 pool，`special` 设备可以提升速度。例如，涉及创建、更新或删除大量文件的工作负载会从
+`special` 设备中受益。还可以配置 ZFS dataset，将整个小文件存储在 `special` 设备上，从而进一步提升性能。`special`
+设备应使用快速 SSD。
 
-IMPORTANT: The redundancy of the `special` device should match the one of the
-pool, since the `special` device is a point of failure for the whole pool.
+IMPORTANT: `special` 设备的冗余级别应与 pool 保持一致，因为 `special` 设备是整个 pool 的故障点。
 
-WARNING: Adding a `special` device to a pool cannot be undone!
+WARNING: 向 pool 添加 `special` 设备后无法撤销。
 
-.Create a pool with `special` device and RAID-1:
+.创建带 `special` 设备和 RAID-1 的 pool：
 
 ----
 # zpool create -f -o ashift=12 <pool> mirror <device1> <device2> special mirror <device3> <device4>
 ----
 
-.Add a `special` device to an existing pool with RAID-1:
+.向现有 RAID-1 pool 添加 `special` 设备：
 
 ----
 # zpool add <pool> special mirror <device1> <device2>
 ----
 
-ZFS datasets expose the `special_small_blocks=<size>` property. `size` can be
-`0` to disable storing small file blocks on the `special` device or a power of
-two in the range between `512B` to `1M`. After setting the property new file
-blocks smaller than `size` will be allocated on the `special` device.
+ZFS dataset 暴露 `special_small_blocks=<size>` 属性。`size` 可以为 `0`，表示禁用在
+`special` 设备上存储小文件块；也可以是 `512B` 到 `1M` 范围内的 2 的幂。设置该属性后，小于 `size`
+的新文件块会分配到 `special` 设备上。
 
-IMPORTANT: If the value for `special_small_blocks` is greater than or equal to
-the `recordsize` (default `128K`) of the dataset, *all* data will be written to
-the `special` device, so be careful!
+IMPORTANT: 如果 `special_small_blocks` 的值大于或等于 dataset 的 `recordsize`（默认
+`128K`），则*所有*数据都会写入 `special` 设备，因此请谨慎设置。
 
-Setting the `special_small_blocks` property on a pool will change the default
-value of that property for all child ZFS datasets (for example all containers
-in the pool will opt in for small file blocks).
+在 pool 上设置 `special_small_blocks` 属性会改变所有子 ZFS dataset 该属性的默认值（例如该 pool
+中的所有容器都会选择使用小文件块）。
 
-.Opt in for all file smaller than 4K-blocks pool-wide:
+.在整个 pool 范围内选择将小于 4K-blocks 的所有文件写入 special device：
 
 ----
 # zfs set special_small_blocks=4K <pool>
 ----
 
-.Opt in for small file blocks for a single dataset:
+.为单个 dataset 选择使用小文件块：
 
 ----
 # zfs set special_small_blocks=4K <pool>/<filesystem>
 ----
 
-.Opt out from small file blocks for a single dataset:
+.为单个 dataset 退出使用小文件块：
 
 ----
 # zfs set special_small_blocks=0 <pool>/<filesystem>
 ----
 
 [[sysadmin_zfs_features]]
-ZFS Pool Features
-~~~~~~~~~~~~~~~~~
+=== ZFS Pool 特性
 
-Changes to the on-disk format in ZFS are only made between major version changes
-and are specified through *features*. All features, as well as the general
-mechanism are well documented in the `zpool-features(5)` manpage.
+ZFS 磁盘格式的变更只会在主版本变更之间进行，并通过 *features* 指定。所有 feature 以及通用机制都在
+`zpool-features(5)` manpage 中有详细记录。
 
-Since enabling new features can render a pool not importable by an older version
-of ZFS, this needs to be done actively by the administrator, by running
-`zpool upgrade` on the pool (see the `zpool-upgrade(8)` manpage).
+由于启用新 feature 可能导致旧版 ZFS 无法导入 pool，因此必须由管理员主动在 pool 上运行 `zpool upgrade`
+完成（参见 `zpool-upgrade(8)` manpage）。
 
-Unless you need to use one of the new features, there is no upside to enabling
-them.
+除非需要使用某个新 feature，否则启用它们没有额外收益。
 
-In fact, there are some downsides to enabling new features:
+事实上，启用新 feature 存在一些缺点：
 
-* A system with root on ZFS, that still boots using GRUB will become
-  unbootable if a new feature is active on the rpool, due to the incompatible
-  implementation of ZFS in GRUB.
-* The system will not be able to import any upgraded pool when booted with an
-  older kernel, which still ships with the old ZFS modules.
-* Booting an older {pve} ISO to repair a non-booting system will likewise not
-  work.
+* 如果 root on ZFS 系统仍使用 GRUB 启动，而 rpool 上激活了新 feature，由于 GRUB 中的 ZFS
+  实现不兼容，系统将无法启动。
+* 使用仍随附旧 ZFS 模块的旧内核启动时，系统将无法导入任何已升级的 pool。
+* 启动较旧的 {pve} ISO 来修复无法启动的系统也同样不可行。
 
-IMPORTANT: Do *not* upgrade your rpool if your system is still booted with
-GRUB, as this will render your system unbootable. This includes systems
-installed before {pve} 5.4, and systems booting with legacy BIOS boot (see
-xref:sysboot_determine_bootloader_used[how to determine the bootloader]).
+IMPORTANT: 如果系统仍使用 GRUB 启动，*不要*升级 rpool，因为这会导致系统无法启动。这包括在 {pve}
+5.4 之前安装的系统，以及使用 legacy BIOS boot 启动的系统（参见
+xref:sysboot_determine_bootloader_used[如何判断所使用的 bootloader]）。
 
-.Enable new features for a ZFS pool:
+.为 ZFS pool 启用新 feature：
 ----
 # zpool upgrade <pool>
+----
+
+=== 常用命令示例
+
+查看所有 ZFS pool 的状态：
+
+----
+# zpool status
+----
+
+列出 ZFS dataset：
+
+----
+# zfs list
 ----

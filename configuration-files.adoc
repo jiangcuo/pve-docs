@@ -1,28 +1,22 @@
 [[configuration_files]]
-General
-=======
+= 常规
 
-Most configuration files in {pve} reside on the
-xref:chapter_pmxcfs[shared cluster file system] mounted at `/etc/pve`. There are
-exceptions, like the node-specific configuration file for backups in
-`/etc/vzdump.conf`.
+{pve} 中的大多数配置文件都位于挂载在 `/etc/pve` 的
+xref:chapter_pmxcfs[共享集群文件系统]上。也存在例外，例如用于备份的节点特定
+配置文件 `/etc/vzdump.conf`。
 
-Usually, the properties in a configuration file are derived from the JSON Schema
-that is also used for the associated API endpoints.
+通常，配置文件中的属性派生自相关 API 端点同样使用的 JSON Schema。
 
 [[configuration_files_casing]]
-Casing of Property Names
-------------------------
+== 属性名称的大小写形式
 
-Historically, longer properties (and sub-properties) often used `snake_case`, or
-were written as one word. This can likely be attributed to the {pve} stack being
-developed mostly in the programming language Perl, where access to properties
-using `kebab-case` requires additional quotes, as well as less style enforcement
-during early development, so different developers used different conventions.
+从历史上看，较长的属性（以及子属性）通常使用 `snake_case`，或者写成一个单词。
+这很可能是因为 {pve} 技术栈主要使用 Perl 编程语言开发，在 Perl 中访问使用
+`kebab-case` 的属性需要额外的引号；同时早期开发阶段样式约束较少，不同开发者
+采用了不同约定。
 
-For new properties, `kebab-case` is the preferred way and it is planned to
-introduce aliases for existing `snake_case` properties, and in the long term,
-switch over to `kebab-case` for the API, CLI and in-use configuration files
-while maintaining backwards-compatibility when restoring a configuration.
+对于新属性，首选 `kebab-case`。计划为现有 `snake_case` 属性引入别名，并在长期
+方向上，在保持还原配置时向后兼容的同时，将 API、CLI 和正在使用的配置文件切换
+为 `kebab-case`。
 
 include::datacenter.cfg.adoc[]

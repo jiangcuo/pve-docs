@@ -1,45 +1,42 @@
 ifdef::manvolnum[]
-spiceproxy(8)
-=============
+= spiceproxy(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-spiceproxy - SPICE Proxy Service
+spiceproxy - SPICE 代理服务
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::spiceproxy.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-spiceproxy - SPICE Proxy Service
-================================
+= spiceproxy - SPICE 代理服务
 endif::manvolnum[]
 
-http://www.spice-space.org[SPICE] (the Simple Protocol for Independent
-Computing Environments) is an open remote computing solution,
-providing client access to remote displays and devices (e.g. keyboard,
-mouse, audio). The main use case is to get remote access to virtual
-machines and container.
+http://www.spice-space.org[SPICE]（Simple Protocol for Independent Computing
+Environments）是一种开放的远程计算解决方案，可让客户端访问远程显示和设备
+（例如键盘、鼠标、音频）。主要使用场景是远程访问虚拟机和容器。
 
-This daemon listens on TCP port 3128, and implements an HTTP proxy to
-forward 'CONNECT' request from the SPICE client to the correct {pve}
-VM. It runs as user `www-data` and has very limited permissions.
+该守护进程监听 TCP 端口 3128，并实现一个 HTTP 代理，用于将 SPICE 客户端发出的
+'CONNECT' 请求转发到正确的 {pve} VM。它以用户 `www-data` 运行，并且权限非常
+有限。
 
 
-Host based Access Control
--------------------------
+== 基于主机的访问控制
 
-It is possible to configure "apache2" like access control
-lists. Values are read from file `/etc/default/pveproxy`.
-See `pveproxy` documentation for details.
+可以配置类似 "apache2" 的访问控制列表。其值从 `/etc/default/pveproxy` 文件读取。
+详细信息请参阅 `pveproxy` 文档。
+
+.常用命令示例
+----
+# spiceproxy status
+# systemctl status spiceproxy.service
+----
 
 
 ifdef::manvolnum[]

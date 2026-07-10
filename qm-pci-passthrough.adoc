@@ -1,112 +1,94 @@
 [[qm_pci_passthrough]]
-PCI(e) Passthrough
-------------------
+== PCI(e) 直通
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-PCI(e) passthrough is a mechanism to give a virtual machine control over
-a PCI device from the host. This can have some advantages over using
-virtualized hardware, for example lower latency, higher performance, or more
-features (e.g., offloading).
+PCI(e) 直通是一种机制，可将主机上的 PCI 设备控制权交给虚拟机。相比使用虚拟化
+硬件，它可能具备一些优势，例如更低延迟、更高性能，或更多功能（例如 offloading）。
 
-But, if you pass through a device to a virtual machine, you cannot use that
-device anymore on the host or in any other VM.
+但是，如果将某个设备直通给虚拟机，就无法再在主机或任何其他虚拟机中使用该设备。
 
-Note that, while PCI passthrough is available for i440fx and q35 machines, PCIe
-passthrough is only available on q35 machines. This does not mean that
-PCIe capable devices that are passed through as PCI devices will only run at
-PCI speeds. Passing through devices as PCIe just sets a flag for the guest to
-tell it that the device is a  PCIe device instead of a "really fast legacy PCI
-device". Some guest applications benefit from this.
+请注意，PCI 直通可用于 i440fx 和 q35 机型，而 PCIe 直通仅可用于 q35 机型。这并
+不意味着支持 PCIe 的设备在以 PCI 设备方式直通时只能以 PCI 速度运行。以 PCIe
+方式直通设备只是为客户机设置一个标志，告诉它该设备是 PCIe 设备，而不是“非常快
+的传统 PCI 设备”。某些客户机应用会因此受益。
 
-General Requirements
-~~~~~~~~~~~~~~~~~~~~
+=== 通用要求
 
-Since passthrough is performed on real hardware, it needs to fulfill some
-requirements. A brief overview of these requirements is given below, for more
-information on specific devices, see
-https://pve.proxmox.com/wiki/PCI_Passthrough[PCI Passthrough Examples].
+由于直通是在真实硬件上执行的，因此需要满足一些要求。下面简要概述这些要求；有关
+特定设备的更多信息，请参见
+https://pve.proxmox.com/wiki/PCI_Passthrough[PCI Passthrough Examples]。
 
-Hardware
-^^^^^^^^
-Your hardware needs to support `IOMMU` (*I*/*O* **M**emory **M**anagement
-**U**nit) interrupt remapping, this includes the CPU and the motherboard.
+==== 硬件
+你的硬件需要支持具备 interrupt remapping 能力的 `IOMMU`（*I*/*O* **M**emory
+**M**anagement **U**nit），这包括 CPU 和主板。
 
-Generally, Intel systems with VT-d and AMD systems with AMD-Vi support this.
-But it is not guaranteed that everything will work out of the box, due
-to bad hardware implementation and missing or low quality drivers.
+通常，带 VT-d 的 Intel 系统以及带 AMD-Vi 的 AMD 系统支持此功能。但由于硬件实现
+不佳、驱动缺失或驱动质量较低，并不能保证所有配置都能开箱即用。
 
-Further, server grade hardware has often better support than consumer grade
-hardware, but even then, many modern system can support this.
+此外，服务器级硬件通常比消费级硬件提供更好的支持，但即便如此，许多现代系统也
+可以支持此功能。
 
-Please refer to your hardware vendor to check if they support this feature
-under Linux for your specific setup.
+请咨询硬件供应商，确认其是否在你的特定配置下支持 Linux 上的此功能。
 
-Determining PCI Card Address
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 确定 PCI 卡地址
 
-The easiest way is to use the GUI to add a device of type "Host PCI" in the VM's
-hardware tab. Alternatively, you can use the command line.
+最简单的方法是在虚拟机的硬件选项卡中，通过 GUI 添加类型为 "Host PCI" 的设备。
+也可以使用命令行。
 
-You can locate your card using
+可以使用以下命令定位你的设备：
 
 ----
  lspci
 ----
 
-Configuration
-^^^^^^^^^^^^^
+==== 配置
 
-Once you ensured that your hardware supports passthrough, you will need to do
-some configuration to enable PCI(e) passthrough.
+确认硬件支持直通后，需要进行一些配置以启用 PCI(e) 直通。
 
 .IOMMU
 
-You will have to enable IOMMU support in your BIOS/UEFI. Usually the
-corresponding setting is called `IOMMU` or `VT-d`, but you should find the exact
-option name in the manual of your motherboard.
+需要在 BIOS/UEFI 中启用 IOMMU 支持。通常对应设置称为 `IOMMU` 或 `VT-d`，但具体
+选项名称应以主板手册为准。
 
-With AMD CPUs IOMMU is enabled by default. With recent kernels (6.8 or newer),
-this is also true for Intel CPUs. On older kernels, it is necessary to enable
-it on Intel CPUs via the
-xref:sysboot_edit_kernel_cmdline[kernel command line] by adding:
+在 AMD CPU 上，IOMMU 默认启用。对于较新的内核（6.8 或更新版本），Intel CPU 也
+是如此。在较旧内核上，需要通过在
+xref:sysboot_edit_kernel_cmdline[内核命令行]中添加以下内容，为 Intel
+CPU 启用该功能：
 
 ----
  intel_iommu=on
 ----
 
-.IOMMU Passthrough Mode
+.IOMMU 直通模式
 
-If your hardware supports IOMMU passthrough mode, enabling this mode might
-increase performance.
-This is because VMs then bypass the (default) DMA translation normally
-performed by the hyper-visor and instead pass DMA requests directly to the
-hardware IOMMU. To enable these options, add:
+如果硬件支持 IOMMU 直通模式，启用该模式可能会提升性能。这是因为虚拟机会绕过
+hypervisor 通常执行的（默认）DMA 转换，而是将 DMA 请求直接传递给硬件 IOMMU。
+要启用这些选项，请添加：
 
 ----
  iommu=pt
 ----
 
-to the xref:sysboot_edit_kernel_cmdline[kernel commandline].
+到 xref:sysboot_edit_kernel_cmdline[内核命令行]。
 
-ON arm64/loongarch64 platforms.IOMMU passthrough has enabled by default.IF you not use pve-port-kernel,to enable these options, add:
+在 arm64/loongarch64 平台上，IOMMU 直通默认已启用。如果未使用 pve-port-kernel，
+要启用这些选项，请添加：
 
 ----
  iommu.passthrough=1
 ----
 
-.Kernel Modules
+.内核模块
 
-You have to make sure the following modules are loaded. This can be achieved by
-adding them to `'/etc/modules''.
+必须确保加载以下模块。可以通过将它们添加到 `'/etc/modules''` 来实现。
 
-.Mediated devices passthrough
+.中介设备直通
 [NOTE]
 ====
-If passing through mediated devices (e.g. vGPUs), the following is not needed.
-In these cases, the device will be owned by the appropriate host-driver
-directly.
+如果直通 mediated devices（例如 vGPU），则不需要以下内容。在这些情况下，设备会
+直接由相应主机驱动拥有。
 ====
 
 ----
@@ -116,130 +98,127 @@ directly.
 ----
 
 [[qm_pci_passthrough_update_initramfs]]
-After changing anything modules related, you need to refresh your
-`initramfs`. On {pve} this can be done by executing:
+更改任何与模块相关的内容后，需要刷新 `initramfs`。在 {pve} 上可以执行：
 
 ----
 # update-initramfs -u -k all
 ----
 
-To check if the modules are being loaded, the output of
+要检查模块是否已加载，以下命令的输出：
 
 ----
 # lsmod | grep vfio
 ----
 
-should include the four modules from above.
+应包含上面列出的四个模块。
 
-.Finish Configuration
+.完成配置
 
-Finally reboot to bring the changes into effect and check that it is indeed
-enabled.
+最后重启以使变更生效，并检查它确实已启用。
 
 ----
 # dmesg |grep iommu
 ----
 
-should display that `Adding to iommu group X`,  depending on hardware and kernel the exact message can vary.
+应显示 `Adding to iommu group X`。根据硬件和内核不同，确切消息可能有所差异。
 
-For notes on how to troubleshoot or verify if IOMMU is working as intended, please
-see the https://pve.proxmox.com/wiki/PCI_Passthrough#Verifying_IOMMU_parameters[Verifying IOMMU Parameters]
-section in our wiki.
+有关如何排查或验证 IOMMU 是否按预期工作的说明，请参见我们 Wiki 中的
+https://pve.proxmox.com/wiki/PCI_Passthrough#Verifying_IOMMU_parameters[Verifying IOMMU Parameters]
+章节。
 
-It is also important that the device(s) you want to pass through
-are in a *separate* `IOMMU` group. This can be checked with a call to the {pve}
-API:
+还需要确保要直通的设备位于*单独*的 `IOMMU` 组中。可以通过调用 {pve} API 检查：
 
 ----
 # pvesh get /nodes/{nodename}/hardware/pci --pci-class-blacklist ""
 ----
 
-It is okay if the device is in an `IOMMU` group together with its functions
-(e.g. a GPU with the HDMI Audio device) or with its root port or PCI(e) bridge.
+如果设备与其功能（例如 GPU 及其 HDMI Audio 设备）、root port 或 PCI(e) bridge
+位于同一个 `IOMMU` 组中，这是可以接受的。
+
+==== 常用命令示例
+
+以下命令常用于确认 PCI 设备、驱动绑定和 IOMMU 分组状态：
+
+----
+# lspci -nn
+# lspci -nnk
+# pvesh get /nodes/{nodename}/hardware/pci --pci-class-blacklist ""
+----
 
 .PCI(e) slots
 [NOTE]
 ====
-Some platforms handle their physical PCI(e) slots differently. So, sometimes
-it can help to put the card in a another PCI(e) slot, if you do not get the
-desired `IOMMU` group separation.
+某些平台对物理 PCI(e) 插槽的处理方式不同。因此，如果没有得到期望的 `IOMMU` 组
+隔离效果，有时将卡插入另一个 PCI(e) 插槽会有所帮助。
 ====
 
-.Unsafe interrupts
+.不安全中断
 [NOTE]
 ====
-For some platforms(arm64/loongarch64), it may be necessary to allow unsafe interrupts.
-For this add  the following line in a file ending with `.conf' file in
-*/etc/modprobe.d/*:
+对于某些平台（arm64/loongarch64），可能需要允许不安全中断。为此，请在
+*/etc/modprobe.d/* 中以 `.conf' 结尾的文件里添加以下行：
 
 ----
  options vfio_iommu_type1 allow_unsafe_interrupts=1
 ----
 
-Please be aware that this option can make your system unstable.
+请注意，此选项可能使系统不稳定。
 ====
 
-GPU Passthrough Notes
-^^^^^^^^^^^^^^^^^^^^^
+==== GPU 直通说明
 
-It is not possible to display the frame buffer of the GPU via NoVNC or SPICE on
-the {pve} web interface.
+无法通过 {pve} Web 界面中的 NoVNC 或 SPICE 显示 GPU 的 framebuffer。
 
-When passing through a whole GPU or a vGPU and graphic output is wanted, one
-has to either physically connect a monitor to the card, or configure a remote
-desktop software (for example, VNC or RDP) inside the guest.
+直通整块 GPU 或 vGPU 且需要图形输出时，必须将显示器物理连接到该显卡，或者在
+客户机内部配置远程桌面软件（例如 VNC 或 RDP）。
 
-If you want to use the GPU as a hardware accelerator, for example, for
-programs using OpenCL or CUDA, this is not required.
+如果只是希望将 GPU 用作硬件加速器，例如用于使用 OpenCL 或 CUDA 的程序，则不
+需要这样做。
 
-Host Device Passthrough
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 主机设备直通
 
-The most used variant of PCI(e) passthrough is to pass through a whole
-PCI(e) card, for example a GPU or a network card.
+PCI(e) 直通最常见的形式是直通整块 PCI(e) 卡，例如 GPU 或网卡。
 
 
-Host Configuration
-^^^^^^^^^^^^^^^^^^
+==== 主机配置
 
-{pve} tries to automatically make the PCI(e) device unavailable for the host.
-However, if this doesn't work, there are two things that can be done:
+{pve} 会尝试自动使 PCI(e) 设备对主机不可用。不过，如果该机制不起作用，可以采取
+两种方式：
 
-* pass the device IDs to the options of the 'vfio-pci' modules by adding
+* 通过添加以下内容，将设备 ID 传递给 'vfio-pci' 模块选项
 +
 ----
  options vfio-pci ids=1234:5678,4321:8765
 ----
 +
-to a .conf file in */etc/modprobe.d/* where `1234:5678` and `4321:8765` are
-the vendor and device IDs obtained by:
+到 */etc/modprobe.d/* 中的 .conf 文件，其中 `1234:5678` 和 `4321:8765` 是通过
+以下命令获得的厂商和设备 ID：
 +
 ----
 # lspci -nn
 ----
 
-* blacklist the driver on the host completely, ensuring that it is free to bind
-for passthrough, with
+* 在主机上完全 blacklist 该驱动，确保它可以自由绑定用于直通，使用
 +
 ----
  blacklist DRIVERNAME
 ----
 +
-in a .conf file in */etc/modprobe.d/*.
+写入 */etc/modprobe.d/* 中的 .conf 文件。
 +
-To find the drivername, execute
+要查找驱动名称，请执行
 +
 ----
 # lspci -k
 ----
 +
-for example:
+例如：
 +
 ----
 # lspci -k | grep -A 3 "VGA"
 ----
 +
-will output something similar to
+会输出类似如下内容：
 +
 ----
 01:00.0 VGA compatible controller: NVIDIA Corporation GP108 [GeForce GT 1030] (rev a1)
@@ -248,329 +227,282 @@ will output something similar to
 	Kernel modules: <some-module>
 ----
 +
-Now we can blacklist the drivers by writing them into a .conf file:
+现在可以将驱动写入 .conf 文件来 blacklist 它们：
 +
 ----
 echo "blacklist <some-module>" >> /etc/modprobe.d/blacklist.conf
 ----
 
-For both methods you need to
-xref:qm_pci_passthrough_update_initramfs[update the `initramfs`] again and
-reboot after that.
+对于这两种方法，都需要再次
+xref:qm_pci_passthrough_update_initramfs[更新 `initramfs`]，然后重启。
 
-Should this not work, you might need to set a soft dependency to load the gpu
-modules before loading 'vfio-pci'. This can be done with the 'softdep' flag, see
-also the manpages on 'modprobe.d' for more information.
+如果仍然不起作用，可能需要设置软依赖，使 GPU 模块在加载 'vfio-pci' 之前加载。
+可以使用 'softdep' 标志实现；更多信息也可参见 'modprobe.d' 的 manpage。
 
-For example, if you are using drivers named <some-module>:
+例如，如果使用名为 <some-module> 的驱动：
 
 ----
 # echo "softdep <some-module> pre: vfio-pci" >> /etc/modprobe.d/<some-module>.conf
 ----
 
 
-.Verify Configuration
+.验证配置
 
-To check if your changes were successful, you can use
+要检查变更是否成功，可以使用
 
 ----
 # lspci -nnk
 ----
 
-and check your device entry. If it says
+并检查设备条目。如果其中显示：
 
 ----
 Kernel driver in use: vfio-pci
 ----
 
-or the 'in use' line is missing entirely, the device is ready to be used for
-passthrough.
+或者完全没有 'in use' 行，则该设备已准备好用于直通。
 
-.Mediated devices
+.中介设备
 [NOTE]
 ====
-For mediated devices this line will differ as the device will be owned as the
-host driver directly, not 'vfio-pci'.
+对于 mediated devices，该行会有所不同，因为设备会直接由主机驱动拥有，而不是
+'vfio-pci'。
 ====
 
 [[qm_pci_passthrough_vm_config]]
-VM Configuration
-^^^^^^^^^^^^^^^^
-When passing through a GPU, the best compatibility is reached when using
-'q35' as machine type, 'OVMF' ('UEFI' for VMs) instead of SeaBIOS and PCIe
-instead of PCI. Note that if you want to use 'OVMF' for GPU passthrough, the
-GPU needs to have an UEFI capable ROM, otherwise use SeaBIOS instead. To check if
-the ROM is UEFI capable, see the
+==== 虚拟机配置
+直通 GPU 时，使用 'q35' 作为机型、使用 'OVMF'（虚拟机中的 'UEFI'）而不是
+SeaBIOS、使用 PCIe 而不是 PCI，可获得最佳兼容性。请注意，如果要使用 'OVMF'
+进行 GPU 直通，GPU 需要具备支持 UEFI 的 ROM；否则请改用 SeaBIOS。要检查 ROM
+是否支持 UEFI，请参见
 https://pve.proxmox.com/wiki/PCI_Passthrough#How_to_know_if_a_graphics_card_is_UEFI_.28OVMF.29_compatible[PCI Passthrough Examples]
-wiki.
+Wiki。
 
-Furthermore, using OVMF, disabling vga arbitration may be possible, reducing the
-amount of legacy code needed to be run during boot. To disable vga arbitration:
+此外，在使用 OVMF 时，可能可以禁用 vga arbitration，从而减少启动期间需要运行的
+legacy code 数量。要禁用 vga arbitration：
 
 ----
  echo "options vfio-pci ids=<vendor-id>,<device-id> disable_vga=1" > /etc/modprobe.d/vfio.conf
 ----
 
-replacing the <vendor-id> and <device-id> with the ones obtained from:
+将 <vendor-id> 和 <device-id> 替换为从以下命令获取的值：
 
 ----
 # lspci -nn
 ----
 
-PCI devices can be added in the web interface in the hardware section of the VM.
-Alternatively, you can use the command line; set the *hostpciX* option in the VM
-configuration, for example by executing:
+可以在 Web 界面的虚拟机硬件部分添加 PCI 设备。也可以使用命令行；在虚拟机配置
+中设置 *hostpciX* 选项，例如执行：
 
 ----
 # qm set VMID -hostpci0 00:02.0
 ----
 
-or by adding a line to the VM configuration file:
+或者向虚拟机配置文件添加一行：
 
 ----
  hostpci0: 00:02.0
 ----
 
 
-If your device has multiple functions (e.g., ``00:02.0`' and ``00:02.1`' ),
-you can pass them through all together with the shortened syntax ``00:02`'.
-This is equivalent with checking the ``All Functions`' checkbox in the
-web interface.
+如果设备有多个功能（例如 ``00:02.0`' 和 ``00:02.1`'），可以使用缩写语法
+``00:02`' 将它们一起直通。这等同于在 Web 界面中勾选 ``All Functions`' 复选框。
 
-There are some options to which may be necessary, depending on the device
-and guest OS:
+根据设备和客户机操作系统不同，可能需要使用一些选项：
 
-* *x-vga=on|off* marks the PCI(e) device as the primary GPU of the VM.
-With this enabled the *vga* configuration option will be ignored.
+* *x-vga=on|off* 将 PCI(e) 设备标记为虚拟机的主 GPU。启用后，*vga* 配置选项会被
+忽略。
 
-* *pcie=on|off* tells {pve} to use a PCIe or PCI port. Some guests/device
-combination require PCIe rather than PCI. PCIe is only available for 'q35'
-machine types.
+* *pcie=on|off* 告诉 {pve} 使用 PCIe 还是 PCI 端口。某些客户机/设备组合需要
+PCIe 而不是 PCI。PCIe 仅适用于 'q35' 机型。
 
-* *rombar=on|off* makes the firmware ROM visible for the guest. Default is on.
-Some PCI(e) devices need this disabled.
+* *rombar=on|off* 使 firmware ROM 对客户机可见。默认为 on。某些 PCI(e) 设备需要
+禁用此项。
 
-* *ramfb=on|off* show ramfb device for vgpu device.default is on.
+* *ramfb=on|off* 为 vgpu 设备显示 ramfb 设备。默认为 on。
 
-* *romfile=<path>*, is an optional path to a ROM file for the device to use.
-This is a relative path under */usr/share/kvm/*.
+* *romfile=<path>* 是设备使用的 ROM 文件的可选路径。这是 */usr/share/kvm/* 下的
+相对路径。
 
-.Example
+.示例
 
-An example of PCIe passthrough with a GPU set to primary:
+以下示例展示将 GPU 设置为主设备的 PCIe 直通：
 
 ----
 # qm set VMID -hostpci0 02:00,pcie=on,x-vga=on
 ----
 
-.PCI ID overrides
+.PCI ID 覆盖
 
-You can override the PCI vendor ID, device ID, and subsystem IDs that will be
-seen by the guest. This is useful if your device is a variant with an ID that
-your guest's drivers don't recognize, but you want to force those drivers to be
-loaded anyway (e.g. if you know your device shares the same chipset as a
-supported variant).
+可以覆盖客户机看到的 PCI vendor ID、device ID 和 subsystem ID。如果设备是某个
+变体，其 ID 无法被客户机驱动识别，但你仍希望强制加载这些驱动，这会很有用
+（例如你知道该设备与受支持变体使用相同芯片组）。
 
-The available options are `vendor-id`, `device-id`, `sub-vendor-id`, and
-`sub-device-id`. You can set any or all of these to override your device's
-default IDs.
+可用选项包括 `vendor-id`、`device-id`、`sub-vendor-id` 和 `sub-device-id`。可以
+设置其中任意一个或全部选项，以覆盖设备的默认 ID。
 
-For example:
+例如：
 
 ----
 # qm set VMID -hostpci0 02:00,device-id=0x10f6,sub-vendor-id=0x0000
 ----
 
-SR-IOV
-~~~~~~
+=== SR-IOV
 
-Another variant for passing through PCI(e) devices is to use the hardware
-virtualization features of your devices, if available.
+PCI(e) 设备直通的另一种形式，是在设备可用时使用其硬件虚拟化功能。
 
-.Enabling SR-IOV
+.启用 SR-IOV
 [NOTE]
 ====
-To use SR-IOV, platform support is especially important. It may be necessary
-to enable this feature in the BIOS/UEFI first, or to use a specific PCI(e) port
-for it to work. In doubt, consult the manual of the platform or contact its
-vendor.
+要使用 SR-IOV，平台支持尤其重要。可能需要先在 BIOS/UEFI 中启用此功能，或者使用
+特定 PCI(e) 端口才能工作。如有疑问，请查阅平台手册或联系供应商。
 ====
 
-'SR-IOV' (**S**ingle-**R**oot **I**nput/**O**utput **V**irtualization) enables
-a single device to provide multiple 'VF' (**V**irtual **F**unctions) to the
-system. Each of those 'VF' can be used in a different VM, with full hardware
-features and also better performance and lower latency than software
-virtualized devices.
+'SR-IOV'（**S**ingle-**R**oot **I**nput/**O**utput **V**irtualization）允许单个
+设备向系统提供多个 'VF'（**V**irtual **F**unctions）。每个 'VF' 都可以在不同虚拟机
+中使用，具备完整硬件功能，并且相比软件虚拟化设备具有更好的性能和更低延迟。
 
-Currently, the most common use case for this are NICs (**N**etwork
-**I**nterface **C**ard) with SR-IOV support, which can provide multiple VFs per
-physical port. This allows using features such as checksum offloading, etc. to
-be used inside a VM, reducing the (host) CPU overhead.
+目前最常见的使用场景是支持 SR-IOV 的 NIC（**N**etwork **I**nterface **C**ard），
+它们可以为每个物理端口提供多个 VF。这允许在虚拟机内部使用 checksum offloading
+等功能，从而降低（主机）CPU 开销。
 
-Host Configuration
-^^^^^^^^^^^^^^^^^^
+==== 主机配置
 
-Generally, there are two methods for enabling virtual functions on a device.
+通常，有两种方法可在设备上启用 virtual functions。
 
-* sometimes there is an option for the driver module e.g. for some
-Intel drivers
+* 有时驱动模块会提供相应选项，例如某些 Intel 驱动
 +
 ----
  max_vfs=4
 ----
 +
-which could be put file with '.conf' ending under */etc/modprobe.d/*.
-(Do not forget to update your initramfs after that)
+可将其放入 */etc/modprobe.d/* 下以 '.conf' 结尾的文件中。
+（之后不要忘记更新 initramfs）
 +
-Please refer to your driver module documentation for the exact
-parameters and options.
+请参阅驱动模块文档以了解确切参数和选项。
 
-* The second, more generic, approach is using the `sysfs`.
-If a device and driver supports this you can change the number of VFs on
-the fly. For example, to setup 4 VFs on device 0000:01:00.0 execute:
+* 第二种更通用的方法是使用 `sysfs`。如果设备和驱动支持此方式，可以动态更改 VF
+数量。例如，要在设备 0000:01:00.0 上设置 4 个 VF，请执行：
 +
 ----
 # echo 4 > /sys/bus/pci/devices/0000:01:00.0/sriov_numvfs
 ----
 +
-To make this change persistent you can use the `sysfsutils` Debian package.
-After installation configure it via */etc/sysfs.conf* or a `FILE.conf' in
-*/etc/sysfs.d/*.
+要使此变更持久化，可以使用 Debian 软件包 `sysfsutils`。安装后，通过
+*/etc/sysfs.conf* 或 */etc/sysfs.d/* 中的 `FILE.conf' 进行配置。
 
-VM Configuration
-^^^^^^^^^^^^^^^^
+==== 虚拟机配置
 
-After creating VFs, you should see them as separate PCI(e) devices when
-outputting them with `lspci`. Get their ID and pass them through like a
-xref:qm_pci_passthrough_vm_config[normal PCI(e) device].
+创建 VF 后，使用 `lspci` 输出时应能看到它们作为独立 PCI(e) 设备出现。获取它们的
+ID，并像 xref:qm_pci_passthrough_vm_config[普通 PCI(e) 设备]一样进行直通。
 
-Mediated Devices (vGPU, GVT-g)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 中介设备（vGPU、GVT-g）
 
-Mediated devices are another method to reuse features and performance from
-physical hardware for virtualized hardware. These are found most common in
-virtualized GPU setups such as Intel's GVT-g and NVIDIA's vGPUs used in their
-GRID technology.
+中介设备是另一种让虚拟化硬件复用物理硬件功能和性能的方法。它们最常见
+于虚拟化 GPU 部署，例如 Intel 的 GVT-g，以及 NVIDIA 在其 GRID 技术中使用的
+vGPU。
 
-With this, a physical Card is able to create virtual cards, similar to SR-IOV.
-The difference is that mediated devices do not appear as PCI(e) devices in the
-host, and are such only suited for using in virtual machines.
+通过这种方式，物理卡可以创建虚拟卡，类似于 SR-IOV。区别在于中介设备
+不会在主机中显示为 PCI(e) 设备，因此只适合在虚拟机中使用。
 
-Host Configuration
-^^^^^^^^^^^^^^^^^^
+==== 主机配置
 
-In general your card's driver must support that feature, otherwise it will
-not work. So please refer to your vendor for compatible drivers and how to
-configure them.
+通常，你的显卡驱动必须支持该功能，否则无法工作。因此，请向供应商了解兼容驱动
+以及配置方法。
 
-Intel's drivers for GVT-g are integrated in the Kernel and should work
-with 5th, 6th and 7th generation Intel Core Processors, as well as E3 v4, E3
-v5 and E3 v6 Xeon Processors.
+Intel 的 GVT-g 驱动已集成在内核中，应可与第 5、第 6、第 7 代 Intel Core 处理器，
+以及 E3 v4、E3 v5 和 E3 v6 Xeon 处理器配合使用。
 
-To enable it for Intel Graphics, you have to make sure to load the module
-'kvmgt' (for example via `/etc/modules`) and to enable it on the
-xref:sysboot_edit_kernel_cmdline[Kernel commandline] and add the following parameter:
+要为 Intel Graphics 启用它，必须确保加载 'kvmgt' 模块（例如通过 `/etc/modules`），
+并在 xref:sysboot_edit_kernel_cmdline[内核命令行]中启用它，添加以下参数：
 
 ----
  i915.enable_gvt=1
 ----
 
-After that remember to
-xref:qm_pci_passthrough_update_initramfs[update the `initramfs`],
-and reboot your host.
+之后记得 xref:qm_pci_passthrough_update_initramfs[更新 `initramfs`]，并重启
+主机。
 
-VM Configuration
-^^^^^^^^^^^^^^^^
+==== 虚拟机配置
 
-To use a mediated device, simply specify the `mdev` property on a `hostpciX`
-VM configuration option.
+要使用 mediated device，只需在 `hostpciX` 虚拟机配置选项上指定 `mdev` 属性。
 
-You can get the supported devices via the 'sysfs'. For example, to list the
-supported types for the device '0000:00:02.0' you would simply execute:
+可以通过 'sysfs' 获取支持的设备。例如，要列出设备 '0000:00:02.0' 支持的类型，只需
+执行：
 
 ----
 # ls /sys/bus/pci/devices/0000:00:02.0/mdev_supported_types
 ----
 
-Each entry is a directory which contains the following important files:
+每个条目都是一个目录，其中包含以下重要文件：
 
-* 'available_instances' contains the amount of still available instances of
-this type, each 'mdev' use in a VM reduces this.
-* 'description' contains a short description about the capabilities of the type
-* 'create' is the endpoint to create such a device, {pve} does this
-automatically for you, if a 'hostpciX' option with `mdev` is configured.
+* 'available_instances' 包含该类型仍可用的实例数量；虚拟机中每使用一个 'mdev' 都会
+减少该数量。
+* 'description' 包含该类型能力的简短描述。
+* 'create' 是创建此类设备的端点；如果配置了带 `mdev` 的 'hostpciX' 选项，{pve}
+会自动为你执行此操作。
 
-Example configuration with an `Intel GVT-g vGPU` (`Intel Skylake 6700k`):
+使用 `Intel GVT-g vGPU`（`Intel Skylake 6700k`）的配置示例：
 
 ----
 # qm set VMID -hostpci0 00:02.0,mdev=i915-GVTg_V5_4
 ----
 
-With this set, {pve} automatically creates such a device on VM start, and
-cleans it up again when the VM stops.
+设置后，{pve} 会在虚拟机启动时自动创建此类设备，并在虚拟机停止时再次清理它。
 
-Use in Clusters
-~~~~~~~~~~~~~~~
+=== 在集群中使用
 
-It is also possible to map devices on a cluster level, so that they can be
-properly used with HA and hardware changes are detected and non root users
-can configure them. See xref:resource_mapping[Resource Mapping]
-for details on that.
+也可以在集群层级映射设备，以便它们可与 HA 正确配合使用、可检测硬件变更，并且
+非 root 用户也可以配置它们。有关详情，请参见
+xref:resource_mapping[Resource Mapping]。
 
 [[qm_pci_viommu]]
-vIOMMU (emulated IOMMU)
-~~~~~~~~~~~~~~~~~~~~~~~
+=== vIOMMU（模拟 IOMMU）
 
-vIOMMU is the emulation of a hardware IOMMU within a virtual machine, providing
-improved memory access control and security for virtualized I/O devices. Using
-the vIOMMU option also allows you to pass through PCI(e) devices to level-2 VMs
-in level-1 VMs via
-https://pve.proxmox.com/wiki/Nested_Virtualization[Nested Virtualization].
-To pass through physical PCI(e) devices from the host to nested VMs, follow the
-PCI(e) passthrough instructions.
+vIOMMU 是在虚拟机内部对硬件 IOMMU 的模拟，可为虚拟化 I/O 设备提供更好的内存
+访问控制和安全性。使用 vIOMMU 选项还允许通过
+https://pve.proxmox.com/wiki/Nested_Virtualization[Nested Virtualization]，在
+level-1 虚拟机中将 PCI(e) 设备直通给 level-2 虚拟机。要将物理 PCI(e) 设备从
+主机直通到嵌套虚拟机，请遵循 PCI(e) 直通说明。
 
-There are currently two vIOMMU implementations available: Intel and VirtIO.
+目前有两种可用的 vIOMMU 实现：Intel 和 VirtIO。
 
-Intel vIOMMU
-^^^^^^^^^^^^
+==== Intel vIOMMU
 
-Intel vIOMMU specific VM requirements:
+Intel vIOMMU 特定的虚拟机要求：
 
-* Whether you are using an Intel or AMD CPU on your host, it is important to set
-`intel_iommu=on` in the VMs kernel parameters.
+* 无论主机使用 Intel 还是 AMD CPU，都必须在虚拟机内核参数中设置
+`intel_iommu=on`。
 
-* To use Intel vIOMMU you need to set *q35* as the machine type.
+* 要使用 Intel vIOMMU，需要将 *q35* 设置为机型。
 
-If all requirements are met, you can add `viommu=intel` to the machine parameter
-in the configuration of the VM that should be able to pass through PCI devices.
+如果满足所有要求，可以在应能够直通 PCI 设备的虚拟机配置中，将 `viommu=intel`
+添加到 machine 参数。
 
 ----
 # qm set VMID -machine q35,viommu=intel
 ----
 
-https://wiki.qemu.org/Features/VT-d[QEMU documentation for VT-d]
+https://wiki.qemu.org/Features/VT-d[QEMU VT-d 文档]
 
-VirtIO vIOMMU
-^^^^^^^^^^^^^
+==== VirtIO vIOMMU
 
-This vIOMMU implementation is more recent and does not have as many limitations
-as Intel vIOMMU but is currently less used in production and less documentated.
+该 vIOMMU 实现较新，没有 Intel vIOMMU 那么多限制，但目前在生产环境中使用较少，
+文档也较少。
 
-With VirtIO vIOMMU there is *no* need to set any kernel parameters. It is also
-*not* necessary to use q35 as the machine type, but it is advisable if you want
-to use PCIe.
+使用 VirtIO vIOMMU 时，*不需要*设置任何内核参数。也*不必*使用 q35 作为机型；
+但如果要使用 PCIe，建议这样做。
 
 ----
 # qm set VMID -machine q35,viommu=virtio
 ----
 
-https://web.archive.org/web/20230804075844/https://michael2012z.medium.com/virtio-iommu-789369049443[Blog-Post by Michael Zhao explaining virtio-iommu]
+https://web.archive.org/web/20230804075844/https://michael2012z.medium.com/virtio-iommu-789369049443[Michael Zhao 关于 virtio-iommu 的博客文章]
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参阅
 
-* link:/wiki/Pci_passthrough[PCI Passthrough Examples]
+* link:/wiki/Pci_passthrough[PCI 直通示例]
 
 endif::wiki[]

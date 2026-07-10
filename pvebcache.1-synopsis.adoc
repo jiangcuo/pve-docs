@@ -1,0 +1,99 @@
+*pvebcache* `<COMMAND> [ARGS] [OPTIONS]`
+
+*pvebcache create* `<device>`
+
+将指定磁盘设备转换为 bcache 后端设备。
+
+`<device>`: `<string>` ::
+
+要转换为 bcache 后端设备的块设备，例如 `/dev/sdb`。
+
+*pvebcache list*
+
+列出当前 bcache 后端设备和缓存设备。
+
+*pvebcache stop* `<name>`
+
+停止指定 bcache 后端设备。
+
+`<name>`: `<string>` ::
+
+bcache 后端设备名称，例如 `bcache0`。
+
+*pvebcache register* `<device>`
+
+重新注册已经创建过的 bcache 后端设备。
+
+`<device>`: `<string>` ::
+
+要重新注册的后端块设备，例如 `/dev/sdb`。
+
+*pvebcache cache create* `<device>`
+
+创建 bcache 缓存设备。
+
+`<device>`: `<string>` ::
+
+要转换为缓存设备的块设备，例如 `/dev/nvme0n1p1`。
+
+*pvebcache cache stop* `<device>`
+
+停止指定缓存设备。如果缓存设备正在使用，则无法停止。
+
+`<device>`: `<string>` ::
+
+要停止的缓存设备，例如 `/dev/nvme0n1p1`。
+
+*pvebcache cache attach* `<name>` `--cache` `<device>`
+
+将缓存设备绑定到 bcache 后端设备。
+
+`<name>`: `<string>` ::
+
+bcache 后端设备名称，例如 `bcache0`。
+
+`--cache` `<device>` ::
+
+要绑定的缓存设备，例如 `/dev/nvme0n1p1`。
+
+*pvebcache cache detach* `<name>`
+
+将 bcache 后端设备与缓存设备分离。
+
+`<name>`: `<string>` ::
+
+bcache 后端设备名称，例如 `bcache0`。
+
+*pvebcache cache set* `<name>` `[OPTIONS]`
+
+设置 bcache 后端设备的缓存策略和相关参数。
+
+`<name>`: `<string>` ::
+
+bcache 后端设备名称，例如 `bcache0`。
+
+`--cachemode` `<none | writearound | writeback | writethrough>` ::
+
+缓存模式。
+
+`--sequential` `<integer>` ::
+
+顺序 IO 阈值，单位为 KiB。
+
+`--wb-percent` `<integer>` ::
+
+回写缓存比例。
+
+`--clear-stats` `<boolean>` ::
+
+清除统计数据。
+
+.常用命令示例
+
+----
+pvebcache list
+pvebcache create /dev/sdb
+pvebcache cache create /dev/nvme0n1p1
+pvebcache cache attach bcache0 --cache /dev/nvme0n1p1
+pvebcache cache set bcache0 --cachemode writeback --sequential 4096 --wb-percent 20
+----

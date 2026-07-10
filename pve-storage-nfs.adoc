@@ -1,54 +1,46 @@
 [[storage_nfs]]
-NFS Backend
------------
+== NFS 后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: NFS
 endif::wiki[]
 
-Storage pool type: `nfs`
+存储池类型：`nfs`
 
-The NFS backend is based on the directory backend, so it shares most
-properties. The directory layout and the file naming conventions are
-the same. The main advantage is that you can directly configure the
-NFS server properties, so the backend can mount the share
-automatically. There is no need to modify `/etc/fstab`. The backend
-can also test if the server is online, and provides a method to query
-the server for exported shares.
+NFS 后端基于目录后端，因此共享其中的大多数属性。目录布局和文件命名约定也相同。
+它的主要优势在于可以直接配置 NFS 服务器属性，使后端能够自动挂载共享，无需修改
+`/etc/fstab`。该后端还可以检测服务器是否在线，并提供查询服务器导出共享的方法。
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-The backend supports all common storage properties, except the shared
-flag, which is always set. Additionally, the following properties are
-used to configure the NFS server:
+该后端支持除 shared 标志之外的所有通用存储属性；shared 标志始终为启用状态。
+此外，以下属性用于配置 NFS 服务器：
 
 server::
 
-Server IP or DNS name. To avoid DNS lookup delays, it is usually
-preferable to use an IP address instead of a DNS name - unless you
-have a very reliable DNS server, or list the server in the local
-`/etc/hosts` file.
+服务器 IP 或 DNS 名称。为避免 DNS 查询延迟，通常更建议使用 IP 地址而不是 DNS
+名称，除非你有非常可靠的 DNS 服务器，或者已将该服务器写入本地 `/etc/hosts`
+文件。
 
 export::
 
-NFS export path (as listed by `pvesm nfsscan`).
+NFS 导出路径（即 `pvesm nfsscan` 列出的路径）。
 
-You can also set NFS mount options:
+也可以设置 NFS 挂载选项：
 
 path::
 
-The local mount point (defaults to `/mnt/pve/<STORAGE_ID>/`).
+本地挂载点（默认为 `/mnt/pve/<STORAGE_ID>/`）。
 
 content-dirs::
 
-Overrides for the default directory layout. Optional.
+对默认目录布局的覆盖配置。可选。
 
 options::
 
-NFS mount options (see `man nfs`).
+NFS 挂载选项（参见 `man nfs`）。
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例（`/etc/pve/storage.cfg`）
 ----
 nfs: iso-templates
 	path /mnt/pve/iso-templates
@@ -58,36 +50,134 @@ nfs: iso-templates
 	content iso,vztmpl
 ----
 
-TIP: After an NFS request times out, NFS request are retried
-indefinitely by default. This can lead to unexpected hangs on the
-client side. For read-only content, it is worth to consider the NFS
-`soft` option, which limits the number of retries to three.
+TIP: NFS 请求超时后，默认会无限重试。这可能导致客户端出现意外的长时间挂起。
+对于只读内容，值得考虑使用 NFS `soft` 选项，它会将重试次数限制为三次。
+
+=== eNFS 多路径
+
+eNFS 是 openEuler 对 NFS 客户端的增强，用于在一个 NFS 挂载点上建立多条访问路径，
+提供多路径、负载均衡和故障转移能力。eNFS 属于客户端增强，不要求 NFS 服务器部署
+PXVIRT 组件；但服务器端需要启用 NFSv3，因为 eNFS 当前仅支持 NFSv3。
+
+更多信息可参见 openEuler eNFS 使用指南：
+https://docs.openeuler.org/zh/docs/20.03_LTS_SP4/docs/eNFS/enfs%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97.html[eNFS 使用指南]。
+
+==== 典型架构
+
+在典型部署中，PXVIRT 主机和 NFS 服务器各自具有多个可互通的业务 IP。例如：
+
+* PXVIRT 主机：`10.13.13.81`、`10.13.14.81`
+* NFS 服务器：`10.13.13.3`、`10.13.14.3`
+
+启用 eNFS 后，同一个 NFS 存储可以同时通过多条路径访问 NFS 服务器。eNFS 会在
+可用路径之间进行负载均衡，并在部分路径异常时将 IO 切换到其他可用路径。
+
+----
++---------------------+                    +---------------------+
+|     PXVIRT 主机      |                    |      NFS 服务器      |
+|                     |                    |                     |
+|  +-------------+    |                    |  +-------------+    |
+|  | eNFS 客户端  |    |                    |  | NFS Server  |    |
+|  +-------------+    |                    |  +-------------+    |
+|          |          |                    |          |          |
+|    10.13.13.81  ---+-----------------------> 10.13.13.3        |
+|                     |      连接路径 1     |                     |
+|    10.13.14.81  ---+-----------------------> 10.13.14.3        |
+|                     |      连接路径 2     |                     |
++---------------------+                    +---------------------+
+----
+
+==== 系统要求
+
+使用 eNFS 需要满足以下条件：
+
+* PXVIRT 主机使用 openEuler 内核 `6.6-openeuler`，且版本不低于 `6.6.0-10`。
+* NFS 服务器启用 NFSv3 支持。
+* PXVIRT 主机到 `remoteaddrs` 中配置的所有 NFS 服务器地址均可达。
+
+==== eNFS 配置文件
+
+可以在每个 PXVIRT 节点上创建 `/etc/enfs/config.ini` 配置文件。以下示例启用多路径：
+
+.文件 `/etc/enfs/config.ini`
+----
+multipath_disable=0
+----
+
+该配置是可选项。未创建该文件时，eNFS 使用内核模块的默认配置。
+
+==== 存储配置
+
+创建 NFS 存储时，需要使用 NFSv3，并在 `options` 中配置 `remoteaddrs`。例如：
+
+.eNFS 存储配置示例（`/etc/pve/storage.cfg`）
+----
+nfs: nfs
+	export /NFS/vm
+	path /mnt/pve/nfs
+	server 10.13.14.3
+	content images
+	options remoteaddrs=10.13.14.3~10.13.13.3,vers=3
+	prune-backups keep-all=1
+----
+
+也可以先在 Web 界面中创建普通 NFS 存储，并选择 NFS 版本 `3`。随后在
+`/etc/pve/storage.cfg` 中为该存储添加 `options` 行。
+
+`remoteaddrs` 中的 IP 地址必须属于同一台 NFS 服务器或同一个 NFS 服务集群。
+多个地址使用 `~` 分隔。eNFS 会根据这些远端地址和本机可达地址建立多条访问路径。
+
+==== 验证
+
+可以使用 `mount` 查看当前挂载选项。启用 eNFS 后，输出中应包含 `remoteaddrs`
+和 `enfs_info`：
+
+----
+# mount
+10.13.14.3:/NFS/vm on /mnt/pve/nfs type nfs
+(rw,relatime,vers=3,rsize=1048576,wsize=1048576,namlen=255,hard,
+proto=tcp,timeo=600,retrans=2,sec=sys,mountaddr=10.13.14.3,
+mountvers=3,mountproto=udp,local_lock=none,addr=10.13.14.3,
+remoteaddrs=10.13.14.3~10.13.13.3,enfs_info=10.13.14.3_1)
+----
+
+也可以通过 `/proc/enfs/<nfsserver>/stat` 查看 eNFS 路径和 IO 统计信息：
+
+----
+# cat /proc/enfs/*/stat
+id    local_addr     remote_addr    r_count  r_rtt  r_exec  w_count  w_rtt  w_exec  queuelen
+0     10.13.14.81    10.13.14.3     0        0      0       499      7      24      0
+1     10.13.13.81    10.13.13.3     0        0      0       525      6      26      0
+----
 
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-NFS does not support snapshots, but the backend uses `qcow2` features
-to implement snapshots and cloning.
+NFS 不支持快照，但该后端会使用 `qcow2` 特性实现快照和克隆。
 
-.Storage features for backend `nfs`
+.后端 `nfs` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types                              |Image formats  |Shared |Snapshots |Clones
+|内容类型                                  |镜像格式       |共享   |快照      |克隆
 |images rootdir vztmpl iso backup snippets  |raw qcow2 vmdk |yes    |qcow2     |qcow2
 |==============================================================================
 
-Examples
-~~~~~~~~
+=== 示例
 
-You can get a list of exported NFS shares with:
+可以使用以下命令获取导出的 NFS 共享列表：
 
  # pvesm scan nfs <server>
 
+常用命令示例：
+
+----
+# pvesm status
+# pvesm scan nfs <server>
+----
+
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参阅
 
 * link:/wiki/Storage[Storage]
 

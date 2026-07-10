@@ -1,6 +1,5 @@
 [[cli_general]]
-General
--------
+== 常规
 
-Regarding the historically non-uniform casing style for options, see
-xref:configuration_files_casing[the related section for configuration files].
+关于选项在历史上大小写风格不统一的问题，请参见
+xref:configuration_files_casing[配置文件的相关章节]。

@@ -1,1 +1,7 @@
 *pveperf* `[PATH]`
+
+.常用命令示例
+----
+# pveperf
+# pveperf /var/lib/vz
+----

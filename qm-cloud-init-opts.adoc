@@ -1,83 +1,78 @@
 `cicustom`: `[meta=<volume>] [,network=<volume>] [,user=<volume>] [,vendor=<volume>]` ::
 
-Specify custom files to replace the automatically generated ones at start.
+指定自定义文件，用于在启动时替换自动生成的文件。
 
 `meta`=`<volume>` ;;
 
-Specify a custom file containing all meta data passed to the VM via"
-	    ." cloud-init. This is provider specific meaning configdrive2 and nocloud differ.
+指定一个自定义文件，其中包含通过 cloud-init 传递给虚拟机的所有元数据。此内容与 provider 相关，意味着 configdrive2 和 nocloud 的格式不同。
 
 `network`=`<volume>` ;;
 
-To pass a custom file containing all network data to the VM via cloud-init.
+通过 cloud-init 向虚拟机传递包含所有网络数据的自定义文件。
 
 `user`=`<volume>` ;;
 
-To pass a custom file containing all user data to the VM via cloud-init.
+通过 cloud-init 向虚拟机传递包含所有用户数据的自定义文件。
 
 `vendor`=`<volume>` ;;
 
-To pass a custom file containing all vendor data to the VM via cloud-init.
+通过 cloud-init 向虚拟机传递包含所有 vendor 数据的自定义文件。
 
 `cipassword`: `<string>` ::
 
-Password to assign the user. Using this is generally not recommended. Use ssh keys instead. Also note that older cloud-init versions do not support hashed passwords.
+要分配给用户的密码。通常不建议使用此项，应改用 SSH 密钥。另请注意，较旧版本的 cloud-init 不支持哈希密码。
 
 `citype`: `<configdrive2 | nocloud | opennebula>` ::
 
-Specifies the cloud-init configuration format. The default depends on the configured operating system type (`ostype`. We use the `nocloud` format for Linux, and `configdrive2` for windows.
+指定 cloud-init 配置格式。默认值取决于配置的操作系统类型（`ostype`）。Linux 使用 `nocloud` 格式，Windows 使用 `configdrive2`。
 
 `ciupgrade`: `<boolean>` ('default =' `1`)::
 
-do an automatic package upgrade after the first boot.
+首次启动后自动执行软件包升级。
 
 `ciuser`: `<string>` ::
 
-User name to change ssh keys and password for instead of the image's configured default user.
+要修改 SSH 密钥和密码的用户名，用于替代镜像中配置的默认用户。
 
 `ipconfig[n]`: `[gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,ip=<IPv4Format/CIDR>] [,ip6=<IPv6Format/CIDR>]` ::
 
-Specify IP addresses and gateways for the corresponding interface.
+为对应接口指定 IP 地址和网关。
 +
-IP addresses use CIDR notation, gateways are optional but need an IP of the same type specified.
+IP 地址使用 CIDR 表示法；网关为可选项，但必须已指定同类型的 IP 地址。
 +
-The special string 'dhcp' can be used for IP addresses to use DHCP, in which case no explicit
-gateway should be provided.
-For IPv6 the special string 'auto' can be used to use stateless autoconfiguration. This requires
-cloud-init 19.4 or newer.
+IP 地址可以使用特殊字符串 'dhcp' 来启用 DHCP；在这种情况下不应提供显式网关。
+对于 IPv6，可以使用特殊字符串 'auto' 来启用无状态自动配置。这需要 cloud-init 19.4 或更新版本。
 +
-If cloud-init is enabled and neither an IPv4 nor an IPv6 address is specified, it defaults to using
-dhcp on IPv4.
+如果启用了 cloud-init，且既未指定 IPv4 地址也未指定 IPv6 地址，则默认对 IPv4 使用 dhcp。
 
 `gw`=`<GatewayIPv4>` ;;
 
-Default gateway for IPv4 traffic.
+IPv4 流量的默认网关。
 +
-NOTE: Requires option(s): `ip`
+NOTE: 需要选项：`ip`
 
 `gw6`=`<GatewayIPv6>` ;;
 
-Default gateway for IPv6 traffic.
+IPv6 流量的默认网关。
 +
-NOTE: Requires option(s): `ip6`
+NOTE: 需要选项：`ip6`
 
 `ip`=`<IPv4Format/CIDR>` ('default =' `dhcp`);;
 
-IPv4 address in CIDR format.
+CIDR 格式的 IPv4 地址。
 
 `ip6`=`<IPv6Format/CIDR>` ('default =' `dhcp`);;
 
-IPv6 address in CIDR format.
+CIDR 格式的 IPv6 地址。
 
 `nameserver`: `<string>` ::
 
-Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
+设置容器的 DNS 服务器 IP 地址。创建时如果既未设置 searchdomain 也未设置 nameserver，则会自动使用主机上的设置。
 
 `searchdomain`: `<string>` ::
 
-Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
+设置容器的 DNS 搜索域。创建时如果既未设置 searchdomain 也未设置 nameserver，则会自动使用主机上的设置。
 
 `sshkeys`: `<string>` ::
 
-Setup public SSH keys (one key per line, OpenSSH format).
-
+设置 SSH 公钥（每行一个密钥，OpenSSH 格式）。

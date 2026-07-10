@@ -1,76 +1,75 @@
 `enable`: `<boolean>` ::
 
-Enable host firewall rules.
+启用主机防火墙规则。
 
 `log_level_forward`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for forwarded traffic.
+转发流量的日志级别。
 
 `log_level_in`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for incoming traffic.
+入站流量的日志级别。
 
 `log_level_out`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for outgoing traffic.
+出站流量的日志级别。
 
 `log_nf_conntrack`: `<boolean>` ('default =' `0`)::
 
-Enable logging of conntrack information.
+启用 conntrack 信息日志记录。
 
 `ndp`: `<boolean>` ('default =' `0`)::
 
-Enable NDP (Neighbor Discovery Protocol).
+启用 NDP（Neighbor Discovery Protocol，邻居发现协议）。
 
 `nf_conntrack_allow_invalid`: `<boolean>` ('default =' `0`)::
 
-Allow invalid packets on connection tracking.
+允许连接跟踪中的无效数据包。
 
 `nf_conntrack_helpers`: `<string>` ('default =' ``)::
 
-Enable conntrack helpers for specific protocols. Supported protocols: amanda, ftp, irc, netbios-ns, pptp, sane, sip, snmp, tftp
+为特定协议启用 conntrack helper。支持的协议：amanda, ftp, irc, netbios-ns, pptp, sane, sip, snmp, tftp
 
 `nf_conntrack_max`: `<integer> (32768 - N)` ('default =' `262144`)::
 
-Maximum number of tracked connections.
+可跟踪连接的最大数量。
 
 `nf_conntrack_tcp_timeout_established`: `<integer> (7875 - N)` ('default =' `432000`)::
 
-Conntrack established timeout.
+conntrack 已建立连接的超时时间。
 
 `nf_conntrack_tcp_timeout_syn_recv`: `<integer> (30 - 60)` ('default =' `60`)::
 
-Conntrack syn recv timeout.
+conntrack `syn recv` 状态的超时时间。
 
 `nftables`: `<boolean>` ('default =' `0`)::
 
-Enable nftables based firewall (tech preview)
+启用基于 nftables 的防火墙（技术预览）
 
 `nosmurfs`: `<boolean>` ::
 
-Enable SMURFS filter.
+启用 SMURFS 过滤器。
 
 `protection_synflood`: `<boolean>` ('default =' `0`)::
 
-Enable synflood protection
+启用 synflood 防护
 
 `protection_synflood_burst`: `<integer>` ('default =' `1000`)::
 
-Synflood protection rate burst by ip src.
+按源 IP 统计的 synflood 防护突发速率。
 
 `protection_synflood_rate`: `<integer>` ('default =' `200`)::
 
-Synflood protection rate syn/sec by ip src.
+按源 IP 统计的 synflood 防护速率，单位为 syn/sec。
 
 `smurf_log_level`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for SMURFS filter.
+SMURFS 过滤器的日志级别。
 
 `tcp_flags_log_level`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for illegal tcp flags filter.
+非法 TCP 标志过滤器的日志级别。
 
 `tcpflags`: `<boolean>` ('default =' `0`)::
 
-Filter illegal combinations of TCP flags.
-
+过滤非法的 TCP 标志组合。

@@ -1,28 +1,37 @@
 ifdef::manvolnum[]
-pvesubscription(1)
-==================
+= pvesubscription(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvesubscription - Proxmox VE Subscription Manager
+pvesubscription - Proxmox VE 订阅管理器
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvesubscription.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-pvesubscription - Subscription Management
-=========================================
+= pvesubscription - 订阅管理
 endif::manvolnum[]
 
-This tool is used to handle {pve} subscriptions.
+此工具用于管理 {pve} 订阅。
+
+== 常用命令示例
+
+查看当前节点的订阅信息：
+
+----
+pvesubscription get
+----
+
+刷新本地订阅状态缓存：
+
+----
+pvesubscription update
+----
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

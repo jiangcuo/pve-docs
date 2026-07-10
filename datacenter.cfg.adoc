@@ -1,50 +1,41 @@
 [[datacenter_configuration_file]]
 ifdef::manvolnum[]
-datacenter.cfg(5)
-=================
+= datacenter.cfg(5)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-datacenter.cfg - Proxmox VE Datacenter Configuration
+datacenter.cfg - Proxmox VE 数据中心配置
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 `/etc/pve/datacenter.cfg`
 
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 ifndef::manvolnum[]
-Datacenter Configuration
-========================
+= 数据中心配置
 endif::manvolnum[]
 ifdef::wiki[]
 :title: Manual: datacenter.cfg
 :pve-toplevel:
 endif::wiki[]
 
-The file `/etc/pve/datacenter.cfg` is a configuration file for
-{pve}. It contains cluster wide default values used by all nodes.
+文件 `/etc/pve/datacenter.cfg` 是 {pve} 的配置文件。它包含由所有节点使用的
+集群范围默认值。
 
-File Format
------------
+== 文件格式
 
-The file uses a simple colon separated key/value format. Each line has
-the following format:
+该文件使用简单的冒号分隔键/值格式。每一行采用以下格式：
 
  OPTION: value
 
-Blank lines in the file are ignored, and lines starting with a `#`
-character are treated as comments and are also ignored.
+文件中的空行会被忽略，以 `#` 字符开头的行会被视为注释并同样被忽略。
 
 
-Options
--------
+== 选项
 
 include::datacenter.cfg.5-opts.adoc[]
 

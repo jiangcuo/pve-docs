@@ -1,287 +1,232 @@
-Introduction
-============
+= 简介
 
-{pve} is a platform to run virtual machines and containers. It is
-based on Debian Linux, and completely open source. For maximum
-flexibility, we implemented two virtualization technologies -
-Kernel-based Virtual Machine (KVM) and container-based virtualization
-(LXC).
+{pve} 是用于运行虚拟机和容器的平台。它基于 OpenEuler Linux，并且完全开源。为了
+获得最大灵活性，我们实现了两种虚拟化技术：基于内核的虚拟机（KVM）和基于容器
+的虚拟化（LXC）。
 
-One main design goal was to make administration as easy as
-possible. You can use {pve} on a single node, or assemble a cluster of
-many nodes. All management tasks can be done using our web-based
-management interface, and even a novice user can setup and install
-{pve} within minutes.
+一个主要设计目标是尽可能简化管理。你可以在单个节点上使用 {pve}，也可以组建由
+多个节点构成的集群。所有管理任务都可以通过基于 Web 的管理界面完成，即使是新手
+用户也能在数分钟内完成 {pve} 的设置和安装。
 
-image::images/pve-software-stack.svg["Proxmox Software Stack",align="center"]
+[IMPORTANT]
+====
+PXVIRT 是基于 Proxmox VE 开源代码和相关生态组件适配、独立维护的虚拟化平台，
+面向 openEuler 和多架构环境提供打包、集成与功能扩展。由于部分上游组件名称、
+命令、API、配置路径及历史术语沿用 PVE/Proxmox 命名，本文档中可能仍出现
+`PVE`、`pve`、`Proxmox` 等字样。这些名称仅用于说明技术来源、兼容接口或组件名称。
+PXVIRT 不是 Proxmox Server Solutions GmbH 的官方产品，也不隶属于 Proxmox 项目。
+Proxmox 和 Proxmox VE 是 Proxmox Server Solutions GmbH 的商标。
+====
+
+image::images/pve-software-stack.svg["PXVIRT Software Stack",align="center"]
 
 
 [[intro_central_management]]
-Central Management
-------------------
+== 集中管理
 
-While many people start with a single node, {pve} can scale out to a
-large set of clustered nodes. The cluster stack is fully integrated
-and ships with the default installation.
+虽然许多人从单节点开始使用，但 {pve} 可以横向扩展为包含大量节点的集群。集群
+软件栈已完全集成，并随默认安装一起提供。
 
-Unique Multi-Master Design::
+独特的多主设计::
 
-The integrated web-based management interface gives you a clean
-overview of all your KVM guests and Linux containers and even of your
-whole cluster. You can easily manage your VMs and containers, storage
-or cluster from the GUI. There is no need to install a separate,
-complex, and pricey management server.
+集成的基于 Web 的管理界面可以清晰展示所有 KVM 客户机和 Linux 容器，甚至可以
+展示整个集群。你可以通过 GUI 轻松管理虚拟机、容器、存储或集群，无需安装单独、
+复杂且昂贵的管理服务器。
 
 Proxmox Cluster File System (pmxcfs)::
 
-{pve} uses the unique Proxmox Cluster file system (pmxcfs), a
-database-driven file system for storing configuration files. This
-enables you to store the configuration of thousands of virtual
-machines. By using corosync, these files are replicated in real time
-on all cluster nodes. The file system stores all data inside a
-persistent database on disk, nonetheless, a copy of the data resides
-in RAM which provides a maximum storage size of 30MB - more than
-enough for thousands of VMs.
+{pve} 使用独特的 Proxmox Cluster file system（pmxcfs），这是一个用于保存配置
+文件、由数据库驱动的文件系统。它使你能够保存数千台虚拟机的配置。通过使用
+corosync，这些文件会实时复制到所有集群节点。该文件系统将所有数据保存在磁盘上
+的持久化数据库中，同时在 RAM 中保留一份数据副本，最大存储容量为 30MB；这对于
+数千台虚拟机而言绰绰有余。
 +
-{pve} is the only virtualization platform using this unique
-cluster file system.
+{pve} 是唯一使用这种独特集群文件系统的虚拟化平台。
 
-Web-based Management Interface::
+基于 Web 的管理界面::
 
-{pve} is simple to use. Management tasks can be done via the
-included web based management interface - there is no need to install a
-separate management tool or any additional management node with huge
-databases. The multi-master tool allows you to manage your whole
-cluster from any node of your cluster. The central web-based
-management - based on the JavaScript Framework (ExtJS) - empowers
-you to control all functionalities from the GUI and overview history
-and syslogs of each single node. This includes running backup or
-restore jobs, live-migration or HA triggered activities.
+{pve} 易于使用。管理任务可以通过随附的基于 Web 的管理界面完成，无需安装单独的
+管理工具，也不需要带有庞大数据库的额外管理节点。多主工具允许你从集群中的任意
+节点管理整个集群。基于 JavaScript Framework（ExtJS）的集中式 Web 管理界面，使
+你可以通过 GUI 控制所有功能，并查看每个节点的历史记录和 syslog。这包括运行
+备份或还原作业、在线迁移或 HA 触发的活动。
 
-Command Line::
+命令行::
 
-For advanced users who are used to the comfort of the Unix shell or
-Windows Powershell, {pve} provides a command-line interface to
-manage all the components of your virtual environment. This command-line
-interface has intelligent tab completion and full documentation
-in the form of UNIX man pages.
+对于习惯 Unix shell 或 Windows Powershell 便利性的高级用户，{pve} 提供了命令行
+界面，用于管理虚拟环境的所有组件。该命令行界面具备智能 Tab 补全，并以 UNIX
+man page 的形式提供完整文档。
 
 REST API::
 
-{pve} uses a RESTful API. We choose JSON as primary data format,
-and the whole API is formally defined using JSON Schema. This enables
-fast and easy integration for third party management tools like custom
-hosting environments.
+{pve} 使用 RESTful API。我们选择 JSON 作为主要数据格式，并使用 JSON Schema 对
+整个 API 进行正式定义。这使第三方管理工具能够快速、轻松地集成，例如定制化托管
+环境。
 
-Role-based Administration::
+基于角色的管理::
 
-You can define granular access for all objects (like VMs, storages,
-nodes, etc.) by using the role based user- and permission
-management. This allows you to define privileges and helps you to
-control access to objects. This concept is also known as access
-control lists: Each permission specifies a subject (a user or group)
-and a role (set of privileges) on a specific path.
+你可以使用基于角色的用户和权限管理，为所有对象（如虚拟机、存储、节点等）定义
+细粒度访问控制。这允许你定义权限，并帮助控制对对象的访问。该概念也称为访问
+控制列表：每条权限都会在特定路径上指定一个主体（用户或组）和一个角色（权限
+集合）。
 
-Authentication Realms::
+认证领域::
 
-{pve} supports multiple authentication sources like Microsoft
-Active Directory, LDAP, Linux PAM standard authentication or the
-built-in {pve} authentication server.
+{pve} 支持多种认证来源，例如 Microsoft Active Directory、LDAP、Linux PAM 标准
+认证，或内置的 {pve} 认证服务器。
 
 
-Flexible Storage
-----------------
+== 灵活存储
 
-The {pve} storage model is very flexible. Virtual machine images
-can either be stored on one or several local storages or on shared
-storage like NFS and on SAN. There are no limits, you may configure as
-many storage definitions as you like. You can use all storage
-technologies available for Debian Linux.
+{pve} 的存储模型非常灵活。虚拟机镜像既可以存储在一个或多个本地存储上，也可以
+存储在 NFS、SAN 等共享存储上。配置数量没有限制，你可以按需配置任意数量的存储
+定义。所有 OpenEuler Linux 可用的存储技术都可以使用。
 
-One major benefit of storing VMs on shared storage is the ability to
-live-migrate running machines without any downtime, as all nodes in
-the cluster have direct access to VM disk images.
+将虚拟机存储在共享存储上的一个主要优势，是可以在不停机的情况下在线迁移正在
+运行的机器，因为集群中的所有节点都可以直接访问虚拟机磁盘镜像。
 
-We currently support the following Network storage types:
+当前支持以下网络存储类型：
 
-* LVM Group (network backing with iSCSI targets)
+* LVM Group（通过 iSCSI target 提供网络后端）
 * iSCSI target
-* NFS Share
-* CIFS Share
+* NFS 共享
+* CIFS 共享
 * Ceph RBD
-* Directly use iSCSI LUNs
+* 直接使用 iSCSI LUN
 * GlusterFS
 
-Local storage types supported are:
+支持的本地存储类型包括：
 
-* LVM Group (local backing devices like block devices, FC devices, DRBD, etc.)
-* Directory (storage on existing filesystem)
+* LVM Group（块设备、FC 设备、DRBD 等本地后端设备）
+* Directory（现有文件系统上的存储）
 * ZFS
 
 
-Integrated Backup and Restore
------------------------------
+== 集成备份与还原
 
-The integrated backup tool (`vzdump`) creates consistent snapshots of
-running Containers and KVM guests. It basically creates an archive of
-the VM or CT data which includes the VM/CT configuration files.
+集成备份工具（`vzdump`）可以为正在运行的容器和 KVM 客户机创建一致性快照。它
+本质上会创建包含虚拟机或容器数据的归档，其中也包括虚拟机/容器配置文件。
 
-KVM live backup works for all storage types including VM images on
-NFS, CIFS, iSCSI LUN, Ceph RBD. The new backup format is optimized for storing
-VM backups fast and effective (sparse files, out of order data, minimized I/O).
+KVM 在线备份适用于所有存储类型，包括位于 NFS、CIFS、iSCSI LUN、Ceph RBD 上的
+虚拟机镜像。新的备份格式针对快速且高效地存储虚拟机备份进行了优化（稀疏文件、
+乱序数据、最小化 I/O）。
 
 
-High Availability Cluster
--------------------------
+== 高可用集群
 
-A multi-node {pve} HA Cluster enables the definition of highly
-available virtual servers. The {pve} HA Cluster is based on
-proven Linux HA technologies, providing stable and reliable HA
-services.
+多节点 {pve} HA 集群支持定义高可用虚拟服务器。{pve} HA 集群基于经过验证的
+Linux HA 技术，可提供稳定可靠的 HA 服务。
 
 
-Flexible Networking
--------------------
+== 灵活网络
 
-{pve} uses a bridged networking model. All VMs can share one
-bridge as if virtual network cables from each guest were all plugged
-into the same switch. For connecting VMs to the outside world, bridges
-are attached to physical network cards and assigned a TCP/IP
-configuration.
+{pve} 使用桥接网络模型。所有虚拟机可以共享同一个网桥，就像来自每个客户机的
+虚拟网线都插入同一台交换机。为了让虚拟机连接到外部网络，网桥会绑定到物理网卡
+并分配 TCP/IP 配置。
 
-For further flexibility, VLANs (IEEE 802.1q) and network
-bonding/aggregation are possible. In this way it is possible to build
-complex, flexible virtual networks for the {pve} hosts,
-leveraging the full power of the Linux network stack.
+为了获得更高灵活性，还可以使用 VLAN（IEEE 802.1q）和网络绑定/聚合。通过这种
+方式，可以为 {pve} 主机构建复杂、灵活的虚拟网络，充分发挥 Linux 网络栈的能力。
 
 
-Integrated Firewall
--------------------
+== 集成防火墙
 
-The integrated firewall allows you to filter network packets on
-any VM or Container interface. Common sets of firewall rules can
-be grouped into ``security groups''.
+集成防火墙允许你在任意虚拟机或容器接口上过滤网络数据包。常用的防火墙规则集合
+可以归组为 ``security groups''。
 
 include::hyper-converged-infrastructure.adoc[]
 
 
-Why Open Source
----------------
+== 为什么选择开源
 
-{pve} uses a Linux kernel and is based on the Debian GNU/Linux
-Distribution. The source code of {pve} is released under the
+{pve} 使用 Linux 内核，并基于 Debian GNU/Linux 发行版。{pve} 的源代码按照
 https://www.gnu.org/licenses/agpl-3.0.html[GNU Affero General Public
-License, version 3]. This means that you are free to inspect the
-source code at any time or contribute to the project yourself.
+License, version 3] 发布。这意味着你可以随时自由查看源代码，也可以亲自为项目
+贡献代码。
 
-At Proxmox we are committed to use open source software whenever
-possible. Using open source software guarantees full access to all
-functionalities - as well as high security and reliability. We think
-that everybody should have the right to access the source code of a
-software to run it, build on it, or submit changes back to the
-project. Everybody is encouraged to contribute while Proxmox ensures
-the product always meets professional quality criteria.
+在 Proxmox，我们承诺尽可能使用开源软件。使用开源软件可确保完整访问所有功能，
+同时获得高安全性和可靠性。我们认为，每个人都应有权访问软件源代码，用于运行、
+基于其继续构建，或向项目提交变更。我们鼓励所有人参与贡献，同时 Proxmox 会确保
+产品始终满足专业质量标准。
 
-Open source software also helps to keep your costs low and makes your
-core infrastructure independent from a single vendor.
+开源软件还有助于降低成本，并使核心基础架构不依赖单一厂商。
 
 
-Your benefits with {pve}
-------------------------
+== 使用 {pve} 的优势
 
-* Open source software
-* No vendor lock-in
-* Linux kernel
-* Fast installation and easy-to-use
-* Web-based management interface
+* 开源软件
+* 无厂商锁定
+* Linux 内核
+* 安装快速且易于使用
+* 基于 Web 的管理界面
 * REST API
-* Huge active community
-* Low administration costs and simple deployment
+* 活跃且庞大的社区
+* 管理成本低，部署简单
 
 include::getting-help.adoc[]
 
 
 [[intro_project_history]]
-Project History
----------------
+== 项目历史
 
-The project started in 2007, followed by a first stable version in 2008. At the
-time we used OpenVZ for containers, and QEMU with KVM for virtual machines. The
-clustering features were limited, and the user interface was simple (server
-generated web page).
+该项目始于 2007 年，并在 2008 年发布了第一个稳定版本。当时我们使用 OpenVZ 运行
+容器，使用带 KVM 的 QEMU 运行虚拟机。那时集群功能较为有限，用户界面也很简单
+（由服务器生成的网页）。
 
-But we quickly developed new features using the
-https://corosync.github.io/corosync/[Corosync] cluster stack, and the
-introduction of the new Proxmox cluster file system (pmxcfs) was a big step
-forward, because it completely hides the cluster complexity from the user.
-Managing a cluster of 16 nodes is as simple as managing a single node.
+但我们很快基于 https://corosync.github.io/corosync/[Corosync] 集群栈开发了新
+功能，并引入了新的 Proxmox cluster file system（pmxcfs），这是一次重大进步，
+因为它完全向用户隐藏了集群复杂性。管理一个 16 节点集群就像管理单个节点一样
+简单。
 
-The introduction of our new REST API, with a complete declarative specification
-written in JSON-Schema, enabled other people to integrate {pve} into their
-infrastructure, and made it easy to provide additional services.
+我们引入了新的 REST API，并使用 JSON-Schema 编写了完整的声明式规范，使其他人
+能够将 {pve} 集成到自己的基础架构中，也让提供附加服务变得更加容易。
 
-Also, the new REST API made it possible to replace the original user interface
-with a modern client side single-page application using JavaScript. We also
-replaced the old Java based VNC console code with
-https://kanaka.github.io/noVNC/[noVNC]. So you only need a web browser to manage
-your VMs.
+此外，新的 REST API 使我们能够用基于 JavaScript 的现代客户端单页应用替换原始
+用户界面。我们还用 https://kanaka.github.io/noVNC/[noVNC] 替换了旧的基于 Java
+的 VNC 控制台代码。因此，你只需要一个 Web 浏览器即可管理虚拟机。
 
-The support for various storage types is another big task. Notably, {pve} was
-the first distribution to ship https://zfsonlinux.org/[ZFS on Linux] by default
-in 2014. Another milestone was the ability to run and manage
-https://ceph.com/[Ceph] storage on the hypervisor nodes. Such setups are
-extremely cost effective.
+支持多种存储类型是另一项重要工作。值得注意的是，{pve} 是 2014 年第一个默认
+随附 https://zfsonlinux.org/[ZFS on Linux] 的发行版。另一个里程碑是在
+hypervisor 节点上运行和管理 https://ceph.com/[Ceph] 存储的能力。这类部署方式
+具有极高的成本效益。
 
-When our project started we were among the first companies providing commercial
-support for KVM. The KVM project itself continuously evolved, and is now a
-widely used hypervisor. New features arrive with each release. We developed the
-KVM live backup feature, which makes it possible to create snapshot backups on
-any storage type.
+项目初期，我们是最早为 KVM 提供商业支持的公司之一。KVM 项目本身持续演进，如今
+已成为广泛使用的 hypervisor。每个版本都会带来新功能。我们开发了 KVM 在线备份
+功能，使在任意存储类型上创建快照备份成为可能。
 
-The most notable change with version 4.0 was the move from OpenVZ to
-https://linuxcontainers.org/[LXC]. Containers are now deeply integrated, and
-they can use the same storage and network features as virtual machines. At the
-same time we introduced the easy-to-use xref:chapter_ha_manager[High
-Availability (HA) manager], simplifying the configuration and management of
-highly available setups.
+4.0 版本最显著的变化是从 OpenVZ 迁移到 https://linuxcontainers.org/[LXC]。容器
+如今已深度集成，并且可以使用与虚拟机相同的存储和网络功能。与此同时，我们引入了
+易用的 xref:chapter_ha_manager[高可用（HA）管理器]，简化了高可用
+部署的配置和管理。
 
-During the development of {pve} 5 the asynchronous
-xref:chapter_pvesr[storage replication] as well as automated
-xref:sysadmin_certificate_management[certificate management] using ACME/Let's
-Encrypt were introduced, among many other features.
+在 {pve} 5 的开发期间，我们引入了异步 xref:chapter_pvesr[存储复制]，
+以及使用 ACME/Let's Encrypt 的自动化
+xref:sysadmin_certificate_management[证书管理]，同时还加入了许多
+其他功能。
 
-The xref:chapter_pvesdn[Software Defined Network (SDN)] stack was developed in
-cooperation with our community. It was integrated into the web interface as
-an experimental feature in version 6.2, simplifying the management of
-sophisticated network configurations. Since version 8.1, the SDN integration is
-fully supported and installed by default.
+xref:chapter_pvesdn[Software Defined Network (SDN)] 栈是与社区合作开发的。它在
+6.2 版本中作为实验性功能集成到 Web 界面中，简化了复杂网络配置的管理。自 8.1
+版本起，SDN 集成已获得完整支持，并默认安装。
 
-2020 marked the release of a new project, the
+2020 年发布了一个新项目：
 https://www.proxmox.com/en/products/proxmox-backup-server/overview[Proxmox
-Backup Server], written in the Rust programming language. Proxmox Backup Server
-is deeply integrated with {pve} and significantly improves backup capabilities
-by implementing incremental backups, deduplication, and much more.
+Backup Server]。Proxmox Backup Server 与 {pve} 深度集成，通过实现增量备份、
+重复数据删除等能力，显著提升了备份能力。
 
-Another new tool, the https://pom.proxmox.com[Proxmox
-Offline Mirror], was released in 2022, enabling subscriptions for systems which
-have no connection to the public internet.
+另一个新工具 https://pom.proxmox.com[Proxmox Offline Mirror] 于 2022 年发布，
+使无法连接公共互联网的系统也可以使用订阅。
 
-The highly requested dark theme for the web interface was introduced in 2023.
-Later that year, version 8.0 integrated access to the Ceph enterprise
-repository. Now access to the most stable Ceph repository comes with any
-{pve} subscription.
+呼声很高的 Web 界面深色主题于 2023 年引入。同年晚些时候，8.0 版本集成了对 Ceph
+enterprise repository 的访问。现在，任何 {pve} 订阅都包含对最稳定 Ceph 仓库的
+访问权限。
 
-Automated and unattended installation for the official
-xref:installation_installer[ISO installer] was introduced in version 8.2,
-significantly simplifying large deployments of {pve}.
+8.2 版本为官方 xref:installation_installer[ISO installer] 引入了自动化和无人值守
+安装，显著简化了 {pve} 的大规模部署。
 
-With the xref:qm_import_virtual_machines[import wizard], equally introduced in
-version 8.2, users can easily and efficiently migrate guests directly from other
-hypervisors like VMware ESXi footnote:[Migrate to Proxmox VE
-https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE].
-Additionally, archives in Open Virtualization Format (OVF/OVA) can now be
-directly imported from file-based storages in the web interface.
+同样在 8.2 版本中引入的 xref:qm_import_virtual_machines[导入向导]，使用户
+能够轻松高效地直接从 VMware ESXi 等其他 hypervisor 迁移客户机
+footnote:[Migrate to Proxmox VE https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE]。
+此外，现在还可以在 Web 界面中从基于文件的存储直接导入 Open Virtualization
+Format（OVF/OVA）归档。
 
 include::howto-improve-pve-docs.adoc[]
 include::translation.adoc[]
-

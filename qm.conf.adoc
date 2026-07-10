@@ -1,55 +1,59 @@
 ifdef::manvolnum[]
-qm.conf(5)
-==========
+= qm.conf(5)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-qm.conf - Proxmox VE Virtual Machine Configuration
+qm.conf - Proxmox VE 虚拟机配置
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 '/etc/pve/qemu-server/<VMID>.conf'
 
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Virtual Machine Configuration
-=============================
+= 虚拟机配置
 endif::manvolnum[]
 ifdef::wiki[]
 :pve-toplevel:
 :title: Manual: qm.conf
 endif::wiki[]
 
-The `/etc/pve/qemu-server/<VMID>.conf` files stores VM configuration,
-where "VMID" is the numeric ID of the given VM.
+`/etc/pve/qemu-server/<VMID>.conf` 文件用于存储虚拟机配置，其中 "VMID" 是指定虚拟机的数字 ID。
 
-NOTE: IDs < 100 are reserved for internal purposes.
+NOTE: ID < 100 保留供内部用途使用。
 
 
-File Format
------------
+== 文件格式
 
-The file uses a simple colon separated key/value format. Each line has
-the following format:
+该文件使用简单的冒号分隔键/值格式。每行采用以下格式：
 
  OPTION: value
 
-Blank lines in the file are ignored, and lines starting with a `#`
-character are treated as comments and are also ignored.
+文件中的空行会被忽略，以 `#` 字符开头的行会作为注释处理，也会被忽略。
 
-One can use the `qm` command to generate and modify those files.
+可以使用 `qm` 命令生成和修改这些文件。
+
+=== 常用命令示例
+
+查看指定虚拟机的当前配置：
+
+----
+qm config <VMID>
+----
+
+验证并查看 `qm` 命令的可用子命令：
+
+----
+qm help
+----
 
 
-Options
--------
+== 选项
 
 include::qm.conf.5-opts.adoc[]
 

@@ -1,35 +1,26 @@
-Time Synchronization
---------------------
+== 时间同步
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-The {pve} cluster stack itself relies heavily on the fact that all
-the nodes have precisely synchronized time. Some other components,
-like Ceph, also won't work properly if the local time on all nodes is
-not in sync.
+{pve} 集群栈本身高度依赖所有节点之间精确同步的时间。其他一些组件（如 Ceph）
+也要求所有节点的本地时间保持同步，否则无法正常工作。
 
-Time synchronization between nodes can be achieved using the ``Network
-Time Protocol'' (`NTP`). As of {pve} 7, `chrony` is used as the default
-NTP daemon, while {pve} 6 uses `systemd-timesyncd`. Both come preconfigured to
-use a set of public servers.
+节点之间的时间同步可以通过“网络时间协议”（`NTP`）实现。从 {pve} 7 开始，
+默认 NTP 守护进程为 `chrony`，而 {pve} 6 使用 `systemd-timesyncd`。
+两者都预配置为使用一组公共服务器。
 
-IMPORTANT: If you upgrade your system to {pve} 7, it is recommended that you
-manually install either `chrony`, `ntp` or `openntpd`.
+IMPORTANT: 如果将系统升级到 {pve} 7，建议手动安装 `chrony`、`ntp` 或
+`openntpd` 之一。
 
-Using Custom NTP Servers
-~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用自定义 NTP 服务器
 
-In some cases, it might be desired to use non-default NTP
-servers. For example, if your {pve} nodes do not have access to the
-public internet due to restrictive firewall rules, you
-need to set up local NTP servers and tell the NTP daemon to use
-them.
+在某些情况下，可能需要使用非默认 NTP 服务器。例如，如果 {pve} 节点由于受限的
+防火墙规则无法访问公网，则需要设置本地 NTP 服务器，并指示 NTP 守护进程使用它们。
 
-For systems using chrony:
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 对于使用 chrony 的系统：
 
-Specify which servers `chrony` should use in `/etc/chrony/chrony.conf`:
+在 `/etc/chrony/chrony.conf` 中指定 `chrony` 应使用的服务器：
 
 ----
 server ntp1.example.com iburst
@@ -37,12 +28,11 @@ server ntp2.example.com iburst
 server ntp3.example.com iburst
 ----
 
-Restart `chrony`:
+重启 `chrony`：
 
  # systemctl restart chronyd
 
-Check the journal to confirm that the newly configured NTP servers are being
-used:
+检查 journal，确认新配置的 NTP 服务器正在被使用：
 
  # journalctl --since -1h -u chrony
 
@@ -54,20 +44,17 @@ Aug 26 13:00:15 node1 chronyd[4873]: System clock TAI offset set to 37 seconds
 ...
 ----
 
-For systems using systemd-timesyncd:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 对于使用 systemd-timesyncd 的系统：
 
-Specify which servers `systemd-timesyncd` should use in
-`/etc/systemd/timesyncd.conf`:
+在 `/etc/systemd/timesyncd.conf` 中指定 `systemd-timesyncd` 应使用的服务器：
 
 ----
 [Time]
 NTP=ntp1.example.com ntp2.example.com ntp3.example.com ntp4.example.com
 ----
 
-Then, restart the synchronization service (`systemctl restart
-systemd-timesyncd`), and verify that your newly configured NTP servers are in
-use by checking the journal (`journalctl --since -1h -u systemd-timesyncd`):
+然后重启同步服务（`systemctl restart systemd-timesyncd`），并通过检查 journal
+（`journalctl --since -1h -u systemd-timesyncd`）确认新配置的 NTP 服务器正在使用：
 
 ----
 ...
@@ -77,4 +64,12 @@ Oct 07 14:58:36 node1 systemd[1]: Started Network Time Synchronization.
 Oct 07 14:58:36 node1 systemd-timesyncd[13514]: Using NTP server 10.0.0.1:123 (ntp1.example.com).
 Oct 07 14:58:36 node1 systemd-timesyncd[13514]: interval/delta/delay/jitter/drift 64s/-0.002s/0.020s/0.000s/-31ppm
 ...
+----
+
+常用命令示例：
+
+----
+timedatectl status
+chronyc tracking
+systemctl status chrony
 ----

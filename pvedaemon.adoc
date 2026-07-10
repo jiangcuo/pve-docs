@@ -1,34 +1,28 @@
 ifdef::manvolnum[]
-pvedaemon(8)
-============
+= pvedaemon(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvedaemon - PVE API Daemon
+pvedaemon - PVE API 守护进程
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvedaemon.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-pvedaemon - Proxmox VE API Daemon
-=================================
+= pvedaemon - Proxmox VE API 守护进程
 endif::manvolnum[]
 
-This daemon exposes the whole {pve} API on `127.0.0.1:85`. It runs as
-`root` and has permission to do all privileged operations.
+该守护进程在 `127.0.0.1:85` 上公开完整的 {pve} API。它以 `root` 身份运行，
+并有权限执行所有特权操作。
 
-NOTE: The daemon listens to a local address only, so you cannot access
-it from outside. The `pveproxy` daemon exposes the API to the outside
-world.
+NOTE: 该守护进程仅监听本地地址，因此无法从外部访问。`pveproxy` 守护进程负责向外部
+公开 API。
 
 
 ifdef::manvolnum[]

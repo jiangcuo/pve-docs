@@ -2,37 +2,43 @@
 
 *qmrestore* `<archive> <vmid>` `[OPTIONS]`
 
-Restore QemuServer vzdump backups.
+还原 QemuServer `vzdump` 备份。
 
 `<archive>`: `<string>` ::
 
-The backup file. You can pass '-' to read from standard input.
+备份文件。可以传入 `-` 以从标准输入读取。
 
 `<vmid>`: `<integer> (100 - 999999999)` ::
 
-The (unique) ID of the VM.
+虚拟机的唯一 ID。
 
 `--bwlimit` `<number> (0 - N)` ::
 
-Override I/O bandwidth limit (in KiB/s).
+覆盖 I/O 带宽限制，单位为 KiB/s。
 
 `--force` `<boolean>` ::
 
-Allow to overwrite existing VM.
+允许覆盖已有虚拟机。
 
 `--live-restore` `<boolean>` ::
 
-Start the VM immediately from the backup and restore in background. PBS only.
+立即从备份启动虚拟机，并在后台继续还原。仅适用于 PBS。
 
 `--pool` `<string>` ::
 
-Add the VM to the specified pool.
+将虚拟机加入指定资源池。
 
 `--storage` `<storage ID>` ::
 
-Default storage.
+默认存储。
 
 `--unique` `<boolean>` ::
 
-Assign a unique random ethernet address.
+分配唯一的随机以太网地址。
 
+.常用命令示例
+
+----
+qmrestore /var/lib/vz/dump/vzdump-qemu-100.vma.zst 101 --storage local-lvm
+qmrestore <archive> <vmid> --force
+----

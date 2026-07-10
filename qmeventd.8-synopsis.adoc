@@ -1,13 +1,12 @@
 *qmeventd* `[-f]` `[-v]` `PATH`
 
-`-v`:: Turn on verbose messages
+`-v`:: 启用详细消息
 
-`-f`:: Do not daemonize server
+`-f`:: 不将服务器守护进程化
 
-`PATH`:: The path to listen on
+`PATH`:: 要监听的路径
 
-This service is usually started and managed using systemd toolset. The
-service is called 'qmeventd'.
+该服务通常使用 systemd 工具集启动和管理。服务名为 'qmeventd'。
 
  systemctl start qmeventd
 

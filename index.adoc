@@ -1,51 +1,43 @@
-image:./images/proxmox-logo.svg[] pass:[<br>] {pve} Documentation Index
-========================================================================
+= image:./images/lierfang-logo.svg[] pass:[<br>] {pve} 文档索引
 :data-uri:
 :icons:
-:title: {pve} Documentation Index
+:title: {pve} 文档索引
 
 
-{pve} Administration Guide
---------------------------
+== {pve} 管理指南
 
 [width="100%",options="header"]
 |===========================================================
-|Format               |Link
-|Printable version    |link:pve-admin-guide.pdf[]
-|Online HTML version  |link:pve-admin-guide.html[]
-|E-Book version       |link:pve-admin-guide.epub[]
+|格式                 |链接
+|可打印版本           |link:pve-admin-guide.pdf[]
+|在线 HTML 版本       |link:pve-admin-guide.html[]
+|电子书版本           |link:pve-admin-guide.epub[]
 |===========================================================
 
 
-Individual Chapters
--------------------
+== 单独章节
 
 include::chapter-index-table.adoc[]
 
 
-{pve} Manual Pages
-------------------
+== {pve} 手册页
 
-Command-line Interface
-~~~~~~~~~~~~~~~~~~~~~~
+=== 命令行接口
 
 include::man1-index-table.adoc[]
 
 
-Service Daemons
-~~~~~~~~~~~~~~~
+=== 服务守护进程
 
 include::man8-index-table.adoc[]
 
 
-Configuration Options
-~~~~~~~~~~~~~~~~~~~~~
+=== 配置选项
 
 include::man5-index-table.adoc[]
 
 
-API Viewer
-~~~~~~~~~~
+=== API 查看器
 
-The link:api-viewer/index.html[API viewer] is a tiny web application
-which allows you to inspect all available API calls.
+link:api-viewer/index.html[API 查看器] 是一个小型 Web 应用，
+可用于查看所有可用的 API 调用。

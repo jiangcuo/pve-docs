@@ -2,30 +2,29 @@
 
 *pve-ha-lrm help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助。
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *pve-ha-lrm start* `[OPTIONS]`
 
-Start the daemon.
+启动守护进程。
 
 `--debug` `<boolean>` ('default =' `0`)::
 
-Debug mode - stay in foreground
+调试模式 - 保持在前台运行。
 
 *pve-ha-lrm status*
 
-Get daemon status.
+获取守护进程状态。
 
 *pve-ha-lrm stop*
 
-Stop the daemon.
-
+停止守护进程。
 

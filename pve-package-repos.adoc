@@ -1,463 +1,118 @@
 [[sysadmin_package_repositories]]
-Package Repositories
---------------------
+== 软件包仓库
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-{pve} uses http://en.wikipedia.org/wiki/Advanced_Packaging_Tool[APT] as its
-package management tool like any other Debian-based system.
+{pve} 基于 openEuler，使用 RPM 软件包格式，并通过 `dnf` 管理软件包和仓库。
 
-{pve} automatically checks for package updates on a daily basis. The `root@pam`
-user is notified via email about available updates. From the GUI, the
-'Changelog' button can be used to see more details about an selected update.
+{pve} 每天自动检查软件包更新。`root@pam` 用户会通过电子邮件收到可用更新通知。
+在 GUI 中，可以使用 'Changelog' 按钮查看所选更新的更多详细信息。
 
-Repositories in {pve}
-~~~~~~~~~~~~~~~~~~~~~
+=== {pve} 中的软件仓库
 
-Repositories are a collection of software packages, they can be used to install
-new software, but are also important to get new updates.
+仓库是一组软件包集合，可用于安装新软件，也是获取安全更新、错误修复和新功能的重要来源。
 
-NOTE: You need valid Debian and Proxmox repositories to get the latest
-security updates, bug fixes and new features.
+NOTE: 需要配置有效的 openEuler 基础仓库和 PXVIRT 仓库，才能获得完整的软件包依赖和更新。
 
-APT Repositories are defined in the file `/etc/apt/sources.list` and in `.list`
-files placed in `/etc/apt/sources.list.d/`.
+DNF 仓库定义在 `/etc/yum.repos.d/` 目录下的 `.repo` 文件中。每个仓库通常包含
+`baseurl`、`enabled`、`gpgcheck`、`gpgkey` 等字段。
 
-Repository Management
-^^^^^^^^^^^^^^^^^^^^^
+==== 仓库管理
 
 [thumbnail="screenshot/gui-node-repositories.png"]
 
-Since Proxmox VE 7, you can check the repository state in the web interface.
-The node summary panel shows a high level status overview, while the separate
-'Repository' panel shows in-depth status and list of all configured
-repositories.
+在 Web 界面中，可以通过节点的更新相关面板查看当前仓库状态和可用更新。
+也可以使用命令行工具 `dnf` 管理仓库和执行系统更新。
 
-Basic repository management, for example, activating or deactivating a
-repository, is also supported.
 
-Sources.list
-^^^^^^^^^^^^
+[[sysadmin_pxvirt_repo]]
+=== PXVIRT 仓库
 
-In a `sources.list` file, each line defines a package repository. The preferred
-source must come first.  Empty lines are ignored. A `#` character anywhere on a
-line marks the remainder of that line as a comment. The available packages from
-a repository are acquired by running `apt-get update`. Updates can be installed
-directly using `apt-get`, or via the GUI (Node -> Updates).
+PXVIRT 软件包通过梨儿方 PXVIRT 仓库发布。请在每个 {pve} 节点上创建
+`/etc/yum.repos.d/pxvirt.repo`：
 
-.File `/etc/apt/sources.list`
+.文件 `/etc/yum.repos.d/pxvirt.repo`
 ----
-deb http://deb.debian.org/debian bookworm main contrib
-deb http://deb.debian.org/debian bookworm-updates main contrib
-
-# security updates
-deb http://security.debian.org/debian-security bookworm-security main contrib
+[pxvirt]
+name=Lierfang PxVirt Repo
+baseurl=https://ah1.mirrors.lierfang.com:8000/pxcloud/pxvirt/repo/openeuler/24.03/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://ah1.mirrors.lierfang.com:8000/pxcloud/lierfang.gpg
+username=testuser
+password=testusertestuser
 ----
 
-{pve} provides three different package repositories.
+也可以使用以下命令写入该文件：
 
-[[sysadmin_enterprise_repo]]
-{pve} Enterprise Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This is the recommended repository and available for all {pve} subscription
-users. It contains the most stable packages and is suitable for production use.
-The `pve-enterprise` repository is enabled by default:
-
-.File `/etc/apt/sources.list.d/pve-enterprise.list`
 ----
-deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
-----
-
-Please note that you need a valid subscription key to access the
-`pve-enterprise` repository. We offer different support levels, which you can
-find further details about at {pricing-url}.
-
-NOTE: You can disable this repository by commenting out the above line using a
-`#` (at the start of the line). This prevents error messages if your host does
-not have a subscription key. Please configure the `pve-no-subscription`
-repository in that case.
-
-[[sysadmin_no_subscription_repo]]
-{pve} No-Subscription Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-As the name suggests, you do not need a subscription key to access
-this repository. It can be used for testing and non-production
-use. It's not recommended to use this on production servers, as these
-packages are not always as heavily tested and validated.
-
-We recommend to configure this repository in `/etc/apt/sources.list`.
-
-.File `/etc/apt/sources.list`
-----
-deb http://ftp.debian.org/debian bookworm main contrib
-deb http://ftp.debian.org/debian bookworm-updates main contrib
-
-# Proxmox VE pve-no-subscription repository provided by proxmox.com,
-# NOT recommended for production use
-deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
-
-# security updates
-deb http://security.debian.org/debian-security bookworm-security main contrib
+# tee /etc/yum.repos.d/pxvirt.repo > /dev/null <<'EOF'
+[pxvirt]
+name=Lierfang PxVirt Repo
+baseurl=https://mirrors.lierfang.com/pxcloud/pxvirt/repo/openeuler/24.03/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://mirrors.lierfang.com/pxcloud/lierfang.gpg
+username=testuser
+password=testusertestuser
+EOF
 ----
 
+配置完成后，刷新软件包元数据：
 
-[[sysadmin_test_repo]]
-{pve} Test Repository
-~~~~~~~~~~~~~~~~~~~~~~
-
-This repository contains the latest packages and is primarily used by developers
-to test new features. To configure it, add the following line to
-`/etc/apt/sources.list`:
-
-.sources.list entry for `pvetest`
 ----
-deb http://download.proxmox.com/debian/pve bookworm pvetest
+# chmod 0600 /etc/yum.repos.d/pxvirt.repo
+# dnf makecache
 ----
 
-WARNING: The `pvetest` repository should (as the name implies) only be used for
-testing new features or bug fixes.
+如果需要确认仓库是否已经启用，可以运行：
+
+----
+# dnf repolist
+----
+
 
 [[sysadmin_package_repositories_ceph]]
-Ceph Squid Enterprise Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Ceph 软件包仓库
 
-This repository holds the enterprise {pve} Ceph 19.2 Squid packages. They are
-suitable for production. Use this repository if you run the Ceph client or a
-full Ceph cluster on {pve}.
+PXVIRT 的 openEuler 版本不使用 Proxmox 的独立 Ceph 仓库。
+不要沿用 Proxmox 文档中的 `enterprise`、`no-subscription` 或 `test`
+Ceph 仓库地址。
 
-.File `/etc/apt/sources.list.d/ceph.list`
+如需安装或更新 Ceph 相关软件包，请使用已配置的 openEuler 基础仓库和 PXVIRT 仓库。
+如果使用外部 Ceph 集群，只需要按存储章节配置客户端连接信息。
+
+
+[[repos_secure_rpm]]
+=== 软件包签名验证
+
+PXVIRT 仓库启用了 `gpgcheck=1`，DNF 会使用 `gpgkey` 指定的 GPG 公钥验证软件包签名。
+如果密钥尚未导入，首次安装或更新软件包时，DNF 会提示导入该密钥。
+
+也可以手动导入仓库密钥：
+
 ----
-deb https://enterprise.proxmox.com/debian/ceph-squid bookworm enterprise
-----
-
-
-Ceph Squid No-Subscription Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This Ceph repository contains the Ceph 19.2 Squid packages before they are moved
-to the enterprise repository and after they where on the test repository.
-
-NOTE: It's recommended to use the enterprise repository for production
-machines.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription
+# rpm --import https://mirrors.lierfang.com/pxcloud/lierfang.gpg
 ----
 
 
-Ceph Squid Test Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==== 常用命令示例
 
-This Ceph repository contains the Ceph 19.2 Squid packages before they are moved
-to the main repository. It is used to test new Ceph releases on {pve}.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb http://download.proxmox.com/debian/ceph-squid bookworm test
-----
-
-Ceph Reef Enterprise Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This repository holds the enterprise {pve} Ceph 18.2 Reef packages. They are
-suitable for production. Use this repository if you run the Ceph client or a
-full Ceph cluster on {pve}.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb https://enterprise.proxmox.com/debian/ceph-reef bookworm enterprise
-----
-
-
-Ceph Reef No-Subscription Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This Ceph repository contains the Ceph 18.2 Reef packages before they are moved
-to the enterprise repository and after they where on the test repository.
-
-NOTE: It's recommended to use the enterprise repository for production
-machines.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb http://download.proxmox.com/debian/ceph-reef bookworm no-subscription
-----
-
-
-Ceph Reef Test Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This Ceph repository contains the Ceph 18.2 Reef packages before they are moved
-to the main repository. It is used to test new Ceph releases on {pve}.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb http://download.proxmox.com/debian/ceph-reef bookworm test
-----
-
-Ceph Quincy Enterprise Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This repository holds the enterprise {pve} Ceph Quincy packages. They are
-suitable for production. Use this repository if you run the Ceph client or a
-full Ceph cluster on {pve}.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm enterprise
-----
-
-
-Ceph Quincy No-Subscription Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This Ceph repository contains the Ceph Quincy packages before they are moved
-to the enterprise repository and after they where on the test repository.
-
-NOTE: It's recommended to use the enterprise repository for production
-machines.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb http://download.proxmox.com/debian/ceph-quincy bookworm no-subscription
-----
-
-
-Ceph Quincy Test Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This Ceph repository contains the Ceph Quincy packages before they are moved
-to the main repository. It is used to test new Ceph releases on {pve}.
-
-.File `/etc/apt/sources.list.d/ceph.list`
-----
-deb http://download.proxmox.com/debian/ceph-quincy bookworm test
-----
-
-Older Ceph Repositories
-~~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 8 doesn't support Ceph Pacific, Ceph Octopus, or even older releases for
-hyper-converged setups. For those releases, you need to first upgrade Ceph to a
-newer release before upgrading to Proxmox VE 8.
-
-See the respective
-https://pve.proxmox.com/wiki/Category:Ceph_Upgrade[upgrade guide] for details.
-
-
-[[sysadmin_debian_firmware_repo]]
-Debian Firmware Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Starting with Debian Bookworm ({pve} 8) non-free firmware (as defined by
-https://www.debian.org/social_contract#guidelines[DFSG]) has been moved to the
-newly created Debian repository component `non-free-firmware`.
-
-Enable this repository if you want to set up
-xref:sysadmin_firmware_cpu[Early OS Microcode Updates] or need additional
-xref:sysadmin_firmware_runtime_files[Runtime Firmware Files] not already
-included in the pre-installed package `pve-firmware`.
-
-To be able to install packages from this component, run
-`editor /etc/apt/sources.list`, append `non-free-firmware` to the end of each
-`.debian.org` repository line and run `apt update`.
-
-
-[[repos_secure_apt]]
-
-SecureApt
-~~~~~~~~~
-
-The 'Release' files in the repositories are signed with GnuPG. APT is using
-these signatures to verify that all packages are from a trusted source.
-
-If you install {pve} from an official ISO image, the key for verification is
-already installed.
-
-If you install {pve} on top of Debian, download and install
-the key with the following commands:
+以下命令可用于刷新软件包索引、查看可升级软件包，并检查 {pve} 软件包版本：
 
 ----
- # wget https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+# dnf makecache
+# dnf check-update
+# pveversion -v
 ----
 
-Verify the checksum afterwards with the `sha512sum` CLI tool:
+安装所有可用更新：
 
 ----
-# sha512sum /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
-7da6fe34168adc6e479327ba517796d4702fa2f8b4f0a9833f5ea6e6b48f6507a6da403a274fe201595edc86a84463d50383d07f64bdde2e3658108db7d6dc87 /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+# dnf update
 ----
 
-or the `md5sum` CLI tool:
-
-----
-# md5sum /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
-41558dc019ef90bd0f6067644a51cf5b /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
-----
-
-
-ifdef::wiki[]
-
-// include note about older releases, but only for wiki
-
-{pve} 7.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 7.x is based on Debian 11.x (``bullseye''). Please note that this release
-is out of date (see the xref:faq-support-table[FAQ support table]). Existing
-installations should be updated. Nevertheless access to these repositories is
-still provided.
-
-[width="100%",cols="<d,3m",options="header"]
-|===========================================================
-|Repository                 | sources.list entry
-|{pve} 7.x Enterprise       |
-deb https://enterprise.proxmox.com/debian/pve bullseye pve-enterprise
-|{pve} 7.x No-Subscription  |
-deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
-|{pve} 7.x Test             |
-deb http://download.proxmox.com/debian/pve bullseye pvetest
-|===========================================================
-
-Release key URL: https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg
-
-Release key hash sums:
-
-----
-sha512sum /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
-7fb03ec8a1675723d2853b84aa4fdb49a46a3bb72b9951361488bfd19b29aab0a789a4f8c7406e71a69aabbc727c936d3549731c4659ffa1a08f44db8fdcebfa
-
-md5sum /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
-bcc35c7173e0845c0d6ad6470b70f50e
-----
-
-
-{pve} 6.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 6.x is based on Debian 10.x (``buster''). Please note that this release is
-out of date. Existing installations should be updated. Nevertheless access to
-these repositories is still provided.
-
-[width="100%",cols="<d,3m",options="header"]
-|===========================================================
-|Repository                 | sources.list entry
-|{pve} 6.x Enterprise       |
-deb https://enterprise.proxmox.com/debian/pve buster pve-enterprise
-|{pve} 6.x No-Subscription  |
-deb http://download.proxmox.com/debian/pve buster pve-no-subscription
-|{pve} 6.x Test             |
-deb http://download.proxmox.com/debian/pve buster pvetest
-|===========================================================
-
-
-{pve} 5.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 5.x is based on Debian 9.x (``stretch''). Please note that this release is
-out of date. Existing installations should be updated. Nevertheless access to
-these repositories is still provided.
-
-[width="100%",cols="<d,3m",options="header"]
-|===========================================================
-|Repository                 | sources.list entry
-|{pve} 5.x Enterprise       |
-deb https://enterprise.proxmox.com/debian/pve stretch pve-enterprise
-|{pve} 5.x No-Subscription  |
-deb http://download.proxmox.com/debian/pve stretch pve-no-subscription
-|{pve} 5.x Test             |
-deb http://download.proxmox.com/debian/pve stretch pvetest
-|===========================================================
-
-
-{pve} 4.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 4.x is based on Debian 8.x (``jessie''). Please note that this release is
-out of date. Existing installations should be updated. Nevertheless access to
-these repositories is still provided.
-
-[width="100%",cols="<d,3m",options="header"]
-|===========================================================
-|Repository                 | sources.list entry
-|{pve} 4.x Enterprise       |
-deb https://enterprise.proxmox.com/debian/pve jessie pve-enterprise
-|{pve} 4.x No-Subscription  |
-deb http://download.proxmox.com/debian/pve jessie pve-no-subscription
-|{pve} 4.x Test             |
-deb http://download.proxmox.com/debian/pve jessie pvetest
-|===========================================================
-
-
-{pve} 3.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 3.x is based on Debian 7.x (``wheezy''). Please note that this release is
-out of date. Existing installations should be updated. Nevertheless access to
-these repositories is still provided.
-
-[width="100%",cols="<d,3m",options="header"]
-|===========================================================
-|Repository                 | sources.list entry
-|{pve} 3.x Enterprise       |
-deb https://enterprise.proxmox.com/debian/pve wheezy pve-enterprise
-|{pve} 3.x No-Subscription  |
-deb http://download.proxmox.com/debian/pve wheezy pve-no-subscription
-|{pve} 3.x Test             |
-deb http://download.proxmox.com/debian/pve wheezy pvetest
-|===========================================================
-
-
-Outdated: `stable` Repository `pve`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This repository is a leftover to ease the update to 3.1. It will not get any
-updates after the release of 3.1. Therefore the repository needs to be removed
-after the upgrade to 3.1.
-
-.File `/etc/apt/sources.list`
-----
-deb http://ftp.debian.org/debian wheezy main contrib
-
-# PVE packages provided by proxmox.com - NO UPDATES after the initial release of 3.1
-# deb http://download.proxmox.com/debian wheezy pve
-
-# security updates
-deb http://security.debian.org/ wheezy/updates main contrib
-----
-
-
-Outdated: {pve} 2.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 2.x is based on Debian 6.0 (``squeeze'') and outdated. Please upgrade to
-the latest version as soon as possible. In order to use the stable `pve` 2.x
-repository, check your sources.list:
-
-.File `/etc/apt/sources.list`
-----
-deb http://ftp.debian.org/debian squeeze main contrib
-
-# PVE packages provided by proxmox.com
-deb http://download.proxmox.com/debian squeeze pve
-
-# security updates
-deb http://security.debian.org/ squeeze/updates main contrib
-----
-
-
-Outdated: {pve} VE 1.x Repositories
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-{pve} 1.x is based on Debian 5.0 (``lenny'') and very outdated. Please upgrade
-to latest version as soon as possible.
-
-
-endif::wiki[]
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]
 endif::manvolnum[]

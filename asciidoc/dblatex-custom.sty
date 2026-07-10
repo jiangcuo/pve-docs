@@ -14,6 +14,31 @@
 %% Just use the original package and pass the options.
 \RequirePackageWithOptions{docbook}
 
+% XeTeX keeps CJK text as UTF-8 in the generated PDF. The build container
+% does not provide xeCJK, so switch the CJK Unicode classes explicitly.
+\ifxetex
+  \setmainfont{DejaVu Serif}
+  \setsansfont{DejaVu Sans}
+  \setmonofont{DejaVu Sans Mono}
+  \usepackage[CJK]{ucharclasses}
+  \newfontfamily\CJKfont{Droid Sans Fallback}
+  \setTransitionsFor{CJKUnifiedIdeographs}{\begingroup\CJKfont}{\endgroup}
+  \setTransitionsFor{CJKSymbolsAndPunctuation}{\begingroup\CJKfont}{\endgroup}
+  \setTransitionsFor{HalfwidthAndFullwidthForms}{\begingroup\CJKfont}{\endgroup}
+  \XeTeXinterchartoks0\CJKUnifiedIdeographsClass={\begingroup\CJKfont}
+  \XeTeXinterchartoks\CJKUnifiedIdeographsClass0={\endgroup}
+  \XeTeXinterchartoks0\CJKSymbolsAndPunctuationClass={\begingroup\CJKfont}
+  \XeTeXinterchartoks\CJKSymbolsAndPunctuationClass0={\endgroup}
+  \XeTeXinterchartoks0\HalfwidthAndFullwidthFormsClass={\begingroup\CJKfont}
+  \XeTeXinterchartoks\HalfwidthAndFullwidthFormsClass0={\endgroup}
+  \XeTeXinterchartoks\CJKUnifiedIdeographsClass\CJKSymbolsAndPunctuationClass={}
+  \XeTeXinterchartoks\CJKSymbolsAndPunctuationClass\CJKUnifiedIdeographsClass={}
+  \XeTeXinterchartoks\CJKUnifiedIdeographsClass\HalfwidthAndFullwidthFormsClass={}
+  \XeTeXinterchartoks\HalfwidthAndFullwidthFormsClass\CJKUnifiedIdeographsClass={}
+  \XeTeXinterchartoks\CJKSymbolsAndPunctuationClass\HalfwidthAndFullwidthFormsClass={}
+  \XeTeXinterchartoks\HalfwidthAndFullwidthFormsClass\CJKSymbolsAndPunctuationClass={}
+\fi
+
 % Sidebar is a boxed minipage that can contain verbatim.
 % Changed shadow box to double box.
 \renewenvironment{sidebar}[1][0.95\textwidth]{
@@ -42,7 +67,7 @@
       {\color{proxmoxgrey1}\rule{\paperwidth}{22cm}}}
     \put(\LenToUnit{\dimexpr(\paperwidth-11cm)},
          \LenToUnit{\dimexpr(\paperheight-3.5cm)}){
-      \includegraphics[width=10cm]{proxmox-logo}}
+      \includegraphics[width=10cm]{lierfang-logo}}
   }
 }
 

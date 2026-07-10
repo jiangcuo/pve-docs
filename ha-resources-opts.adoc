@@ -1,48 +1,36 @@
 `comment`: `<string>` ::
 
-Description.
+说明。
 
 `group`: `<string>` ::
 
-The HA group identifier.
+HA 组标识符。
 
 `max_relocate`: `<integer> (0 - N)` ('default =' `1`)::
 
-Maximal number of service relocate tries when a service failes to start.
+服务启动失败时，尝试重定位服务的最大次数。
 
 `max_restart`: `<integer> (0 - N)` ('default =' `1`)::
 
-Maximal number of tries to restart the service on a node after its start failed.
+服务在节点上启动失败后，尝试重启该服务的最大次数。
 
 `state`: `<disabled | enabled | ignored | started | stopped>` ('default =' `started`)::
 
-Requested resource state. The CRM reads this state and acts accordingly.
-Please note that `enabled` is just an alias for `started`.
+请求的资源状态。CRM 读取此状态并据此执行操作。
+请注意，`enabled` 只是 `started` 的别名。
 +
 `started`;;
 +
-The CRM tries to start the resource. Service state is
-set to `started` after successful start. On node failures, or when start
-fails, it tries to recover the resource.  If everything fails, service
-state it set to `error`.
+CRM 会尝试启动资源。成功启动后，服务状态会设置为 `started`。当节点故障或启动失败时，它会尝试恢复该资源。如果所有操作均失败，服务状态会设置为 `error`。
 +
 `stopped`;;
 +
-The CRM tries to keep the resource in `stopped` state, but it
-still tries to relocate the resources on node failures.
+CRM 会尝试将资源保持在 `stopped` 状态，但在节点故障时仍会尝试重定位资源。
 +
 `disabled`;;
 +
-The CRM tries to put the resource in `stopped` state, but does not try
-to relocate the resources on node failures. The main purpose of this
-state is error recovery, because it is the only way to move a resource out
-of the `error` state.
+CRM 会尝试将资源置于 `stopped` 状态，但在节点故障时不会尝试重定位资源。此状态的主要用途是错误恢复，因为它是将资源移出 `error` 状态的唯一方式。
 +
 `ignored`;;
 +
-The resource gets removed from the manager status and so the CRM and the LRM do
-not touch the resource anymore. All \{pve\} API calls affecting this resource
-will be executed, directly bypassing the HA stack. CRM commands will be thrown
-away while there source is in this state. The resource will not get relocated
-on node failures.
-
+该资源会从管理器状态中移除，因此 CRM 和 LRM 不再处理该资源。所有影响此资源的 \{pve\} API 调用都会直接执行，并绕过 HA 栈。当资源处于此状态时，CRM 命令会被丢弃。节点故障时，该资源不会被重定位。

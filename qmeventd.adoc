@@ -1,32 +1,26 @@
 ifdef::manvolnum[]
-qmeventd(8)
-===========
+= qmeventd(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-qmeventd - PVE QEMU Eventd Daemon
+qmeventd - PVE QEMU 事件守护进程
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::qmeventd.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-PVE QEMU Event Daemon
-=====================
+= PVE QEMU 事件守护进程
 :pve-toplevel:
 endif::manvolnum[]
 
-`qmeventd` is a daemon that listens on PATH for incoming connections from
-a qemu qmp socket, and waits for SHUTDOWN events. When a client then
-disconnects, it executes `/usr/sbin/qm cleanup`. This makes it easy
-to clean up leftover tap devices, vgpus, etc.
+`qmeventd` 是一个守护进程，它在 PATH 上监听来自 QEMU QMP 套接字的传入连接，
+并等待 `SHUTDOWN` 事件。随后当客户端断开连接时，它会执行
+`/usr/sbin/qm cleanup`。这样可以方便地清理残留的 tap 设备、vGPU 等资源。
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

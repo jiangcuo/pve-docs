@@ -1,54 +1,51 @@
 [[kernel_samepage_merging]]
-Kernel Samepage Merging (KSM)
------------------------------
+== Kernel Samepage Merging (KSM)
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-Kernel Samepage Merging (KSM) is an optional memory deduplication feature
-offered by the Linux kernel, which is enabled by default in {pve}. KSM
-works by scanning a range of physical memory pages for identical content, and
-identifying the virtual pages that are mapped to them. If identical pages are
-found, the corresponding virtual pages are re-mapped so that they all point to
-the same physical page, and the old pages are freed. The virtual pages are
-marked as "copy-on-write", so that any writes to them will be written to a new
-area of memory, leaving the shared physical page intact.
+Kernel Samepage Merging（KSM）是 Linux 内核提供的一项可选内存去重功能，
+在 {pve} 中默认启用。KSM 的工作方式是扫描一段物理内存页，查找内容相同的页面，
+并识别映射到这些页面的虚拟页。如果发现相同页面，对应的虚拟页会被重新映射，
+使它们都指向同一个物理页，并释放旧页面。虚拟页会被标记为“写时复制”，
+因此对它们的任何写入都会写入新的内存区域，从而保持共享物理页不变。
 
-Implications of KSM
-~~~~~~~~~~~~~~~~~~~
+=== KSM 的影响
 
-KSM can optimize memory usage in virtualization environments, as multiple VMs
-running similar operating systems or workloads could potentially share a lot of
-common memory pages.
+在虚拟化环境中，KSM 可以优化内存使用，因为运行相似操作系统或工作负载的多台虚拟机
+可能共享大量相同的内存页。
 
-However, while KSM can reduce memory usage, it also comes with some security
-risks, as it can expose VMs to side-channel attacks. Research has shown that it
-is possible to infer information about a running VM via a second VM on the same
-host, by exploiting certain characteristics of KSM.
+不过，虽然 KSM 能降低内存使用量，它也带来一些安全风险，因为它可能使虚拟机暴露于
+侧信道攻击。研究表明，可以利用 KSM 的某些特性，通过同一主机上的另一台虚拟机推断
+正在运行的虚拟机中的信息。
 
-Thus, if you are using {pve} to provide hosting services, you should consider
-disabling KSM, in order to provide your users with additional security.
-Furthermore, you should check your country's regulations, as disabling KSM may
-be a legal requirement.
+因此，如果使用 {pve} 提供托管服务，应考虑禁用 KSM，以便为用户提供额外的安全性。
+此外，还应检查所在国家或地区的法规，因为禁用 KSM 可能是法律要求。
 
-Disabling KSM
-~~~~~~~~~~~~~
+=== 禁用 KSM
 
-To see if KSM is active, you can check the output of:
+要查看 KSM 是否处于活动状态，可以检查以下命令的输出：
 
 ----
 # systemctl status ksmtuned
 ----
 
-If it is, it can be disabled immediately with:
+如果处于活动状态，可以使用以下命令立即禁用：
 
 ----
 # systemctl disable --now ksmtuned
 ----
 
-Finally, to unmerge all the currently merged pages, run:
+最后，要取消当前所有已合并页面的合并，请运行：
 
 ----
 # echo 2 > /sys/kernel/mm/ksm/run
 ----
 
+常用命令示例：
+
+----
+systemctl status ksmtuned
+cat /sys/kernel/mm/ksm/run
+cat /sys/kernel/mm/ksm/pages_shared
+----

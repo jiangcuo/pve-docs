@@ -1,218 +1,178 @@
 [[chapter_pvesr]]
 ifdef::manvolnum[]
-pvesr(1)
-========
+= pvesr(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvesr - Proxmox VE Storage Replication
+pvesr - Proxmox VE 存储复制
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvesr.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Storage Replication
-===================
+= 存储复制
 :pve-toplevel:
 endif::manvolnum[]
 
-The `pvesr` command-line tool manages the {PVE} storage replication
-framework. Storage replication brings redundancy for guests using
-local storage and reduces migration time.
+`pvesr` 命令行工具用于管理 {pve} 存储复制框架。存储复制可为使用本地存储的
+来宾提供冗余，并减少迁移时间。
 
-It replicates guest volumes to another node so that all data is available
-without using shared storage. Replication uses snapshots to minimize traffic
-sent over the network. Therefore, new data is sent only incrementally after
-the initial full sync. In the case of a node failure, your guest data is
-still available on the replicated node.
+它会将来宾卷复制到另一个节点，因此无需使用共享存储即可让所有数据保持可用。
+复制使用快照来尽量减少通过网络传输的流量。因此，在首次完整同步之后，新数据只会
+以增量方式发送。如果发生节点故障，来宾数据仍可在复制目标节点上使用。
 
-The replication is done automatically in configurable intervals.
-The minimum replication interval is one minute, and the maximal interval
-once a week. The format used to specify those intervals is a subset of
-`systemd` calendar events, see
-xref:pvesr_schedule_time_format[Schedule Format] section:
+复制会按可配置的间隔自动完成。最小复制间隔为一分钟，最大间隔为每周一次。用于指定
+这些间隔的格式是 `systemd` 日历事件的一个子集，请参见
+xref:pvesr_schedule_time_format[调度格式] 章节：
 
-It is possible to replicate a guest to multiple target nodes,
-but not twice to the same target node.
+可以将一个来宾复制到多个目标节点，但不能对同一个目标节点复制两次。
 
-Each replications bandwidth can be limited, to avoid overloading a storage
-or server.
+可以限制每个复制任务的带宽，以避免存储或服务器过载。
 
-Only changes since the last replication (so-called `deltas`) need to be
-transferred if the guest is migrated to a node to which it already is
-replicated. This reduces the time needed significantly. The replication
-direction automatically switches if you migrate a guest to the replication
-target node.
+如果将来宾迁移到一个已拥有该来宾副本的节点，则只需要传输自上次复制以来的变更
+（即所谓的 `deltas`）。这会显著减少所需时间。如果将来宾迁移到复制目标节点，
+复制方向会自动切换。
 
-For example: VM100 is currently on `nodeA` and gets replicated to `nodeB`.
-You migrate it to `nodeB`, so now it gets automatically replicated back from
-`nodeB` to `nodeA`.
+例如：VM100 当前位于 `nodeA`，并复制到 `nodeB`。将其迁移到 `nodeB` 后，它现在会
+自动从 `nodeB` 反向复制回 `nodeA`。
 
-If you migrate to a node where the guest is not replicated, the whole disk
-data must send over. After the migration, the replication job continues to
-replicate this guest to the configured nodes.
+如果迁移到一个没有该来宾副本的节点，则必须传输完整磁盘数据。迁移完成后，复制
+作业会继续将该来宾复制到已配置的节点。
 
 [IMPORTANT]
 ====
-High-Availability is allowed in combination with storage replication, but there
-may be some data loss between the last synced time and the time a node failed.
+高可用可以与存储复制结合使用，但从最后一次同步到节点发生故障之间可能会有部分
+数据丢失。
 ====
 
-Supported Storage Types
------------------------
+== 支持的存储类型
 
-.Storage Types
+.存储类型
 [width="100%",options="header"]
 |=============================================
-|Description    |Plugin type |Snapshots|Stable
-|ZFS (local)    |zfspool     |yes      |yes
+|描述           |插件类型    |快照     |稳定
+|ZFS (local)    |zfspool     |是       |是
 |=============================================
 
 [[pvesr_schedule_time_format]]
-Schedule Format
----------------
-Replication uses xref:chapter_calendar_events[calendar events] for
-configuring the schedule.
+== 调度格式
+复制使用 xref:chapter_calendar_events[日历事件] 配置调度。
 
-Error Handling
---------------
+== 错误处理
 
-If a replication job encounters problems, it is placed in an error state.
-In this state, the configured replication intervals get suspended
-temporarily. The failed replication is repeatedly tried again in a
-30 minute interval.
-Once this succeeds, the original schedule gets activated again.
+如果复制作业遇到问题，会被置于错误状态。在此状态下，已配置的复制间隔会被临时挂起。
+失败的复制会以 30 分钟为间隔反复重试。一旦重试成功，原始调度会再次激活。
 
-Possible issues
-~~~~~~~~~~~~~~~
+=== 可能的问题
 
-Some of the most common issues are in the following list. Depending on your
-setup there may be another cause.
+下列是一些最常见的问题。根据具体设置，也可能存在其他原因。
 
-* Network is not working.
+* 网络未正常工作。
 
-* No free space left on the replication target storage.
+* 复制目标存储没有剩余可用空间。
 
-* Storage with the same storage ID is not available on the target node.
+* 目标节点上没有相同存储 ID 的存储。
 
-NOTE: You can always use the replication log to find out what is causing the problem.
+NOTE: 始终可以使用复制日志查找问题原因。
 
-Migrating a guest in case of Error
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 发生错误时迁移来宾
 // FIXME: move this to better fitting chapter (sysadmin ?) and only link to
 // it here
 
-In the case of a grave error, a virtual guest may get stuck on a failed
-node. You then need to move it manually to a working node again.
+在发生严重错误时，虚拟来宾可能会滞留在故障节点上。此时需要手动将其再次移动到
+正常工作的节点。
 
-Example
-~~~~~~~
+=== 示例
 
-Let's assume that you have two guests (VM 100 and CT 200) running on node A
-and replicate to node B.
-Node A failed and can not get back online. Now you have to migrate the guest
-to Node B manually.
+假设有两个来宾（VM 100 和 CT 200）运行在节点 A 上，并复制到节点 B。
+节点 A 发生故障且无法恢复上线。现在必须手动将来宾迁移到节点 B。
 
-- connect to node B over ssh or open its shell via the web UI
+- 通过 ssh 连接到节点 B，或通过 Web UI 打开其 shell
 
-- check if that the cluster is quorate
+- 检查集群是否具备法定票数
 +
 ----
 # pvecm status
 ----
 
-- If you have no quorum, we strongly advise to fix this first and make the
-  node operable again. Only if this is not possible at the moment, you may
-  use the following command to enforce quorum on the current node:
+- 如果没有法定票数，强烈建议先修复该问题，使节点重新可操作。只有在当前无法做到这一点时，
+  才可以使用以下命令在当前节点上强制设置法定票数：
 +
 ----
 # pvecm expected 1
 ----
 
-WARNING: Avoid changes which affect the cluster if `expected votes` are set
-(for example adding/removing nodes, storages, virtual guests) at all costs.
-Only use it to get vital guests up and running again or to resolve the quorum
-issue itself.
+WARNING: 设置 `expected votes` 后，应尽一切可能避免会影响集群的变更
+（例如添加/移除节点、存储、虚拟来宾）。仅应将其用于让关键来宾重新运行，或用于解决
+法定票数问题本身。
 
-- move both guest configuration files form the origin node A to node B:
+- 将两个来宾配置文件从原始节点 A 移动到节点 B：
 +
 ----
 # mv /etc/pve/nodes/A/qemu-server/100.conf /etc/pve/nodes/B/qemu-server/100.conf
 # mv /etc/pve/nodes/A/lxc/200.conf /etc/pve/nodes/B/lxc/200.conf
 ----
 
-- Now you can start the guests again:
+- 现在可以再次启动来宾：
 +
 ----
 # qm start 100
 # pct start 200
 ----
 
-Remember to replace the VMIDs and node names with your respective values.
+请记得将 VMID 和节点名称替换为实际值。
 
-Managing Jobs
--------------
+== 管理作业
 
 [thumbnail="screenshot/gui-qemu-add-replication-job.png"]
 
-You can use the web GUI to create, modify, and remove replication jobs
-easily. Additionally, the command-line interface (CLI) tool `pvesr` can be
-used to do this.
+可以使用 Web GUI 轻松创建、修改和移除复制作业。此外，也可以使用命令行接口（CLI）
+工具 `pvesr` 完成这些操作。
 
-You can find the replication panel on all levels (datacenter, node, virtual
-guest) in the web GUI. They differ in which jobs get shown:
-all, node- or guest-specific jobs.
+在 Web GUI 的所有层级（数据中心、节点、虚拟来宾）都可以找到复制面板。不同层级显示
+的作业范围不同：全部作业、节点特定作业或来宾特定作业。
 
-When adding a new job, you need to specify the guest if not already selected
-as well as the target node. The replication
-xref:pvesr_schedule_time_format[schedule] can be set if the default of `all
-15 minutes` is not desired. You may impose a rate-limit on a replication
-job. The rate limit can help to keep the load on the storage acceptable.
+添加新作业时，如果尚未选中来宾，则需要指定来宾以及目标节点。如果不希望使用默认的
+`all 15 minutes`，可以设置复制 xref:pvesr_schedule_time_format[调度]。
+也可以为复制作业施加速率限制。速率限制有助于让存储负载保持在可接受范围内。
 
-A replication job is identified by a cluster-wide unique ID. This ID is
-composed of the VMID in addition to a job number.
-This ID must only be specified manually if the CLI tool is used.
+复制作业由一个集群范围内唯一的 ID 标识。该 ID 由 VMID 加上作业编号组成。
+只有使用 CLI 工具时才需要手动指定该 ID。
 
-Network
--------
+== 网络
 
-Replication traffic will use the same network as the live guest migration. By
-default, this is the management network. To use a different network for the
-migration, configure the `Migration Network` in the web interface under
-`Datacenter -> Options -> Migration Settings` or in the `datacenter.cfg`. See
-xref:pvecm_migration_network[Migration Network] for more details.
+复制流量会使用与来宾在线迁移相同的网络。默认情况下，这是管理网络。若要为迁移使用
+其他网络，请在 Web 界面的 `Datacenter -> Options -> Migration Settings` 中配置
+`Migration Network`，或在 `datacenter.cfg` 中配置。更多详情请参见
+xref:pvecm_migration_network[迁移网络]。
 
-Command-line Interface Examples
--------------------------------
+== 命令行接口示例
 
-Create a replication job which runs every 5 minutes with a limited bandwidth
-of 10 Mbps (megabytes per second) for the guest with ID 100.
+为 ID 为 100 的来宾创建一个每 5 分钟运行一次、带宽限制为 10 Mbps（兆字节每秒）的
+复制作业。
 
 ----
 # pvesr create-local-job 100-0 pve1 --schedule "*/5" --rate 10
 ----
 
-Disable an active job with ID `100-0`.
+禁用 ID 为 `100-0` 的活动作业。
 
 ----
 # pvesr disable 100-0
 ----
 
-Enable a deactivated job with ID `100-0`.
+启用 ID 为 `100-0` 的已停用作业。
 
 ----
 # pvesr enable 100-0
 ----
 
-Change the schedule interval of the job with ID `100-0` to once per hour.
+将 ID 为 `100-0` 的作业调度间隔改为每小时一次。
 
 ----
 # pvesr update 100-0 --schedule '*/00'

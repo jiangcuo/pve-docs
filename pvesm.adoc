@@ -1,144 +1,114 @@
 [[chapter_storage]]
 ifdef::manvolnum[]
-pvesm(1)
-========
+= pvesm(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvesm - Proxmox VE Storage Manager
+pvesm - Proxmox VE 存储管理器
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvesm.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 ifndef::manvolnum[]
-{pve} Storage
-=============
+= {pve} 存储
 :pve-toplevel:
 endif::manvolnum[]
 ifdef::wiki[]
 :title: Storage
 endif::wiki[]
 
-The {pve} storage model is very flexible. Virtual machine images
-can either be stored on one or several local storages, or on shared
-storage like NFS or iSCSI (NAS, SAN). There are no limits, and you may
-configure as many storage pools as you like. You can use all
-storage technologies available for Debian Linux.
+{pve} 的存储模型非常灵活。虚拟机镜像既可以存储在一个或多个本地存储上，
+也可以存储在 NFS 或 iSCSI（NAS、SAN）等共享存储上。系统没有固定数量限制，
+可以按需配置任意数量的存储池。OpenEuler Linux 可用的所有存储技术都可以使用。
 
-One major benefit of storing VMs on shared storage is the ability to
-live-migrate running machines without any downtime, as all nodes in
-the cluster have direct access to VM disk images. There is no need to
-copy VM image data, so live migration is very fast in that case.
+将虚拟机存储在共享存储上的一个主要优势是，可以在不停机的情况下实时迁移正在运行的机器，
+因为集群中的所有节点都可以直接访问虚拟机磁盘镜像。这种情况下无需复制虚拟机镜像数据，
+因此实时迁移速度很快。
 
-The storage library (package `libpve-storage-perl`) uses a flexible
-plugin system to provide a common interface to all storage types. This
-can be easily adopted to include further storage types in the future.
+存储库（软件包 `libpve-storage-perl`）使用灵活的插件系统，为所有存储类型提供统一接口。
+将来可以很容易地扩展以包含更多存储类型。
 
 
-Storage Types
--------------
+== 存储类型
 
-There are basically two different classes of storage types:
+存储类型基本分为两大类：
 
-File level storage::
+文件级存储::
 
-File level based storage technologies allow access to a fully featured (POSIX)
-file system.  They are in general more flexible than any Block level storage
-(see below), and allow you to store content of any type. ZFS is probably the
-most advanced system, and it has full support for snapshots and clones.
+基于文件级的存储技术允许访问功能完整的（POSIX）文件系统。一般来说，
+它们比任何块级存储（见下文）更灵活，并允许存储任意类型的内容。ZFS 可能是最先进的系统，
+并且完整支持快照和克隆。
 
-Block level storage::
+块级存储::
 
-Allows to store large 'raw' images. It is usually not possible to store
-other files (ISO, backups, ..) on such storage types. Most modern
-block level storage implementations support snapshots and clones.
-RADOS and GlusterFS are distributed systems, replicating storage
-data to different nodes.
+允许存储大型 `raw` 镜像。通常无法在这类存储类型上存储其他文件（ISO、备份等）。
+大多数现代块级存储实现都支持快照和克隆。RADOS 和 GlusterFS 是分布式系统，
+会将存储数据复制到不同节点。
 
 
-.Available storage types
+.可用存储类型
 [width="100%",cols="<2d,1*m,4*d",options="header"]
 |===========================================================
-|Description    |Plugin type |Level  |Shared|Snapshots|Stable
-|ZFS (local)    |zfspool     |both^1^|no    |yes      |yes
-|Directory      |dir         |file   |no    |no^2^    |yes
-|BTRFS          |btrfs       |file   |no    |yes      |technology preview
-|NFS            |nfs         |file   |yes   |no^2^    |yes
-|CIFS           |cifs        |file   |yes   |no^2^    |yes
+|说明          |插件类型     |级别      |共享 |快照     |稳定性
+|ZFS（本地）   |zfspool     |both^1^|no    |yes      |yes
+|目录          |dir         |file   |no    |no^2^    |yes
+|BTRFS         |btrfs       |file   |no    |yes      |technology preview
+|NFS           |nfs         |file   |yes   |no^2^    |yes
+|CIFS          |cifs        |file   |yes   |no^2^    |yes
 |Proxmox Backup |pbs         |both   |yes   |n/a      |yes
-|GlusterFS      |glusterfs   |file   |yes   |no^2^    |yes
-|CephFS         |cephfs      |file   |yes   |yes      |yes
-|LVM            |lvm         |block  |no^3^ |no       |yes
-|LVM-thin       |lvmthin     |block  |no    |yes      |yes
-|iSCSI/kernel   |iscsi       |block  |yes   |no       |yes
+|GlusterFS     |glusterfs   |file   |yes   |no^2^    |yes
+|CephFS        |cephfs      |file   |yes   |yes      |yes
+|LVM           |lvm         |block  |no^3^ |no       |yes
+|LVM-thin      |lvmthin     |block  |no    |yes      |yes
+|iSCSI/kernel  |iscsi       |block  |yes   |no       |yes
 |iSCSI/libiscsi |iscsidirect |block  |yes   |no       |yes
-|Ceph/RBD       |rbd         |block  |yes   |yes      |yes
+|Ceph/RBD      |rbd         |block  |yes   |yes      |yes
 |ZFS over iSCSI |zfs         |block  |yes   |yes      |yes
 |===========================================================
 
-^1^: Disk images for VMs are stored in ZFS volume (zvol) datasets, which provide
-block device functionality.
+^1^: 虚拟机磁盘镜像存储在提供块设备功能的 ZFS volume（zvol）数据集中。
 
-^2^: On file based storages, snapshots are possible with the 'qcow2' format.
+^2^: 在基于文件的存储上，可以通过 `qcow2` 格式实现快照。
 
-^3^: It is possible to use LVM on top of an iSCSI or FC-based storage.
-That way you get a `shared` LVM storage
+^3^: 可以在基于 iSCSI 或 FC 的存储之上使用 LVM。这样可以获得 `shared` LVM 存储。
 
 
-Thin Provisioning
-~~~~~~~~~~~~~~~~~
+=== 精简配置
 
-A number of storages, and the QEMU image format `qcow2`, support 'thin
-provisioning'.  With thin provisioning activated, only the blocks that
-the guest system actually use will be written to the storage.
+许多存储以及 QEMU 镜像格式 `qcow2` 都支持“精简配置”。启用精简配置后，
+只有客户机系统实际使用的块才会写入存储。
 
-Say for instance you create a VM with a 32GB hard disk, and after
-installing the guest system OS, the root file system of the VM contains
-3 GB of data.  In that case only 3GB are written to the storage, even
-if the guest VM sees a 32GB hard drive. In this way thin provisioning
-allows you to create disk images which are larger than the currently
-available storage blocks. You can create large disk images for your
-VMs, and when the need arises, add more disks to your storage without
-resizing the VMs' file systems.
+例如，创建一台带 32GB 硬盘的虚拟机，安装客户机操作系统后，虚拟机根文件系统中包含
+3GB 数据。在这种情况下，即使客户机虚拟机看到的是 32GB 硬盘，也只有 3GB 会写入存储。
+通过这种方式，精简配置允许创建大于当前可用存储块数量的磁盘镜像。可以先为虚拟机创建
+较大的磁盘镜像，并在需要时为存储添加更多磁盘，而无需调整虚拟机文件系统大小。
 
-All storage types which have the ``Snapshots'' feature also support thin
-provisioning.
+所有具备“快照”特性的存储类型也都支持精简配置。
 
-CAUTION: If a storage runs full, all guests using volumes on that
-storage receive IO errors. This can cause file system inconsistencies
-and may corrupt your data. So it is advisable to avoid
-over-provisioning of your storage resources, or carefully observe
-free space to avoid such conditions.
+CAUTION: 如果某个存储被写满，所有使用该存储上卷的客户机都会收到 IO 错误。
+这可能导致文件系统不一致，并可能损坏数据。因此，建议避免过度配置存储资源，
+或仔细监控可用空间以避免此类情况。
 
 
-Storage Configuration
----------------------
+== 存储配置
 
-All {pve} related storage configuration is stored within a single text
-file at `/etc/pve/storage.cfg`. As this file is within `/etc/pve/`, it
-gets automatically distributed to all cluster nodes. So all nodes
-share the same storage configuration.
+所有与 {pve} 相关的存储配置都保存在单个文本文件 `/etc/pve/storage.cfg` 中。
+由于该文件位于 `/etc/pve/` 内，它会自动分发到所有集群节点。因此，所有节点共享同一份
+存储配置。
 
-Sharing storage configuration makes perfect sense for shared storage,
-because the same ``shared'' storage is accessible from all nodes. But it is
-also useful for local storage types. In this case such local storage
-is available on all nodes, but it is physically different and can have
-totally different content.
+对于共享存储，共享存储配置是很自然的，因为所有节点都能访问同一个“共享”存储。
+但这对本地存储类型同样有用。在这种情况下，此类本地存储在所有节点上都可用，
+但物理上是不同的，也可能包含完全不同的内容。
 
 
-Storage Pools
-~~~~~~~~~~~~~
+=== 存储池
 
-Each storage pool has a `<type>`, and is uniquely identified by its
-`<STORAGE_ID>`. A pool configuration looks like this:
+每个存储池都有一个 `<type>`，并通过其 `<STORAGE_ID>` 唯一标识。存储池配置如下所示：
 
 ----
 <type>: <STORAGE_ID>
@@ -148,17 +118,14 @@ Each storage pool has a `<type>`, and is uniquely identified by its
 	...
 ----
 
-The `<type>: <STORAGE_ID>` line starts the pool definition, which is then
-followed by a list of properties. Most properties require a value. Some have
-reasonable defaults, in which case you can omit the value.
+`<type>: <STORAGE_ID>` 行开始一个存储池定义，随后是属性列表。大多数属性需要值。
+有些属性具有合理的默认值，此时可以省略该值。
 
-To be more specific, take a look at the default storage configuration
-after installation. It contains one special local storage pool named
-`local`, which refers to the directory `/var/lib/vz` and is always
-available. The {pve} installer creates additional storage entries
-depending on the storage type chosen at installation time.
+更具体地说，可以查看安装后的默认存储配置。它包含一个名为 `local` 的特殊本地存储池，
+指向目录 `/var/lib/vz`，并且始终可用。{pve} 安装程序会根据安装时选择的存储类型
+创建额外的存储条目。
 
-.Default storage configuration (`/etc/pve/storage.cfg`)
+.默认存储配置（`/etc/pve/storage.cfg`）
 ----
 dir: local
 	path /var/lib/vz
@@ -177,101 +144,83 @@ zfspool: local-zfs
 	content images,rootdir
 ----
 
-CAUTION: It is problematic to have multiple storage configurations pointing to
-the exact same underlying storage. Such an _aliased_ storage configuration can
-lead to two different volume IDs ('volid') pointing to the exact same disk
-image. {pve} expects that the images' volume IDs point to, are unique. Choosing
-different content types for _aliased_ storage configurations can be fine, but
-is not recommended.
+CAUTION: 让多个存储配置指向完全相同的底层存储会带来问题。这类 _aliased_
+存储配置可能导致两个不同的卷 ID（`volid`）指向同一个磁盘镜像。{pve} 期望镜像的卷 ID
+是唯一的。为 _aliased_ 存储配置选择不同内容类型在某些情况下可行，但不推荐。
 
-Common Storage Properties
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通用存储属性
 
-A few storage properties are common among different storage types.
+一些存储属性在不同存储类型之间通用。
 
 nodes::
 
-List of cluster node names where this storage is
-usable/accessible. One can use this property to restrict storage
-access to a limited set of nodes.
+可以使用或访问该存储的集群节点名称列表。可以使用该属性将存储访问限制在有限的一组节点上。
 
 content::
 
-A storage can support several content types, for example virtual disk
-images, cdrom iso images, container templates or container root
-directories. Not all storage types support all content types. One can set
-this property to select what this storage is used for.
+一个存储可以支持多种内容类型，例如虚拟磁盘镜像、cdrom ISO 镜像、容器模板或容器根目录。
+并非所有存储类型都支持所有内容类型。可以设置该属性以选择该存储的用途。
 
 images:::
 
-QEMU/KVM VM images.
+QEMU/KVM 虚拟机镜像。
 
 rootdir:::
 
-Allow to store container data.
+允许存储容器数据。
 
 vztmpl:::
 
-Container templates.
+容器模板。
 
 backup:::
 
-Backup files (`vzdump`).
+备份文件（`vzdump`）。
 
 iso:::
 
-ISO images
+ISO 镜像
 
 snippets:::
 
-Snippet files, for example guest hook scripts
+片段文件，例如客户机 hook 脚本
 
 shared::
 
-Indicate that this is a single storage with the same contents on all nodes (or
-all listed in the 'nodes' option). It will not make the contents of a local
-storage automatically accessible to other nodes, it just marks an already shared
-storage as such!
+表示这是一个在所有节点（或 `nodes` 选项列出的所有节点）上内容相同的单一存储。
+它不会让本地存储的内容自动对其他节点可访问，只是把已经共享的存储标记为共享。
 
 disable::
 
-You can use this flag to disable the storage completely.
+可以使用该标志完全禁用存储。
 
 maxfiles::
 
-Deprecated, please use `prune-backups` instead. Maximum number of backup files
-per VM. Use `0` for unlimited.
+已弃用，请改用 `prune-backups`。每台虚拟机的最大备份文件数量。使用 `0` 表示不限制。
 
 prune-backups::
 
-Retention options for backups. For details, see
-xref:vzdump_retention[Backup Retention].
+备份保留选项。详情请参见 xref:vzdump_retention[备份保留]。
 
 format::
 
-Default image format (`raw|qcow2|vmdk`)
+默认镜像格式（`raw|qcow2|vmdk`）
 
 preallocation::
 
-Preallocation mode (`off|metadata|falloc|full`) for `raw` and `qcow2` images on
-file-based storages. The default is `metadata`, which is treated like `off` for
-`raw` images. When using network storages in combination with large `qcow2`
-images, using `off` can help to avoid timeouts.
+文件型存储上 `raw` 和 `qcow2` 镜像的预分配模式（`off|metadata|falloc|full`）。
+默认值为 `metadata`，对于 `raw` 镜像会按 `off` 处理。当网络存储与大型 `qcow2`
+镜像配合使用时，使用 `off` 有助于避免超时。
 
-WARNING: It is not advisable to use the same storage pool on different
-{pve} clusters. Some storage operation need exclusive access to the
-storage, so proper locking is required. While this is implemented
-within a cluster, it does not work between different clusters.
+WARNING: 不建议在不同 {pve} 集群上使用同一个存储池。某些存储操作需要对存储进行独占访问，
+因此需要正确的锁定机制。该机制已在集群内部实现，但不能跨不同集群工作。
 
 
-Volumes
--------
+== 卷
 
-We use a special notation to address storage data. When you allocate
-data from a storage pool, it returns such a volume identifier. A volume
-is identified by the `<STORAGE_ID>`, followed by a storage type
-dependent volume name, separated by colon. A valid `<VOLUME_ID>` looks
-like:
+系统使用一种特殊表示法来定位存储数据。从存储池分配数据时，会返回这样的卷标识符。
+卷由 `<STORAGE_ID>` 标识，后接依赖于存储类型的卷名称，中间以冒号分隔。
+有效的 `<VOLUME_ID>` 如下所示：
 
  local:230/example-image.raw
 
@@ -281,41 +230,32 @@ like:
 
  iscsi-storage:0.0.2.scsi-14f504e46494c4500494b5042546d2d646744372d31616d61
 
-To get the file system path for a `<VOLUME_ID>` use:
+要获取 `<VOLUME_ID>` 的文件系统路径，请使用：
 
  pvesm path <VOLUME_ID>
 
 
-Volume Ownership
-~~~~~~~~~~~~~~~~
+=== 卷所有权
 
-There exists an ownership relation for `image` type volumes. Each such
-volume is owned by a VM or Container. For example volume
-`local:230/example-image.raw` is owned by VM 230. Most storage
-backends encodes this ownership information into the volume name.
+`image` 类型卷存在所有权关系。每个此类卷都归属于一台虚拟机或一个容器。
+例如，卷 `local:230/example-image.raw` 归属于虚拟机 230。大多数存储后端会将该所有权信息
+编码到卷名称中。
 
-When you remove a VM or Container, the system also removes all
-associated volumes which are owned by that VM or Container.
+删除虚拟机或容器时，系统也会删除其拥有的所有关联卷。
 
 
-Using the Command-line Interface
---------------------------------
+== 使用命令行界面
 
-It is recommended to familiarize yourself with the concept behind storage
-pools and volume identifiers, but in real life, you are not forced to do any
-of those low level operations on the command line. Normally,
-allocation and removal of volumes is done by the VM and Container
-management tools.
+建议熟悉存储池和卷标识符背后的概念，但在实际使用中，并不要求在命令行执行这些低级操作。
+通常，卷的分配和移除由虚拟机与容器管理工具完成。
 
-Nevertheless, there is a command-line tool called `pvesm` (``{pve}
-Storage Manager''), which is able to perform common storage management
-tasks.
+不过，系统提供了名为 `pvesm`（“{pve} Storage Manager”）的命令行工具，
+可执行常见的存储管理任务。
 
 
-Examples
-~~~~~~~~
+=== 示例
 
-Add storage pools
+添加存储池
 
  pvesm add <TYPE> <STORAGE_ID> <OPTIONS>
  pvesm add dir <STORAGE_ID> --path <PATH>
@@ -323,104 +263,106 @@ Add storage pools
  pvesm add lvm <STORAGE_ID> --vgname <VGNAME>
  pvesm add iscsi <STORAGE_ID> --portal <HOST[:PORT]> --target <TARGET>
 
-Disable storage pools
+禁用存储池
 
  pvesm set <STORAGE_ID> --disable 1
 
-Enable storage pools
+启用存储池
 
  pvesm set <STORAGE_ID> --disable 0
 
-Change/set storage options
+更改或设置存储选项
 
  pvesm set <STORAGE_ID> <OPTIONS>
  pvesm set <STORAGE_ID> --shared 1
  pvesm set local --format qcow2
  pvesm set <STORAGE_ID> --content iso
 
-Remove storage pools. This does not delete any data, and does not
-disconnect or unmount anything. It just removes the storage
-configuration.
+移除存储池。这不会删除任何数据，也不会断开连接或卸载任何内容。它只会移除存储配置。
 
  pvesm remove <STORAGE_ID>
 
-Allocate volumes
+分配卷
 
  pvesm alloc <STORAGE_ID> <VMID> <name> <size> [--format <raw|qcow2>]
 
-Allocate a 4G volume in local storage. The name is auto-generated if
-you pass an empty string as `<name>`
+在本地存储中分配一个 4G 卷。如果将空字符串作为 `<name>` 传入，名称会自动生成。
 
  pvesm alloc local <VMID> '' 4G
 
-Free volumes
+释放卷
 
  pvesm free <VOLUME_ID>
 
-WARNING: This really destroys all volume data.
+WARNING: 这会真正销毁该卷上的所有数据。
 
-List storage status
+列出存储状态
 
  pvesm status
 
-List storage contents
+列出存储内容
 
  pvesm list <STORAGE_ID> [--vmid <VMID>]
 
-List volumes allocated by VMID
+列出按 VMID 分配的卷
 
  pvesm list <STORAGE_ID> --vmid <VMID>
 
-List iso images
+列出 ISO 镜像
 
  pvesm list <STORAGE_ID> --content iso
 
-List container templates
+列出容器模板
 
  pvesm list <STORAGE_ID> --content vztmpl
 
-Show file system path for a volume
+显示卷的文件系统路径
 
  pvesm path <VOLUME_ID>
 
-Exporting the volume `local:103/vm-103-disk-0.qcow2` to the file `target`.
-This is mostly used internally with `pvesm import`.
-The stream format qcow2+size is different to the qcow2 format.
-Consequently, the exported file cannot simply be attached to a VM.
-This also holds for the other formats.
+将卷 `local:103/vm-103-disk-0.qcow2` 导出到文件 `target`。
+这主要在内部与 `pvesm import` 配合使用。流格式 qcow2+size 不同于 qcow2 格式。
+因此，导出的文件不能简单地附加到虚拟机。其他格式也是如此。
 
  pvesm export local:103/vm-103-disk-0.qcow2 qcow2+size target --with-snapshots 1
 
+常用命令示例：
+
+----
+pvesm status
+pvesm list local
+pvesm path <VOLUME_ID>
+----
+
 ifdef::wiki[]
 
-See Also
---------
+== 另请参见
 
-* link:/wiki/Storage:_Directory[Storage: Directory]
+* link:/wiki/Storage:_Directory[存储：目录]
 
-* link:/wiki/Storage:_GlusterFS[Storage: GlusterFS]
+* link:/wiki/Storage:_GlusterFS[存储：GlusterFS]
 
-* link:/wiki/Storage:_User_Mode_iSCSI[Storage: User Mode iSCSI]
+* link:/wiki/Storage:_User_Mode_iSCSI[存储：用户模式 iSCSI]
 
-* link:/wiki/Storage:_iSCSI[Storage: iSCSI]
+* link:/wiki/Storage:_iSCSI[存储：iSCSI]
 
-* link:/wiki/Storage:_LVM[Storage: LVM]
+* link:/wiki/Storage:_LVM[存储：LVM]
 
-* link:/wiki/Storage:_LVM_Thin[Storage: LVM Thin]
+* link:/wiki/Storage:_LVM_Thin[存储：LVM Thin]
 
-* link:/wiki/Storage:_NFS[Storage: NFS]
+* link:/wiki/Storage:_NFS[存储：NFS]
 
-* link:/wiki/Storage:_CIFS[Storage: CIFS]
+* link:/wiki/Storage:_CIFS[存储：CIFS]
 
-* link:/wiki/Storage:_Proxmox_Backup_Server[Storage: Proxmox Backup Server]
+* link:/wiki/Storage:_Proxmox_Backup_Server[存储：Proxmox Backup Server]
 
-* link:/wiki/Storage:_RBD[Storage: RBD]
+* link:/wiki/Storage:_RBD[存储：RBD]
 
-* link:/wiki/Storage:_CephFS[Storage: CephFS]
+* link:/wiki/Storage:_CephFS[存储：CephFS]
 
-* link:/wiki/Storage:_ZFS[Storage: ZFS]
+* link:/wiki/Storage:_ZFS[存储：ZFS]
 
-* link:/wiki/Storage:_ZFS_over_ISCSI[Storage: ZFS over ISCSI]
+* link:/wiki/Storage:_ZFS_over_ISCSI[存储：ZFS over iSCSI]
 
 endif::wiki[]
 
@@ -462,4 +404,3 @@ include::pve-copyright.adoc[]
 endif::manvolnum[]
 
 endif::wiki[]
-

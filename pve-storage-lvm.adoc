@@ -1,104 +1,91 @@
 [[storage_lvm]]
-LVM Backend
------------
+== LVM 后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: LVM
 endif::wiki[]
 
-Storage pool type: `lvm`
+存储池类型：`lvm`
 
-LVM is a light software layer on top of hard disks and partitions. It
-can be used to split available disk space into smaller logical
-volumes. LVM is widely used on Linux and makes managing hard drives
-easier.
+LVM 是构建在硬盘和分区之上的轻量级软件层。它可用于将可用磁盘空间划分为较小的逻辑卷。LVM 在 Linux 上被广泛使用，可简化硬盘管理。
 
-Another use case is to put LVM on top of a big iSCSI LUN. That way you
-can easily manage space on that iSCSI LUN, which would not be possible
-otherwise, because the iSCSI specification does not define a
-management interface for space allocation.
+另一种使用场景是在大型 iSCSI LUN 之上部署 LVM。这样可以方便地管理该 iSCSI LUN 上的空间；否则，由于 iSCSI 规范未定义用于空间分配的管理接口，这类管理将无法实现。
 
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-The LVM backend supports the common storage properties `content`, `nodes`,
-`disable`, and the following LVM specific properties:
+LVM 后端支持通用存储属性 `content`、`nodes`、`disable`，以及以下 LVM 专用属性：
 
 `vgname`::
 
-LVM volume group name. This must point to an existing volume group.
+LVM 卷组名称。必须指向一个已存在的卷组。
 
 `base`::
 
-Base volume. This volume is automatically activated before accessing
-the storage. This is mostly useful when the LVM volume group resides
-on a remote iSCSI server.
+基础卷。访问该存储前，此卷会被自动激活。当 LVM 卷组位于远程 iSCSI 服务器上时，此项尤其有用。
 
 `saferemove`::
 
-Called "Wipe Removed Volumes" in the web UI. Zero-out data when removing LVs.
-When removing a volume, this makes sure that all data gets erased and cannot be
-accessed by other LVs created later (which happen to be assigned the same
-physical extents). This is a costly operation, but may be required as a security
-measure in certain environments.
+在 Web UI 中称为 "Wipe Removed Volumes"。移除 LV 时将数据清零。移除卷时，此项可确保所有数据被擦除，之后创建并恰好分配到相同物理 extent 的其他 LV 无法访问这些数据。该操作成本较高，但在某些环境中可能是必要的安全措施。
 
 `saferemove_throughput`::
 
-Wipe throughput (`cstream -t` parameter value).
+擦除吞吐量（`cstream -t` 参数值）。
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例（`/etc/pve/storage.cfg`）
 ----
 lvm: myspace
 	vgname myspace
 	content rootdir,images
 ----
 
-File naming conventions
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 文件命名约定
 
-The backend use basically the same naming conventions as the ZFS pool
-backend.
+该后端基本使用与 ZFS pool 后端相同的命名约定。
 
  vm-<VMID>-<NAME>      // normal VM images
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-LVM is a typical block storage, but this backend does not support
-snapshots and clones. Unfortunately, normal LVM snapshots are quite
-inefficient, because they interfere with all writes on the entire volume
-group during snapshot time.
+LVM 是典型的块存储，但此后端不支持快照和克隆。遗憾的是，普通 LVM 快照效率较低，因为在快照期间它们会影响整个卷组上的所有写入。
 
-One big advantage is that you can use it on top of a shared storage,
-for example, an iSCSI LUN. The backend itself implements proper cluster-wide
-locking.
+它的一大优势是可以部署在共享存储之上，例如 iSCSI LUN。该后端自身实现了适当的集群范围锁定。
 
-TIP: The newer LVM-thin backend allows snapshots and clones, but does
-not support shared storage.
+TIP: 较新的 LVM-thin 后端支持快照和克隆，但不支持共享存储。
 
 
-.Storage features for backend `lvm`
+.后端 `lvm` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types  |Image formats  |Shared   |Snapshots |Clones
-|images rootdir |raw            |possible |no        |no
+|内容类型       |镜像格式       |共享     |快照      |克隆
+|images rootdir |raw            |可行     |否        |否
 |==============================================================================
 
-Examples
-~~~~~~~~
+=== 示例
 
-You can get a list of available LVM volume groups with:
+可以使用以下命令获取可用 LVM 卷组列表：
 
  # pvesm scan lvm
 
+=== 常用命令示例
+
+查看当前 Proxmox VE 存储配置：
+
+----
+pvesm status
+----
+
+扫描节点上可用的 LVM 卷组：
+
+----
+pvesm scan lvm
+----
+
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Storage[Storage]
 
 endif::wiki[]
-
 

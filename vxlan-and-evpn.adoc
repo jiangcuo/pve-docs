@@ -1,37 +1,42 @@
 
 ////
 
-This is currently not included, because
-- it requires ifupdown2
-- routing needs more documentation
+目前未包含此内容，因为：
+- 它需要 ifupdown2
+- 路由还需要更多文档说明
 
 ////
 
 
-VXLAN layer2 with vlan unware linux bridges
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用非 VLAN 感知 Linux 网桥的 VXLAN 二层网络
 
-VXLAN is an overlay network to carry Ethernet traffic over an existing IP network
-while accommodating a very large number of tenants. It is defined in RFC 7348.
-Each overlay network is known as a VXLAN Segment and identified by a unique
-24-bit segment ID called a VXLAN Network Identifier (VNI).
+VXLAN 是一种覆盖网络，用于在现有 IP 网络之上传输以太网流量，同时支持数量非常大的
+租户。它定义于 RFC 7348。每个覆盖网络称为一个 VXLAN Segment，并通过唯一的 24 位
+段 ID 标识，该 ID 称为 VXLAN Network Identifier（VNI）。
 
-VXLAN encapsulation add 50bytes overhead, so you need to increase mtu on your host
-physical interfaces to 1550 at minimum. (or decrease mtu inside your vms to 1450)
+VXLAN 封装会增加 50 字节开销，因此需要将主机物理接口的 MTU 至少提高到 1550
+（或将虚拟机内部的 MTU 降低到 1450）。
 
-For BUM traffic (broadcast / unknown unicast traffic, multicast),
-we have 3 different VXLAN setup modes : multicast, unicast, bgp-evpn
+对于 BUM 流量（广播/未知单播流量、多播），有 3 种不同的 VXLAN 设置模式：
+multicast、unicast、bgp-evpn。
+
+==== 常用命令示例
+
+以下命令可用于在节点上只读检查 VXLAN 设备、网桥 FDB 与路由状态：
+
+----
+# ip -d link show type vxlan
+# bridge fdb show
+# ip route show
+----
 
 image::images/vxlan-l2-vlanunaware.svg["vxlan l2 bridge vlan unaware",align="center"]
 
-multicast mode
-^^^^^^^^^^^^^^
+==== multicast 模式
 
-This scenario relies in head end replication, meaning that end host in case
-of not having any entry for the destination MAC address will send out an ARP
-to other devices / VTEPs in the VXLAN network.
-This is done by sending the request to the VXLAN multicast group,
-remote VTEPs will get the packet and answer accordingly direct to the originating VTEP.
+此场景依赖头端复制，即终端主机在没有目标 MAC 地址条目时，会向 VXLAN 网络中的其他
+设备/VTEP 发送 ARP。实现方式是将请求发送到 VXLAN 多播组，远端 VTEP 会接收该数据包，
+并直接向发起请求的 VTEP 作出相应应答。
 
 
 * node1
@@ -159,14 +164,11 @@ iface vmbr3 inet manual
 ----
 
 
-unicast mode
-^^^^^^^^^^^^
+==== unicast 模式
 
-We can replace multicast by head-end replication of BUM frames to a statically configured lists of remote VTEPs.
-The VXLAN is defined without a remote multicast group.
-Instead, all the remote VTEPs are associated with the all-zero address:
-a BUM frame will be duplicated to all these destinations.
-The VXLAN device will still learn remote addresses automatically using source-address learning.
+可以通过将 BUM 帧头端复制到静态配置的远端 VTEP 列表来替代多播。此时定义 VXLAN 时
+不使用远端多播组。相反，所有远端 VTEP 都会与全零地址关联：BUM 帧会被复制到所有
+这些目标。VXLAN 设备仍会使用源地址学习自动学习远端地址。
 
 * node1
 
@@ -301,16 +303,14 @@ iface vmbr3 inet manual
 ----
 
 
-bgp-evpn
-^^^^^^^^
+==== bgp-evpn
 
-VTEPs use control plane learning/distribution via BGP for remote MAC addresses instead of data plane learning.
-VTEPs have the ability to suppress ARP flooding over VXLAN tunnels.
+VTEP 通过 BGP 在控制平面学习/分发远端 MAC 地址，而不是使用数据平面学习。
+VTEP 能够抑制 VXLAN 隧道上的 ARP 泛洪。
 
-The control plane used here is FRR, a bgp routing software.
-Each node in the proxmox cluster peer with each others nodes.
-For bigger networks, or multiple proxmox clusters,
-it's possible to use external bgp route reflector servers.
+此处使用的控制平面是 FRR，即一种 BGP 路由软件。Proxmox 集群中的每个节点都与其他
+节点建立对等关系。对于更大的网络或多个 Proxmox 集群，也可以使用外部 BGP 路由反射器
+服务器。
 
 * node1
 
@@ -520,25 +520,21 @@ line vty
 !
 ----
 
-VXLAN layer3 routing with anycast gateway
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用任播网关的 VXLAN 三层路由
 
-With this need, each vmbr bridge will be the gateway for the vm.
-Same vmbr on different node, will have same ip address and same mac address,
-to have working vm live migration and no network disruption.
+在这种需求下，每个 vmbr 网桥都会作为虚拟机的网关。不同节点上的同一个 vmbr
+会使用相同的 IP 地址和相同的 MAC 地址，以确保虚拟机在线迁移可正常工作且网络不中断。
 
-VXLAN layer3 routing only work with FRR and non-aware bridge.
-(vlan aware bridge support is buggy currently).
+VXLAN 三层路由只适用于 FRR 和非 VLAN 感知网桥。
+（VLAN 感知网桥支持当前仍存在问题。）
 
-asymmetric model
-^^^^^^^^^^^^^^^^
+==== 非对称模型
 
-This is the simplest mode. To get it work, all vxlan need to be defined on all nodes.
+这是最简单的模式。要使其工作，所有 vxlan 都需要在所有节点上定义。
 
-The asymmetric model allows routing and bridging on the VXLAN tunnel ingress,
-but only bridging on the egress.
-This results in bi-directional VXLAN traffic traveling on different VNIs
-in each direction (always the destination VNI) across the routed infrastructure.
+非对称模型允许在 VXLAN 隧道入口执行路由和桥接，但在出口只执行桥接。
+因此，双向 VXLAN 流量在经过路由基础设施时，会在每个方向上使用不同的 VNI
+（始终是目标 VNI）。
 
 image::images/vxlan-l3-asymmetric.svg["vxlan l3 asymmetric",align="center"]
 
@@ -788,19 +784,17 @@ line vty
 ----
 
 
-symmetric model
-^^^^^^^^^^^^^^^
+==== 对称模型
 
-With this model, you don't need to have all vxlan on all nodes.
-This model will also be needed to route traffic to an external router.
+使用此模型时，不需要在所有节点上拥有全部 vxlan。将流量路由到外部路由器时也需要
+使用此模型。
 
-The symmetric model routes and bridges on both the ingress and the egress leafs.
-This results in bi-directional traffic being able to travel on the same VNI, hence the symmetric name.
-However, a new specialty transit VNI is used for all routed VXLAN traffic, called the L3VNI.
-All traffic that needs to be routed will be routed onto the L3VNI, tunneled across the layer 3 Infrastructure,
-routed off the L3VNI to the appropriate VLAN and ultimately bridged to the destination.
+对称模型会在入口和出口叶节点上同时执行路由和桥接。因此，双向流量能够在同一个 VNI
+上传输，这也是“对称”名称的由来。不过，所有经过路由的 VXLAN 流量都会使用一个新的
+专用传输 VNI，称为 L3VNI。所有需要路由的流量都会被路由到 L3VNI，经由三层基础设施
+隧道传输，再从 L3VNI 路由到合适的 VLAN，最终桥接到目标。
 
-A vrf is needed for the L3VNI, so all vmbr bridge need to be in the vrf if they want to be able to reach each others.
+L3VNI 需要一个 vrf，因此如果所有 vmbr 网桥需要彼此可达，就必须都位于该 vrf 中。
 
 image::images/vxlan-l3-symmetric.svg["vxlan l3 symmetric",align="center"]
 
@@ -1126,14 +1120,13 @@ line vty
 !
 ----
 
-VXLAN layer3 routing with anycast gateway + routing to outside with external router with static default gw
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Routing to outside need the symmetric model.
+=== 使用任播网关的 VXLAN 三层路由 + 通过带静态默认网关的外部路由器对外路由
+对外路由需要使用对称模型。
 
-1 gateway node
-^^^^^^^^^^^^^^
-In this example, we'll use only 1 proxmox node as exit gateway. (node1)
-This node announce the default gw in vrf1 (default originate) and forward to his own default gateway (192.168.0.254) (no bgp between router and node1)
+==== 单个网关节点
+在此示例中，只使用 1 个 Proxmox 节点作为出口网关（node1）。该节点会在 vrf1 中
+通告默认网关（default originate），并转发到它自己的默认网关（192.168.0.254）
+（路由器和 node1 之间没有 BGP）。
 
 
 *node1
@@ -1484,19 +1477,17 @@ line vty
 !
 ----
 
-multiple gateway nodes
-^^^^^^^^^^^^^^^^^^^^^^
-In this example, all nodes will be used as exit gateway. (But you can use only 2 nodes if you want)
-All nodes have a a default gw to the external router (192.168.0.254) (no bgp between router and node1)
-and announce this default gw in the vrf (default originate)
-The external router have ecmp routes to all proxmox nodes.(balancing).
-If the router send the packet to a wrong node (vm is not on this node), this node will route through
-vxlan the packet to final destination.
+==== 多个网关节点
+在此示例中，所有节点都会作为出口网关使用（如果需要，也可以只使用 2 个节点）。
+所有节点都有一个指向外部路由器（192.168.0.254）的默认网关（路由器和 node1
+之间没有 BGP），并在 vrf 中通告该默认网关（default originate）。外部路由器拥有
+到所有 Proxmox 节点的 ECMP 路由（用于负载均衡）。如果路由器将数据包发送到错误节点
+（虚拟机不在该节点上），该节点会通过 vxlan 将数据包路由到最终目标。
 
-If you have multiple gateway nodes, disable rp_filter as packet could incoming in a 1 node, and outgoing
-to another node.
+如果有多个网关节点，请禁用 rp_filter，因为数据包可能从一个节点进入，并从另一个节点
+发出。
 
-sysctl.conf tuning
+sysctl.conf 调优
 -----
 net.ipv4.conf.default.rp_filter=0
 net.ipv4.conf.all.rp_filter=0
@@ -1901,18 +1892,16 @@ line vty
 !
 ----
 
-Note
-^^^^
+==== 说明
 
-If your external router doesn't support 'ECMP static routes' to reach multiple
-{pve} nodes, you can setup an HA floating vip on proxmox nodes by using the
-Virtual Router Redundancy Protocol (VRRP).
+如果外部路由器不支持通过 `ECMP static routes` 到达多个 {pve} 节点，可以使用
+Virtual Router Redundancy Protocol（VRRP）在 Proxmox 节点上设置 HA 浮动 VIP。
 
-In this example, we will setup an floating 192.168.0.10 IP on node1 and node2.
-Node1 is the primary with failover to node2 in case of outage.
+在此示例中，会在 node1 和 node2 上设置一个浮动 IP 192.168.0.10。node1 为主节点，
+发生故障时故障转移到 node2。
 
-This setup currently needs 'vrrpd' package (`apt install vrrpd`).
-#TODO : It should be possible to do it with frr directly with last version.
+此设置当前需要 `vrrpd` 软件包（`apt install vrrpd`）。
+#TODO : 使用最新版本时，应该可以直接通过 FRR 实现。
 
 * node1
 
@@ -1948,11 +1937,11 @@ iface vmbr0 inet static
 
 
 
-gateway node(s) with a upstream bgp router
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Setup is almost the same than with a static gateway, but we'll connect to an upstream bgp router.
+=== 带上游 BGP 路由器的网关节点
+设置与静态网关几乎相同，但这里会连接到上游 BGP 路由器。
 
-example with node1 as gateway (192.168.0.1) for evpn-bgp, and an upstream bgp router (running frr too) 192.168.0.254.
+以下示例中，node1 作为 evpn-bgp 的网关（192.168.0.1），上游 BGP 路由器
+（同样运行 frr）为 192.168.0.254。
 
 * node1
 
@@ -2006,7 +1995,7 @@ line vty
 !
 ----
 
-* bgp router
+* BGP 路由器
 
 frr.conf
 ----
@@ -2032,16 +2021,13 @@ router bgp 25253
 !
 ---
 
-Route Reflectors
-^^^^^^^^^^^^^^^^
-If you have a lot of proxmox nodes, or multiple proxmox clusters, you may want
-to avoid that all node peers with each others nodes.
-For this, you can create dedicated route reflectors (RR) servers. As a RR is a
-single point of failure, a minimum of two servers acting as an RR is highly
-recommended for redundancy.
+==== 路由反射器
+如果有大量 Proxmox 节点或多个 Proxmox 集群，可能希望避免所有节点彼此建立对等关系。
+为此，可以创建专用的 route reflector（RR）服务器。由于单个 RR 是单点故障，强烈建议
+至少使用两台服务器作为 RR，以实现冗余。
 
-Below is an example of configuration with 'frr', with `rrserver1
-(192.168.0.200)' and `rrserver2 (192.168.0.201)`.
+以下是使用 `frr` 的配置示例，其中包含 `rrserver1 (192.168.0.200)` 和
+`rrserver2 (192.168.0.201)`。
 
 rrserver1
 ----
@@ -2064,7 +2050,7 @@ router bgp 1234
   !
   exit
 !
----
+----
 
 rrserver2
 ----
@@ -2087,9 +2073,9 @@ router bgp 1234
   !
   exit
 !
----
+----
 
-proxmoxnode(s)
+Proxmox 节点
 ----
 router bgp 1234
  bgp router-id 192.168.0.x

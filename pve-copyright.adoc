@@ -1,18 +1,22 @@
-Copyright and Disclaimer
-------------------------
+== 版权和免责声明
+
+Copyright © 2022-2025 成都市梨儿方信息技术有限责任公司.
+
+本程序是自由软件：你可以依据自由软件基金会发布的 GNU Affero General Public
+License 条款重新分发和/或修改本程序；可使用该许可证第 3 版，或（由你选择）任何后续版本。
+
+发布本程序是希望它能够有用，但不提供任何担保；甚至不包含对适销性或特定用途适用性的默示担保。更多详情请参见 GNU Affero General Public License。
+
+你应当已经随本程序收到一份 GNU Affero General Public License 的副本。如果没有，请访问：
+https://www.gnu.org/licenses/
+
 
 Copyright (C) 2007-2022 Proxmox Server Solutions GmbH
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
+本程序是自由软件：你可以依据自由软件基金会发布的 GNU Affero General Public
+License 条款重新分发和/或修改本程序；可使用该许可证第 3 版，或（由你选择）任何后续版本。
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Affero General Public License for more details.
+发布本程序是希望它能够有用，但不提供任何担保；甚至不包含对适销性或特定用途适用性的默示担保。更多详情请参见 GNU Affero General Public License。
 
-You should have received a copy of the GNU Affero General Public
-License along with this program.  If not, see
+你应当已经随本程序收到一份 GNU Affero General Public License 的副本。如果没有，请访问：
 https://www.gnu.org/licenses/

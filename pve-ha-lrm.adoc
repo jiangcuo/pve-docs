@@ -1,29 +1,24 @@
 ifdef::manvolnum[]
-pve-ha-lrm(8)
-=============
+= pve-ha-lrm(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pve-ha-lrm - PVE Local Resource Manager Daemon
+pve-ha-lrm - PVE 本地资源管理器守护进程
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pve-ha-lrm.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Local Resource Manager Daemon
-==============================
+= 本地资源管理器守护进程
 endif::manvolnum[]
 
-This is the Local Resource Manager Daemon.
+这是本地资源管理器守护进程。
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

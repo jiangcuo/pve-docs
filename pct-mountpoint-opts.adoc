@@ -1,52 +1,51 @@
 `rootfs`: `[volume=]<volume> [,acl=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]` ::
 
-Use volume as container root. See below for a detailed description of all options.
+将卷用作容器根文件系统。各选项的详细说明见下文。
 
 `mp[n]`: `[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]` ::
 
-Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.
+将卷用作容器挂载点。可使用特殊语法 STORAGE_ID:SIZE_IN_GiB 分配新卷。
 
 `acl`=`<boolean>` ;;
 
-Explicitly enable or disable ACL support.
+显式启用或禁用 ACL 支持。
 
 `backup`=`<boolean>` ;;
 
-Whether to include the mount point in backups (only used for volume mount points).
+是否将该挂载点包含在备份中（仅用于卷挂载点）。
 
 `mountoptions`=`<opt[;opt...]>` ;;
 
-Extra mount options for rootfs/mps.
+rootfs/mps 的额外挂载选项。
 
 `mp`=`<Path>` ;;
 
-Path to the mount point as seen from inside the container.
+从容器内部看到的挂载点路径。
 +
-NOTE: Must not contain any symlinks for security reasons.
+NOTE: 出于安全原因，不得包含任何符号链接。
 
 `quota`=`<boolean>` ;;
 
-Enable user quotas inside the container (not supported with zfs subvolumes)
+在容器内启用用户配额（zfs subvolume 不支持）。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Will include this volume to a storage replica job.
+会将该卷包含在存储复制任务中。
 
 `ro`=`<boolean>` ;;
 
-Read-only mount point
+只读挂载点。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this non-volume mount point as available on all nodes.
+将此非卷挂载点标记为在所有节点上可用。
 +
-WARNING: This option does not share the mount point automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享该挂载点，而是假定它已经被共享！
 
 `size`=`<DiskSize>` ;;
 
-Volume size (read only value).
+卷大小（只读值）。
 
 `volume`=`<volume>` ;;
 
-Volume, device or directory to mount into the container.
-
+要挂载到容器中的卷、设备或目录。

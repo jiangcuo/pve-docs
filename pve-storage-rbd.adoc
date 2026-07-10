@@ -1,62 +1,53 @@
 :fn-ceph-user-mgmt: footnote:cephusermgmt[Ceph user management {cephdocs-url}/rados/operations/user-management/]
 [[ceph_rados_block_devices]]
-Ceph RADOS Block Devices (RBD)
-------------------------------
+== Ceph RADOS 块设备（RBD）
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: RBD
 endif::wiki[]
 
-Storage pool type: `rbd`
+存储池类型：`rbd`
 
-https://ceph.com[Ceph] is a distributed object store and file system
-designed to provide excellent performance, reliability and
-scalability. RADOS block devices implement a feature rich block level
-storage, and you get the following advantages:
+https://ceph.com[Ceph] 是一种分布式对象存储和文件系统，设计目标是提供优秀的性能、可靠性和可扩展性。
+RADOS 块设备实现了功能丰富的块级存储，并具备以下优势：
 
 * thin provisioning
-* resizable volumes
-* distributed and redundant (striped over multiple OSDs)
-* full snapshot and clone capabilities
-* self healing
-* no single point of failure
-* scalable to the exabyte level
-* kernel and user space implementation available
+* 可调整大小的卷
+* 分布式且具备冗余能力（跨多个 OSD 条带化）
+* 完整的快照和克隆能力
+* 自愈能力
+* 无单点故障
+* 可扩展到 EB 级别
+* 同时提供内核态和用户态实现
 
-NOTE: For smaller deployments, it is also possible to run Ceph
-services directly on your {pve} nodes. Recent hardware has plenty
-of CPU power and RAM, so running storage services and VMs on same node
-is possible.
+NOTE: 对于较小规模的部署，也可以直接在 {pve} 节点上运行 Ceph 服务。现代硬件通常具备充足的
+CPU 算力和内存，因此在同一节点上同时运行存储服务和虚拟机是可行的。
 
 [[storage_rbd_config]]
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-This backend supports the common storage properties `nodes`,
-`disable`, `content`, and the following `rbd` specific properties:
+该后端支持通用存储属性 `nodes`、`disable`、`content`，以及以下 `rbd` 专用属性：
 
 monhost::
 
-List of monitor daemon IPs. Optional, only needed if Ceph is not running on the
-{pve} cluster.
+monitor 守护进程 IP 列表。可选，仅当 Ceph 未运行在 {pve} 集群上时需要。
 
 pool::
 
-Ceph pool name.
+Ceph pool 名称。
 
 username::
 
-RBD user ID. Optional, only needed if Ceph is not running on the {pve} cluster.
-Note that only the user ID should be used. The "client." type prefix must be
-left out.
+RBD 用户 ID。可选，仅当 Ceph 未运行在 {pve} 集群上时需要。注意这里只应使用用户 ID，必须省略
+`client.` 类型前缀。
 
 krbd::
 
-Enforce access to rados block devices through the krbd kernel module. Optional.
+强制通过 `krbd` 内核模块访问 RADOS 块设备。可选。
 
-NOTE: Containers will use `krbd` independent of the option value.
+NOTE: 无论该选项取值如何，容器都会使用 `krbd`。
 
-.Configuration Example for a external Ceph cluster (`/etc/pve/storage.cfg`)
+.外部 Ceph 集群的配置示例（`/etc/pve/storage.cfg`）
 ----
 rbd: ceph-external
         monhost 10.1.1.20 10.1.1.21 10.1.1.22
@@ -65,87 +56,85 @@ rbd: ceph-external
         username admin
 ----
 
-TIP: You can use the `rbd` utility to do low-level management tasks.
+TIP: 可以使用 `rbd` 工具执行低层管理任务。
 
-Authentication
-~~~~~~~~~~~~~~
+=== 认证
 
-NOTE: If Ceph is installed locally on the {pve} cluster, the following is done
-automatically when adding the storage.
+NOTE: 如果 Ceph 安装在本地 {pve} 集群上，添加存储时会自动完成以下操作。
 
-If you use `cephx` authentication, which is enabled by default, you need to
-provide the keyring from the external Ceph cluster.
+如果使用默认启用的 `cephx` 认证，需要提供外部 Ceph 集群的 keyring。
 
-To configure the storage via the CLI, you first need to make the file
-containing the keyring available. One way is to copy the file from the external
-Ceph cluster directly to one of the {pve} nodes. The following example will
-copy it to the `/root` directory of the node on which we run it:
+要通过 CLI 配置该存储，首先需要让包含 keyring 的文件可用。一种方法是将该文件从外部 Ceph
+集群直接复制到某个 {pve} 节点。以下示例会将它复制到当前执行命令节点的 `/root` 目录：
 
 ----
 # scp <external cephserver>:/etc/ceph/ceph.client.admin.keyring /root/rbd.keyring
 ----
 
-Then use the `pvesm` CLI tool to configure the external RBD storage, use the
-`--keyring` parameter, which needs to be a path to the keyring file that you
-copied.  For example:
+然后使用 `pvesm` CLI 工具配置外部 RBD 存储，并通过 `--keyring` 参数指定刚复制的 keyring
+文件路径。例如：
 
 ----
 # pvesm add rbd <name> --monhost "10.1.1.20 10.1.1.21 10.1.1.22" --content images --keyring /root/rbd.keyring
 ----
 
-When configuring an external RBD storage via the GUI, you can copy and paste
-the keyring into the appropriate field.
+通过 GUI 配置外部 RBD 存储时，可以将 keyring 复制并粘贴到相应字段中。
 
-The keyring will be stored at
+keyring 将存储在：
 
 ----
 # /etc/pve/priv/ceph/<STORAGE_ID>.keyring
 ----
 
-TIP: Creating a keyring with only the needed capabilities is recommend when
-connecting to an external cluster. For further information on Ceph user
-management, see the Ceph docs.footnoteref:[cephusermgmt,{cephdocs-url}/rados/operations/user-management/[Ceph User Management]]
+TIP: 连接外部集群时，建议创建仅具备所需权限的 keyring。有关 Ceph 用户管理的更多信息，请参见
+Ceph 文档。footnoteref:[cephusermgmt,{cephdocs-url}/rados/operations/user-management/[Ceph User Management]]
 
-Ceph client configuration (optional)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Ceph 客户端配置（可选）
 
-Connecting to an external Ceph storage doesn't always allow setting
-client-specific options in the config DB on the external cluster. You can add a
-`ceph.conf` beside the Ceph keyring to change the Ceph client configuration for
-the storage.
+连接外部 Ceph 存储时，并不总是允许在外部集群的配置数据库中设置客户端专用选项。可以在 Ceph
+keyring 旁边添加一个 `ceph.conf`，用于调整该存储的 Ceph 客户端配置。
 
-The ceph.conf needs to have the same name as the storage.
+`ceph.conf` 需要与该存储使用相同名称。
 
 ----
 # /etc/pve/priv/ceph/<STORAGE_ID>.conf
 ----
 
-See the RBD configuration reference footnote:[RBD configuration reference
-{cephdocs-url}/rbd/rbd-config-ref/] for possible settings.
+可用设置请参见 RBD 配置参考 footnote:[RBD configuration reference
+{cephdocs-url}/rbd/rbd-config-ref/]。
 
-NOTE: Do not change these settings lightly. {PVE} is merging the
-<STORAGE_ID>.conf with the storage configuration.
+NOTE: 不要轻易修改这些设置。{pve} 会将 `<STORAGE_ID>.conf` 与存储配置合并使用。
 
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-The `rbd` backend is a block level storage, and implements full
-snapshot and clone functionality.
+`rbd` 后端是块级存储，并实现了完整的快照和克隆功能。
 
-.Storage features for backend `rbd`
+.后端 `rbd` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types  |Image formats  |Shared |Snapshots |Clones
-|images rootdir |raw            |yes    |yes       |yes
+|内容类型       |镜像格式       |共享   |快照      |克隆
+|images rootdir |raw            |是     |是        |是
 |==============================================================================
+
+=== 常用命令示例
+
+查看 Proxmox VE 存储状态：
+
+----
+# pvesm status
+----
+
+使用 `rbd` 工具列出指定 Ceph pool 中的镜像：
+
+----
+# rbd ls <pool>
+----
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Storage[Storage]
 
 endif::wiki[]
-

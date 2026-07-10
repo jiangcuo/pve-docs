@@ -1,79 +1,69 @@
 [[storage_cifs]]
-CIFS Backend
------------
+== CIFS 后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: CIFS
 endif::wiki[]
 
-Storage pool type: `cifs`
+存储池类型：`cifs`
 
-The CIFS backend extends the directory backend, so that no manual
-setup of a CIFS mount is needed. Such a storage can be added directly
-through the {pve} API or the web UI, with all our backend advantages,
-like server heartbeat check or comfortable selection of exported
-shares.
+CIFS 后端扩展了目录后端，因此无需手动设置 CIFS 挂载。可以直接通过 {pve} API
+或 Web UI 添加此类存储，并继续使用后端提供的优势，例如服务器心跳检查，以及便捷地选择
+导出的共享。
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-The backend supports all common storage properties, except the shared
-flag, which is always set. Additionally, the following CIFS special
-properties are available:
+该后端支持所有通用存储属性，但 `shared` 标志除外，该标志始终会被设置。此外，还可使用
+以下 CIFS 专用属性：
 
 server::
 
-Server IP or DNS name. Required.
+服务器 IP 或 DNS 名称。必填。
 
-TIP: To avoid DNS lookup delays, it is usually preferable to use an IP
-address instead of a DNS name - unless you have a very reliable DNS
-server, or list the server in the local `/etc/hosts` file.
+TIP: 为避免 DNS 查询延迟，通常最好使用 IP 地址而不是 DNS 名称，除非你拥有非常可靠的
+DNS 服务器，或已在本地 `/etc/hosts` 文件中列出该服务器。
 
 share::
 
-CIFS share to use (get available ones with `pvesm scan cifs <address>` or the
-web UI). Required.
+要使用的 CIFS 共享（可通过 `pvesm scan cifs <address>` 或 Web UI 获取可用共享）。
+必填。
 
 username::
 
-The username for the CIFS storage. Optional, defaults to `guest'.
+CIFS 存储使用的用户名。可选，默认为 `guest'。
 
 password::
 
-The user password. Optional.
-It will be saved in a file only readable by root
-(`/etc/pve/priv/storage/<STORAGE-ID>.pw`).
+用户密码。可选。它会保存到仅 root 可读的文件中
+(`/etc/pve/priv/storage/<STORAGE-ID>.pw`)。
 
 domain::
 
-Sets the user domain (workgroup) for this storage. Optional.
+设置该存储的用户域（工作组）。可选。
 
 smbversion::
 
-SMB protocol Version. Optional, default is `3`.
-SMB1 is not supported due to security issues.
+SMB 协议版本。可选，默认为 `3`。由于安全问题，不支持 SMB1。
 
 path::
 
-The local mount point. Optional, defaults to `/mnt/pve/<STORAGE_ID>/`.
+本地挂载点。可选，默认为 `/mnt/pve/<STORAGE_ID>/`。
 
 content-dirs::
 
-Overrides for the default directory layout. Optional.
+默认目录布局的覆盖设置。可选。
 
 options::
 
-Additional CIFS mount options (see `man mount.cifs`). Some options are set
-automatically and shouldn't be set here. {pve} will always set the option
-`soft`. Depending on the configuration, these options are set automatically:
-`username`, `credentials`, `guest`, `domain`, `vers`.
+额外的 CIFS 挂载选项（参见 `man mount.cifs`）。部分选项会自动设置，不应在此处设置。
+{pve} 始终会设置 `soft` 选项。根据配置，以下选项会自动设置：`username`,
+`credentials`, `guest`, `domain`, `vers`。
 
 subdir::
 
-The subdirectory of the share to mount. Optional, defaults to the root directory
-of the share.
+要挂载的共享子目录。可选，默认为共享的根目录。
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例 (`/etc/pve/storage.cfg`)
 ----
 cifs: backup
 	path /mnt/pve/backup
@@ -87,31 +77,26 @@ cifs: backup
 
 ----
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-CIFS does not support snapshots on a storage level. But you may use
-`qcow2` backing files if you still want to have snapshots and cloning
-features available.
+CIFS 不支持存储级快照。但如果仍希望使用快照和克隆功能，可以使用 `qcow2` 后端文件。
 
-.Storage features for backend `cifs`
+.后端 `cifs` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
 |Content types                             |Image formats   |Shared |Snapshots |Clones
 |images rootdir vztmpl iso backup snippets |raw qcow2 vmdk  |yes    |qcow2     |qcow2
 |==============================================================================
 
-Examples
-~~~~~~~~
+=== 示例
 
-You can get a list of exported CIFS shares with:
+可以使用以下命令获取导出的 CIFS 共享列表：
 
 ----
 # pvesm scan cifs <server> [--username <username>] [--password]
 ----
 
-Then you can add one of these shares as a storage to the whole {pve} cluster
-with:
+然后可以使用以下命令将其中一个共享作为存储添加到整个 {pve} 集群：
 
 ----
 # pvesm add cifs <storagename> --server <server> --share <share> [--username <username>] [--password]
@@ -119,8 +104,7 @@ with:
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Storage[Storage]
 

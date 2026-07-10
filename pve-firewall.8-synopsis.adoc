@@ -2,82 +2,91 @@
 
 *pve-firewall compile*
 
-Compile and print firewall rules. This is useful for testing.
+编译并打印防火墙规则。这对测试很有用。
 
 *pve-firewall help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助信息。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助信息
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *pve-firewall localnet*
 
-Print information about local network.
+打印本地网络信息。
 
 *pve-firewall restart*
 
-Restart the Proxmox VE firewall service.
+重启 Proxmox VE 防火墙服务。
 
 *pve-firewall simulate* `[OPTIONS]`
 
-Simulate firewall rules. This does not simulates the kernel 'routing'
-table, but simply assumes that routing from source zone to destination zone
-is possible.
+模拟防火墙规则。此操作不会模拟内核的 'routing' 表，而只是简单假定从源区域到目标区域的路由可达。
 
 `--dest` `<string>` ::
 
-Destination IP address.
+目标 IP 地址。
 
 `--dport` `<integer>` ::
 
-Destination port.
+目标端口。
 
 `--from` `(host|outside|vm\d+|ct\d+|([a-zA-Z][a-zA-Z0-9]{0,9})/(\S+))` ('default =' `outside`)::
 
-Source zone.
+源区域。
 
 `--protocol` `(tcp|udp)` ('default =' `tcp`)::
 
-Protocol.
+协议。
 
 `--source` `<string>` ::
 
-Source IP address.
+源 IP 地址。
 
 `--sport` `<integer>` ::
 
-Source port.
+源端口。
 
 `--to` `(host|outside|vm\d+|ct\d+|([a-zA-Z][a-zA-Z0-9]{0,9})/(\S+))` ('default =' `host`)::
 
-Destination zone.
+目标区域。
 
 `--verbose` `<boolean>` ('default =' `0`)::
 
-Verbose output.
+详细输出。
 
 *pve-firewall start* `[OPTIONS]`
 
-Start the Proxmox VE firewall service.
+启动 Proxmox VE 防火墙服务。
 
 `--debug` `<boolean>` ('default =' `0`)::
 
-Debug mode - stay in foreground
+调试模式 - 保持在前台运行
 
 *pve-firewall status*
 
-Get firewall status.
+获取防火墙状态。
 
 *pve-firewall stop*
 
-Stop the Proxmox VE firewall service. Note, stopping actively removes all
-Proxmox VE related iptable rules rendering the host potentially
-unprotected.
+停止 Proxmox VE 防火墙服务。注意，停止操作会主动移除所有与 Proxmox VE 相关的 iptable 规则，可能导致主机失去保护。
 
+=== 常用命令示例
+
+查看防火墙状态：
+
+----
+# pve-firewall status
+----
+
+编译并打印当前防火墙规则用于检查：
+
+----
+# pve-firewall compile
+----
 

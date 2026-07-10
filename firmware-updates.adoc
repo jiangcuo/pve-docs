@@ -1,148 +1,107 @@
 [[chapter_firmware_updates]]
-Firmware Updates
-----------------
+== 固件更新
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
-Firmware updates from this chapter should be applied when running {pve} on a
-bare-metal server. Whether configuring firmware updates is appropriate within
-guests, e.g. when using device pass-through, depends strongly on your setup and
-is therefore out of scope.
+在裸金属服务器上运行 {pve} 时，应应用本章所述的固件更新。是否适合在客户机内部配置固件更新
+（例如使用设备直通时）高度依赖具体部署，因此不在本章讨论范围内。
 
-In addition to regular software updates, firmware updates are also important
-for reliable and secure operation.
+除了常规软件更新，固件更新对于可靠、安全的运行同样重要。
 
-When obtaining and applying firmware updates, a combination of available options
-is recommended to get them as early as possible or at all.
+在获取并应用固件更新时，建议结合使用可用的多种方法，以便尽早获得更新，或确保能够获得更新。
 
-The term firmware is usually divided linguistically into microcode (for CPUs)
-and firmware (for other devices).
+从术语上看，firmware 通常分为微码（用于 CPU）和固件（用于其他设备）。
 
 
 [[sysadmin_firmware_persistent]]
-Persistent Firmware
-~~~~~~~~~~~~~~~~~~~
-This section is suitable for all devices. Updated microcode, which is usually
-included in a BIOS/UEFI update, is stored on the motherboard, whereas other
-firmware is stored on the respective device. This persistent method is
-especially important for the CPU, as it enables the earliest possible regular
-loading of the updated microcode at boot time.
+=== 持久化固件
+本节适用于所有设备。更新后的微码通常包含在 BIOS/UEFI 更新中，并存储在主板上；
+其他固件则存储在相应设备上。这种持久化方式对 CPU 尤其重要，因为它允许在启动时尽早按常规流程加载更新后的微码。
 
-CAUTION: With some updates, such as for BIOS/UEFI or storage controller, the
-device configuration could be reset. Please follow the vendor's instructions
-carefully and back up the current configuration.
+CAUTION: 某些更新（例如 BIOS/UEFI 或存储控制器更新）可能会重置设备配置。请仔细遵循厂商说明，并备份当前配置。
 
-Please check with your vendor which update methods are available.
+请向厂商确认可用的更新方法。
 
-* Convenient update methods for servers can include Dell's Lifecycle Manager or
-Service Packs from HPE.
+* 服务器的便捷更新方法可能包括 Dell 的 Lifecycle Manager 或 HPE 的 Service Packs。
 
-* Sometimes there are Linux utilities available as well. Examples are
-https://network.nvidia.com/support/firmware/mlxup-mft/['mlxup'] for NVIDIA
-ConnectX or
-https://techdocs.broadcom.com/us/en/storage-and-ethernet-connectivity/ethernet-nic-controllers/bcm957xxx/adapters/software-installation/updating-the-firmware/manually-updating-the-adapter-firmware-on-linuxesx.html['bnxtnvm'/'niccli']
-for Broadcom network cards.
+* 有时也可以使用 Linux 实用工具。例如，NVIDIA ConnectX 可使用
+https://network.nvidia.com/support/firmware/mlxup-mft/['mlxup']，Broadcom
+网卡可使用
+https://techdocs.broadcom.com/us/en/storage-and-ethernet-connectivity/ethernet-nic-controllers/bcm957xxx/adapters/software-installation/updating-the-firmware/manually-updating-the-adapter-firmware-on-linuxesx.html['bnxtnvm'/'niccli']。
 
-* https://fwupd.org[LVFS] is also an option if there is a cooperation with
-the https://fwupd.org/lvfs/vendors/[hardware vendor] and
-https://fwupd.org/lvfs/devices/[supported hardware] in use. The technical
-requirement for this is that the system was manufactured after 2014 and is
-booted via UEFI.
+* 如果正在使用的 https://fwupd.org/lvfs/vendors/[硬件厂商]与
+https://fwupd.org[LVFS] 合作，并且硬件属于
+https://fwupd.org/lvfs/devices/[受支持硬件]，那么 LVFS 也是一种选择。
+其技术要求是系统制造于 2014 年之后，并通过 UEFI 启动。
 
-{pve} ships its own version of the `fwupd` package to enable Secure Boot
-Support with the Proxmox signing key. This package consciously dropped the
-dependency recommendation for the `udisks2` package, due to observed issues with
-its use on hypervisors. That means you must explicitly configure the correct
-mount point of the EFI partition in `/etc/fwupd/daemon.conf`, for example:
+在 openEuler 中，可以通过 `fwupd` 软件包使用 LVFS 提供的固件更新。
+如果系统未能自动识别 EFI 分区位置，可以在 `/etc/fwupd/daemon.conf`
+中显式配置正确的挂载点，例如：
 
-.File `/etc/fwupd/daemon.conf`
+.文件 `/etc/fwupd/daemon.conf`
 ----
 # Override the location used for the EFI system partition (ESP) path.
 EspLocation=/boot/efi
 ----
 
-TIP: If the update instructions require a host reboot, make sure that it can be
-done safely. See also xref:ha_manager_node_maintenance[Node Maintenance].
+TIP: 如果更新说明要求重启主机，请确保可以安全执行。另请参见
+xref:ha_manager_node_maintenance[节点维护]。
 
 
 [[sysadmin_firmware_runtime_files]]
-Runtime Firmware Files
-~~~~~~~~~~~~~~~~~~~~~~
-This method stores firmware on the {pve} operating system and will pass it to a
-device if its xref:sysadmin_firmware_persistent[persisted firmware] is less
-recent. It is supported by devices such as network and graphics cards, but not
-by those that rely on persisted firmware such as the motherboard and hard disks.
+=== 运行时固件文件
+此方法将固件存储在 {pve} 操作系统中；如果设备的
+xref:sysadmin_firmware_persistent[持久化固件]版本较旧，则会将该固件传递给设备。
+该方法受网络卡、显卡等设备支持，但不适用于依赖持久化固件的设备，例如主板和硬盘。
 
-In {pve} the package `pve-firmware` is already installed by default. Therefore,
-with the normal xref:system_software_updates[system updates (APT)], included
-firmware of common hardware is automatically kept up to date.
+在 {pve} 中，常见硬件所需的运行时固件由 openEuler 的 `linux-firmware`
+软件包提供。因此，通过常规的 xref:system_software_updates[系统更新]，
+常见硬件所包含的固件会自动保持最新。
 
-An additional xref:sysadmin_debian_firmware_repo[Debian Firmware Repository]
-exists, but is not configured by default.
+如需额外固件，请确认已经启用相应的 openEuler 软件源。
 
-If you try to install an additional firmware package but it conflicts, APT will
-abort the installation. Perhaps the particular firmware can be obtained in
-another way.
+如果尝试安装额外固件软件包但发生冲突，DNF 将中止安装。特定固件也许可以通过其他方式获取。
 
 
 [[sysadmin_firmware_cpu]]
-CPU Microcode Updates
-~~~~~~~~~~~~~~~~~~~~~
-Microcode updates are intended to fix found security vulnerabilities and other
-serious CPU bugs. While the CPU performance can be affected, a patched microcode
-is usually still more performant than an unpatched microcode where the kernel
-itself has to do mitigations. Depending on the CPU type, it is possible that
-performance results of the flawed factory state can no longer be achieved
-without knowingly running the CPU in an unsafe state.
+=== CPU 微码更新
+微码更新用于修复已发现的安全漏洞和其他严重 CPU 缺陷。虽然 CPU 性能可能受到影响，
+但已打补丁的微码通常仍然比由内核自行执行缓解措施的未打补丁微码具有更好的性能。
+根据 CPU 类型不同，如果不有意让 CPU 运行在不安全状态，可能无法再达到存在缺陷的出厂状态下的性能结果。
 
-To get an overview of present CPU vulnerabilities and their mitigations, run
-`lscpu`. Current real-world known vulnerabilities can only show up if the
-{pve} host is xref:system_software_updates[up to date], its version not
-xref:faq-support-table[end of life], and has at least been rebooted since the
-last kernel update.
+要查看当前 CPU 漏洞及其缓解措施概览，请运行 `lscpu`。只有当 {pve} 主机
+xref:system_software_updates[保持最新]、版本尚未
+xref:faq-support-table[结束生命周期]，并且自上次内核更新以来至少重启过一次时，
+当前真实世界中已知的漏洞才会显示出来。
 
-Besides the recommended microcode update via
-xref:sysadmin_firmware_persistent[persistent] BIOS/UEFI updates, there is also
-an independent method via *Early OS Microcode Updates*. It is convenient to use
-and also quite helpful when the motherboard vendor no longer provides BIOS/UEFI
-updates. Regardless of the method in use, a reboot is always needed to apply a
-microcode update.
+除了推荐通过 xref:sysadmin_firmware_persistent[持久化] BIOS/UEFI 更新来更新微码之外，
+还可以使用一种独立方式：*早期 OS 微码更新*。这种方式使用方便，
+在主板厂商不再提供 BIOS/UEFI 更新时也很有帮助。无论使用哪种方法，应用微码更新都始终需要重启。
 
 
-Set up Early OS Microcode Updates
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To set up microcode updates that are applied early on boot by the Linux kernel,
-you need to:
+==== 设置早期 OS 微码更新
+要设置由 Linux 内核在启动早期应用的微码更新，需要：
 
-. Enable the xref:sysadmin_debian_firmware_repo[Debian Firmware Repository]
-. Get the latest available packages `apt update` (or use the web interface,
-  under Node -> Updates)
-. Install the CPU-vendor specific microcode package:
-  - For Intel CPUs:  `apt install intel-microcode`
-  - For AMD CPUs:  `apt install amd64-microcode`
-. Reboot the {pve} host
+. 确认已经启用相应的 openEuler 软件源
+. 获取最新可用软件包：`dnf makecache`（也可以使用 Web 界面中的 Node -> Updates）
+. 安装 CPU 微码软件包：`dnf install microcode_ctl`
+. 重启 {pve} 主机
 
-Any future microcode update will also require a reboot to be loaded.
+之后的任何微码更新也都需要重启后才能加载。
 
-Microcode Version
-^^^^^^^^^^^^^^^^^
-To get the current running microcode revision for comparison or debugging
-purposes:
+==== 微码版本
+要获取当前正在运行的微码修订版以便比较或调试：
 
 ----
 # grep microcode /proc/cpuinfo | uniq
 microcode	: 0xf0
 ----
 
-A microcode package has updates for many different CPUs. But updates
-specifically for your CPU might not come often. So, just looking at the date on
-the package won't tell you when the company actually released an update for your
-specific CPU.
+一个微码软件包包含许多不同 CPU 的更新。但专门适用于你的 CPU 的更新可能并不频繁。
+因此，仅查看软件包日期并不能说明厂商何时实际为你的特定 CPU 发布了更新。
 
-If you've installed a new microcode package and rebooted your {pve} host, and
-this new microcode is newer than both, the version baked into the CPU and the
-one from the motherboard's firmware, you'll see a message in the system log
-saying "microcode updated early".
+如果已安装新的微码软件包并重启 {pve} 主机，且这个新微码同时比 CPU 内置版本和主板固件提供的版本更新，
+系统日志中会出现 "microcode updated early" 消息。
 
 ----
 # dmesg | grep microcode
@@ -152,60 +111,66 @@ saying "microcode updated early".
 
 
 [[sysadmin_firmware_troubleshooting]]
-Troubleshooting
-^^^^^^^^^^^^^^^
-For debugging purposes, the set up Early OS Microcode Update applied regularly
-at system boot can be temporarily disabled as follows:
+==== 故障排查
+出于调试目的，可以按如下方式临时禁用系统启动时常规应用的早期 OS 微码更新：
 
-1. make sure that the host can be rebooted xref:ha_manager_node_maintenance[safely]
-2. reboot the host to get to the GRUB menu (hold `SHIFT` if it is hidden)
-3. at the desired {pve} boot entry press `E`
-4. go to the line which starts with `linux` and append separated by a space
+1. 确保主机可以 xref:ha_manager_node_maintenance[安全]重启
+2. 重启主机以进入 GRUB 菜单（如果菜单隐藏，请按住 `SHIFT`）
+3. 在所需的 {pve} 启动项上按 `E`
+4. 转到以 `linux` 开头的行，并以空格分隔追加
 *`dis_ucode_ldr`*
-5. press `CTRL-X` to boot this time without an Early OS Microcode Update
+5. 按 `CTRL-X`，本次启动将不使用早期 OS 微码更新
 
-If a problem related to a recent microcode update is suspected, a package
-downgrade should be considered instead of package removal
-(`apt purge <intel-microcode|amd64-microcode>`). Otherwise, a too old
-xref:sysadmin_firmware_persistent[persisted] microcode might be loaded, even
-though a more recent one would run without problems.
+如果怀疑问题与最近的微码更新有关，应考虑软件包降级，而不是移除软件包
+（`dnf remove microcode_ctl`）。否则，可能会加载过旧的
+xref:sysadmin_firmware_persistent[持久化]微码，即使较新的微码本可以正常运行。
 
-A downgrade is possible if an earlier microcode package version is
-available in the Debian repository, as shown in this example:
+如果 openEuler 软件源中存在较早版本的微码软件包，则可以降级，如以下示例所示：
 
 ----
-# apt list -a intel-microcode
-Listing... Done
-intel-microcode/stable-security,now 3.20230808.1~deb12u1 amd64 [installed]
-intel-microcode/stable 3.20230512.1 amd64
+# dnf --showduplicates list microcode_ctl
+Installed Packages
+microcode_ctl.x86_64 4:2.1-53.oe2203sp4 @OS
+Available Packages
+microcode_ctl.x86_64 4:2.1-51.oe2203sp4 OS
 ----
 ----
-# apt install intel-microcode=3.202305*
+# dnf downgrade microcode_ctl
 ...
-Selected version '3.20230512.1' (Debian:12.1/stable [amd64]) for 'intel-microcode'
+Downgrading:
+ microcode_ctl x86_64 4:2.1-51.oe2203sp4 OS
 ...
-dpkg: warning: downgrading intel-microcode from 3.20230808.1~deb12u1 to 3.20230512.1
-...
-intel-microcode: microcode will be updated at next boot
+Complete!
 ...
 ----
 
-Make sure (again) that the host can be rebooted
-xref:ha_manager_node_maintenance[safely]. To apply an older microcode
-potentially included in the microcode package for your CPU type, reboot now.
+再次确认主机可以 xref:ha_manager_node_maintenance[安全]重启。要应用该微码软件包中可能包含的、
+适用于你 CPU 类型的较旧微码，请立即重启。
 
 [TIP]
 ====
-It makes sense to hold the downgraded package for a while and try more recent
-versions again at a later time. Even if the package version is the same in the
-future, system updates may have fixed the experienced problem in the meantime.
+将降级后的软件包保持一段时间，然后稍后再尝试更新版本，是合理的做法。即使未来软件包版本相同，
+期间的系统更新也可能已经修复曾遇到的问题。
 ----
-# apt-mark hold intel-microcode
-intel-microcode set on hold.
+# dnf versionlock add microcode_ctl
 ----
 ----
-# apt-mark unhold intel-microcode
-# apt update
-# apt full-upgrade
+# dnf versionlock delete microcode_ctl
+# dnf makecache
+# dnf update
 ----
 ====
+
+=== 常用命令示例
+
+查看 CPU 漏洞和缓解状态概览：
+
+----
+# lscpu
+----
+
+查看当前正在运行的微码修订版：
+
+----
+# grep microcode /proc/cpuinfo | uniq
+----

@@ -1,71 +1,57 @@
 [[chapter_hyper_converged_infrastructure]]
-Hyper-converged Infrastructure
-------------------------------
+== 超融合基础设施
 
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-{pve} is a virtualization platform that tightly integrates compute, storage and
-networking resources, manages highly available clusters, backup/restore as well
-as disaster recovery. All components are software-defined and compatible with
-one another.
+{pve} 是一个虚拟化平台，紧密集成计算、存储和网络资源，并管理高可用集群、
+备份/还原以及灾难恢复。所有组件均为软件定义，并彼此兼容。
 
-Therefore it is possible to administrate them like a single system via the
-centralized web management interface. These capabilities make {pve} an ideal
-choice to deploy and manage an open source
-https://en.wikipedia.org/wiki/Hyper-converged_infrastructure[hyper-converged infrastructure].
+因此，可以通过集中式 Web 管理界面像管理单一系统一样管理这些组件。这些能力使
+{pve} 成为部署和管理开源
+https://en.wikipedia.org/wiki/Hyper-converged_infrastructure[hyper-converged infrastructure]
+的理想选择。
 
-Benefits of a Hyper-Converged Infrastructure (HCI) with {pve}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用 {pve} 构建超融合基础设施（HCI）的优势
 
-A hyper-converged infrastructure (HCI) is especially useful for deployments in
-which a high infrastructure demand meets a low administration budget, for
-distributed setups such as remote and branch office environments or for virtual
-private and public clouds.
+超融合基础设施（HCI）尤其适用于基础设施需求较高但管理预算有限的部署场景，
+也适用于远程和分支机构环境等分布式部署，或虚拟私有云和公有云场景。
 
-HCI provides the following advantages:
+HCI 提供以下优势：
 
-- Scalability: seamless expansion of compute, network and storage devices (i.e.
-  scale up servers and storage quickly and independently from each other).
+- 可扩展性：可以无缝扩展计算、网络和存储设备（即快速且相互独立地扩展
+  服务器和存储）。
 
-- Low cost: {pve} is open source and integrates all components you need such as
-  compute, storage, networking, backup, and management center. It can replace
-  an expensive compute/storage infrastructure.
+- 低成本：{pve} 是开源软件，并集成计算、存储、网络、备份和管理中心等所需
+  组件。它可以替代昂贵的计算/存储基础设施。
 
-- Data protection and efficiency: services such as backup and disaster recovery
-  are integrated.
+- 数据保护和效率：集成了备份和灾难恢复等服务。
 
-- Simplicity: easy configuration and centralized administration.
+- 简洁性：配置简单，并支持集中式管理。
 
-- Open Source: No vendor lock-in.
+- 开源：无厂商锁定。
 
 
-Hyper-Converged Infrastructure: Storage
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 超融合基础设施：存储
 
-{pve} has tightly integrated support for deploying a hyper-converged storage
-infrastructure. You can, for example, deploy and manage the following two
-storage technologies by using the web interface only:
+{pve} 对部署超融合存储基础设施提供了紧密集成的支持。例如，可以仅通过 Web
+界面部署并管理以下两种存储技术：
 
-- *Ceph*: a both self-healing and self-managing shared, reliable and highly
-  scalable storage system. Checkout
-  xref:chapter_pveceph[how to manage Ceph services on {pve} nodes]
+- *Ceph*：一种具备自修复和自管理能力的共享、可靠且高度可扩展的存储系统。
+  请参见 xref:chapter_pveceph[如何在 {pve} 节点上管理 Ceph 服务]
 
-- *ZFS*: a combined file system and logical volume manager with extensive
-  protection against data corruption, various RAID modes, fast and cheap
-  snapshots - among other features. Find out
-  xref:chapter_zfs[how to leverage the power of ZFS on {pve} nodes].
+- *ZFS*：结合文件系统和逻辑卷管理器，提供广泛的数据损坏防护、多种 RAID
+  模式、快速且成本低的快照等功能。请参见
+  xref:chapter_zfs[如何在 {pve} 节点上发挥 ZFS 的能力]。
 
-Besides above, {pve} has support to integrate a wide range of
-additional storage technologies. You can find out about them in the
-xref:chapter_storage[Storage Manager chapter].
+除上述技术外，{pve} 还支持集成多种其他存储技术。可以在
+xref:chapter_storage[存储管理器章节]中了解相关内容。
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
-* xref:chapter_pveceph[pveceph - Manage Ceph Services on Proxmox VE Nodes]
+* xref:chapter_pveceph[pveceph - 在 Proxmox VE 节点上管理 Ceph 服务]
 
 endif::wiki[]

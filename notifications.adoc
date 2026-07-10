@@ -1,85 +1,55 @@
 [[chapter_notifications]]
-Notifications
-=============
+= 通知
 ifndef::manvolnum[]
 :pve-toplevel:
 endif::manvolnum[]
 
-Overview
---------
+== 概述
 
 [thumbnail="screenshot/gui-datacenter-notification-overview.png"]
 
-* {pve} emits xref:notification_events[Notification Events] in case of
-  storage replication failures, node fencing, finished/failed backups and other
-  events.
-  These events are handled by the notification system. A notification event has
-  metadata, for example a timestamp, a severity level, a type, and other
-  optional metadata fields.
-* xref:notification_matchers[Notification Matchers] route a notification
-  event to one or more notification targets. A matcher can have match rules to
-  selectively route based on the metadata of a notification event.
-* xref:notification_targets[Notification Targets] are a destination to
-  which a notification event is routed to by a matcher.  There are multiple
-  types of target, mail-based (Sendmail and SMTP) and Gotify.
+* 当发生存储复制失败、节点 fencing、备份完成/失败以及其他事件时，{pve} 会发出
+  xref:notification_events[通知事件]。这些事件由通知系统处理。通知事件带有元数据，例如时间戳、严重级别、类型，以及其他可选元数据字段。
+* xref:notification_matchers[通知匹配器] 会将通知事件路由到一个或多个通知目标。匹配器可以配置匹配规则，根据通知事件的元数据进行选择性路由。
+* xref:notification_targets[通知目标] 是匹配器将通知事件路由到的目的地。目标有多种类型，包括基于邮件的 Sendmail 和 SMTP，以及 Gotify。
 
-Backup jobs have a configurable xref:notification_mode[Notification Mode].
-It allows you to choose between the notification system and a legacy mode for
-sending notification emails. The legacy mode is equivalent to the way
-notifications were handled before {pve} 8.1.
+备份任务可以配置 xref:notification_mode[通知模式]。该模式允许在通知系统和旧版通知邮件发送方式之间选择。旧版模式等同于
+{pve} 8.1 之前处理通知的方式。
 
-The notification system can be configured in the GUI under Datacenter →
-Notifications. The configuration is stored in `/etc/pve/notifications.cfg` and
-`/etc/pve/priv/notifications.cfg` - the latter contains sensitive configuration
-options such as passwords or authentication tokens for notification targets and
-can only be read by `root`.
+通知系统可以在 GUI 的 Datacenter → Notifications 下配置。配置存储在
+`/etc/pve/notifications.cfg` 和 `/etc/pve/priv/notifications.cfg` 中，后者包含通知目标的密码或认证 token
+等敏感配置选项，只能由 `root` 读取。
 
 [[notification_targets]]
-Notification Targets
---------------------
+== 通知目标
 
-{pve} offers multiple types of notification targets.
+{pve} 提供多种类型的通知目标。
 
 [[notification_targets_sendmail]]
-Sendmail
-~~~~~~~~
+=== Sendmail
 
 [thumbnail="screenshot/gui-datacenter-notification-sendmail.png"]
 
-The sendmail binary is a program commonly found on Unix-like operating systems
-that handles the sending of email messages.
-It is a command-line utility that allows users and applications to send emails
-directly from the command line or from within scripts.
+`sendmail` 二进制程序常见于类 Unix 操作系统，用于处理电子邮件消息的发送。它是一个命令行工具，允许用户和应用程序直接从命令行或脚本中发送电子邮件。
 
-The sendmail notification target uses the `sendmail` binary to send emails to a
-list of configured users or email addresses. If a user is selected as a
-recipient, the email address configured in user's settings will be used.
-For the `root@pam` user, this is the email address entered during installation.
-A user's email address can be configured in `Datacenter → Permissions → Users`.
-If a user has no associated email address, no email will be sent.
+Sendmail 通知目标使用 `sendmail` 二进制程序向已配置的用户或电子邮件地址列表发送邮件。如果选择用户作为收件人，则使用该用户设置中配置的电子邮件地址。对于
+`root@pam` 用户，这就是安装期间输入的电子邮件地址。用户的电子邮件地址可以在 `Datacenter → Permissions → Users`
+中配置。如果用户没有关联电子邮件地址，则不会发送邮件。
 
-NOTE: In standard {pve} installations, the `sendmail` binary is provided by
-Postfix. It may be necessary to configure Postfix so that it can deliver mails
-correctly - for example by setting an external mail relay (smart host).  In case
-of failed delivery, check the system logs for messages logged by the Postfix
-daemon.
+NOTE: 在标准 {pve} 安装中，`sendmail` 二进制程序由 Postfix 提供。可能需要配置 Postfix 才能正确投递邮件，例如设置外部邮件中继（smart host）。如果投递失败，请检查系统日志中
+Postfix 守护进程记录的消息。
 
-The configuration for Sendmail target plugins has the following options:
+Sendmail 目标插件配置包含以下选项：
 
-* `mailto`: E-Mail address to which the notification shall be sent to. Can be
-  set multiple times to accommodate multiple recipients.
-* `mailto-user`: Users to which emails shall be sent to. The user's email
-  address will be looked up in `users.cfg`. Can be set multiple times to
-  accommodate multiple recipients.
-* `author`: Sets the author of the E-Mail. Defaults to `Proxmox VE`.
-* `from-address`: Sets the from address of the E-Mail. If the parameter is not
-  set, the plugin will fall back to the `email_from` setting from
-  `datacenter.cfg`. If that is also not set, the plugin will default to
-  `root@$hostname`, where `$hostname` is the hostname of the node.
-  The `From` header in the email will be set to `$author <$from-address>`.
-* `comment`: Comment for this target
+* `mailto`: 通知应发送到的电子邮件地址。可设置多次以支持多个收件人。
+* `mailto-user`: 应接收邮件的用户。用户的电子邮件地址会从 `users.cfg` 中查找。可设置多次以支持多个收件人。
+* `author`: 设置电子邮件作者。默认为 `Proxmox VE`。
+* `from-address`: 设置电子邮件发件地址。如果未设置该参数，插件会回退到 `datacenter.cfg` 中的
+  `email_from` 设置。如果该设置也未设置，插件默认使用 `root@$hostname`，其中 `$hostname`
+  是节点主机名。电子邮件中的 `From` 头会设置为 `$author <$from-address>`。
+* `comment`: 此目标的注释。
 
-Example configuration (`/etc/pve/notifications.cfg`):
+配置示例（`/etc/pve/notifications.cfg`）：
 ----
 sendmail: example
         mailto-user root@pam
@@ -90,43 +60,31 @@ sendmail: example
 ----
 
 [[notification_targets_smtp]]
-SMTP
-~~~~
+=== SMTP
 
 [thumbnail="screenshot/gui-datacenter-notification-smtp.png"]
 
-SMTP notification targets can send emails directly to an SMTP mail relay.
-This target does not use the system's MTA to deliver emails.
-Similar to sendmail targets, if a user is selected as a recipient, the user's
-configured email address will be used.
+SMTP 通知目标可以直接向 SMTP 邮件中继发送电子邮件。该目标不使用系统的 MTA 投递邮件。与 sendmail
+目标类似，如果选择用户作为收件人，则使用该用户配置的电子邮件地址。
 
-NOTE: Unlike sendmail targets, SMTP targets do not have any queuing/retry
-mechanism in case of a failed mail delivery.
+NOTE: 与 sendmail 目标不同，SMTP 目标在邮件投递失败时没有任何排队/重试机制。
 
-The configuration for SMTP target plugins has the following options:
+SMTP 目标插件配置包含以下选项：
 
-* `mailto`: E-Mail address to which the notification shall be sent to. Can be
-  set multiple times to accommodate multiple recipients.
-* `mailto-user`: Users to which emails shall be sent to. The user's email
-  address will be looked up in `users.cfg`. Can be set multiple times to
-  accommodate multiple recipients.
-* `author`: Sets the author of the E-Mail. Defaults to `Proxmox VE`.
-* `from-address`: Sets the From-address of the email. SMTP relays might require
-  that this address is owned by the user in order to avoid spoofing.  The `From`
-  header in the email will be set to `$author <$from-address>`.
-* `username`: Username to use during authentication. If no username is set,
-  no authentication will be performed. The PLAIN and LOGIN authentication
-  methods are supported.
-* `password`: Password to use when authenticating.
-* `mode`: Sets the encryption mode (`insecure`, `starttls` or `tls`). Defaults
-  to `tls`.
-* `server`: Address/IP of the SMTP relay.
-* `port`: The port to connect to. If not set, the used port .
-   Defaults to 25 (`insecure`), 465 (`tls`) or 587 (`starttls`), depending on
-   the value of `mode`.
-* `comment`: Comment for this target
+* `mailto`: 通知应发送到的电子邮件地址。可设置多次以支持多个收件人。
+* `mailto-user`: 应接收邮件的用户。用户的电子邮件地址会从 `users.cfg` 中查找。可设置多次以支持多个收件人。
+* `author`: 设置电子邮件作者。默认为 `Proxmox VE`。
+* `from-address`: 设置电子邮件的 From 地址。SMTP 中继可能要求该地址属于对应用户，以避免欺骗。电子邮件中的
+  `From` 头会设置为 `$author <$from-address>`。
+* `username`: 认证时使用的用户名。如果未设置用户名，则不执行认证。支持 PLAIN 和 LOGIN 认证方法。
+* `password`: 认证时使用的密码。
+* `mode`: 设置加密模式（`insecure`、`starttls` 或 `tls`）。默认为 `tls`。
+* `server`: SMTP 中继的地址/IP。
+* `port`: 要连接的端口。如果未设置，根据 `mode` 的取值，默认分别使用 25（`insecure`）、465（`tls`）或
+  587（`starttls`）。
+* `comment`: 此目标的注释。
 
-Example configuration (`/etc/pve/notifications.cfg`):
+配置示例（`/etc/pve/notifications.cfg`）：
 ----
 smtp: example
         mailto-user root@pam
@@ -138,8 +96,7 @@ smtp: example
         mode starttls
 ----
 
-The matching entry in `/etc/pve/priv/notifications.cfg`, containing the
-secret token:
+`/etc/pve/priv/notifications.cfg` 中包含密钥 token 的对应条目：
 
 ----
 smtp: example
@@ -147,85 +104,66 @@ smtp: example
 ----
 
 [[notification_targets_gotify]]
-Gotify
-~~~~~~
+=== Gotify
 
 [thumbnail="screenshot/gui-datacenter-notification-gotify.png"]
 
-http://gotify.net[Gotify] is an open-source self-hosted notification server that
-allows you to send and receive push notifications to various devices and
-applications. It provides a simple API and web interface, making it easy to
-integrate with different platforms and services.
+http://gotify.net[Gotify] 是一个开源的自托管通知服务器，允许向各种设备和应用程序发送并接收推送通知。它提供简单的 API 和 Web 界面，便于与不同平台和服务集成。
 
-The configuration for Gotify target plugins has the following options:
+Gotify 目标插件配置包含以下选项：
 
-* `server`: The base URL of the Gotify server, e.g. `http://<ip>:8888`
-* `token`: The authentication token. Tokens can be generated within the Gotify
-  web interface.
-* `comment`: Comment for this target
+* `server`: Gotify 服务器的基础 URL，例如 `http://<ip>:8888`
+* `token`: 认证 token。可以在 Gotify Web 界面中生成 token。
+* `comment`: 此目标的注释。
 
-NOTE: The Gotify target plugin will respect the HTTP proxy settings from the
-xref:datacenter_configuration_file[datacenter configuration]
+NOTE: Gotify 目标插件会遵循 xref:datacenter_configuration_file[数据中心配置] 中的 HTTP 代理设置。
 
-Example configuration (`/etc/pve/notifications.cfg`):
+配置示例（`/etc/pve/notifications.cfg`）：
 ----
 gotify: example
         server http://gotify.example.com:8888
         comment Send to multiple users/addresses
 ----
 
-The matching entry in `/etc/pve/priv/notifications.cfg`, containing the
-secret token:
+`/etc/pve/priv/notifications.cfg` 中包含密钥 token 的对应条目：
 ----
 gotify: example
         token somesecrettoken
 ----
 
 [[notification_targets_webhook]]
-Webhook
-~~~~~~~
+=== Webhook
 
-Webhook notification targets perform HTTP requests to a configurable URL.
+Webhook 通知目标会向可配置的 URL 执行 HTTP 请求。
 
-The following configuration options are available:
+可用配置选项如下：
 
-* `url`: The URL to which to perform the HTTP requests.
-  Supports templating to inject message contents, metadata and secrets.
-* `method`: HTTP Method to use (POST/PUT/GET)
-* `header`: Array of HTTP headers that should be set for the request.
-  Supports templating to inject message contents, metadata and secrets.
-* `body`: HTTP body that should be sent.
-  Supports templating to inject message contents, metadata and secrets.
-* `secret`: Array of secret key-value pairs. These will be stored in
-  a protected configuration file only readable by root. Secrets can be accessed
-  in body/header/URL templates via the `secrets` namespace.
-* `comment`: Comment for this target.
+* `url`: 执行 HTTP 请求的 URL。支持通过模板注入消息内容、元数据和 secret。
+* `method`: 要使用的 HTTP Method（POST/PUT/GET）。
+* `header`: 请求应设置的 HTTP 头数组。支持通过模板注入消息内容、元数据和 secret。
+* `body`: 应发送的 HTTP body。支持通过模板注入消息内容、元数据和 secret。
+* `secret`: secret 键值对数组。它们会存储在仅 root 可读的受保护配置文件中。可以在 body/header/URL
+  模板中通过 `secrets` 命名空间访问 secret。
+* `comment`: 此目标的注释。
 
-For configuration options that support templating, the
-https://handlebarsjs.com/[Handlebars] syntax can be used to
-access the following properties:
+对于支持模板的配置选项，可以使用 https://handlebarsjs.com/[Handlebars] 语法访问以下属性：
 
-* `{{ title }}`: The rendered notification title
-* `{{ message }}`: The rendered notification body
-* `{{ severity }}`: The severity of the notification (`info`, `notice`,
-  `warning`, `error`, `unknown`)
-* `{{ timestamp }}`: The notification's timestamp as a UNIX epoch (in seconds).
-* `{{ fields.<name> }}`: Sub-namespace for any metadata fields of the
-  notification. For instance, `fields.type` contains the notification type -
-  for all available fields refer to xref:notification_events[Notification Events].
-* `{{ secrets.<name> }}`: Sub-namespace for secrets. For instance, a secret
-  named `token` is accessible via `secrets.token`.
+* `{{ title }}`: 渲染后的通知标题。
+* `{{ message }}`: 渲染后的通知正文。
+* `{{ severity }}`: 通知严重级别（`info`、`notice`、`warning`、`error`、`unknown`）。
+* `{{ timestamp }}`: 通知时间戳，以 UNIX epoch 表示（秒）。
+* `{{ fields.<name> }}`: 通知任意元数据字段的子命名空间。例如，`fields.type` 包含通知类型；所有可用字段请参见
+  xref:notification_events[通知事件]。
+* `{{ secrets.<name> }}`: secret 的子命名空间。例如，名为 `token` 的 secret 可通过 `secrets.token` 访问。
 
-For convenience, the following helpers are available:
+为方便使用，提供以下 helper：
 
-* `{{ url-encode <value/property> }}`: URL-encode a property/literal.
-* `{{ escape <value/property> }}`: Escape any control characters that cannot be
-  safely represented as a JSON string.
-* `{{ json <value/property> }}`: Render a value as JSON. This can be useful to
-  pass a whole sub-namespace (e.g. `fields`) as a part of a JSON payload (e.g.
-  `{{ json fields }}`).
+* `{{ url-encode <value/property> }}`: 对属性/字面量进行 URL 编码。
+* `{{ escape <value/property> }}`: 转义无法安全表示为 JSON 字符串的控制字符。
+* `{{ json <value/property> }}`: 将值渲染为 JSON。将整个子命名空间（例如 `fields`）作为 JSON payload
+  的一部分传递时很有用，例如 `{{ json fields }}`。
 
-==== Examples
+==== 示例
 
 ===== `ntfy.sh`
 
@@ -275,53 +213,37 @@ For convenience, the following helpers are available:
 
 
 [[notification_matchers]]
-Notification Matchers
----------------------
+== 通知匹配器
 
 [thumbnail="screenshot/gui-datacenter-notification-matcher.png"]
 
-Notification matchers route notifications to notification targets based on their
-matching rules. These rules can match certain properties of a notification, such
-as the timestamp (`match-calendar`), the severity of the notification
-(`match-severity`) or metadata fields (`match-field`).
-If a notification is matched by a matcher, all targets configured for the
-matcher will receive the notification.
+通知匹配器根据匹配规则将通知路由到通知目标。这些规则可以匹配通知的特定属性，例如时间戳（`match-calendar`）、通知严重级别（`match-severity`）或元数据字段（`match-field`）。
+如果通知被某个匹配器匹配，该匹配器配置的所有目标都会收到通知。
 
-An arbitrary number of matchers can be created, each with with their own
-matching rules and targets to notify.
-Every target is notified at most once for every notification, even if the target
-is used in multiple matchers.
+可以创建任意数量的匹配器，每个匹配器都可以有自己的匹配规则和要通知的目标。即使某个目标被多个匹配器使用，每条通知最多也只会向该目标发送一次。
 
-A matcher without any matching rules is always true; the configured targets will
-always be notified.
+没有任何匹配规则的匹配器始终为 true；其配置的目标始终会被通知。
 ----
 matcher: always-matches
         target admin
-        comment This matcher always matches
+        comment 该匹配器始终匹配
 ----
 
-Matcher Options
-~~~~~~~~~~~~~~~
+=== 匹配器选项
 
-* `target`: Determine which target should be notified if the matcher matches.
-  can be used multiple times to notify multiple targets.
-* `invert-match`: Inverts the result of the whole matcher
-* `mode`: Determines how the individual match rules are evaluated to compute
-  the result for the whole matcher.
-  If set to `all`, all matching rules must match.
-  If set to `any`, at least one rule must match.
-  Defaults to `all`.
-* `match-calendar`: Match the notification's timestamp against a schedule.
-* `match-field`: Match the notification's metadata fields.
-* `match-severity`: Match the notification's severity.
-* `comment`: Comment for this matcher.
+* `target`: 确定匹配器命中时应通知哪个目标。可多次使用以通知多个目标。
+* `invert-match`: 反转整个匹配器的结果。
+* `mode`: 确定如何评估各个匹配规则以计算整个匹配器的结果。设置为 `all` 时，所有匹配规则都必须匹配。设置为
+  `any` 时，至少一个规则匹配即可。默认为 `all`。
+* `match-calendar`: 将通知时间戳与日程匹配。
+* `match-field`: 匹配通知的元数据字段。
+* `match-severity`: 匹配通知严重级别。
+* `comment`: 此匹配器的注释。
 
 [[notification_matchers_calendar]]
-Calendar Matching Rules
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 日历匹配规则
 
-A calendar matcher matches the time when a notification is sent against a
-configurable schedule.
+日历匹配器会将通知发送时间与可配置日程进行匹配。
 
 * `match-calendar 8-12`
 * `match-calendar 8:00-15:30`
@@ -329,51 +251,41 @@ configurable schedule.
 * `match-calendar sun,tue-wed,fri 9-17`
 
 [[notification_matchers_field]]
-Field Matching Rules
-~~~~~~~~~~~~~~~~~~~~
+=== 字段匹配规则
 
-Notifications have a selection of metadata fields that can be matched.  When
-using `exact` as a matching mode, a `,` can be used as a separator.  The
-matching rule then matches if the metadata field has *any* of the specified
-values.
+通知包含若干可匹配的元数据字段。使用 `exact` 作为匹配模式时，可以使用 `,` 作为分隔符。只要元数据字段具有任意一个指定值，该匹配规则即匹配。
 
-* `match-field exact:type=vzdump` Only match notifications about backups.
-* `match-field exact:type=replication,fencing` Match `replication` and `fencing` notifications.
-* `match-field regex:hostname=^.+\.example\.com$` Match the hostname of
-the node.
+* `match-field exact:type=vzdump` 仅匹配与备份相关的通知。
+* `match-field exact:type=replication,fencing` 匹配 `replication` 和 `fencing` 通知。
+* `match-field regex:hostname=^.+\.example\.com$` 匹配节点主机名。
 
 
-If a matched metadata field does not exist, the notification will not be
-matched.
-For instance, a `match-field regex:hostname=.*` directive will only match
-notifications that have an arbitrary `hostname` metadata field, but will
-not match if the field does not exist.
+如果被匹配的元数据字段不存在，则通知不会匹配。例如，`match-field regex:hostname=.*` 指令只会匹配具有任意
+`hostname` 元数据字段的通知；如果该字段不存在，则不会匹配。
 
 [[notification_matchers_severity]]
-Severity Matching Rules
-~~~~~~~~~~~~~~~~~~~~~~~
-A notification has a associated severity that can be matched.
+=== 严重级别匹配规则
+通知具有关联的严重级别，可用于匹配。
 
-* `match-severity error`: Only match errors
-* `match-severity warning,error`: Match warnings and error
+* `match-severity error`: 仅匹配错误。
+* `match-severity warning,error`: 匹配警告和错误。
 
-The following severities are in use:
+当前使用以下严重级别：
 `info`, `notice`, `warning`, `error`, `unknown`.
 
 
-Examples
-~~~~~~~~
+=== 示例
 ----
 matcher: workday
         match-calendar mon-fri 9-17
         target admin
-        comment Notify admins during working hours
+        comment 工作时间通知管理员
 
 matcher: night-and-weekend
         match-calendar mon-fri 9-17
         invert-match true
         target on-call-admins
-        comment Separate target for non-working hours
+        comment 非工作时间使用独立目标
 ----
 
 ----
@@ -381,109 +293,96 @@ matcher: backup-failures
         match-field exact:type=vzdump
         match-severity error
         target backup-admins
-        comment Send notifications about backup failures to one group of admins
+        comment 将备份失败通知发送给一组管理员
 
 matcher: cluster-failures
         match-field exact:type=replication,fencing
         target cluster-admins
-        comment Send cluster-related notifications to other group of admins
+        comment 将集群相关通知发送给另一组管理员
 ----
 
 [[notification_events]]
-Notification Events
--------------------
+== 通知事件
 
 [width="100%",options="header"]
 |===========================================================================
-| Event                            | `type`            | Severity | Metadata fields (in addition to `type`)
-| System updates available         |`package-updates`  | `info`   | `hostname`
-| Cluster node fenced              |`fencing`          | `error`  | `hostname`
-| Storage replication job failed   |`replication`      | `error`  | `hostname`, `job-id`
-| Backup succeeded                 |`vzdump`           | `info`   | `hostname`, `job-id` (only for backup jobs)
-| Backup failed                    |`vzdump`           | `error`  | `hostname`, `job-id` (only for backup jobs)
-| Mail for root                    |`system-mail`      | `unknown`| `hostname`
+|事件                              | `type`            | 严重级别 | 元数据字段（除 `type` 外）
+|系统更新可用                      |`package-updates`  | `info`   | `hostname`
+|集群节点被 fencing                |`fencing`          | `error`  | `hostname`
+|存储复制任务失败                  |`replication`      | `error`  | `hostname`, `job-id`
+|备份成功                          |`vzdump`           | `info`   | `hostname`, `job-id`（仅备份任务）
+|备份失败                          |`vzdump`           | `error`  | `hostname`, `job-id`（仅备份任务）
+|root 邮件                         |`system-mail`      | `unknown`| `hostname`
 |===========================================================================
 
 [width="100%",options="header"]
 |=======================================================================
-| Field name        | Description
-| `type`            | Type of the notification
-| `hostname`        | Hostname, without domain (e.g. `pve1`)
-| `job-id`          | Job ID
+|字段名            |说明
+| `type`            |通知类型
+| `hostname`        |不含域名的主机名（例如 `pve1`）
+| `job-id`          |任务 ID
 |=======================================================================
 
-NOTE: Backup job notifications only have `job-id` set if the backup job
-  was executed automatically based on its schedule, but not if it was triggered
-  manually by the 'Run now' button in the UI.
+NOTE: 只有根据调度自动执行的备份任务通知才会设置 `job-id`；如果通过 UI 中的 `Run now`
+按钮手动触发，则不会设置该字段。
 
-System Mail Forwarding
----------------------
+== 系统邮件转发
 
-Certain local system daemons, such as `smartd`, generate notification emails
-that are initially directed to the local `root` user. {pve} will
-feed these mails into the notification system as a notification of
-type `system-mail` and with severity `unknown`.
+某些本地系统守护进程（例如 `smartd`）会生成通知邮件，这些邮件最初发送给本地 `root` 用户。{pve}
+会将这些邮件送入通知系统，并作为类型为 `system-mail`、严重级别为 `unknown` 的通知处理。
 
-When the email is forwarded to a sendmail target, the mail's content and headers
-are forwarded as-is. For all other targets,
-the system tries to extract both a subject line and the main text body
-from the email content. In instances where emails solely consist of HTML
-content, they will be transformed into plain text format during this process.
+当电子邮件转发到 sendmail 目标时，邮件内容和头部会按原样转发。对于所有其他目标，系统会尝试从邮件内容中提取主题行和正文文本。如果邮件只包含 HTML 内容，则会在此过程中转换为纯文本格式。
 
-Permissions
------------
+== 权限
 
-To modify/view the configuration for notification targets,
-the `Mapping.Modify/Mapping.Audit` permissions are required for the
-`/mapping/notifications` ACL node.
+要修改/查看通知目标配置，需要在 `/mapping/notifications` ACL 节点上具备
+`Mapping.Modify`/`Mapping.Audit` 权限。
 
-Testing a target requires `Mapping.Use`, `Mapping.Audit` or `Mapping.Modify`
-permissions on `/mapping/notifications`
+测试目标需要在 `/mapping/notifications` 上具备 `Mapping.Use`、`Mapping.Audit` 或
+`Mapping.Modify` 权限。
 
 [[notification_mode]]
-Notification Mode
------------------
-A backup job configuration has the `notification-mode`
-option which can have one of three values.
+== 通知模式
+备份任务配置包含 `notification-mode` 选项，可取以下三个值之一。
 
-* `auto`: Use the `legacy-sendmail` mode if no email address is entered in the
-  `mailto`/`Send email to` field. If no email address is entered,
-  the `notification-system` mode is used.
+* `auto`: 如果在 `mailto`/`Send email to` 字段中输入了电子邮件地址，则使用 `legacy-sendmail`
+  模式。如果未输入电子邮件地址，则使用 `notification-system` 模式。
 
-* `legacy-sendmail`: Send notification emails via the system's `sendmail` command.
-  The notification system will be bypassed and any configured
-  targets/matchers will be ignored.
-  This mode is equivalent to the notification behavior for version before
-  {pve} 8.1 .
+* `legacy-sendmail`: 通过系统的 `sendmail` 命令发送通知邮件。通知系统会被绕过，所有已配置的目标/匹配器都会被忽略。该模式等同于
+  {pve} 8.1 之前版本的通知行为。
 
-* `notification-system`: Use the new, flexible notification system.
+* `notification-system`: 使用新的灵活通知系统。
 
-If the `notification-mode` option is not set, {pve} will default
-to `auto`.
+如果未设置 `notification-mode` 选项，{pve} 默认使用 `auto`。
 
-The `legacy-sendmail` mode might be removed in a later release of
-{pve}.
+`legacy-sendmail` 模式可能会在 {pve} 未来版本中移除。
 
-Overriding Notification Templates
----------------------------------
+== 覆盖通知模板
 
-{pve} uses Handlebars templates to render notifications. The original templates
-provided by {pve} are stored in `/usr/share/pve-manager/templates/default/`.
+{pve} 使用 Handlebars 模板渲染通知。{pve} 提供的原始模板存储在
+`/usr/share/pve-manager/templates/default/`。
 
-Notification templates can be overridden by providing a custom template file in
-the override directory at `/etc/pve/notification-templates/default/`.  When
-rendering a notification of a given type, {pve} will first attempt to load a
-template from the override directory. If this one does not exist or fails to
-render, the original template will be used.
+可以通过在覆盖目录 `/etc/pve/notification-templates/default/` 中提供自定义模板文件来覆盖通知模板。渲染指定类型的通知时，{pve}
+会首先尝试从覆盖目录加载模板。如果该模板不存在或渲染失败，则使用原始模板。
 
-The template files follow the naming convention of
-`<type>-<body|subject>.<html|txt>.hbs`. For instance, the file
-`vzdump-body.html.hbs` contains the template for rendering the HTML version for
-backup notifications, while `package-updates-subject.txt.hbs` is used to render
-the subject line of notifications for available package updates.
+模板文件遵循 `<type>-<body|subject>.<html|txt>.hbs` 命名约定。例如，
+`vzdump-body.html.hbs` 包含用于渲染备份通知 HTML 版本的模板，而
+`package-updates-subject.txt.hbs` 用于渲染可用软件包更新通知的主题行。
 
-Email-based notification targets, such as `sendmail` and `smtp`, always send
-multi-part messages with an HTML and a plain text part. As a result, both the
-`<type>-body.html.hbs` as well as the `<type>-body.txt.hbs` template will be
-used when rendering the email message. All other notification target types only
-use the `<type>-body.txt.hbs` template.
+基于电子邮件的通知目标（例如 `sendmail` 和 `smtp`）始终发送同时包含 HTML 和纯文本部分的 multi-part
+消息。因此，渲染电子邮件消息时会同时使用 `<type>-body.html.hbs` 和
+`<type>-body.txt.hbs` 模板。所有其他通知目标类型只使用 `<type>-body.txt.hbs` 模板。
+
+== 常用命令示例
+
+查看通知配置文件：
+
+----
+# cat /etc/pve/notifications.cfg
+----
+
+查看包含敏感字段的私有通知配置文件权限：
+
+----
+# ls -l /etc/pve/priv/notifications.cfg
+----

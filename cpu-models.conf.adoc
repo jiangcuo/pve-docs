@@ -1,71 +1,59 @@
 ifdef::manvolnum[]
-cpu-models.conf(5)
-==================
+= cpu-models.conf(5)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-cpu-models.conf - Custom CPU model configuration file
+cpu-models.conf - 自定义 CPU 型号配置文件
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 '/etc/pve/virtual-guest/cpu-models.conf'
 
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Custom CPU Model Configuration
-==============================
+= 自定义 CPU 型号配置
 endif::manvolnum[]
 ifdef::wiki[]
 :pve-toplevel:
 :title: Manual: cpu-models.conf
 endif::wiki[]
 
-The `/etc/pve/virtual-guest/cpu-models.conf` file stores custom CPU
-models, which can be used by VMs to get access to advanced CPU
-features (for example custom CPU flags).
+`/etc/pve/virtual-guest/cpu-models.conf` 文件用于存储自定义 CPU 型号。
+虚拟机可以使用这些型号来访问高级 CPU 功能（例如自定义 CPU 标志）。
 
 
-File Format
------------
+== 文件格式
 
-CPU models each have their own section in the file, beginning with
-the header:
+每个 CPU 型号在文件中都有自己的独立小节，并以下列标题开头：
 
  cpu-model: <name>
 
-Note that <name> does not include the 'custom-' prefix, which is
-required in VM configs to denote custom CPU models.
+请注意，<name> 不包含 `custom-` 前缀；在虚拟机配置中表示自定义 CPU 型号时
+才需要该前缀。
 
-For example, if the <name> is 'foobar', the CPU for a VM would need to be
-configured as 'custom-foobar'.
+例如，如果 <name> 为 `foobar`，则虚拟机的 CPU 需要配置为 `custom-foobar`。
 
-Each section can specify several options. They are indented by either one TAB
-character or multiple spaces. Every option and its value is separated by one
-space, for example:
+每个小节可以指定多个选项。选项行使用一个 TAB 字符或多个空格缩进。每个选项及其值
+用一个空格分隔，例如：
 
  reported-model qemu64
 
-See below for all available options.
+所有可用选项见下文。
 
-Blank lines and those starting with a `#` are ignored.
+空行以及以 `#` 开头的行会被忽略。
 
 
-Options
--------
+== 选项
 
 include::cpu-models.conf.5-opts.adoc[]
 
 
-Example File
-------------
+== 示例文件
 
 ----
 cpu-model: avx

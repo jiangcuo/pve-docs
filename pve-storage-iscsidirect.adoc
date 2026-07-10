@@ -1,54 +1,58 @@
 [[storage_iscsidirect]]
-User Mode iSCSI Backend
------------------------
+== 用户态 iSCSI 后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: User Mode iSCSI
 endif::wiki[]
 
-Storage pool type: `iscsidirect`
+存储池类型：`iscsidirect`
 
-This backend provides basically the same functionality as the Open-iSCSI backed,
-but uses a user-level library to implement it. You need to install the
-`libiscsi-bin` package in order to use this backend.
+该后端提供的功能基本与 Open-iSCSI 后端相同，但通过用户态库实现。要使用该后端，需要安装
+`libiscsi` 软件包。
 
-It should be noted that there are no kernel drivers involved, so this
-can be viewed as performance optimization. But this comes with the
-drawback that you cannot use LVM on top of such iSCSI LUN. So you need
-to manage all space allocations at the storage server side.
+需要注意的是，该后端不涉及内核驱动，因此可视为一种性能优化方式。但它也有一个缺点：
+不能在这类 iSCSI LUN 之上使用 LVM。因此，所有空间分配都需要在存储服务器端管理。
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-The user mode iSCSI backend uses the same configuration options as the
-Open-iSCSI backed.
+用户态 iSCSI 后端使用与 Open-iSCSI 后端相同的配置选项。
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例（`/etc/pve/storage.cfg`）
 ----
 iscsidirect: faststore
      portal 10.10.10.1
      target iqn.2006-01.openfiler.com:tsn.dcb5aaaddd
 ----
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-NOTE: This backend works with VMs only. Containers cannot use this
-driver.
+NOTE: 该后端仅适用于虚拟机。容器不能使用此驱动。
 
-.Storage features for backend `iscsidirect`
+.后端 `iscsidirect` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types  |Image formats  |Shared |Snapshots |Clones
-|images         |raw            |yes    |no        |no
+|内容类型       |镜像格式       |共享   |快照      |克隆
+|images         |raw            |是     |否        |否
 |==============================================================================
+
+=== 常用命令示例
+
+查看当前存储状态：
+
+----
+# pvesm status
+----
+
+扫描可用 iSCSI target：
+
+----
+# pvesm scan iscsi <portal>
+----
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Storage[Storage]
 
 endif::wiki[]
-

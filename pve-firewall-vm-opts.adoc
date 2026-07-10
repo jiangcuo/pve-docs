@@ -1,40 +1,41 @@
 `dhcp`: `<boolean>` ('default =' `0`)::
 
-Enable DHCP.
+启用 DHCP。
 
 `enable`: `<boolean>` ('default =' `0`)::
 
-Enable/disable firewall rules.
+启用或禁用防火墙规则。
 
 `ipfilter`: `<boolean>` ::
 
-Enable default IP filters. This is equivalent to adding an empty ipfilter-net<id> ipset for every interface. Such ipsets implicitly contain sane default restrictions such as restricting IPv6 link local addresses to the one derived from the interface's MAC address. For containers the configured IP addresses will be implicitly added.
+启用默认 IP 过滤器。这等同于为每个接口添加一个空的 ipfilter-net<id> ipset。
+此类 ipset 隐式包含合理的默认限制，例如将 IPv6 链路本地地址限制为由接口
+MAC 地址派生出的地址。对于容器，已配置的 IP 地址会被隐式加入。
 
 `log_level_in`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for incoming traffic.
+入站流量的日志级别。
 
 `log_level_out`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for outgoing traffic.
+出站流量的日志级别。
 
 `macfilter`: `<boolean>` ('default =' `1`)::
 
-Enable/disable MAC address filter.
+启用或禁用 MAC 地址过滤器。
 
 `ndp`: `<boolean>` ('default =' `0`)::
 
-Enable NDP (Neighbor Discovery Protocol).
+启用 NDP（Neighbor Discovery Protocol）。
 
 `policy_in`: `<ACCEPT | DROP | REJECT>` ::
 
-Input policy.
+输入策略。
 
 `policy_out`: `<ACCEPT | DROP | REJECT>` ::
 
-Output policy.
+输出策略。
 
 `radv`: `<boolean>` ::
 
-Allow sending Router Advertisement.
-
+允许发送 Router Advertisement。

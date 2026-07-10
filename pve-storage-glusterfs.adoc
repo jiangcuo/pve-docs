@@ -1,46 +1,41 @@
 [[storage_glusterfs]]
-GlusterFS Backend
------------------
+== GlusterFS 后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: GlusterFS
 endif::wiki[]
 
-Storage pool type: `glusterfs`
+存储池类型：`glusterfs`
 
-GlusterFS is a scalable network file system. The system uses a modular
-design, runs on commodity hardware, and can provide a highly available
-enterprise storage at low costs. Such system is capable of scaling to
-several petabytes, and can handle thousands of clients.
+GlusterFS 是一种可扩展的网络文件系统。该系统采用模块化设计，可运行在通用硬件上，
+并能以较低成本提供高可用的企业级存储。这类系统可以扩展到数 PB 规模，
+并可处理数千个客户端。
 
-NOTE: After a node/brick crash, GlusterFS does a full `rsync` to make
-sure data is consistent. This can take a very long time with large
-files, so this backend is not suitable to store large VM images.
+NOTE: 在节点或 brick 崩溃后，GlusterFS 会执行完整的 `rsync` 以确保数据一致。
+对于大文件，这可能耗费很长时间，因此该后端不适合存储大型虚拟机镜像。
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-The backend supports all common storage properties, and adds the
-following GlusterFS specific options:
+该后端支持所有通用存储属性，并额外增加以下 GlusterFS 专用选项：
 
 `server`::
 
-GlusterFS volfile server IP or DNS name.
+GlusterFS volfile 服务器 IP 或 DNS 名称。
 
 `server2`::
 
-Backup volfile server IP or DNS name.
+备用 volfile 服务器 IP 或 DNS 名称。
 
 `volume`::
 
-GlusterFS Volume.
+GlusterFS 卷。
 
 `transport`::
 
-GlusterFS transport: `tcp`, `unix` or `rdma`
+GlusterFS 传输方式：`tcp`、`unix` 或 `rdma`
 
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例（`/etc/pve/storage.cfg`）
 ----
 glusterfs: Gluster
         server 10.2.3.4
@@ -50,39 +45,39 @@ glusterfs: Gluster
 ----
 
 
-File naming conventions
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 文件命名约定
 
-The directory layout and the file naming conventions are inherited
-from the `dir` backend.
+目录布局和文件命名约定继承自 `dir` 后端。
 
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-The storage provides a file level interface, but no native
-snapshot/clone implementation.
+该存储提供文件级接口，但没有原生快照或克隆实现。
 
-.Storage features for backend `glusterfs`
+.后端 `glusterfs` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types                      |Image formats   |Shared |Snapshots |Clones
+|内容类型                           |镜像格式        |共享 |快照  |克隆
 |images vztmpl iso backup snippets  |raw qcow2 vmdk  |yes    |qcow2     |qcow2
 |==============================================================================
 
-Examples
-~~~~~~~~
+=== 示例
 
-You can get a list of available GlusterFS volumes with:
+可以使用以下命令获取可用 GlusterFS 卷列表：
 
  # pvesm scan glusterfs <server>
 
+常用命令示例：
+
+----
+pvesm scan glusterfs <server>
+pvesm status
+----
+
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
-* link:/wiki/Storage[Storage]
+* link:/wiki/Storage[存储]
 
 endif::wiki[]
-

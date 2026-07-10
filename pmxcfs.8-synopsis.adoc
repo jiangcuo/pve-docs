@@ -1,19 +1,20 @@
 *pmxcfs* `[OPTIONS]`
 
-Help Options:
+帮助选项：
 
-`-h`, `--help`:: Show help options
+`-h`, `--help`:: 显示帮助选项
 
-Application Options:
+应用选项：
 
-`-d`, `--debug`:: Turn on debug messages
+`-d`, `--debug`:: 打开调试消息
 
-`-f`, `--foreground`:: Do not daemonize server
+`-f`, `--foreground`:: 不将服务器守护进程化
 
-`-l`, `--local`:: Force local mode (ignore corosync.conf, force quorum)
+`-l`, `--local`:: 强制本地模式（忽略 corosync.conf，强制 quorum）
 
-This service is usually started and managed using systemd toolset. The
-service is called 'pve-cluster'.
+该服务通常使用 systemd 工具集启动和管理。服务名为 'pve-cluster'。
+
+.常用命令示例
 
  systemctl start pve-cluster
 

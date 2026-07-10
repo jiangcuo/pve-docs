@@ -1,349 +1,287 @@
 [[chapter_pveceph]]
 ifdef::manvolnum[]
-pveceph(1)
-==========
+= pveceph(1)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pveceph - Manage Ceph Services on Proxmox VE Nodes
+pveceph - 管理 Proxmox VE 节点上的 Ceph 服务
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pveceph.1-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 ifndef::manvolnum[]
-Deploy Hyper-Converged Ceph Cluster
-===================================
+= 部署超融合 Ceph 集群
 :pve-toplevel:
 
-Introduction
-------------
+== 简介
 endif::manvolnum[]
 
 [thumbnail="screenshot/gui-ceph-status-dashboard.png"]
 
-{pve} unifies your compute and storage systems, that is, you can use the same
-physical nodes within a cluster for both computing (processing VMs and
-containers) and replicated storage. The traditional silos of compute and
-storage resources can be wrapped up into a single hyper-converged appliance.
-Separate storage networks (SANs) and connections via network attached storage
-(NAS) disappear. With the integration of Ceph, an open source software-defined
-storage platform, {pve} has the ability to run and manage Ceph storage directly
-on the hypervisor nodes.
+{pve} 将计算系统和存储系统统一起来，也就是说，你可以在同一个集群中的相同物理
+节点上同时用于计算（处理虚拟机和容器）以及副本存储。传统上相互隔离的计算资源
+和存储资源可以整合为单一的超融合设备。独立的存储网络（SAN）以及通过网络附加
+存储（NAS）建立的连接也随之消失。通过集成 Ceph 这一开源软件定义存储平台，
+{pve} 能够直接在 hypervisor 节点上运行和管理 Ceph 存储。
 
-Ceph is a distributed object store and file system designed to provide
-excellent performance, reliability and scalability.
+Ceph 是一个分布式对象存储和文件系统，旨在提供出色的性能、可靠性和可扩展性。
 
-.Some advantages of Ceph on {pve} are:
-- Easy setup and management via CLI and GUI
-- Thin provisioning
-- Snapshot support
-- Self healing
-- Scalable to the exabyte level
-- Provides block, file system, and object storage
-- Setup pools with different performance and redundancy characteristics
-- Data is replicated, making it fault tolerant
-- Runs on commodity hardware
-- No need for hardware RAID controllers
-- Open source
+.在 {pve} 上使用 Ceph 的一些优势包括：
+- 可通过 CLI 和 GUI 轻松设置和管理
+- 精简置备
+- 支持快照
+- 自愈
+- 可扩展到 EB 级别
+- 提供块存储、文件系统和对象存储
+- 可设置具备不同性能和冗余特征的池
+- 数据会进行复制，从而具备容错能力
+- 可运行在通用硬件上
+- 不需要硬件 RAID 控制器
+- 开源
 
-For small to medium-sized deployments, it is possible to install a Ceph server
-for using RADOS Block Devices (RBD) or CephFS directly on your {pve} cluster
-nodes (see xref:ceph_rados_block_devices[Ceph RADOS Block Devices (RBD)]).
-Recent hardware has a lot of CPU power and RAM, so running storage services and
-virtual guests on the same node is possible.
+对于中小规模部署，可以直接在 {pve} 集群节点上安装 Ceph 服务器，以使用 RADOS
+Block Devices（RBD）或 CephFS（参见
+xref:ceph_rados_block_devices[Ceph RADOS Block Devices (RBD)]）。现代硬件拥有大量 CPU 计算能力和内存，因此可以在同一
+节点上同时运行存储服务和虚拟客户机。
 
-To simplify management, {pve} provides you native integration to install and
-manage {ceph} services on {pve} nodes either via the built-in web interface, or
-using the 'pveceph' command line tool.
+为简化管理，{pve} 提供原生集成，可通过内置 Web 界面或 'pveceph' 命令行工具在
+{pve} 节点上安装和管理 {ceph} 服务。
 
 
-Terminology
------------
+== 术语
 
 // TODO: extend and also describe basic architecture here.
-.Ceph consists of multiple Daemons, for use as an RBD storage:
-- Ceph Monitor (ceph-mon, or MON)
-- Ceph Manager (ceph-mgr, or MGS)
-- Ceph Metadata Service (ceph-mds, or MDS)
-- Ceph Object Storage Daemon (ceph-osd, or OSD)
+.作为 RBD 存储使用时，Ceph 由多个守护进程组成：
+- Ceph Monitor（ceph-mon，或 MON）
+- Ceph Manager（ceph-mgr，或 MGR）
+- Ceph Metadata Service（ceph-mds，或 MDS）
+- Ceph Object Storage Daemon（ceph-osd，或 OSD）
 
-TIP: We highly recommend to get familiar with Ceph
+TIP: 强烈建议熟悉 Ceph
 footnote:[Ceph intro {cephdocs-url}/start/],
-its architecture
+其架构
 footnote:[Ceph architecture {cephdocs-url}/architecture/]
-and vocabulary
+以及术语
 footnote:[Ceph glossary {cephdocs-url}/glossary].
 
 
 [[_recommendations_for_a_healthy_ceph_cluster]]
-Recommendations for a Healthy Ceph Cluster
-------------------------------------------
+== 健康 Ceph 集群的建议
 
-To build a hyper-converged Proxmox + Ceph Cluster, you must use at least three
-(preferably) identical servers for the setup.
+要构建超融合 Proxmox + Ceph 集群，必须至少使用三台服务器，并且最好使用相同配置
+的服务器。
 
-Check also the recommendations from
-{cephdocs-url}/start/hardware-recommendations/[Ceph's website].
+也请查看 {cephdocs-url}/start/hardware-recommendations/[Ceph 网站]中的建议。
 
-NOTE: The recommendations below should be seen as a rough guidance for choosing
-hardware. Therefore, it is still essential to adapt it to your specific needs.
-You should test your setup and monitor health and performance continuously.
+NOTE: 以下建议应视为选择硬件时的粗略指导。因此，仍然必须根据具体需求进行调整。
+应测试你的部署，并持续监控健康状态和性能。
 
 [[pve_ceph_recommendation_cpu]]
 .CPU
-Ceph services can be classified into two categories:
+Ceph 服务可分为两类：
 
-* Intensive CPU usage, benefiting from high CPU base frequencies and multiple
-  cores. Members of that category are:
-** Object Storage Daemon (OSD) services
-** Meta Data Service (MDS) used for CephFS
-* Moderate CPU usage, not needing multiple CPU cores. These are:
-** Monitor (MON) services
-** Manager (MGR) services
+* CPU 使用密集型，受益于较高的 CPU 基础频率和多个核心。此类别包括：
+** Object Storage Daemon（OSD）服务
+** CephFS 使用的 Meta Data Service（MDS）
+* 中等 CPU 使用型，不需要多个 CPU 核心。此类别包括：
+** Monitor（MON）服务
+** Manager（MGR）服务
 
-As a simple rule of thumb, you should assign at least one CPU core (or thread)
-to each Ceph service to provide the minimum resources required for stable and
-durable Ceph performance.
+作为简单经验法则，应为每个 Ceph 服务至少分配一个 CPU 核心（或线程），以提供
+稳定且持久的 Ceph 性能所需的最低资源。
 
-For example, if you plan to run a Ceph monitor, a Ceph manager and 6 Ceph OSDs
-services on a node you should reserve 8 CPU cores purely for Ceph when targeting
-basic and stable performance.
+例如，如果计划在一个节点上运行一个 Ceph monitor、一个 Ceph manager 和 6 个
+Ceph OSD 服务，并以基础且稳定的性能为目标，则应为 Ceph 专门保留 8 个 CPU 核心。
 
-Note that OSDs CPU usage depend mostly from the disks performance. The higher
-the possible IOPS (**IO** **O**perations per **S**econd) of a disk, the more CPU
-can be utilized by a OSD service.
-For modern enterprise SSD disks, like NVMe's that can permanently sustain a high
-IOPS load over 100'000 with sub millisecond latency, each OSD can use multiple
-CPU threads, e.g., four to six CPU threads utilized per NVMe backed OSD is
-likely for very high performance disks.
+请注意，OSD 的 CPU 使用率主要取决于磁盘性能。磁盘可能提供的 IOPS（**IO**
+**O**perations per **S**econd）越高，OSD 服务可利用的 CPU 就越多。对于现代企业级
+SSD 磁盘，例如可以长期承受超过 100'000 IOPS 且延迟低于毫秒级的 NVMe，每个 OSD
+都可能使用多个 CPU 线程；对于非常高性能的磁盘，每个 NVMe 支撑的 OSD 使用四到六
+个 CPU 线程是可能的。
 
 [[pve_ceph_recommendation_memory]]
-.Memory
-Especially in a hyper-converged setup, the memory consumption needs to be
-carefully planned out and monitored. In addition to the predicted memory usage
-of virtual machines and containers, you must also account for having enough
-memory available for Ceph to provide excellent and stable performance.
+.内存
+尤其是在超融合部署中，需要仔细规划并监控内存消耗。除了虚拟机和容器的预期内存
+使用量外，还必须考虑为 Ceph 保留足够内存，以提供出色且稳定的性能。
 
-As a rule of thumb, for roughly **1 TiB of data, 1 GiB of memory** will be used
-by an OSD. While the usage might be less under normal conditions, it will use
-most during critical operations like recovery, re-balancing or backfilling.
-That means that you should avoid maxing out your available memory already on
-normal operation, but rather leave some headroom to cope with outages.
+作为经验法则，每个 OSD 大约会为 **1 TiB 数据使用 1 GiB 内存**。正常情况下使用量
+可能更低，但在恢复、重新平衡或 backfilling 等关键操作期间会使用最多内存。这
+意味着应避免在正常运行时就耗尽可用内存，而应保留一定余量以应对故障。
 
-The OSD service itself will use additional memory. The Ceph BlueStore backend of
-the daemon requires by default **3-5 GiB of memory** (adjustable).
+OSD 服务本身也会使用额外内存。该守护进程的 Ceph BlueStore 后端默认需要 **3-5
+GiB 内存**（可调整）。
 
 [[pve_ceph_recommendation_network]]
-.Network
-We recommend a network bandwidth of at least 10 Gbps, or more, to be used
-exclusively for Ceph traffic. A meshed network setup
+.网络
+建议至少使用 10 Gbps 或更高带宽的网络专门承载 Ceph 流量。对于三到五节点集群，
+如果没有可用的 10+ Gbps 交换机，也可以选择网状网络部署
 footnote:[Full Mesh Network for Ceph {webwiki-url}Full_Mesh_Network_for_Ceph_Server]
-is also an option for three to five node clusters, if there are no 10+ Gbps
-switches available.
+。
 
 [IMPORTANT]
-The volume of traffic, especially during recovery, will interfere
-with other services on the same network, especially the latency sensitive {pve}
-corosync cluster stack can be affected, resulting in possible loss of cluster
-quorum.  Moving the Ceph traffic to dedicated and physical separated networks
-will avoid such interference, not only for corosync, but also for the networking
-services provided by any virtual guests.
+流量规模，尤其是恢复期间的流量，会干扰同一网络上的其他服务；其中对延迟敏感的
+{pve} corosync 集群栈尤其可能受到影响，并可能导致集群 quorum 丢失。将 Ceph
+流量迁移到专用且物理隔离的网络，可以避免这种干扰；这不仅适用于 corosync，也
+适用于任何虚拟客户机提供的网络服务。
 
-For estimating your bandwidth needs, you need to take the performance of your
-disks into account.. While a single HDD might not saturate a 1 Gb link, multiple
-HDD OSDs per node can already saturate 10 Gbps too.
-If modern NVMe-attached SSDs are used, a single one can already saturate 10 Gbps
-of bandwidth, or more. For such high-performance setups we recommend at least
-a 25 Gpbs, while even 40 Gbps or 100+ Gbps might be required to utilize the full
-performance potential of the underlying disks.
+估算带宽需求时，需要考虑磁盘性能。单块 HDD 可能无法打满 1 Gb 链路，但每个节点上
+多个 HDD OSD 也可能已经打满 10 Gbps。如果使用现代 NVMe SSD，单块磁盘就可能打满
+10 Gbps 或更高带宽。对于这类高性能部署，建议至少使用 25 Gbps；为了充分利用底层
+磁盘的性能潜力，甚至可能需要 40 Gbps 或 100+ Gbps。
 
-If unsure, we recommend using three (physical) separate networks for
-high-performance setups:
+如果不确定，对于高性能部署，建议使用三个（物理）独立网络：
 
-* one very high bandwidth (25+ Gbps) network for Ceph (internal) cluster
-  traffic.
-* one high bandwidth (10+ Gpbs) network for Ceph (public) traffic between the
-  ceph server and ceph client storage traffic. Depending on your needs this can
-  also be used to host the virtual guest traffic and the VM live-migration
-  traffic.
-* one medium bandwidth (1 Gbps) exclusive for the latency sensitive corosync
-  cluster communication.
+* 一个超高带宽（25+ Gbps）网络，用于 Ceph（内部）集群流量。
+* 一个高带宽（10+ Gbps）网络，用于 ceph server 和 ceph client 之间的 Ceph
+  （public）存储流量。根据需求，也可用于承载虚拟客户机流量和虚拟机在线迁移流量。
+* 一个中等带宽（1 Gbps）网络，专用于对延迟敏感的 corosync 集群通信。
 
 [[pve_ceph_recommendation_disk]]
-.Disks
-When planning the size of your Ceph cluster, it is important to take the
-recovery time into consideration. Especially with small clusters, recovery
-might take long. It is recommended that you use SSDs instead of HDDs in small
-setups to reduce recovery time, minimizing the likelihood of a subsequent
-failure event during recovery.
+.磁盘
+规划 Ceph 集群规模时，必须考虑恢复时间。尤其是在小型集群中，恢复可能需要较长
+时间。建议在小型部署中使用 SSD 而不是 HDD，以缩短恢复时间，并尽量降低恢复期间
+发生后续故障事件的可能性。
 
-In general, SSDs will provide more IOPS than spinning disks. With this in mind,
-in addition to the higher cost, it may make sense to implement a
-xref:pve_ceph_device_classes[class based] separation of pools. Another way to
-speed up OSDs is to use a faster disk as a journal or
-DB/**W**rite-**A**head-**L**og device, see
-xref:pve_ceph_osds[creating Ceph OSDs].
-If a faster disk is used for multiple OSDs, a proper balance between OSD
-and WAL / DB (or journal) disk must be selected, otherwise the faster disk
-becomes the bottleneck for all linked OSDs.
+通常，SSD 会比机械磁盘提供更多 IOPS。考虑到这一点，并结合更高成本，实施基于
+xref:pve_ceph_device_classes[类别]的池分离可能是有意义的。另一种加速 OSD 的
+方法，是使用更快的磁盘作为 journal 或 DB/**W**rite-**A**head-**L**og 设备，参见
+xref:pve_ceph_osds[创建 Ceph OSD]。如果将更快的磁盘用于多个 OSD，必须在 OSD 与
+WAL/DB（或 journal）磁盘之间选择合适平衡，否则这块更快的磁盘会成为所有关联
+OSD 的瓶颈。
 
-Aside from the disk type, Ceph performs best with an evenly sized, and an evenly
-distributed amount of disks per node. For example, 4 x 500 GB disks within each
-node is better than a mixed setup with a single 1 TB and three 250 GB disk.
+除磁盘类型外，当每个节点上的磁盘容量一致且数量均匀分布时，Ceph 性能最佳。例如，
+每个节点使用 4 块 500 GB 磁盘，优于混合使用一块 1 TB 磁盘和三块 250 GB 磁盘。
 
-You also need to balance OSD count and single OSD capacity. More capacity
-allows you to increase storage density, but it also means that a single OSD
-failure forces Ceph to recover more data at once.
+还需要平衡 OSD 数量和单个 OSD 容量。更高容量可以提升存储密度，但也意味着单个
+OSD 故障会迫使 Ceph 一次恢复更多数据。
 
 [[pve_ceph_recommendation_raid]]
-.Avoid RAID
-As Ceph handles data object redundancy and multiple parallel writes to disks
-(OSDs) on its own, using a RAID controller normally doesn’t improve
-performance or availability. On the contrary, Ceph is designed to handle whole
-disks on it's own, without any abstraction in between. RAID controllers are not
-designed for the Ceph workload and may complicate things and sometimes even
-reduce performance, as their write and caching algorithms may interfere with
-the ones from Ceph.
+.避免 RAID
+由于 Ceph 自行处理数据对象冗余以及对磁盘（OSD）的多路并行写入，使用 RAID
+控制器通常不会提升性能或可用性。相反，Ceph 的设计目标是自行处理整块磁盘，中间
+不需要任何抽象层。RAID 控制器并非为 Ceph 工作负载设计，可能会使问题复杂化，
+有时甚至降低性能，因为其写入和缓存算法可能会干扰 Ceph 的算法。
 
-WARNING: Avoid RAID controllers. Use host bus adapter (HBA) instead.
+WARNING: 避免使用 RAID 控制器。请改用 host bus adapter（HBA）。
 
 [[pve_ceph_install_wizard]]
-Initial Ceph Installation & Configuration
------------------------------------------
+== Ceph 初始安装与配置
 
-Using the Web-based Wizard
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用基于 Web 的向导
 
 [thumbnail="screenshot/gui-node-ceph-install.png"]
 
-With {pve} you have the benefit of an easy to use installation wizard
-for Ceph. Click on one of your cluster nodes and navigate to the Ceph
-section in the menu tree. If Ceph is not already installed, you will see a
-prompt offering to do so.
+使用 {pve} 时，可以受益于易用的 Ceph 安装向导。点击某个集群节点，并在菜单树中
+导航到 Ceph 部分。如果尚未安装 Ceph，你会看到安装提示。
 
-The wizard is divided into multiple sections, where each needs to
-finish successfully, in order to use Ceph.
+向导分为多个部分，每一部分都需要成功完成，才能使用 Ceph。
 
-First you need to chose which Ceph version you want to install. Prefer the one
-from your other nodes, or the newest if this is the first node you install
-Ceph.
+首先需要选择要安装的 Ceph 版本。优先选择与其他节点相同的版本；如果这是第一个
+安装 Ceph 的节点，则选择最新版本。
 
-After starting the installation, the wizard will download and install all the
-required packages from {pve}'s Ceph repository.
+开始安装后，向导会从 {pve} 的 Ceph 仓库下载并安装所有必需软件包。
 [thumbnail="screenshot/gui-node-ceph-install-wizard-step0.png"]
 
-After finishing the installation step, you will need to create a configuration.
-This step is only needed once per cluster, as this configuration is distributed
-automatically to all remaining cluster members through {pve}'s clustered
-xref:chapter_pmxcfs[configuration file system (pmxcfs)].
+完成安装步骤后，需要创建配置。每个集群只需要执行一次此步骤，因为该配置会通过
+{pve} 的集群化 xref:chapter_pmxcfs[配置文件系统（pmxcfs）]自动分发
+到所有剩余集群成员。
 
-The configuration step includes the following settings:
+配置步骤包括以下设置：
 
 [[pve_ceph_wizard_networks]]
 
-* *Public Network:* This network will be used for public storage communication
-  (e.g., for virtual machines using a Ceph RBD backed disk, or a CephFS mount),
-  and communication between the different Ceph services. This setting is
-  required.
+* *Public Network:* 此网络用于 public 存储通信（例如使用 Ceph RBD 后端磁盘的
+  虚拟机，或 CephFS 挂载），以及不同 Ceph 服务之间的通信。此设置为必填项。
   +
-  Separating your Ceph traffic from the {pve} cluster communication (corosync),
-  and possible the front-facing (public) networks of your virtual guests, is
-  highly recommended. Otherwise, Ceph's high-bandwidth IO-traffic could cause
-  interference with other low-latency dependent services.
+  强烈建议将 Ceph 流量与 {pve} 集群通信（corosync）分离，并尽可能与虚拟客户机
+  面向前端的（public）网络分离。否则，Ceph 的高带宽 IO 流量可能会干扰其他依赖
+  低延迟的服务。
 
 [thumbnail="screenshot/gui-node-ceph-install-wizard-step2.png"]
 
-* *Cluster Network:* Specify to separate the xref:pve_ceph_osds[OSD] replication
-  and heartbeat traffic as well. This setting is optional.
+* *Cluster Network:* 指定是否也分离 xref:pve_ceph_osds[OSD] 复制和心跳流量。此
+  设置为可选项。
   +
-  Using a physically separated network is recommended, as it will relieve the
-  Ceph public and the virtual guests network, while also providing a significant
-  Ceph performance improvements.
+  建议使用物理隔离的网络，因为它可以减轻 Ceph public 网络和虚拟客户机网络的负载，
+  同时显著提升 Ceph 性能。
   +
-  The Ceph cluster network can be configured and moved to another physically
-  separated network at a later time.
+  Ceph cluster network 可以在之后配置并迁移到另一个物理隔离网络。
 
-You have two more options which are considered advanced and therefore should
-only changed if you know what you are doing.
+还有两个被视为高级设置的选项，因此只有在明确理解其作用时才应更改。
 
-* *Number of replicas*: Defines how often an object is replicated.
-* *Minimum replicas*: Defines the minimum number of required replicas for I/O to
-  be marked as complete.
+* *Number of replicas*: 定义对象被复制的次数。
+* *Minimum replicas*: 定义将 I/O 标记为完成所需的最小副本数。
 
-Additionally, you need to choose your first monitor node. This step is required.
+此外，还需要选择第一个 monitor 节点。此步骤为必需项。
 
-That's it. You should now see a success page as the last step, with further
-instructions on how to proceed. Your system is now ready to start using Ceph.
-To get started, you will need to create some additional xref:pve_ceph_monitors[monitors],
-xref:pve_ceph_osds[OSDs] and at least one xref:pve_ceph_pools[pool].
+至此完成。现在应在最后一步看到成功页面，其中包含后续操作说明。系统现在已准备好
+开始使用 Ceph。要开始使用，需要创建一些额外的 xref:pve_ceph_monitors[monitors]、
+xref:pve_ceph_osds[OSDs] 以及至少一个 xref:pve_ceph_pools[pool]。
 
-The rest of this chapter will guide you through getting the most out of
-your {pve} based Ceph setup. This includes the aforementioned tips and
-more, such as xref:pveceph_fs[CephFS], which is a helpful addition to your
-new Ceph cluster.
+本章后续内容将指导你充分利用基于 {pve} 的 Ceph 部署。这包括前述提示，以及更多
+内容，例如 xref:pveceph_fs[CephFS]；它是新 Ceph 集群的有用补充。
 
 [[pve_ceph_install]]
-CLI Installation of Ceph Packages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通过 CLI 安装 Ceph 软件包
 
-Alternatively to the the recommended {pve}  Ceph installation wizard available
-in the web interface, you can use the following CLI command on each node:
+除了推荐使用 Web 界面中的 {pve} Ceph 安装向导外，也可以在每个节点上使用以下
+CLI 命令：
 
 [source,bash]
 ----
 pveceph install
 ----
 
-This sets up an `apt` package repository in
-`/etc/apt/sources.list.d/ceph.list` and installs the required software.
+这会在 `/etc/apt/sources.list.d/ceph.list` 中设置 `apt` 软件包仓库，并安装必需
+软件。
 
 
-Initial Ceph configuration via CLI
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 通过 CLI 进行 Ceph 初始配置
 
-Use the {pve} Ceph installation wizard (recommended) or run the
-following command on one node:
+使用 {pve} Ceph 安装向导（推荐），或在一个节点上运行以下命令：
 
 [source,bash]
 ----
 pveceph init --network 10.10.10.0/24
 ----
 
-This creates an initial configuration at `/etc/pve/ceph.conf` with a
-dedicated network for Ceph. This file is automatically distributed to
-all {pve} nodes, using xref:chapter_pmxcfs[pmxcfs]. The command also
-creates a symbolic link at `/etc/ceph/ceph.conf`, which points to that file.
-Thus, you can simply run Ceph commands without the need to specify a
-configuration file.
+这会在 `/etc/pve/ceph.conf` 创建初始配置，并为 Ceph 使用专用网络。该文件会通过
+xref:chapter_pmxcfs[pmxcfs] 自动分发到所有 {pve} 节点。该命令还会在
+`/etc/ceph/ceph.conf` 创建指向该文件的符号链接。因此，可以直接运行 Ceph 命令，
+而无需指定配置文件。
+
+=== 常用命令示例
+
+以下命令可用于安装 Ceph、初始化集群网络，并查看 Ceph 当前状态：
+
+[source,bash]
+----
+pveceph install
+pveceph init --network 10.10.10.0/24
+ceph -s
+----
 
 
 [[pve_ceph_monitors]]
-Ceph Monitor
------------
+== Ceph Monitor
 
 [thumbnail="screenshot/gui-ceph-monitor.png"]
 
-The Ceph Monitor (MON)
+Ceph Monitor（MON）
 footnote:[Ceph Monitor {cephdocs-url}/rados/configuration/mon-config-ref/]
-maintains a master copy of the cluster map. For high availability, you need at
-least 3 monitors. One monitor will already be installed if you
-used the installation wizard. You won't need more than 3 monitors, as long
-as your cluster is small to medium-sized. Only really large clusters will
-require more than this.
+维护集群映射的主副本。为了实现高可用，至少需要 3 个 monitor。如果使用安装向导，
+则已经安装了一个 monitor。只要集群为中小规模，就不需要超过 3 个 monitor。只有
+非常大的集群才需要更多。
 
 [[pveceph_create_mon]]
-Create Monitors
-~~~~~~~~~~~~~~~
+=== 创建 Monitor
 
-On each node where you want to place a monitor (three monitors are recommended),
-create one by using the 'Ceph -> Monitor' tab in the GUI or run:
+在每个要放置 monitor 的节点上（建议使用三个 monitor），可通过 GUI 中的
+'Ceph -> Monitor' 选项卡创建，或运行：
 
 
 [source,bash]
@@ -352,146 +290,126 @@ pveceph mon create
 ----
 
 [[pveceph_destroy_mon]]
-Destroy Monitors
-~~~~~~~~~~~~~~~~
+=== 销毁 Monitor
 
-To remove a Ceph Monitor via the GUI, first select a node in the tree view and
-go to the **Ceph -> Monitor** panel. Select the MON and click the **Destroy**
-button.
+要通过 GUI 移除 Ceph Monitor，首先在树视图中选择一个节点，并进入
+**Ceph -> Monitor** 面板。选择 MON 并点击 **Destroy** 按钮。
 
-To remove a Ceph Monitor via the CLI, first connect to the node on which the MON
-is running. Then execute the following command:
+要通过 CLI 移除 Ceph Monitor，首先连接到运行该 MON 的节点。然后执行以下命令：
 [source,bash]
 ----
 pveceph mon destroy
 ----
 
-NOTE: At least three Monitors are needed for quorum.
+NOTE: quorum 至少需要三个 Monitor。
 
 
 [[pve_ceph_manager]]
-Ceph Manager
-------------
+== Ceph Manager
 
-The Manager daemon runs alongside the monitors. It provides an interface to
-monitor the cluster. Since the release of Ceph luminous, at least one ceph-mgr
-footnote:[Ceph Manager {cephdocs-url}/mgr/] daemon is
-required.
+Manager 守护进程与 monitor 一起运行。它提供用于监控集群的接口。自 Ceph luminous
+发布以来，至少需要一个 ceph-mgr 守护进程
+footnote:[Ceph Manager {cephdocs-url}/mgr/]。
 
 [[pveceph_create_mgr]]
-Create Manager
-~~~~~~~~~~~~~~
+=== 创建 Manager
 
-Multiple Managers can be installed, but only one Manager is active at any given
-time.
+可以安装多个 Manager，但任意时刻只有一个 Manager 处于 active 状态。
 
 [source,bash]
 ----
 pveceph mgr create
 ----
 
-NOTE: It is recommended to install the Ceph Manager on the monitor nodes. For
-high availability install more then one manager.
+NOTE: 建议在 monitor 节点上安装 Ceph Manager。为了实现高可用，请安装多个
+manager。
 
 
 [[pveceph_destroy_mgr]]
-Destroy Manager
-~~~~~~~~~~~~~~~
+=== 销毁 Manager
 
-To remove a Ceph Manager via the GUI, first select a node in the tree view and
-go to the **Ceph -> Monitor** panel. Select the Manager and click the
-**Destroy** button.
+要通过 GUI 移除 Ceph Manager，首先在树视图中选择一个节点，并进入
+**Ceph -> Monitor** 面板。选择 Manager 并点击 **Destroy** 按钮。
 
-To remove a Ceph Monitor via the CLI, first connect to the node on which the
-Manager is running. Then execute the following command:
+要通过 CLI 移除 Ceph Manager，首先连接到运行该 Manager 的节点。然后执行以下
+命令：
 [source,bash]
 ----
 pveceph mgr destroy
 ----
 
-NOTE: While a manager is not a hard-dependency, it is crucial for a Ceph cluster,
-as it handles important features like PG-autoscaling, device health monitoring,
-telemetry and more.
+NOTE: 虽然 manager 不是硬依赖，但它对 Ceph 集群非常关键，因为它负责
+PG-autoscaling、设备健康监控、telemetry 等重要功能。
 
 [[pve_ceph_osds]]
-Ceph OSDs
----------
+== Ceph OSDs
 
 [thumbnail="screenshot/gui-ceph-osd-status.png"]
 
-Ceph **O**bject **S**torage **D**aemons store objects for Ceph over the
-network. It is recommended to use one OSD per physical disk.
+Ceph **O**bject **S**torage **D**aemons 通过网络为 Ceph 存储对象。建议每块物理磁盘
+使用一个 OSD。
 
 [[pve_ceph_osd_create]]
-Create OSDs
-~~~~~~~~~~~
+=== 创建 OSD
 
-You can create an OSD either via the {pve} web interface or via the CLI using
-`pveceph`. For example:
+可以通过 {pve} Web 界面创建 OSD，也可以通过 CLI 使用 `pveceph` 创建。例如：
 
 [source,bash]
 ----
 pveceph osd create /dev/sd[X]
 ----
 
-TIP: We recommend a Ceph cluster with at least three nodes and at least 12
-OSDs, evenly distributed among the nodes.
+TIP: 建议 Ceph 集群至少包含三个节点和至少 12 个 OSD，并在各节点之间均匀分布。
 
-If the disk was in use before (for example, for ZFS or as an OSD) you first need
-to zap all traces of that usage. To remove the partition table, boot sector and
-any other OSD leftover, you can use the following command:
+如果磁盘此前已被使用（例如用于 ZFS 或作为 OSD），首先需要清除所有使用痕迹。要
+移除分区表、引导扇区和任何其他 OSD 残留，可以使用以下命令：
 
 [source,bash]
 ----
 ceph-volume lvm zap /dev/sd[X] --destroy
 ----
 
-WARNING: The above command will destroy all data on the disk!
+WARNING: 上述命令会销毁磁盘上的所有数据！
 
 .Ceph Bluestore
 
-Starting with the Ceph Kraken release, a new Ceph OSD storage type was
-introduced called Bluestore
+从 Ceph Kraken 版本开始，引入了一种新的 Ceph OSD 存储类型，称为 Bluestore
 footnote:[Ceph Bluestore https://ceph.com/community/new-luminous-bluestore/].
-This is the default when creating OSDs since Ceph Luminous.
+自 Ceph Luminous 起，这是创建 OSD 时的默认类型。
 
 [source,bash]
 ----
 pveceph osd create /dev/sd[X]
 ----
 
-.Block.db and block.wal
+.Block.db 与 block.wal
 
-If you want to use a separate DB/WAL device for your OSDs, you can specify it
-through the '-db_dev' and '-wal_dev' options. The WAL is placed with the DB, if
-not specified separately.
+如果希望为 OSD 使用单独的 DB/WAL 设备，可以通过 '-db_dev' 和 '-wal_dev' 选项
+指定。如果未单独指定 WAL，它会与 DB 放在一起。
 
 [source,bash]
 ----
 pveceph osd create /dev/sd[X] -db_dev /dev/sd[Y] -wal_dev /dev/sd[Z]
 ----
 
-You can directly choose the size of those with the '-db_size' and '-wal_size'
-parameters respectively. If they are not given, the following values (in order)
-will be used:
+可以分别使用 '-db_size' 和 '-wal_size' 参数直接选择它们的大小。如果未给出这些
+参数，将按顺序使用以下值：
 
-* bluestore_block_{db,wal}_size from Ceph configuration...
-** ... database, section 'osd'
-** ... database, section 'global'
-** ... file, section 'osd'
-** ... file, section 'global'
-* 10% (DB)/1% (WAL) of OSD size
+* Ceph 配置中的 bluestore_block_{db,wal}_size...
+** ... database，'osd' 段
+** ... database，'global' 段
+** ... file，'osd' 段
+** ... file，'global' 段
+* OSD 大小的 10%（DB）/1%（WAL）
 
-NOTE: The DB stores BlueStore’s internal metadata, and the WAL is BlueStore’s
-internal journal or write-ahead log. It is recommended to use a fast SSD or
-NVRAM for better performance.
+NOTE: DB 存储 BlueStore 的内部元数据，WAL 是 BlueStore 的内部 journal 或
+write-ahead log。建议使用快速 SSD 或 NVRAM 以获得更好性能。
 
 .Ceph Filestore
 
-Before Ceph Luminous, Filestore was used as the default storage type for Ceph OSDs.
-Starting with Ceph Nautilus, {pve} does not support creating such OSDs with
-'pveceph' anymore. If you still want to create filestore OSDs, use
-'ceph-volume' directly.
+在 Ceph Luminous 之前，Filestore 是 Ceph OSD 的默认存储类型。自 Ceph Nautilus
+起，{pve} 不再支持使用 'pveceph' 创建此类 OSD。如果仍想创建 filestore OSD，请
+直接使用 'ceph-volume'。
 
 [source,bash]
 ----
@@ -499,49 +417,45 @@ ceph-volume lvm create --filestore --data /dev/sd[X] --journal /dev/sd[Y]
 ----
 
 [[pve_ceph_osd_destroy]]
-Destroy OSDs
-~~~~~~~~~~~~
+=== 销毁 OSD
 
-If you experience problems with an OSD or its disk, try to
-xref:pve_ceph_mon_and_ts[troubleshoot] them first to decide if a
-xref:pve_ceph_osd_replace[replacement] is needed.
+如果遇到 OSD 或其磁盘问题，请先尝试 xref:pve_ceph_mon_and_ts[排查]，以决定是否
+需要 xref:pve_ceph_osd_replace[替换]。
 
-To destroy an OSD, navigate to the __<Node> -> Ceph -> OSD__ panel or use the
-mentioned CLI commands on the node where the OSD is located.
+要销毁 OSD，请导航到 __<Node> -> Ceph -> OSD__ 面板，或在该 OSD 所在节点上使用
+下述 CLI 命令。
 
-. Make sure the cluster has enough space to handle the removal of the OSD.
-In the __Ceph -> OSD__ panel,if the to-be destroyed OSD is still `up` and `in`
-(non-zero value at `AVAIL`), make sure that all OSDs have their `Used (%)`
-value well below the `nearfull_ratio` of default `85%`.
+. 确保集群有足够空间处理 OSD 移除。
+在 __Ceph -> OSD__ 面板中，如果待销毁 OSD 仍为 `up` 和 `in`（`AVAIL` 为非零值），
+请确保所有 OSD 的 `Used (%)` 值都明显低于默认 `85%` 的 `nearfull_ratio`。
 +
-This way you can reduce the risk from the upcoming rebalancing, which may cause
-OSDs to run full and thereby blocking I/O on Ceph pools.
+这样可以降低即将发生的重新平衡带来的风险；重新平衡可能导致 OSD 写满，从而阻塞
+Ceph pool 上的 I/O。
 +
-Use the following command to get the same information on the CLI:
+使用以下命令可在 CLI 上获取相同信息：
 +
 [source,bash]
 ----
 ceph osd df tree
 ----
 
-. If the to-be destroyed OSD is not `out` yet, select the OSD and click on
-**Out**. This will exclude it from data distribution and start a rebalance.
+. 如果待销毁 OSD 尚未 `out`，请选择该 OSD 并点击 **Out**。这会将它从数据分布中
+排除，并启动重新平衡。
 +
-The following command does the same:
+以下命令执行相同操作：
 +
 [source,bash]
 ----
 ceph osd out <id>
 ----
 
-. If you can, wait until Ceph has finished the rebalance to always have enough
-replicas. The OSD will be empty; once it is, it will show __0 PGs__.
+. 如果可以，请等待 Ceph 完成重新平衡，以确保始终有足够副本。该 OSD 会变为空；
+一旦变空，将显示 __0 PGs__。
 
-. Click on **Stop**. If stopping is not safe yet, a warning will
-appear, and you should click on **Cancel**. Try it again in a few moments.
+. 点击 **Stop**。如果此时停止尚不安全，会出现警告，此时应点击 **Cancel**。稍等
+片刻后再试。
 +
-The following commands can be used to check if it is safe to stop and stop
-the OSD:
+可以使用以下命令检查是否可以安全停止，并停止该 OSD：
 +
 [source,bash]
 ----
@@ -549,15 +463,13 @@ ceph osd ok-to-stop <id>
 pveceph stop --service osd.<id>
 ----
 
-. Finally:
+. 最后：
 +
-To remove the OSD from Ceph and delete all disk data, first click on
-**More -> Destroy**. Enable the cleanup option to clean up the partition table
-and other structures. This makes it possible to immediately reuse the disk in
-{pve}.
-Then, click on **Remove**.
+要从 Ceph 移除 OSD 并删除所有磁盘数据，首先点击 **More -> Destroy**。启用 cleanup
+选项以清理分区表和其他结构。这样即可在 {pve} 中立即复用该磁盘。然后点击
+**Remove**。
 +
-The CLI command to destroy the OSD is:
+销毁 OSD 的 CLI 命令为：
 +
 [source,bash]
 ----
@@ -566,275 +478,234 @@ pveceph osd destroy <id> [--cleanup]
 
 
 [[pve_ceph_pools]]
-Ceph Pools
-----------
+== Ceph Pools
 
 [thumbnail="screenshot/gui-ceph-pools.png"]
 
-A pool is a logical group for storing objects. It holds a collection of objects,
-known as **P**lacement **G**roups (`PG`, `pg_num`).
+pool 是用于存储对象的逻辑组。它包含一组对象集合，称为 **P**lacement **G**roups
+（`PG`，`pg_num`）。
 
 
-Create and Edit Pools
-~~~~~~~~~~~~~~~~~~~~~
+=== 创建和编辑 Pool
 
-You can create and edit pools from the command line or the web interface of any
-{pve} host under **Ceph -> Pools**.
+可以通过命令行创建和编辑 pool，也可以在任意 {pve} 主机的 Web 界面中通过
+**Ceph -> Pools** 进行操作。
 
-When no options are given, we set a default of **128 PGs**, a **size of 3
-replicas** and a **min_size of 2 replicas**, to ensure no data loss occurs if
-any OSD fails.
+如果未给出选项，默认设置为 **128 PGs**、**size 为 3 个副本**以及 **min_size 为
+2 个副本**，以确保任意 OSD 发生故障时不会丢失数据。
 
-WARNING: **Do not set a min_size of 1**. A replicated pool with min_size of 1
-allows I/O on an object when it has only 1 replica, which could lead to data
-loss, incomplete PGs or unfound objects.
+WARNING: **不要将 min_size 设置为 1**。min_size 为 1 的 replicated pool 会允许在
+对象只有 1 个副本时执行 I/O，这可能导致数据丢失、PG 不完整或对象无法找到。
 
-It is advised that you either enable the PG-Autoscaler or calculate the PG
-number based on your setup. You can find the formula and the PG calculator
-footnote:[PG calculator https://web.archive.org/web/20210301111112/http://ceph.com/pgcalc/] online. From Ceph Nautilus
-onward, you can change the number of PGs
+建议启用 PG-Autoscaler，或根据部署情况计算 PG 数量。可以在线找到公式和 PG 计算器
+footnote:[PG calculator https://web.archive.org/web/20210301111112/http://ceph.com/pgcalc/]。
+从 Ceph Nautilus 开始，可以在部署后更改 PG 数量
 footnoteref:[placement_groups,Placement Groups
-{cephdocs-url}/rados/operations/placement-groups/] after the setup.
+{cephdocs-url}/rados/operations/placement-groups/]。
 
-The PG autoscaler footnoteref:[autoscaler,Automated Scaling
-{cephdocs-url}/rados/operations/placement-groups/#automated-scaling] can
-automatically scale the PG count for a pool in the background. Setting the
-`Target Size` or `Target Ratio` advanced parameters helps the PG-Autoscaler to
-make better decisions.
+PG autoscaler footnoteref:[autoscaler,Automated Scaling
+{cephdocs-url}/rados/operations/placement-groups/#automated-scaling]
+可以在后台自动扩缩 pool 的 PG 数量。设置 `Target Size` 或 `Target Ratio`
+高级参数，有助于 PG-Autoscaler 做出更好的决策。
 
-.Example for creating a pool over the CLI
+.通过 CLI 创建 pool 的示例
 [source,bash]
 ----
 pveceph pool create <pool-name> --add_storages
 ----
 
-TIP: If you would also like to automatically define a storage for your
-pool, keep the `Add as Storage' checkbox checked in the web interface, or use the
-command-line option '--add_storages' at pool creation.
+TIP: 如果还希望自动为 pool 定义一个存储，请在 Web 界面中保持 `Add as Storage'
+复选框选中，或在创建 pool 时使用命令行选项 '--add_storages'。
 
-Pool Options
-^^^^^^^^^^^^
+==== Pool 选项
 
 [thumbnail="screenshot/gui-ceph-pool-create.png"]
 
-The following options are available on pool creation, and partially also when
-editing a pool.
+以下选项可在创建 pool 时使用，其中部分选项也可在编辑 pool 时使用。
 
-Name:: The name of the pool. This must be unique and can't be changed afterwards.
-Size:: The number of replicas per object. Ceph always tries to have this many
-copies of an object. Default: `3`.
-PG Autoscale Mode:: The automatic PG scaling mode footnoteref:[autoscaler] of
-the pool. If set to `warn`, it produces a warning message when a pool
-has a non-optimal PG count. Default: `warn`.
-Add as Storage:: Configure a VM or container storage using the new pool.
-Default: `true` (only visible on creation).
+Name:: pool 名称。必须唯一，之后不能更改。
+Size:: 每个对象的副本数。Ceph 始终会尝试为对象保留这么多副本。默认值：`3`。
+PG Autoscale Mode:: 该 pool 的自动 PG 扩缩模式 footnoteref:[autoscaler]。如果设置为
+`warn`，当 pool 的 PG 数量不是最优时会生成警告消息。默认值：`warn`。
+Add as Storage:: 使用新 pool 配置虚拟机或容器存储。默认值：`true`（仅在创建时
+可见）。
 
-.Advanced Options
-Min. Size:: The minimum number of replicas per object. Ceph will reject I/O on
-the pool if a PG has less than this many replicas. Default: `2`.
-Crush Rule:: The rule to use for mapping object placement in the cluster. These
-rules define how data is placed within the cluster. See
-xref:pve_ceph_device_classes[Ceph CRUSH & device classes] for information on
-device-based rules.
-# of PGs:: The number of placement groups footnoteref:[placement_groups] that
-the pool should have at the beginning. Default: `128`.
-Target Ratio:: The ratio of data that is expected in the pool. The PG
-autoscaler uses the ratio relative to other ratio sets. It takes precedence
-over the `target size` if both are set.
-Target Size:: The estimated amount of data expected in the pool. The PG
-autoscaler uses this size to estimate the optimal PG count.
-Min. # of PGs:: The minimum number of placement groups. This setting is used to
-fine-tune the lower bound of the PG count for that pool. The PG autoscaler
-will not merge PGs below this threshold.
+.高级选项
+Min. Size:: 每个对象的最小副本数。如果某个 PG 的副本数低于该值，Ceph 会拒绝该
+pool 上的 I/O。默认值：`2`。
+Crush Rule:: 用于在集群中映射对象放置位置的规则。这些规则定义数据在集群内的
+放置方式。有关基于设备的规则信息，请参见
+xref:pve_ceph_device_classes[Ceph CRUSH & device classes]。
+# of PGs:: pool 初始应拥有的 placement group 数量 footnoteref:[placement_groups]。
+默认值：`128`。
+Target Ratio:: pool 中预期数据量的比例。PG autoscaler 使用该比例相对于其他比例集
+进行计算。如果同时设置了 `target size`，该选项优先。
+Target Size:: pool 中预期数据量的估计值。PG autoscaler 使用此大小估算最优 PG 数量。
+Min. # of PGs:: placement group 的最小数量。该设置用于微调该 pool 的 PG 数量下限。
+PG autoscaler 不会将 PG 合并到低于此阈值。
 
-Further information on Ceph pool handling can be found in the Ceph pool
-operation footnote:[Ceph pool operation
+有关 Ceph pool 处理的更多信息，请参见 Ceph pool operation 手册
+footnote:[Ceph pool operation
 {cephdocs-url}/rados/operations/pools/]
-manual.
+。
 
 
 [[pve_ceph_ec_pools]]
-Erasure Coded Pools
-~~~~~~~~~~~~~~~~~~~
+=== 纠删码 Pool
 
-Erasure coding (EC) is a form of `forward error correction' codes that allows
-to recover from a certain amount of data loss. Erasure coded pools can offer
-more usable space compared to replicated pools, but they do that for the price
-of performance.
+Erasure coding（EC）是一种 `forward error correction' 编码形式，允许从一定量的
+数据丢失中恢复。与 replicated pools 相比，erasure coded pools 可以提供更多可用
+空间，但代价是性能下降。
 
-For comparison: in classic, replicated pools, multiple replicas of the data
-are stored (`size`) while in erasure coded pool, data is split into `k` data
-chunks with additional `m` coding (checking) chunks. Those coding chunks can be
-used to recreate data should data chunks be missing.
+作为对比：在经典 replicated pools 中，会存储数据的多个副本（`size`）；而在
+erasure coded pool 中，数据会拆分为 `k` 个数据块，并附加 `m` 个编码（校验）块。
+当数据块缺失时，这些编码块可用于重建数据。
 
-The number of coding chunks, `m`, defines how many OSDs can be lost without
-losing any data. The total amount of objects stored is `k + m`.
+编码块数量 `m` 定义了在不丢失任何数据的情况下可以丢失多少个 OSD。存储的对象总量
+为 `k + m`。
 
-Creating EC Pools
-^^^^^^^^^^^^^^^^^
+==== 创建 EC Pool
 
-Erasure coded (EC) pools can be created with the `pveceph` CLI tooling.
-Planning an EC pool needs to account for the fact, that they work differently
-than replicated pools.
+可以使用 `pveceph` CLI 工具创建 erasure coded（EC）pool。规划 EC pool 时需要考虑
+它与 replicated pools 的工作方式不同。
 
-The default `min_size` of an EC pool depends on the `m` parameter. If `m = 1`,
-the `min_size` of the EC pool will be `k`. The `min_size` will be `k + 1` if
-`m > 1`. The Ceph documentation recommends a conservative `min_size` of `k + 2`
+EC pool 的默认 `min_size` 取决于 `m` 参数。如果 `m = 1`，EC pool 的 `min_size`
+将为 `k`。如果 `m > 1`，`min_size` 将为 `k + 1`。Ceph 文档建议采用更保守的
+`min_size`，即 `k + 2`
 footnote:[Ceph Erasure Coded Pool Recovery
 {cephdocs-url}/rados/operations/erasure-code/#erasure-coded-pool-recovery].
 
-If there are less than `min_size` OSDs available, any IO to the pool will be
-blocked until there are enough OSDs available again.
+如果可用 OSD 数量少于 `min_size`，该 pool 的任何 IO 都会被阻塞，直到再次有足够
+OSD 可用。
 
-NOTE: When planning an erasure coded pool, keep an eye on the `min_size` as it
-defines how many OSDs need to be available. Otherwise, IO will be blocked.
+NOTE: 规划 erasure coded pool 时，请关注 `min_size`，因为它定义了需要有多少 OSD
+可用。否则，IO 会被阻塞。
 
-For example, an EC pool with `k = 2` and `m = 1` will have `size = 3`,
-`min_size = 2` and will stay operational if one OSD fails. If the pool is
-configured with `k = 2`, `m = 2`, it will have a `size = 4` and `min_size = 3`
-and stay operational if one OSD is lost.
+例如，`k = 2` 且 `m = 1` 的 EC pool 将具有 `size = 3`、`min_size = 2`，并且在
+一个 OSD 故障时仍可运行。如果 pool 配置为 `k = 2`、`m = 2`，则它会具有
+`size = 4` 和 `min_size = 3`，并在丢失一个 OSD 时仍可运行。
 
-To create a new EC pool, run the following command:
+要创建新的 EC pool，请运行以下命令：
 
 [source,bash]
 ----
 pveceph pool create <pool-name> --erasure-coding k=2,m=1
 ----
 
-Optional parameters are `failure-domain` and `device-class`. If you
-need to change any EC profile settings used by the pool, you will have to
-create a new pool with a new profile.
+可选参数包括 `failure-domain` 和 `device-class`。如果需要更改该 pool 使用的任何
+EC profile 设置，则必须使用新 profile 创建新的 pool。
 
-This will create a new EC pool plus the needed replicated pool to store the RBD
-omap and other metadata. In the end, there will be a `<pool name>-data` and
-`<pool name>-metadata` pool. The default behavior is to create a matching storage
-configuration as well. If that behavior is not wanted, you can disable it by
-providing the `--add_storages 0` parameter.  When configuring the storage
-configuration manually, keep in mind that the `data-pool` parameter needs to be
-set. Only then will the EC pool be used to store the data objects. For example:
+这会创建一个新的 EC pool，并创建所需的 replicated pool 来存储 RBD omap 和其他
+元数据。最终会得到 `<pool name>-data` 和 `<pool name>-metadata` 两个 pool。默认
+行为还会创建匹配的存储配置。如果不需要此行为，可以通过提供 `--add_storages 0`
+参数禁用。手动配置存储配置时，请记住需要设置 `data-pool` 参数。只有这样，EC
+pool 才会用于存储数据对象。例如：
 
-NOTE: The optional parameters `--size`, `--min_size` and `--crush_rule` will be
-used for the replicated metadata pool, but not for the erasure coded data pool.
-If you need to change the `min_size` on the data pool, you can do it later.
-The `size` and `crush_rule` parameters cannot be changed on erasure coded
-pools.
+NOTE: 可选参数 `--size`、`--min_size` 和 `--crush_rule` 会用于 replicated metadata
+pool，但不会用于 erasure coded data pool。如果需要更改 data pool 上的 `min_size`，
+可以稍后执行。erasure coded pools 上不能更改 `size` 和 `crush_rule` 参数。
 
-If there is a need to further customize the EC profile, you can do so by
-creating it with the Ceph tools directly footnote:[Ceph Erasure Code Profile
-{cephdocs-url}/rados/operations/erasure-code/#erasure-code-profiles], and
-specify the profile to use with the `profile` parameter.
+如果需要进一步自定义 EC profile，可以直接使用 Ceph 工具创建
+footnote:[Ceph Erasure Code Profile
+{cephdocs-url}/rados/operations/erasure-code/#erasure-code-profiles]，
+并使用 `profile` 参数指定要使用的 profile。
 
-For example:
+例如：
 [source,bash]
 ----
 pveceph pool create <pool-name> --erasure-coding profile=<profile-name>
 ----
 
-Adding EC Pools as Storage
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 将 EC Pool 添加为存储
 
-You can add an already existing EC pool as storage to {pve}. It works the same
-way as adding an `RBD` pool but requires the extra `data-pool` option.
+可以将现有 EC pool 作为存储添加到 {pve}。其工作方式与添加 `RBD` pool 相同，但
+需要额外的 `data-pool` 选项。
 
 [source,bash]
 ----
 pvesm add rbd <storage-name> --pool <replicated-pool> --data-pool <ec-pool>
 ----
 
-TIP: Do not forget to add the `keyring` and `monhost` option for any external
-Ceph clusters, not managed by the local {pve} cluster.
+TIP: 对于任何不由本地 {pve} 集群管理的外部 Ceph 集群，不要忘记添加 `keyring`
+和 `monhost` 选项。
 
-Destroy Pools
-~~~~~~~~~~~~~
+=== 销毁 Pool
 
-To destroy a pool via the GUI, select a node in the tree view and go to the
-**Ceph -> Pools** panel. Select the pool to destroy and click the **Destroy**
-button. To confirm the destruction of the pool, you need to enter the pool name.
+要通过 GUI 销毁 pool，请在树视图中选择一个节点，并进入 **Ceph -> Pools** 面板。
+选择要销毁的 pool 并点击 **Destroy** 按钮。要确认销毁 pool，需要输入 pool 名称。
 
-Run the following command to destroy a pool. Specify the '-remove_storages' to
-also remove the associated storage.
+运行以下命令可销毁 pool。指定 '-remove_storages' 还会移除关联存储。
 
 [source,bash]
 ----
 pveceph pool destroy <name>
 ----
 
-NOTE: Pool deletion runs in the background and can take some time.
-You will notice the data usage in the cluster decreasing throughout this
-process.
+NOTE: Pool 删除会在后台运行，可能需要一些时间。在此过程中，你会看到集群中的数据
+使用量逐步下降。
 
 
-PG Autoscaler
-~~~~~~~~~~~~~
+=== PG Autoscaler
 
-The PG autoscaler allows the cluster to consider the amount of (expected) data
-stored in each pool and to choose the appropriate pg_num values automatically.
-It is available since Ceph Nautilus.
+PG autoscaler 允许集群考虑每个 pool 中存储的（预期）数据量，并自动选择合适的
+pg_num 值。它自 Ceph Nautilus 起可用。
 
-You may need to activate the PG autoscaler module before adjustments can take
-effect.
+在调整生效之前，可能需要先激活 PG autoscaler 模块。
 
 [source,bash]
 ----
 ceph mgr module enable pg_autoscaler
 ----
 
-The autoscaler is configured on a per pool basis and has the following modes:
+autoscaler 按 pool 配置，并具有以下模式：
 
 [horizontal]
-warn:: A health warning is issued if the suggested `pg_num` value differs too
-much from the current value.
-on:: The `pg_num` is adjusted automatically with no need for any manual
-interaction.
-off:: No automatic `pg_num` adjustments are made, and no warning will be issued
-if the PG count is not optimal.
+warn:: 如果建议的 `pg_num` 值与当前值差异过大，则发出健康警告。
+on:: 自动调整 `pg_num`，无需任何人工交互。
+off:: 不自动调整 `pg_num`，即使 PG 数量不是最优，也不会发出警告。
 
-The scaling factor can be adjusted to facilitate future data storage with the
-`target_size`, `target_size_ratio` and the `pg_num_min` options.
+可以使用 `target_size`、`target_size_ratio` 和 `pg_num_min` 选项调整扩缩因子，以便
+适应未来的数据存储。
 
-WARNING: By default, the autoscaler considers tuning the PG count of a pool if
-it is off by a factor of 3. This will lead to a considerable shift in data
-placement and might introduce a high load on the cluster.
+WARNING: 默认情况下，如果 pool 的 PG 数量偏差达到 3 倍，autoscaler 就会考虑调整
+该 pool 的 PG 数量。这会导致数据放置发生明显变化，并可能给集群带来高负载。
 
-You can find a more in-depth introduction to the PG autoscaler on Ceph's Blog -
+可以在 Ceph Blog 中找到对 PG autoscaler 更深入的介绍：
 https://ceph.io/rados/new-in-nautilus-pg-merging-and-autotuning/[New in
 Nautilus: PG merging and autotuning].
 
 
 [[pve_ceph_device_classes]]
-Ceph CRUSH & Device Classes
----------------------------
+== Ceph CRUSH 与设备类别
 
 [thumbnail="screenshot/gui-ceph-config.png"]
 
-The footnote:[https://ceph.com/assets/pdfs/weil-crush-sc06.pdf] (**C**ontrolled
-**R**eplication **U**nder **S**calable **H**ashing) algorithm is at the
-foundation of Ceph.
+CRUSH footnote:[https://ceph.com/assets/pdfs/weil-crush-sc06.pdf]
+（**C**ontrolled **R**eplication **U**nder **S**calable **H**ashing）算法是 Ceph
+的基础。
 
-CRUSH calculates where to store and retrieve data from. This has the
-advantage that no central indexing service is needed. CRUSH works using a map of
-OSDs, buckets (device locations) and rulesets (data replication) for pools.
+CRUSH 计算数据应存储在哪里以及从哪里检索。其优势在于不需要中心化索引服务。
+CRUSH 使用由 OSD、bucket（设备位置）和 pool 的 ruleset（数据复制）组成的映射来
+工作。
 
-NOTE: Further information can be found in the Ceph documentation, under the
-section CRUSH map footnote:[CRUSH map {cephdocs-url}/rados/operations/crush-map/].
+NOTE: 更多信息可在 Ceph 文档的 CRUSH map 章节中找到
+footnote:[CRUSH map {cephdocs-url}/rados/operations/crush-map/]。
 
-This map can be altered to reflect different replication hierarchies. The object
-replicas can be separated (e.g., failure domains), while maintaining the desired
-distribution.
+可以修改此映射以反映不同的复制层级。对象副本可以被分离（例如按 failure domain），
+同时保持期望的分布。
 
-A common configuration is to use different classes of disks for different Ceph
-pools.  For this reason, Ceph introduced device classes with luminous, to
-accommodate the need for easy ruleset generation.
+一种常见配置是为不同 Ceph pool 使用不同类别的磁盘。因此，Ceph 从 luminous 开始
+引入 device classes，以满足轻松生成 ruleset 的需求。
 
-The device classes can be seen in the 'ceph osd tree' output. These classes
-represent their own root bucket, which can be seen with the below command.
+可以在 'ceph osd tree' 输出中看到设备类别。这些类别表示各自的 root bucket，可
+通过以下命令查看：
 
 [source,bash]
 ----
 ceph osd crush tree --show-shadow
 ----
 
-Example output form the above command:
+上述命令的示例输出：
 
 [source,bash]
 ----
@@ -855,8 +726,7 @@ ID  CLASS WEIGHT  TYPE NAME
  14  nvme 0.72769         osd.14
 ----
 
-To instruct a pool to only distribute objects on a specific device class, you
-first need to create a ruleset for the device class:
+要指示 pool 仅在特定设备类别上分布对象，首先需要为该设备类别创建 ruleset：
 
 [source,bash]
 ----
@@ -865,41 +735,37 @@ ceph osd crush rule create-replicated <rule-name> <root> <failure-domain> <class
 
 [frame="none",grid="none", align="left", cols="30%,70%"]
 |===
-|<rule-name>|name of the rule, to connect with a pool (seen in GUI & CLI)
-|<root>|which crush root it should belong to (default Ceph root "default")
-|<failure-domain>|at which failure-domain the objects should be distributed (usually host)
-|<class>|what type of OSD backing store to use (e.g., nvme, ssd, hdd)
+|<rule-name>|规则名称，用于关联 pool（可在 GUI 和 CLI 中看到）
+|<root>|它应属于哪个 crush root（默认 Ceph root 为 "default"）
+|<failure-domain>|对象应在哪个 failure-domain 上分布（通常为 host）
+|<class>|要使用的 OSD 后端存储类型（例如 nvme、ssd、hdd）
 |===
 
-Once the rule is in the CRUSH map, you can tell a pool to use the ruleset.
+规则进入 CRUSH map 后，即可让 pool 使用该 ruleset。
 
 [source,bash]
 ----
 ceph osd pool set <pool-name> crush_rule <rule-name>
 ----
 
-TIP: If the pool already contains objects, these must be moved accordingly.
-Depending on your setup, this may introduce a big performance impact on your
-cluster. As an alternative, you can create a new pool and move disks separately.
+TIP: 如果 pool 中已经包含对象，则必须相应移动这些对象。根据部署情况，这可能会对
+集群产生较大性能影响。作为替代方案，可以创建新 pool 并单独移动磁盘。
 
 
-Ceph Client
------------
+== Ceph Client
 
 [thumbnail="screenshot/gui-ceph-log.png"]
 
-Following the setup from the previous sections, you can configure {pve} to use
-such pools to store VM and Container images. Simply use the GUI to add a new
-`RBD` storage (see section
-xref:ceph_rados_block_devices[Ceph RADOS Block Devices (RBD)]).
+按照前面章节完成设置后，可以配置 {pve} 使用这些 pool 存储虚拟机和容器镜像。只需
+使用 GUI 添加新的 `RBD` 存储（参见
+xref:ceph_rados_block_devices[Ceph RADOS Block Devices (RBD)] 章节）。
 
-You also need to copy the keyring to a predefined location for an external Ceph
-cluster. If Ceph is installed on the Proxmox nodes itself, then this will be
-done automatically.
+对于外部 Ceph 集群，还需要将 keyring 复制到预定义位置。如果 Ceph 安装在 Proxmox
+节点本身，则会自动完成此操作。
 
-NOTE: The filename needs to be `<storage_id> + `.keyring`, where `<storage_id>` is
-the expression after 'rbd:' in `/etc/pve/storage.cfg`. In the following example,
-`my-ceph-storage` is the `<storage_id>`:
+NOTE: 文件名需要是 `<storage_id> + `.keyring`，其中 `<storage_id>` 是
+`/etc/pve/storage.cfg` 中 'rbd:' 后面的表达式。在以下示例中，`my-ceph-storage`
+就是 `<storage_id>`：
 
 [source,bash]
 ----
@@ -908,234 +774,194 @@ cp /etc/ceph/ceph.client.admin.keyring /etc/pve/priv/ceph/my-ceph-storage.keyrin
 ----
 
 [[pveceph_fs]]
-CephFS
-------
+== CephFS
 
-Ceph also provides a filesystem, which runs on top of the same object storage as
-RADOS block devices do. A **M**eta**d**ata **S**erver (`MDS`) is used to map the
-RADOS backed objects to files and directories, allowing Ceph to provide a
-POSIX-compliant, replicated filesystem. This allows you to easily configure a
-clustered, highly available, shared filesystem. Ceph's Metadata Servers
-guarantee that files are evenly distributed over the entire Ceph cluster. As a
-result, even cases of high load will not overwhelm a single host, which can be
-an issue with traditional shared filesystem approaches, for example `NFS`.
+Ceph 还提供文件系统，它运行在与 RADOS block devices 相同的对象存储之上。Ceph 使用
+**M**eta**d**ata **S**erver（`MDS`）将 RADOS 后端对象映射为文件和目录，使 Ceph
+能够提供兼容 POSIX 的复制文件系统。这使你可以轻松配置集群化、高可用的共享文件
+系统。Ceph 的 Metadata Servers 保证文件在整个 Ceph 集群中均匀分布。因此，即使
+在高负载场景下，也不会压垮单个主机；而这可能是传统共享文件系统方案（例如
+`NFS`）中的问题。
 
 [thumbnail="screenshot/gui-node-ceph-cephfs-panel.png"]
 
-{pve} supports both creating a hyper-converged CephFS and using an existing
-xref:storage_cephfs[CephFS as storage] to save backups, ISO files, and container
-templates.
+{pve} 既支持创建超融合 CephFS，也支持使用现有
+xref:storage_cephfs[CephFS as storage] 保存备份、ISO 文件和容器模板。
 
 
 [[pveceph_fs_mds]]
-Metadata Server (MDS)
-~~~~~~~~~~~~~~~~~~~~~
+=== Metadata Server（MDS）
 
-CephFS needs at least one Metadata Server to be configured and running, in order
-to function. You can create an MDS through the {pve} web GUI's `Node
--> CephFS` panel or from the command line with:
+CephFS 至少需要配置并运行一个 Metadata Server 才能工作。可以通过 {pve} Web GUI 的
+`Node -> CephFS` 面板创建 MDS，也可以使用命令行：
 
 [source,bash]
 ----
 pveceph mds create
 ----
 
-Multiple metadata servers can be created in a cluster, but with the default
-settings, only one can be active at a time. If an MDS or its node becomes
-unresponsive (or crashes), another `standby` MDS will get promoted to `active`.
-You can speed up the handover between the active and standby MDS by using
-the 'hotstandby' parameter option on creation, or if you have already created it
-you may set/add:
+一个集群中可以创建多个 metadata server，但在默认设置下，任意时刻只有一个可以处于
+active 状态。如果某个 MDS 或其节点无响应（或崩溃），另一个 `standby` MDS 会被
+提升为 `active`。可以在创建时使用 'hotstandby' 参数选项，加快 active 与 standby
+MDS 之间的切换；如果已经创建，也可以设置/添加：
 
 [source,bash]
 ----
 mds standby replay = true
 ----
 
-in the respective MDS section of `/etc/pve/ceph.conf`. With this enabled, the
-specified MDS will remain in a `warm` state, polling the active one, so that it
-can take over faster in case of any issues.
+到 `/etc/pve/ceph.conf` 中相应的 MDS 段。启用后，指定 MDS 会保持在 `warm` 状态，
+并轮询 active MDS，从而在出现问题时更快接管。
 
-NOTE: This active polling will have an additional performance impact on your
-system and the active `MDS`.
+NOTE: 这种主动轮询会对系统和 active `MDS` 带来额外性能影响。
 
-.Multiple Active MDS
+.多个 Active MDS
 
-Since Luminous (12.2.x) you can have multiple active metadata servers
-running at once, but this is normally only useful if you have a high amount of
-clients running in parallel. Otherwise the `MDS` is rarely the bottleneck in a
-system. If you want to set this up, please refer to the Ceph documentation.
+自 Luminous（12.2.x）起，可以同时运行多个 active metadata server，但通常只有在有
+大量客户端并行运行时才有用。否则，`MDS` 很少是系统瓶颈。如果要设置此模式，请
+参阅 Ceph 文档。
 footnote:[Configuring multiple active MDS daemons
 {cephdocs-url}/cephfs/multimds/]
 
 [[pveceph_fs_create]]
-Create CephFS
-~~~~~~~~~~~~~
+=== 创建 CephFS
 
-With {pve}'s integration of CephFS, you can easily create a CephFS using the
-web interface, CLI or an external API interface. Some prerequisites are required
-for this to work:
+借助 {pve} 对 CephFS 的集成，可以使用 Web 界面、CLI 或外部 API 接口轻松创建
+CephFS。要使其正常工作，需要满足一些前提条件：
 
-.Prerequisites for a successful CephFS setup:
-- xref:pve_ceph_install[Install Ceph packages] - if this was already done some
-time ago, you may want to rerun it on an up-to-date system to
-ensure that all CephFS related packages get installed.
+.成功设置 CephFS 的前提条件：
+- xref:pve_ceph_install[Install Ceph packages] - 如果此前已经执行过，可能需要在
+  最新系统上重新运行，以确保安装所有 CephFS 相关软件包。
 - xref:pve_ceph_monitors[Setup Monitors]
 - xref:pve_ceph_monitors[Setup your OSDs]
 - xref:pveceph_fs_mds[Setup at least one MDS]
 
-After this is complete, you can simply create a CephFS through
-either the Web GUI's `Node -> CephFS` panel or the command-line tool `pveceph`,
-for example:
+完成后，可以通过 Web GUI 的 `Node -> CephFS` 面板，或使用命令行工具 `pveceph`
+创建 CephFS，例如：
 
 [source,bash]
 ----
 pveceph fs create --pg_num 128 --add-storage
 ----
 
-This creates a CephFS named 'cephfs', using a pool for its data named
-'cephfs_data' with '128' placement groups and a pool for its metadata named
-'cephfs_metadata' with one quarter of the data pool's placement groups (`32`).
-Check the xref:pve_ceph_pools[{pve} managed Ceph pool chapter] or visit the
-Ceph documentation for more information regarding an appropriate placement group
-number (`pg_num`) for your setup footnoteref:[placement_groups].
-Additionally, the '--add-storage' parameter will add the CephFS to the {pve}
-storage configuration after it has been created successfully.
+这会创建名为 'cephfs' 的 CephFS，使用名为 'cephfs_data' 的数据 pool，其中包含
+'128' 个 placement groups；并使用名为 'cephfs_metadata' 的元数据 pool，其中的
+placement groups 数量为数据 pool 的四分之一（`32`）。请查看
+xref:pve_ceph_pools[{pve} managed Ceph pool chapter] 或访问 Ceph 文档，了解适合
+你部署的 placement group 数量（`pg_num`）footnoteref:[placement_groups]。此外，
+'--add-storage' 参数会在 CephFS 成功创建后，将其添加到 {pve} 存储配置中。
 
-Destroy CephFS
-~~~~~~~~~~~~~~
+=== 销毁 CephFS
 
-WARNING: Destroying a CephFS will render all of its data unusable. This cannot be
-undone!
+WARNING: 销毁 CephFS 会使其中所有数据不可用。此操作无法撤销！
 
-To completely and gracefully remove a CephFS, the following steps are
-necessary:
+要完整且平稳地移除 CephFS，需要执行以下步骤：
 
-* Disconnect every non-{PVE} client (e.g. unmount the CephFS in guests).
-* Disable all related CephFS {PVE} storage entries (to prevent it from being
-  automatically mounted).
-* Remove all used resources from guests (e.g. ISOs) that are on the CephFS you
-  want to destroy.
-* Unmount the CephFS storages on all cluster nodes manually with
+* 断开每个非 {pve} 客户端（例如在客户机中卸载 CephFS）。
+* 禁用所有相关的 CephFS {pve} 存储条目（以防止其被自动挂载）。
+* 从客户机中移除位于要销毁 CephFS 上的所有已使用资源（例如 ISO）。
+* 使用以下命令在所有集群节点上手动卸载 CephFS 存储
 +
 [source,bash]
 ----
 umount /mnt/pve/<STORAGE-NAME>
 ----
 +
-Where `<STORAGE-NAME>` is the name of the CephFS storage in your {PVE}.
+其中 `<STORAGE-NAME>` 是 {pve} 中 CephFS 存储的名称。
 
-* Now make sure that no metadata server (`MDS`) is running for that CephFS,
-  either by stopping or destroying them. This can be done through the web
-  interface or via the command-line interface, for the latter you would issue
-  the following command:
+* 现在确保没有 metadata server（`MDS`）正在为该 CephFS 运行，可通过停止或销毁它们
+  来实现。这可以通过 Web 界面完成，也可以通过命令行接口完成；对于后者，可执行
+  以下命令：
 +
 [source,bash]
 ----
 pveceph stop --service mds.NAME
 ----
 +
-to stop them, or
+以停止它们，或
 +
 [source,bash]
 ----
 pveceph mds destroy NAME
 ----
 +
-to destroy them.
+以销毁它们。
 +
-Note that standby servers will automatically be promoted to active when an
-active `MDS` is stopped or removed, so it is best to first stop all standby
-servers.
+请注意，当 active `MDS` 被停止或移除时，standby server 会自动提升为 active，
+因此最好先停止所有 standby server。
 
-* Now you can destroy the CephFS with
+* 现在可以使用以下命令销毁 CephFS
 +
 [source,bash]
 ----
 pveceph fs destroy NAME --remove-storages --remove-pools
 ----
 +
-This will automatically destroy the underlying Ceph pools as well as remove
-the storages from pve config.
+这会自动销毁底层 Ceph pool，并从 pve 配置中移除存储。
 
-After these steps, the CephFS should be completely removed and if you have
-other CephFS instances, the stopped metadata servers can be started again
-to act as standbys.
+完成这些步骤后，CephFS 应已被完全移除；如果还有其他 CephFS 实例，可以再次启动
+已停止的 metadata server，让它们作为 standby 运行。
 
-Ceph Maintenance
-----------------
+== Ceph 维护
 
 [[pve_ceph_osd_replace]]
-Replace OSDs
-~~~~~~~~~~~~
+=== 替换 OSD
 
-With the following steps you can replace the disk of an OSD, which is
-one of the most common maintenance tasks in Ceph. If there is a
-problem with an OSD while its disk still seems to be healthy, read the
-xref:pve_ceph_mon_and_ts[troubleshooting] section first.
+通过以下步骤可以替换 OSD 的磁盘，这是 Ceph 中最常见的维护任务之一。如果某个 OSD
+出现问题，但其磁盘看起来仍然健康，请先阅读 xref:pve_ceph_mon_and_ts[故障排查]
+章节。
 
-. If the disk failed, get a
-xref:pve_ceph_recommendation_disk[recommended] replacement disk of the
-same type and size.
+. 如果磁盘发生故障，请获取同类型、同容量的
+xref:pve_ceph_recommendation_disk[推荐]替换磁盘。
 
-. xref:pve_ceph_osd_destroy[Destroy] the OSD in question.
+. xref:pve_ceph_osd_destroy[销毁]有问题的 OSD。
 
-. Detach the old disk from the server and attach the new one.
+. 从服务器上拆下旧磁盘并接入新磁盘。
 
-. xref:pve_ceph_osd_create[Create] the OSD again.
+. 再次 xref:pve_ceph_osd_create[创建] OSD。
 
-. After automatic rebalancing, the cluster status should switch back
-to `HEALTH_OK`. Any still listed crashes can be acknowledged by
-running the following command:
+. 自动重新平衡后，集群状态应切回 `HEALTH_OK`。对于仍列出的任何 crash，可以运行
+以下命令确认：
 [source,bash]
 ----
 ceph crash archive-all
 ----
 
-Trim/Discard
-~~~~~~~~~~~~
+=== Trim/Discard
 
-It is good practice to run 'fstrim' (discard) regularly on VMs and containers.
-This releases data blocks that the filesystem isn’t using anymore. It reduces
-data usage and resource load. Most modern operating systems issue such discard
-commands to their disks regularly. You only need to ensure that the Virtual
-Machines enable the xref:qm_hard_disk_discard[disk discard option].
+在虚拟机和容器中定期运行 'fstrim'（discard）是一项良好实践。这会释放文件系统
+不再使用的数据块，从而减少数据使用量和资源负载。大多数现代操作系统都会定期向
+磁盘发出这类 discard 命令。只需要确保虚拟机启用了
+xref:qm_hard_disk_discard[disk discard option]。
 
 [[pveceph_scrub]]
-Scrub & Deep Scrub
-~~~~~~~~~~~~~~~~~~
+=== Scrub & Deep Scrub
 
-Ceph ensures data integrity by 'scrubbing' placement groups. Ceph checks every
-object in a PG for its health. There are two forms of Scrubbing, daily
-cheap metadata checks and weekly deep data checks. The weekly deep scrub reads
-the objects and uses checksums to ensure data integrity. If a running scrub
-interferes with business (performance) needs, you can adjust the time when
-scrubs footnote:[Ceph scrubbing {cephdocs-url}/rados/configuration/osd-config-ref/#scrubbing]
-are executed.
+Ceph 通过对 placement group 进行 'scrubbing' 来确保数据完整性。Ceph 会检查 PG 中
+每个对象的健康状态。Scrubbing 有两种形式：每日执行的低开销元数据检查，以及每周
+执行的深度数据检查。每周 deep scrub 会读取对象并使用校验和确保数据完整性。如果
+正在运行的 scrub 干扰业务（性能）需求，可以调整 scrub
+footnote:[Ceph scrubbing {cephdocs-url}/rados/configuration/osd-config-ref/#scrubbing]
+执行时间。
 
 
 [[pveceph_shutdown]]
-Shutdown {pve} + Ceph HCI Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 关闭 {pve} + Ceph HCI 集群
 
-To shut down the whole {pve} + Ceph cluster, first stop all Ceph clients. These
-will mainly be VMs and containers. If you have additional clients that might
-access a Ceph FS or an installed RADOS GW, stop these as well.
-Highly available guests will switch their state to 'stopped' when powered down
-via the {pve} tooling.
+要关闭整个 {pve} + Ceph 集群，首先停止所有 Ceph 客户端。这些主要是虚拟机和容器。
+如果还有可能访问 Ceph FS 或已安装 RADOS GW 的其他客户端，也应将其停止。通过
+{pve} 工具关机时，高可用客户机会将其状态切换为 'stopped'。
 
-Once all clients, VMs and containers are off or not accessing the Ceph cluster
-anymore, verify that the Ceph cluster is in a healthy state. Either via the Web UI
-or the CLI:
+一旦所有客户端、虚拟机和容器都已关闭，或不再访问 Ceph 集群，请确认 Ceph 集群
+处于健康状态。可通过 Web UI 或 CLI 执行：
 
 [source,bash]
 ----
 ceph -s
 ----
 
-To disable all self-healing actions, and to pause any client IO in the Ceph
-cluster, enable the following OSD flags in the **Ceph -> OSD** panel or via the
-CLI:
+要禁用所有自愈操作，并暂停 Ceph 集群中的任何客户端 IO，请在 **Ceph -> OSD** 面板
+中或通过 CLI 启用以下 OSD 标志：
 
 [source,bash]
 ----
@@ -1147,12 +973,11 @@ ceph osd set nodown
 ceph osd set pause
 ----
 
-Start powering down your nodes without a monitor (MON). After these nodes are
-down, continue by shutting down nodes with monitors on them.
+开始关闭没有 monitor（MON）的节点。这些节点关闭后，再继续关闭运行 monitor 的
+节点。
 
-When powering on the cluster, start the nodes with monitors (MONs) first. Once
-all nodes are up and running, confirm that all Ceph services are up and running
-before you unset the OSD flags again:
+启动集群时，先启动带有 monitor（MON）的节点。所有节点启动并运行后，在取消设置
+OSD 标志之前，确认所有 Ceph 服务都已启动并运行：
 
 [source,bash]
 ----
@@ -1164,113 +989,96 @@ ceph osd unset norecover
 ceph osd unset noout
 ----
 
-You can now start up the guests. Highly available guests will change their state
-to 'started' when they power on.
+现在可以启动客户机。高可用客户机开机后会将其状态更改为 'started'。
 
 [[pve_ceph_mon_and_ts]]
-Ceph Monitoring and Troubleshooting
------------------------------------
+== Ceph 监控与故障排查
 
-It is important to continuously monitor the health of a Ceph deployment from the
-beginning, either by using the Ceph tools or by accessing
-the status through the {pve} link:api-viewer/index.html[API].
+从一开始就持续监控 Ceph 部署的健康状态非常重要，可以使用 Ceph 工具，也可以通过
+{pve} link:api-viewer/index.html[API] 访问状态。
 
-The following Ceph commands can be used to see if the cluster is healthy
-('HEALTH_OK'), if there are warnings ('HEALTH_WARN'), or even errors
-('HEALTH_ERR'). If the cluster is in an unhealthy state, the status commands
-below will also give you an overview of the current events and actions to take.
-To stop their execution, press CTRL-C.
+以下 Ceph 命令可用于查看集群是否健康（'HEALTH_OK'）、是否存在警告
+（'HEALTH_WARN'），甚至是否存在错误（'HEALTH_ERR'）。如果集群处于不健康状态，
+下面的状态命令还会概览当前事件和应采取的操作。要停止执行，请按 CTRL-C。
 
-Continuously watch the cluster status:
+持续观察集群状态：
 [source,bash]
 ----
 watch ceph --status
 ----
 
-Print the cluster status once (not being updated) and continuously append lines of status events:
+打印一次集群状态（不会持续更新），并持续追加状态事件行：
 [source,bash]
 ----
 ceph --watch
 ----
 
 [[pve_ceph_ts]]
-Troubleshooting
-~~~~~~~~~~~~~~~
+=== 故障排查
 
-This section includes frequently used troubleshooting information.
-More information can be found on the official Ceph website under
-Troubleshooting
+本节包含常用故障排查信息。更多信息可在 Ceph 官方网站的故障排查部分找到
 footnote:[Ceph troubleshooting {cephdocs-url}/rados/troubleshooting/].
 
 [[pve_ceph_ts_logs]]
-.Relevant Logs on Affected Node
+.受影响节点上的相关日志
 
-* xref:disk_health_monitoring[Disk Health Monitoring]
-* __System -> System Log__ or via the CLI, for example of the last 2 days:
+* xref:disk_health_monitoring[磁盘健康监控]
+* __System -> System Log__，或通过 CLI 查看，例如最近 2 天：
 +
 [source,bash]
 ----
 journalctl --since "2 days ago"
 ----
-* IPMI and RAID controller logs
+* IPMI 和 RAID 控制器日志
 
-Ceph service crashes can be listed and viewed in detail by running the following
-commands:
+可以运行以下命令列出并详细查看 Ceph 服务 crash：
 [source,bash]
 ----
 ceph crash ls
 ceph crash info <crash_id>
 ----
-Crashes marked as new can be acknowledged by running:
+可运行以下命令确认标记为 new 的 crash：
 [source,bash]
 ----
 ceph crash archive-all
 ----
 
-To get a more detailed view, every Ceph service has a log file under
-`/var/log/ceph/`. If more detail is required, the log level can be
-adjusted footnote:[Ceph log and debugging {cephdocs-url}/rados/troubleshooting/log-and-debug/].
+要获得更详细视图，每个 Ceph 服务在 `/var/log/ceph/` 下都有日志文件。如果需要更多
+细节，可以调整日志级别
+footnote:[Ceph log and debugging {cephdocs-url}/rados/troubleshooting/log-and-debug/]。
 
 [[pve_ceph_ts_causes]]
-.Common Causes of Ceph Problems
+.Ceph 问题的常见原因
 
-* Network problems like congestion, a faulty switch, a shut down
-interface or a blocking firewall. Check whether all {pve} nodes are
-reliably reachable on the
-xref:pvecm_cluster_network[corosync cluster network] and on the
-xref:pve_ceph_install_wizard[Ceph public and cluster network].
+* 网络问题，例如拥塞、交换机故障、接口关闭或防火墙阻断。检查所有 {pve} 节点在
+xref:pvecm_cluster_network[corosync 集群网络]以及
+xref:pve_ceph_install_wizard[Ceph public 和 cluster 网络]上是否都可可靠访问。
 
-* Disk or connection parts which are:
-** defective
-** not firmly mounted
-** lacking I/O performance under higher load (e.g. when using HDDs,
-consumer hardware or
-xref:pve_ceph_recommendation_raid[inadvisable RAID controllers])
+* 磁盘或连接部件存在以下情况：
+** 有缺陷
+** 未牢固安装
+** 在较高负载下缺少 I/O 性能（例如使用 HDD、消费级硬件或
+xref:pve_ceph_recommendation_raid[不建议使用的 RAID 控制器]时）
 
-* Not fulfilling the xref:_recommendations_for_a_healthy_ceph_cluster[recommendations] for
-a healthy Ceph cluster.
+* 未满足健康 Ceph 集群的 xref:_recommendations_for_a_healthy_ceph_cluster[建议]。
 
 [[pve_ceph_ts_problems]]
-.Common Ceph Problems
+.常见 Ceph 问题
  ::
 
 OSDs `down`/crashed:::
-A faulty OSD will be reported as `down` and mostly (auto) `out` 10
-minutes later. Depending on the cause, it can also automatically
-become `up` and `in` again. To try a manual activation via web
-interface, go to __Any node -> Ceph -> OSD__, select the OSD and click
-on **Start**, **In** and **Reload**. When using the shell, run following
-command on the affected node:
+故障 OSD 会被报告为 `down`，并且通常会在 10 分钟后（自动）变为 `out`。根据原因，
+它也可能自动再次变为 `up` 和 `in`。要尝试通过 Web 界面手动激活，请进入
+__Any node -> Ceph -> OSD__，选择该 OSD，并点击 **Start**、**In** 和 **Reload**。
+使用 shell 时，请在受影响节点上运行以下命令：
 +
 [source,bash]
 ----
 ceph-volume lvm activate --all
 ----
 +
-To activate a failed OSD, it may be necessary to
-xref:ha_manager_node_maintenance[safely reboot] the respective node
-or, as a last resort, to
-xref:pve_ceph_osd_replace[recreate or replace] the OSD.
+要激活失败的 OSD，可能需要 xref:ha_manager_node_maintenance[安全重启]相应节点；
+或者作为最后手段，xref:pve_ceph_osd_replace[重新创建或替换]该 OSD。
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

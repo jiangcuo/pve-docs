@@ -1,67 +1,53 @@
 [[storage_cephfs]]
-Ceph Filesystem (CephFS)
-------------------------
+== Ceph 文件系统（CephFS）
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: CephFS
 endif::wiki[]
 
-Storage pool type: `cephfs`
+存储池类型：`cephfs`
 
-CephFS implements a POSIX-compliant filesystem, using a https://ceph.com[Ceph]
-storage cluster to store its data. As CephFS builds upon Ceph, it shares most of
-its properties. This includes redundancy, scalability, self-healing, and high
-availability.
+CephFS 实现了兼容 POSIX 的文件系统，并使用 https://ceph.com[Ceph] 存储集群保存
+数据。由于 CephFS 构建在 Ceph 之上，它继承了 Ceph 的大多数属性，包括冗余、
+可扩展性、自愈能力和高可用性。
 
-TIP: {pve} can xref:chapter_pveceph[manage Ceph setups], which makes
-configuring a CephFS storage easier. As modern hardware offers a lot of
-processing power and RAM, running storage services and VMs on same node is
-possible without a significant performance impact.
+TIP: {pve} 可以 xref:chapter_pveceph[管理 Ceph 部署]，这使 CephFS 存储配置更为
+简单。现代硬件提供了大量处理能力和内存，因此在同一节点上运行存储服务和虚拟机
+是可行的，且不会产生显著性能影响。
 
-To use the CephFS storage plugin, you must replace the stock Debian Ceph client,
-by adding our xref:sysadmin_package_repositories_ceph[Ceph repository].
-Once added, run `apt update`, followed by `apt dist-upgrade`, in order to get
-the newest packages.
-
-WARNING: Please ensure that there are no other Ceph repositories configured.
-Otherwise the installation will fail or there will be mixed package versions on
-the node, leading to unexpected behavior.
 
 [[storage_cephfs_config]]
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-This backend supports the common storage properties `nodes`,
-`disable`, `content`, as well as the following `cephfs` specific properties:
+该后端支持通用存储属性 `nodes`、`disable`、`content`，以及以下 `cephfs`
+专用属性：
 
 fs-name::
 
-Name of the Ceph FS.
+Ceph FS 的名称。
 
 monhost::
 
-List of monitor daemon addresses. Optional, only needed if Ceph is not running
-on the {pve} cluster.
+monitor 守护进程地址列表。可选，仅在 Ceph 未运行于 {pve} 集群上时需要。
 
 path::
 
-The local mount point. Optional, defaults to `/mnt/pve/<STORAGE_ID>/`.
+本地挂载点。可选，默认为 `/mnt/pve/<STORAGE_ID>/`。
 
 username::
 
-Ceph user id. Optional, only needed if Ceph is not running on the {pve} cluster,
-where it defaults to `admin`.
+Ceph 用户 ID。可选，仅在 Ceph 未运行于 {pve} 集群上时需要；在本地集群场景中默认为
+`admin`。
 
 subdir::
 
-CephFS subdirectory to mount. Optional, defaults to `/`.
+要挂载的 CephFS 子目录。可选，默认为 `/`。
 
 fuse::
 
-Access CephFS through FUSE, instead of the kernel client. Optional, defaults
-to `0`.
+通过 FUSE 而不是内核客户端访问 CephFS。可选，默认为 `0`。
 
-.Configuration example for an external Ceph cluster (`/etc/pve/storage.cfg`)
+.外部 Ceph 集群的配置示例（`/etc/pve/storage.cfg`）
 ----
 cephfs: cephfs-external
         monhost 10.1.1.20 10.1.1.21 10.1.1.22
@@ -70,76 +56,72 @@ cephfs: cephfs-external
         username admin
         fs-name cephfs
 ----
-NOTE: Don't forget to set up the client's secret key file, if cephx was not
-disabled.
+NOTE: 如果未禁用 cephx，请不要忘记设置客户端的密钥文件。
 
-Authentication
-~~~~~~~~~~~~~~
+=== 认证
 
-NOTE: If Ceph is installed locally on the {pve} cluster, the following is done
-automatically when adding the storage.
+NOTE: 如果 Ceph 本地安装在 {pve} 集群上，添加存储时以下操作会自动完成。
 
-If you use `cephx` authentication, which is enabled by default, you need to
-provide the secret from the external Ceph cluster.
+如果使用默认启用的 `cephx` 认证，则需要提供来自外部 Ceph 集群的 secret。
 
-To configure the storage via the CLI, you first need to make the file
-containing the secret available. One way is to copy the file from the external
-Ceph cluster directly to one of the {pve} nodes. The following example will
-copy it to the `/root` directory of the node on which we run it:
+要通过 CLI 配置存储，首先需要提供包含 secret 的文件。一种方式是直接从外部 Ceph
+集群将该文件复制到某个 {pve} 节点。以下示例会将其复制到运行命令节点的 `/root`
+目录：
 
 ----
 # scp <external cephserver>:/etc/ceph/cephfs.secret /root/cephfs.secret
 ----
 
-Then use the `pvesm` CLI tool to configure the external RBD storage, use the
-`--keyring` parameter, which needs to be a path to the secret file that you
-copied.  For example:
+然后使用 `pvesm` CLI 工具配置外部 RBD 存储，并使用 `--keyring` 参数；该参数
+需要指向已复制的 secret 文件路径。例如：
 
 ----
 # pvesm add cephfs <name> --monhost "10.1.1.20 10.1.1.21 10.1.1.22" --content backup --keyring /root/cephfs.secret
 ----
 
-When configuring an external RBD storage via the GUI, you can copy and paste
-the secret into the appropriate field.
+通过 GUI 配置外部 RBD 存储时，可以将 secret 复制并粘贴到相应字段中。
 
-The secret is only the key itself, as opposed to the `rbd` backend which also
-contains a `[client.userid]` section.
+该 secret 仅包含密钥本身，不同于 `rbd` 后端；后者还包含 `[client.userid]` 段。
 
-The secret will be stored at
+secret 将存储在：
 
 ----
 # /etc/pve/priv/ceph/<STORAGE_ID>.secret
 ----
 
-A secret can be received from the Ceph cluster (as Ceph admin) by issuing the
-command below, where `userid` is the client ID that has been configured to
-access the cluster. For further information on Ceph user management, see the
-Ceph docs.footnoteref:[cephusermgmt]
+可以使用以下命令以 Ceph 管理员身份从 Ceph 集群获取 secret，其中 `userid` 是已配置
+为可访问该集群的客户端 ID。有关 Ceph 用户管理的更多信息，请参见 Ceph
+文档。footnoteref:[cephusermgmt]
 
 ----
 # ceph auth get-key client.userid > cephfs.secret
 ----
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-The `cephfs` backend is a POSIX-compliant filesystem, on top of a Ceph cluster.
+`cephfs` 后端是在 Ceph 集群之上提供的兼容 POSIX 的文件系统。
 
-.Storage features for backend `cephfs`
+.后端 `cephfs` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types              |Image formats  |Shared |Snapshots |Clones
+|内容类型                   |镜像格式       |共享   |快照      |克隆
 |vztmpl iso backup snippets |none           |yes    |yes^[1]^  |no
 |==============================================================================
-^[1]^ While no known bugs exist, snapshots are not yet guaranteed to be stable,
-as they lack sufficient testing.
+^[1]^ 虽然目前没有已知缺陷，但由于缺少充分测试，快照尚不能保证稳定。
+
+=== 常用命令示例
+
+以下命令可用于查看存储状态，并通过 CLI 添加外部 CephFS 存储：
+
+----
+# pvesm status
+# pvesm add cephfs <name> --monhost "10.1.1.20 10.1.1.21 10.1.1.22" --content backup --keyring /root/cephfs.secret
+----
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参阅
 
 * link:/wiki/Storage[Storage]
 
 endif::wiki[]
-

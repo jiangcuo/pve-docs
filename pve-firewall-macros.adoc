@@ -1,5 +1,5 @@
 [horizontal]
-'Amanda':: Amanda Backup
+'Amanda':: Amanda 备份
 
 [width="100%",options="header"]
 |===========================================================
@@ -9,7 +9,7 @@
 |===========================================================
 
 [horizontal]
-'Auth':: Auth (identd) traffic
+'Auth':: Auth (identd) 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -18,7 +18,7 @@
 |===========================================================
 
 [horizontal]
-'BGP':: Border Gateway Protocol traffic
+'BGP':: Border Gateway Protocol 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -27,7 +27,7 @@
 |===========================================================
 
 [horizontal]
-'BitTorrent':: BitTorrent traffic for BitTorrent 3.1 and earlier
+'BitTorrent':: BitTorrent 3.1 及更早版本的 BitTorrent 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -37,7 +37,7 @@
 |===========================================================
 
 [horizontal]
-'BitTorrent32':: BitTorrent traffic for BitTorrent 3.2 and later
+'BitTorrent32':: BitTorrent 3.2 及更高版本的 BitTorrent 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -47,7 +47,7 @@
 |===========================================================
 
 [horizontal]
-'CVS':: Concurrent Versions System pserver traffic
+'CVS':: Concurrent Versions System pserver 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -56,7 +56,7 @@
 |===========================================================
 
 [horizontal]
-'Ceph':: Ceph Storage Cluster traffic (Ceph Monitors, OSD & MDS Daemons)
+'Ceph':: Ceph 存储集群流量（Ceph Monitors、OSD 和 MDS 守护进程）
 
 [width="100%",options="header"]
 |===========================================================
@@ -67,7 +67,7 @@
 |===========================================================
 
 [horizontal]
-'Citrix':: Citrix/ICA traffic (ICA, ICA Browser, CGP)
+'Citrix':: Citrix/ICA 流量（ICA、ICA Browser、CGP）
 
 [width="100%",options="header"]
 |===========================================================
@@ -78,7 +78,7 @@
 |===========================================================
 
 [horizontal]
-'DAAP':: Digital Audio Access Protocol traffic (iTunes, Rythmbox daemons)
+'DAAP':: Digital Audio Access Protocol 流量（iTunes、Rythmbox 守护进程）
 
 [width="100%",options="header"]
 |===========================================================
@@ -88,7 +88,7 @@
 |===========================================================
 
 [horizontal]
-'DCC':: Distributed Checksum Clearinghouse spam filtering mechanism
+'DCC':: Distributed Checksum Clearinghouse 垃圾邮件过滤机制
 
 [width="100%",options="header"]
 |===========================================================
@@ -97,7 +97,7 @@
 |===========================================================
 
 [horizontal]
-'DHCPfwd':: Forwarded DHCP traffic
+'DHCPfwd':: 转发的 DHCP 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -106,7 +106,7 @@
 |===========================================================
 
 [horizontal]
-'DHCPv6':: DHCPv6 traffic
+'DHCPv6':: DHCPv6 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -115,7 +115,7 @@
 |===========================================================
 
 [horizontal]
-'DNS':: Domain Name System traffic (upd and tcp)
+'DNS':: Domain Name System 流量（udp 和 tcp）
 
 [width="100%",options="header"]
 |===========================================================
@@ -125,7 +125,7 @@
 |===========================================================
 
 [horizontal]
-'Distcc':: Distributed Compiler service
+'Distcc':: Distributed Compiler 服务
 
 [width="100%",options="header"]
 |===========================================================
@@ -143,7 +143,7 @@
 |===========================================================
 
 [horizontal]
-'Finger':: Finger protocol (RFC 742)
+'Finger':: Finger 协议（RFC 742）
 
 [width="100%",options="header"]
 |===========================================================
@@ -152,7 +152,7 @@
 |===========================================================
 
 [horizontal]
-'GNUnet':: GNUnet secure peer-to-peer networking traffic
+'GNUnet':: GNUnet 安全点对点网络流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -164,7 +164,7 @@
 |===========================================================
 
 [horizontal]
-'GRE':: Generic Routing Encapsulation tunneling protocol
+'GRE':: Generic Routing Encapsulation 隧道协议
 
 [width="100%",options="header"]
 |===========================================================
@@ -173,7 +173,7 @@
 |===========================================================
 
 [horizontal]
-'Git':: Git distributed revision control traffic
+'Git':: Git 分布式版本控制流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -182,7 +182,7 @@
 |===========================================================
 
 [horizontal]
-'HKP':: OpenPGP HTTP key server protocol traffic
+'HKP':: OpenPGP HTTP key server 协议流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -191,7 +191,7 @@
 |===========================================================
 
 [horizontal]
-'HTTP':: Hypertext Transfer Protocol (WWW)
+'HTTP':: Hypertext Transfer Protocol（WWW）
 
 [width="100%",options="header"]
 |===========================================================
@@ -200,7 +200,7 @@
 |===========================================================
 
 [horizontal]
-'HTTPS':: Hypertext Transfer Protocol (WWW) over SSL
+'HTTPS':: 基于 SSL 的 Hypertext Transfer Protocol（WWW）
 
 [width="100%",options="header"]
 |===========================================================
@@ -209,7 +209,7 @@
 |===========================================================
 
 [horizontal]
-'ICPV2':: Internet Cache Protocol V2 (Squid) traffic
+'ICPV2':: Internet Cache Protocol V2（Squid）流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -218,7 +218,7 @@
 |===========================================================
 
 [horizontal]
-'ICQ':: AOL Instant Messenger traffic
+'ICQ':: AOL Instant Messenger 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -236,7 +236,7 @@
 |===========================================================
 
 [horizontal]
-'IMAPS':: Internet Message Access Protocol over SSL
+'IMAPS':: 基于 SSL 的 Internet Message Access Protocol
 
 [width="100%",options="header"]
 |===========================================================
@@ -245,7 +245,7 @@
 |===========================================================
 
 [horizontal]
-'IPIP':: IPIP capsulation traffic
+'IPIP':: IPIP 封装流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -254,7 +254,7 @@
 |===========================================================
 
 [horizontal]
-'IPsec':: IPsec traffic
+'IPsec':: IPsec 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -264,7 +264,7 @@
 |===========================================================
 
 [horizontal]
-'IPsecah':: IPsec authentication (AH) traffic
+'IPsecah':: IPsec 认证（AH）流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -274,7 +274,7 @@
 |===========================================================
 
 [horizontal]
-'IPsecnat':: IPsec traffic and Nat-Traversal
+'IPsecnat':: IPsec 流量和 Nat-Traversal
 
 [width="100%",options="header"]
 |===========================================================
@@ -285,7 +285,7 @@
 |===========================================================
 
 [horizontal]
-'IRC':: Internet Relay Chat traffic
+'IRC':: Internet Relay Chat 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -294,7 +294,7 @@
 |===========================================================
 
 [horizontal]
-'Jetdirect':: HP Jetdirect printing
+'Jetdirect':: HP Jetdirect 打印
 
 [width="100%",options="header"]
 |===========================================================
@@ -303,7 +303,7 @@
 |===========================================================
 
 [horizontal]
-'L2TP':: Layer 2 Tunneling Protocol traffic
+'L2TP':: Layer 2 Tunneling Protocol 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -312,7 +312,7 @@
 |===========================================================
 
 [horizontal]
-'LDAP':: Lightweight Directory Access Protocol traffic
+'LDAP':: Lightweight Directory Access Protocol 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -321,7 +321,7 @@
 |===========================================================
 
 [horizontal]
-'LDAPS':: Secure Lightweight Directory Access Protocol traffic
+'LDAPS':: 安全 Lightweight Directory Access Protocol 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -357,7 +357,7 @@
 |===========================================================
 
 [horizontal]
-'Mail':: Mail traffic (SMTP, SMTPS, Submission)
+'Mail':: 邮件流量（SMTP、SMTPS、Submission）
 
 [width="100%",options="header"]
 |===========================================================
@@ -368,7 +368,7 @@
 |===========================================================
 
 [horizontal]
-'Munin':: Munin networked resource monitoring traffic
+'Munin':: Munin 网络资源监控流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -377,7 +377,7 @@
 |===========================================================
 
 [horizontal]
-'MySQL':: MySQL server
+'MySQL':: MySQL 服务器
 
 [width="100%",options="header"]
 |===========================================================
@@ -386,7 +386,7 @@
 |===========================================================
 
 [horizontal]
-'NNTP':: NNTP traffic (Usenet).
+'NNTP':: NNTP 流量（Usenet）。
 
 [width="100%",options="header"]
 |===========================================================
@@ -395,7 +395,7 @@
 |===========================================================
 
 [horizontal]
-'NNTPS':: Encrypted NNTP traffic (Usenet)
+'NNTPS':: 加密 NNTP 流量（Usenet）
 
 [width="100%",options="header"]
 |===========================================================
@@ -404,7 +404,7 @@
 |===========================================================
 
 [horizontal]
-'NTP':: Network Time Protocol (ntpd)
+'NTP':: Network Time Protocol（ntpd）
 
 [width="100%",options="header"]
 |===========================================================
@@ -413,7 +413,7 @@
 |===========================================================
 
 [horizontal]
-'NeighborDiscovery':: IPv6 neighbor solicitation, neighbor and router advertisement
+'NeighborDiscovery':: IPv6 邻居请求、邻居通告和路由器通告
 
 [width="100%",options="header"]
 |===========================================================
@@ -425,7 +425,7 @@
 |===========================================================
 
 [horizontal]
-'OSPF':: OSPF multicast traffic
+'OSPF':: OSPF 组播流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -434,7 +434,7 @@
 |===========================================================
 
 [horizontal]
-'OpenVPN':: OpenVPN traffic
+'OpenVPN':: OpenVPN 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -453,7 +453,7 @@
 |===========================================================
 
 [horizontal]
-'PMG':: Proxmox Mail Gateway web interface
+'PMG':: Proxmox Mail Gateway Web 界面
 
 [width="100%",options="header"]
 |===========================================================
@@ -462,7 +462,7 @@
 |===========================================================
 
 [horizontal]
-'POP3':: POP3 traffic
+'POP3':: POP3 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -471,7 +471,7 @@
 |===========================================================
 
 [horizontal]
-'POP3S':: Encrypted POP3 traffic
+'POP3S':: 加密 POP3 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -499,7 +499,7 @@
 |===========================================================
 
 [horizontal]
-'PostgreSQL':: PostgreSQL server
+'PostgreSQL':: PostgreSQL 服务器
 
 [width="100%",options="header"]
 |===========================================================
@@ -508,7 +508,7 @@
 |===========================================================
 
 [horizontal]
-'Printer':: Line Printer protocol printing
+'Printer':: Line Printer protocol 打印
 
 [width="100%",options="header"]
 |===========================================================
@@ -517,7 +517,7 @@
 |===========================================================
 
 [horizontal]
-'RDP':: Microsoft Remote Desktop Protocol traffic
+'RDP':: Microsoft Remote Desktop Protocol 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -526,7 +526,7 @@
 |===========================================================
 
 [horizontal]
-'RIP':: Routing Information Protocol (bidirectional)
+'RIP':: Routing Information Protocol（双向）
 
 [width="100%",options="header"]
 |===========================================================
@@ -535,7 +535,7 @@
 |===========================================================
 
 [horizontal]
-'RNDC':: BIND remote management protocol
+'RNDC':: BIND 远程管理协议
 
 [width="100%",options="header"]
 |===========================================================
@@ -544,7 +544,7 @@
 |===========================================================
 
 [horizontal]
-'Razor':: Razor Antispam System
+'Razor':: Razor 反垃圾邮件系统
 
 [width="100%",options="header"]
 |===========================================================
@@ -553,7 +553,7 @@
 |===========================================================
 
 [horizontal]
-'Rdate':: Remote time retrieval (rdate)
+'Rdate':: 远程时间获取（rdate）
 
 [width="100%",options="header"]
 |===========================================================
@@ -562,7 +562,7 @@
 |===========================================================
 
 [horizontal]
-'Rsync':: Rsync server
+'Rsync':: Rsync 服务器
 
 [width="100%",options="header"]
 |===========================================================
@@ -571,7 +571,7 @@
 |===========================================================
 
 [horizontal]
-'SANE':: SANE network scanning
+'SANE':: SANE 网络扫描
 
 [width="100%",options="header"]
 |===========================================================
@@ -580,7 +580,7 @@
 |===========================================================
 
 [horizontal]
-'SMB':: Microsoft SMB traffic
+'SMB':: Microsoft SMB 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -592,7 +592,7 @@
 |===========================================================
 
 [horizontal]
-'SMBswat':: Samba Web Administration Tool
+'SMBswat':: Samba Web 管理工具
 
 [width="100%",options="header"]
 |===========================================================
@@ -610,7 +610,7 @@
 |===========================================================
 
 [horizontal]
-'SMTPS':: Encrypted Simple Mail Transfer Protocol
+'SMTPS':: 加密 Simple Mail Transfer Protocol
 
 [width="100%",options="header"]
 |===========================================================
@@ -629,7 +629,7 @@
 |===========================================================
 
 [horizontal]
-'SPAMD':: Spam Assassin SPAMD traffic
+'SPAMD':: Spam Assassin SPAMD 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -638,7 +638,7 @@
 |===========================================================
 
 [horizontal]
-'SPICEproxy':: Proxmox VE SPICE display proxy traffic
+'SPICEproxy':: Proxmox VE SPICE 显示代理流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -647,7 +647,7 @@
 |===========================================================
 
 [horizontal]
-'SSH':: Secure shell traffic
+'SSH':: Secure shell 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -656,7 +656,7 @@
 |===========================================================
 
 [horizontal]
-'SVN':: Subversion server (svnserve)
+'SVN':: Subversion 服务器（svnserve）
 
 [width="100%",options="header"]
 |===========================================================
@@ -677,7 +677,7 @@
 |===========================================================
 
 [horizontal]
-'Squid':: Squid web proxy traffic
+'Squid':: Squid Web 代理流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -686,7 +686,7 @@
 |===========================================================
 
 [horizontal]
-'Submission':: Mail message submission traffic
+'Submission':: 邮件提交流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -695,7 +695,7 @@
 |===========================================================
 
 [horizontal]
-'Syslog':: Syslog protocol (RFC 5424) traffic
+'Syslog':: Syslog 协议（RFC 5424）流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -705,7 +705,7 @@
 |===========================================================
 
 [horizontal]
-'TFTP':: Trivial File Transfer Protocol traffic
+'TFTP':: Trivial File Transfer Protocol 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -714,7 +714,7 @@
 |===========================================================
 
 [horizontal]
-'Telnet':: Telnet traffic
+'Telnet':: Telnet 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -723,7 +723,7 @@
 |===========================================================
 
 [horizontal]
-'Telnets':: Telnet over SSL
+'Telnets':: 基于 SSL 的 Telnet
 
 [width="100%",options="header"]
 |===========================================================
@@ -732,7 +732,7 @@
 |===========================================================
 
 [horizontal]
-'Time':: RFC 868 Time protocol
+'Time':: RFC 868 Time 协议
 
 [width="100%",options="header"]
 |===========================================================
@@ -741,7 +741,7 @@
 |===========================================================
 
 [horizontal]
-'Trcrt':: Traceroute (for up to 30 hops) traffic
+'Trcrt':: Traceroute 流量（最多 30 跳）
 
 [width="100%",options="header"]
 |===========================================================
@@ -751,7 +751,7 @@
 |===========================================================
 
 [horizontal]
-'VNC':: VNC traffic for VNC display's 0 - 99
+'VNC':: VNC display 0 - 99 的 VNC 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -760,7 +760,7 @@
 |===========================================================
 
 [horizontal]
-'VNCL':: VNC traffic from Vncservers to Vncviewers in listen mode
+'VNCL':: listen 模式下从 VNC 服务器到 VNC 查看器的 VNC 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -769,7 +769,7 @@
 |===========================================================
 
 [horizontal]
-'Web':: WWW traffic (HTTP and HTTPS)
+'Web':: WWW 流量（HTTP 和 HTTPS）
 
 [width="100%",options="header"]
 |===========================================================
@@ -779,7 +779,7 @@
 |===========================================================
 
 [horizontal]
-'Webcache':: Web Cache/Proxy traffic (port 8080)
+'Webcache':: Web 缓存/代理流量（端口 8080）
 
 [width="100%",options="header"]
 |===========================================================
@@ -788,7 +788,7 @@
 |===========================================================
 
 [horizontal]
-'Webmin':: Webmin traffic
+'Webmin':: Webmin 流量
 
 [width="100%",options="header"]
 |===========================================================
@@ -797,11 +797,10 @@
 |===========================================================
 
 [horizontal]
-'Whois':: Whois (nicname, RFC 3912) traffic
+'Whois':: Whois（nicname，RFC 3912）流量
 
 [width="100%",options="header"]
 |===========================================================
 |Action|proto|dport|sport
 |PARAM|tcp|43|
 |===========================================================
-

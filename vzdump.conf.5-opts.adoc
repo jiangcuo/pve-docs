@@ -1,160 +1,159 @@
 `bwlimit`: `<integer> (0 - N)` ('default =' `0`)::
 
-Limit I/O bandwidth (in KiB/s).
+限制 I/O 带宽（单位 KiB/s）。
 
 `compress`: `<0 | 1 | gzip | lzo | zstd>` ('default =' `0`)::
 
-Compress dump file.
+压缩转储文件。
 
 `dumpdir`: `<string>` ::
 
-Store resulting files to specified directory.
+将生成的文件保存到指定目录。
 
 `exclude-path`: `<array>` ::
 
-Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.
+排除指定文件/目录（shell glob）。以 `/` 开头的路径锚定到容器根目录，其他路径则相对于各个子目录匹配。
 
 `fleecing`: `[[enabled=]<1|0>] [,storage=<storage ID>]` ::
 
-Options for backup fleecing (VM only).
+backup fleecing 选项（仅适用于虚拟机）。
 
 `enabled`=`<boolean>` ('default =' `0`);;
 
-Enable backup fleecing. Cache backup data from blocks where new guest writes happen on specified storage instead of copying them directly to the backup target. This can help guest IO performance and even prevent hangs, at the cost of requiring more storage space.
+启用 backup fleecing。当客户机发生新写入时，将相关块的备份数据缓存在指定存储上，而不是直接复制到备份目标。这有助于提升客户机 I/O 性能，甚至避免卡顿，但代价是需要更多存储空间。
 
 `storage`=`<storage ID>` ;;
 
-Use this storage to storage fleecing images. For efficient space usage, it's best to use a local storage that supports discard and either thin provisioning or sparse files.
+使用该存储保存 fleecing 镜像。为了高效利用空间，最好使用支持 discard 且支持 thin provisioning 或 sparse file 的本地存储。
 
 `ionice`: `<integer> (0 - 8)` ('default =' `7`)::
 
-Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.
+使用 BFQ 调度器时设置 I/O 优先级。对于虚拟机的 snapshot 和 suspend 模式备份，该设置只影响压缩器。值为 8 表示使用 idle 优先级，否则使用带指定数值的 best-effort 优先级。
 
 `lockwait`: `<integer> (0 - N)` ('default =' `180`)::
 
-Maximal time to wait for the global lock (minutes).
+等待全局锁的最长时间（分钟）。
 
 `mailnotification`: `<always | failure>` ('default =' `always`)::
 
-Deprecated: use notification targets/matchers instead. Specify when to send a notification mail
+已弃用：请改用通知目标/匹配器。指定何时发送通知邮件。
 
 `mailto`: `<string>` ::
 
-Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.
+已弃用：请改用通知目标/匹配器。应接收电子邮件通知的电子邮件地址或用户，以逗号分隔。
 
 `maxfiles`: `<integer> (1 - N)` ::
 
-Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.
+已弃用：请改用 `prune-backups`。每个客户系统的最大备份文件数。
 
 `mode`: `<snapshot | stop | suspend>` ('default =' `snapshot`)::
 
-Backup mode.
+备份模式。
 
 `notes-template`: `<string>` ::
 
-Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are \{\{cluster\}\}, \{\{guestname\}\}, \{\{node\}\}, and \{\{vmid\}\}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\n' and '\\' respectively.
+用于生成备份备注的模板字符串。可以包含变量，这些变量会被对应值替换。当前支持 \{\{cluster\}\}、\{\{guestname\}\}、\{\{node\}\} 和 \{\{vmid\}\}，未来可能会增加更多变量。必须为单行，换行符和反斜杠需要分别转义为 `\n` 和 `\\`。
 +
-NOTE: Requires option(s): `storage`
+NOTE: 需要选项：`storage`
 
 `notification-mode`: `<auto | legacy-sendmail | notification-system>` ('default =' `auto`)::
 
-Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.
+确定使用哪个通知系统。如果设置为 `legacy-sendmail`，`vzdump` 会使用 `mailto`/`mailnotification` 参数，并通过 `sendmail` 命令向指定地址发送电子邮件。如果设置为 `notification-system`，则通过 PVE 通知系统发送通知，并忽略 `mailto` 和 `mailnotification`。如果设置为 `auto`（默认设置），设置了 `mailto` 时会发送电子邮件，否则使用通知系统。
 
 `notification-policy`: `<always | failure | never>` ('default =' `always`)::
 
-Deprecated: Do not use
+已弃用：不要使用。
 
 `notification-target`: `<string>` ::
 
-Deprecated: Do not use
+已弃用：不要使用。
 
 `pbs-change-detection-mode`: `<data | legacy | metadata>` ::
 
-PBS mode used to detect file changes and switch encoding format for container backups.
+用于检测文件变化并为容器备份切换编码格式的 PBS 模式。
 
 `performance`: `[max-workers=<integer>] [,pbs-entries-max=<integer>]` ::
 
-Other performance-related settings.
+其他性能相关设置。
 
 `max-workers`=`<integer> (1 - 256)` ('default =' `16`);;
 
-Applies to VMs. Allow up to this many IO workers at the same time.
+适用于虚拟机。允许同时使用的最大 I/O worker 数量。
 
 `pbs-entries-max`=`<integer> (1 - N)` ('default =' `1048576`);;
 
-Applies to container backups sent to PBS. Limits the number of entries allowed in memory at a given time to avoid unintended OOM situations. Increase it to enable backups of containers with a large amount of files.
+适用于发送到 PBS 的容器备份。限制同一时间允许驻留在内存中的条目数量，以避免意外 OOM。对于包含大量文件的容器，可增大该值以支持备份。
 
 `pigz`: `<integer>` ('default =' `0`)::
 
-Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.
+当 N>0 时使用 `pigz` 代替 `gzip`。N=1 表示使用一半核心数，N>1 表示使用 N 作为线程数。
 
 `pool`: `<string>` ::
 
-Backup all known guest systems included in the specified pool.
+备份指定 pool 中包含的所有已知客户系统。
 
 `protected`: `<boolean>` ::
 
-If true, mark backup(s) as protected.
+如果为 true，则将备份标记为受保护。
 +
-NOTE: Requires option(s): `storage`
+NOTE: 需要选项：`storage`
 
 `prune-backups`: `[keep-all=<1|0>] [,keep-daily=<N>] [,keep-hourly=<N>] [,keep-last=<N>] [,keep-monthly=<N>] [,keep-weekly=<N>] [,keep-yearly=<N>]` ('default =' `keep-all=1`)::
 
-Use these retention options instead of those from the storage configuration.
+使用这些保留选项，而不是存储配置中的保留选项。
 
 `keep-all`=`<boolean>` ;;
 
-Keep all backups. Conflicts with the other options when true.
+保留所有备份。为 true 时与其他选项冲突。
 
 `keep-daily`=`<N>` ;;
 
-Keep backups for the last <N> different days. If there is morethan one backup for a single day, only the latest one is kept.
+保留最近 <N> 个不同日期的备份。如果同一天有多个备份，只保留最新的一个。
 
 `keep-hourly`=`<N>` ;;
 
-Keep backups for the last <N> different hours. If there is morethan one backup for a single hour, only the latest one is kept.
+保留最近 <N> 个不同小时的备份。如果同一小时有多个备份，只保留最新的一个。
 
 `keep-last`=`<N>` ;;
 
-Keep the last <N> backups.
+保留最近 <N> 个备份。
 
 `keep-monthly`=`<N>` ;;
 
-Keep backups for the last <N> different months. If there is morethan one backup for a single month, only the latest one is kept.
+保留最近 <N> 个不同月份的备份。如果同一月份有多个备份，只保留最新的一个。
 
 `keep-weekly`=`<N>` ;;
 
-Keep backups for the last <N> different weeks. If there is morethan one backup for a single week, only the latest one is kept.
+保留最近 <N> 个不同周的备份。如果同一周有多个备份，只保留最新的一个。
 
 `keep-yearly`=`<N>` ;;
 
-Keep backups for the last <N> different years. If there is morethan one backup for a single year, only the latest one is kept.
+保留最近 <N> 个不同年份的备份。如果同一年有多个备份，只保留最新的一个。
 
 `remove`: `<boolean>` ('default =' `1`)::
 
-Prune older backups according to 'prune-backups'.
+根据 `prune-backups` 清理较旧备份。
 
 `script`: `<string>` ::
 
-Use specified hook script.
+使用指定的 hook script。
 
 `stdexcludes`: `<boolean>` ('default =' `1`)::
 
-Exclude temporary files and logs.
+排除临时文件和日志。
 
 `stopwait`: `<integer> (0 - N)` ('default =' `10`)::
 
-Maximal time to wait until a guest system is stopped (minutes).
+等待客户系统停止的最长时间（分钟）。
 
 `storage`: `<storage ID>` ::
 
-Store resulting file to this storage.
+将生成的文件保存到该存储。
 
 `tmpdir`: `<string>` ::
 
-Store temporary files to specified directory.
+将临时文件保存到指定目录。
 
 `zstd`: `<integer>` ('default =' `1`)::
 
-Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.
-
+Zstd 线程数。N=0 表示使用一半可用核心数；如果 N 设置为大于 0 的值，则将 N 作为线程数。

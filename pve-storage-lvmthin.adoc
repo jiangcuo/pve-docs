@@ -1,22 +1,18 @@
 [[storage_lvmthin]]
-LVM thin Backend
-----------------
+== LVM thin 后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: LVM Thin
 endif::wiki[]
 
-Storage pool type: `lvmthin`
+存储池类型：`lvmthin`
 
-LVM normally allocates blocks when you create a volume. LVM thin pools
-instead allocates blocks when they are written. This behaviour is
-called thin-provisioning, because volumes can be much larger than
-physically available space.
+普通 LVM 通常会在创建卷时分配块。LVM thin pool 则在写入数据时才分配块。这种行为称为
+thin-provisioning，因为卷的逻辑大小可以大于实际可用的物理空间。
 
-You can use the normal LVM command-line tools to manage and create LVM
-thin pools (see `man lvmthin` for details). Assuming you already have
-a LVM volume group called `pve`, the following commands create a new
-LVM thin pool (size 100G) called `data`:
+可以使用常规 LVM 命令行工具来管理和创建 LVM thin pool（详情请参见 `man
+lvmthin`）。假设已经有一个名为 `pve` 的 LVM 卷组，以下命令会创建一个名为 `data`、
+大小为 100G 的 LVM thin pool：
 
 ----
 lvcreate -L 100G -n data pve
@@ -24,22 +20,20 @@ lvconvert --type thin-pool pve/data
 ----
 
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-The LVM thin backend supports the common storage properties `content`, `nodes`,
-`disable`, and the following LVM specific properties:
+LVM thin 后端支持通用存储属性 `content`、`nodes`、`disable`，以及以下 LVM 专用属性：
 
 `vgname`::
 
-LVM volume group name. This must point to an existing volume group.
+LVM 卷组名称。必须指向一个已存在的卷组。
 
 `thinpool`::
 
-The name of the LVM thin pool.
+LVM thin pool 的名称。
 
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例（`/etc/pve/storage.cfg`）
 ----
 lvmthin: local-lvm
 	thinpool data
@@ -48,42 +42,49 @@ lvmthin: local-lvm
 ----
 
 
-File naming conventions
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 文件命名约定
 
-The backend use basically the same naming conventions as the ZFS pool
-backend.
+该后端基本使用与 ZFS pool 后端相同的命名约定。
 
  vm-<VMID>-<NAME>      // normal VM images
 
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-LVM thin is a block storage, but fully supports snapshots and clones
-efficiently. New volumes are automatically initialized with zero.
+LVM thin 是块存储，但可以高效地完整支持快照和克隆。新卷会自动初始化为零。
 
-It must be mentioned that LVM thin pools cannot be shared across
-multiple nodes, so you can only use them as local storage.
+需要注意，LVM thin pool 不能跨多个节点共享，因此只能作为本地存储使用。
 
-.Storage features for backend `lvmthin`
+.后端 `lvmthin` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types  |Image formats  |Shared   |Snapshots |Clones
-|images rootdir |raw            |no       |yes       |yes
+|内容类型       |镜像格式       |共享     |快照      |克隆
+|images rootdir |raw            |否       |是        |是
 |==============================================================================
 
-Examples
-~~~~~~~~
+=== 示例
 
-You can get a list of available LVM thin pools on the volume group `pve` with:
+可以使用以下命令获取卷组 `pve` 上可用的 LVM thin pool 列表：
 
  # pvesm scan lvmthin pve
 
+=== 常用命令示例
+
+查看当前存储状态：
+
+----
+# pvesm status
+----
+
+列出节点上的 LVM 卷组：
+
+----
+# pvesm scan lvm
+----
+
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
 * link:/wiki/Storage[Storage]
 

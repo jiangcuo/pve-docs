@@ -1,32 +1,35 @@
 ifdef::manvolnum[]
-pvescheduler(8)
-===============
+= pvescheduler(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pvescheduler - PVE Scheduler Daemon
+pvescheduler - PVE 调度器守护进程
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pvescheduler.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-pvescheduler - Proxmox VE Scheduler Daemon
-==========================================
+= pvescheduler - Proxmox VE 调度器守护进程
 endif::manvolnum[]
 
-This daemon is responsible for starting jobs according to the schedule,
-such as replication and vzdump jobs.
+此守护进程负责按照计划启动作业，例如复制作业和 vzdump 作业。
 
-For vzdump jobs, it gets its configuration from the file `/etc/pve/jobs.cfg`
+对于 vzdump 作业，它会从 `/etc/pve/jobs.cfg` 文件读取配置。
+
+== 常用命令示例
+
+查看调度器服务状态和相关日志时，可使用标准 Debian 系统命令：
+
+----
+# systemctl status pvescheduler
+# journalctl -u pvescheduler
+----
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

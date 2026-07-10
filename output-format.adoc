@@ -1,23 +1,19 @@
 ifndef::manvolnum[]
-Output format options `[FORMAT_OPTIONS]`
----------------------------------------
+== 输出格式选项 `[FORMAT_OPTIONS]`
 endif::manvolnum[]
 ifdef::manvolnum[]
-FORMAT_OPTIONS
---------------
+== FORMAT_OPTIONS
 endif::manvolnum[]
 
-It is possible to specify the output format using the
-`--output-format` parameter. The default format 'text' uses ASCII-art
-to draw nice borders around tables. It additionally transforms some
-values into human-readable text, for example:
+可以使用 `--output-format` 参数指定输出格式。默认格式 `text` 使用 ASCII
+字符为表格绘制边框，并会将部分值转换为便于阅读的文本，例如：
 
-- Unix epoch is displayed as ISO 8601 date string.
-- Durations are displayed as week/day/hour/minute/second count, i.e `1d 5h`.
-- Byte sizes value include units (`B`, `KiB`, `MiB`, `GiB`, `TiB`, `PiB`).
-- Fractions are display as percentage, i.e. 1.0 is displayed as 100%.
+- Unix epoch 会显示为 ISO 8601 日期字符串。
+- 持续时间会显示为周/天/小时/分钟/秒的组合，例如 `1d 5h`。
+- 字节大小会包含单位（`B`、`KiB`、`MiB`、`GiB`、`TiB`、`PiB`）。
+- 小数会显示为百分比，例如 1.0 会显示为 100%。
 
-You can also completely suppress output using option `--quiet`.
+也可以使用 `--quiet` 选项完全抑制输出。
 
 
 include::output-format-opts.adoc[]

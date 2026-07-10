@@ -1,704 +1,703 @@
 `gicversion`: `<2 | 3 | 4 | max | host >` ('default =' `host`)::
 
-Set arm vm gicversion.
+设置 ARM 虚拟机的 gicversion。
 
 `virtualization`: `<boolean>` ('default =' `0`)::
 
-enable nested virtualization for arm64 vm.
+为 arm64 虚拟机启用嵌套虚拟化。
 
 `pxvditemplate` `<boolean>` ('default =' `0`)::
 
-Enable/disable PXVDI Template.
+启用/禁用 PXVDI 模板。
 
 `acpi`: `<boolean>` ('default =' `1`)::
 
-Enable/disable ACPI.
+启用/禁用 ACPI。
 
 `affinity`: `<string>` ::
 
-List of host cores used to execute guest processes, for example: 0,5,8-11
+用于执行客户机进程的主机核心列表，例如：0,5,8-11
 
 `agent`: `[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]` ::
 
-Enable/disable communication with the QEMU Guest Agent and its properties.
+启用/禁用与 QEMU Guest Agent 的通信及其属性。
 
 `enabled`=`<boolean>` ('default =' `0`);;
 
-Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.
+启用/禁用与虚拟机中运行的 QEMU Guest Agent（QGA）的通信。
 
 `freeze-fs-on-backup`=`<boolean>` ('default =' `1`);;
 
-Freeze/thaw guest filesystems on backup for consistency.
+备份时冻结/解冻客户机文件系统，以保证一致性。
 
 `fstrim_cloned_disks`=`<boolean>` ('default =' `0`);;
 
-Run fstrim after moving a disk or migrating the VM.
+移动磁盘或迁移虚拟机后运行 fstrim。
 
 `type`=`<isa | virtio>` ('default =' `virtio`);;
 
-Select the agent type
+选择 agent 类型。
 
 `amd-sev`: `[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]` ::
 
-Secure Encrypted Virtualization (SEV) features by AMD CPUs
+AMD CPU 提供的 Secure Encrypted Virtualization（SEV）功能。
 
 `allow-smt`=`<boolean>` ('default =' `1`);;
 
-Sets policy bit to allow Simultaneous Multi Threading (SMT) (Ignored unless for SEV-SNP)
+设置策略位以允许 Simultaneous Multi Threading（SMT）（除 SEV-SNP 外会被忽略）。
 
 `kernel-hashes`=`<boolean>` ('default =' `0`);;
 
-Add kernel hashes to guest firmware for measured linux kernel launch
+向客户机固件添加 kernel hashes，用于 measured Linux kernel launch。
 
 `no-debug`=`<boolean>` ('default =' `0`);;
 
-Sets policy bit to disallow debugging of guest
+设置策略位以禁止调试客户机。
 
 `no-key-sharing`=`<boolean>` ('default =' `0`);;
 
-Sets policy bit to disallow key sharing with other guests (Ignored for SEV-SNP)
+设置策略位以禁止与其他客户机共享密钥（对 SEV-SNP 会被忽略）。
 
 `type`=`<sev-type>` ;;
 
-Enable standard SEV with type='std' or enable experimental SEV-ES with the 'es' option or enable experimental SEV-SNP with the 'snp' option.
+使用 type='std' 启用标准 SEV；使用 'es' 选项启用实验性 SEV-ES；使用 'snp' 选项启用实验性 SEV-SNP。
 
 `arch`: `<aarch64 | x86_64>` ::
 
-Virtual processor architecture. Defaults to the host.
+虚拟处理器架构。默认为主机架构。
 
 `args`: `<string>` ::
 
-Arbitrary arguments passed to kvm, for example:
+传递给 kvm 的任意参数，例如：
 +
 args: -no-reboot -smbios 'type=0,vendor=FOO'
 +
-NOTE: this option is for experts only.
+NOTE: 此选项仅供专家使用。
 
 `audio0`: `device=<ich9-intel-hda|intel-hda|AC97> [,driver=<spice|none>]` ::
 
-Configure a audio device, useful in combination with QXL/Spice.
+配置音频设备，与 QXL/Spice 结合使用时很有用。
 
 `device`=`<AC97 | ich9-intel-hda | intel-hda>` ;;
 
-Configure an audio device.
+配置音频设备。
 
 `driver`=`<none | spice>` ('default =' `spice`);;
 
-Driver backend for the audio device.
+音频设备的驱动后端。
 
 `autostart`: `<boolean>` ('default =' `0`)::
 
-Automatic restart after crash (currently ignored).
+崩溃后自动重启（当前会被忽略）。
 
 `balloon`: `<integer> (0 - N)` ::
 
-Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.
+虚拟机目标 RAM 大小，单位为 MiB。设置为零会禁用 balloon 驱动。
 
 `bios`: `<ovmf | seabios>` ('default =' `seabios`)::
 
-Select BIOS implementation.
+选择 BIOS 实现。
 
 `boot`: `[[legacy=]<[acdn]{1,4}>] [,order=<device[;device...]>]` ::
 
-Specify guest boot order. Use the 'order=' sub-property as usage with no key or 'legacy=' is deprecated.
+指定客户机启动顺序。应使用 'order=' 子属性；无键用法或 'legacy=' 已弃用。
 
 `legacy`=`<[acdn]{1,4}>` ('default =' `cdn`);;
 
-Boot on floppy (a), hard disk (c), CD-ROM (d), or network (n). Deprecated, use 'order=' instead.
+从软盘 (a)、硬盘 (c)、CD-ROM (d) 或网络 (n) 启动。已弃用，请改用 'order='。
 
 `order`=`<device[;device...]>` ;;
 
-The guest will attempt to boot from devices in the order they appear here.
+客户机会按照此处设备出现的顺序尝试启动。
 +
-Disks, optical drives and passed-through storage USB devices will be directly
-booted from, NICs will load PXE, and PCIe devices will either behave like disks
-(e.g. NVMe) or load an option ROM (e.g. RAID controller, hardware NIC).
+磁盘、光驱和直通的存储 USB 设备会被直接用于启动；
+NIC 会加载 PXE，PCIe 设备则会像磁盘一样工作，
+例如 NVMe，或加载 option ROM，例如 RAID 控制器、硬件 NIC。
 +
-Note that only devices in this list will be marked as bootable and thus loaded
-by the guest firmware (BIOS/UEFI). If you require multiple disks for booting
-(e.g. software-raid), you need to specify all of them here.
+请注意，只有此列表中的设备会被标记为可启动，并因此由
+客户机固件（BIOS/UEFI）加载。如果启动需要多个磁盘，
+例如 software-raid，需要在此处指定全部磁盘。
 +
-Overrides the deprecated 'legacy=[acdn]*' value when given.
+指定后会覆盖已弃用的 'legacy=[acdn]*' 值。
 
 `bootdisk`: `(ide|sata|scsi|virtio)\d+` ::
 
-Enable booting from specified disk. Deprecated: Use 'boot: order=foo;bar' instead.
+允许从指定磁盘启动。已弃用：请改用 'boot: order=foo;bar'。
 
 `cdrom`: `<volume>` ::
 
-This is an alias for option -ide2
+这是选项 -ide2 的别名。
 
 `cicustom`: `[meta=<volume>] [,network=<volume>] [,user=<volume>] [,vendor=<volume>]` ::
 
-cloud-init: Specify custom files to replace the automatically generated ones at start.
+cloud-init：指定自定义文件，用于在启动时替换自动生成的文件。
 
 `meta`=`<volume>` ;;
 
-Specify a custom file containing all meta data passed to the VM via"
-	    ." cloud-init. This is provider specific meaning configdrive2 and nocloud differ.
+指定一个自定义文件，其中包含通过 cloud-init 传递给虚拟机的所有元数据。
+此内容与 provider 相关，意味着 configdrive2 和 nocloud 的格式不同。
 
 `network`=`<volume>` ;;
 
-To pass a custom file containing all network data to the VM via cloud-init.
+通过 cloud-init 向虚拟机传递包含所有网络数据的自定义文件。
 
 `user`=`<volume>` ;;
 
-To pass a custom file containing all user data to the VM via cloud-init.
+通过 cloud-init 向虚拟机传递包含所有用户数据的自定义文件。
 
 `vendor`=`<volume>` ;;
 
-To pass a custom file containing all vendor data to the VM via cloud-init.
+通过 cloud-init 向虚拟机传递包含所有 vendor 数据的自定义文件。
 
 `cipassword`: `<string>` ::
 
-cloud-init: Password to assign the user. Using this is generally not recommended. Use ssh keys instead. Also note that older cloud-init versions do not support hashed passwords.
+cloud-init：要分配给用户的密码。通常不建议使用此项，应改用 SSH 密钥。另请注意，较旧版本的 cloud-init 不支持哈希密码。
 
 `citype`: `<configdrive2 | nocloud | opennebula>` ::
 
-Specifies the cloud-init configuration format. The default depends on the configured operating system type (`ostype`. We use the `nocloud` format for Linux, and `configdrive2` for windows.
+指定 cloud-init 配置格式。默认值取决于配置的操作系统类型（`ostype`）。Linux 使用 `nocloud` 格式，Windows 使用 `configdrive2`。
 
 `ciupgrade`: `<boolean>` ('default =' `1`)::
 
-cloud-init: do an automatic package upgrade after the first boot.
+cloud-init：首次启动后自动执行软件包升级。
 
 `ciuser`: `<string>` ::
 
-cloud-init: User name to change ssh keys and password for instead of the image's configured default user.
+cloud-init：要修改 SSH 密钥和密码的用户名，用于替代镜像中配置的默认用户。
 
 `cores`: `<integer> (1 - N)` ('default =' `1`)::
 
-The number of cores per socket.
+每个 socket 的核心数。
 
 `cpu`: `[[cputype=]<string>] [,flags=<+FLAG[;-FLAG...]>] [,hidden=<1|0>] [,hv-vendor-id=<vendor-id>] [,phys-bits=<8-64|host>] [,reported-model=<enum>]` ::
 
-Emulated CPU type.
+模拟的 CPU 类型。
 
 `cputype`=`<string>` ('default =' `kvm64`);;
 
-Emulated CPU type. Can be default or custom name (custom model names must be prefixed with 'custom-').
+模拟的 CPU 类型。可以是默认名称或自定义名称（自定义模型名称必须以 'custom-' 为前缀）。
 
 `flags`=`<+FLAG[;-FLAG...]>` ;;
 
-List of additional CPU flags separated by ';'. Use '+FLAG' to enable, '-FLAG' to disable a flag. Custom CPU models can specify any flag supported by QEMU/KVM, VM-specific flags must be from the following set for security reasons: pcid, spec-ctrl, ibpb, ssbd, virt-ssbd, amd-ssbd, amd-no-ssb, pdpe1gb, md-clear, hv-tlbflush, hv-evmcs, aes
+额外 CPU flags 列表，以 ';' 分隔。使用 '+FLAG' 启用 flag，使用 '-FLAG' 禁用 flag。自定义 CPU 模型可以指定 QEMU/KVM 支持的任意 flag；出于安全原因，虚拟机专用 flag 必须来自以下集合：pcid, spec-ctrl, ibpb, ssbd, virt-ssbd, amd-ssbd, amd-no-ssb, pdpe1gb, md-clear, hv-tlbflush, hv-evmcs, aes
 
 `hidden`=`<boolean>` ('default =' `0`);;
 
-Do not identify as a KVM virtual machine.
+不要将其标识为 KVM 虚拟机。
 
 `hv-vendor-id`=`<vendor-id>` ;;
 
-The Hyper-V vendor ID. Some drivers or programs inside Windows guests need a specific ID.
+Hyper-V vendor ID。Windows 客户机内的某些驱动或程序需要特定 ID。
 
 `phys-bits`=`<8-64|host>` ;;
 
-The physical memory address bits that are reported to the guest OS. Should be smaller or equal to the host's. Set to 'host' to use value from host CPU, but note that doing so will break live migration to CPUs with other values.
+报告给客户机操作系统的物理内存地址位数。应小于或等于主机值。设置为 'host' 可使用主机 CPU 的值，但请注意，这会破坏到具有其他值的 CPU 的在线迁移。
 
 `reported-model`=`<486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | Conroe | Cooperlake | Cooperlake-v2 | EPYC | EPYC-Genoa | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-v3 | EPYC-v4 | GraniteRapids | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Westmere | Westmere-IBRS | athlon | core2duo | coreduo | host | kvm32 | kvm64 | max | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64>` ('default =' `kvm64`);;
 
-CPU model and vendor to report to the guest. Must be a QEMU/KVM supported model. Only valid for custom CPU model definitions, default models will always report themselves to the guest OS.
+报告给客户机的 CPU 模型和厂商。必须是 QEMU/KVM 支持的模型。仅对自定义 CPU 模型定义有效，默认模型始终会向客户机操作系统报告其自身。
 
 `cpulimit`: `<number> (0 - 128)` ('default =' `0`)::
 
-Limit of CPU usage.
+CPU 使用限制。
 +
-NOTE: If the computer has 2 CPUs, it has total of '2' CPU time. Value '0' indicates no CPU limit.
+NOTE: 如果计算机有 2 个 CPU，则总共有 '2' 份 CPU 时间。值 '0' 表示不限制 CPU。
 
 `cpuunits`: `<integer> (1 - 262144)` ('default =' `cgroup v1: 1024, cgroup v2: 100`)::
 
-CPU weight for a VM. Argument is used in the kernel fair scheduler. The larger the number is, the more CPU time this VM gets. Number is relative to weights of all the other running VMs.
+虚拟机的 CPU 权重。该参数用于内核公平调度器。数值越大，该虚拟机获得的 CPU 时间越多。该数值相对于所有其他正在运行虚拟机的权重。
 
 `description`: `<string>` ::
 
-Description for the VM. Shown in the web-interface VM's summary. This is saved as comment inside the configuration file.
+虚拟机说明。显示在 Web 界面的虚拟机摘要中，并作为注释保存在配置文件内。
 
 `efidisk0`: `[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]` ::
 
-Configure a disk for storing EFI vars.
+配置用于存储 EFI vars 的磁盘。
 
 `efitype`=`<2m | 4m>` ('default =' `2m`);;
 
-Size and type of the OVMF EFI vars. '4m' is newer and recommended, and required for Secure Boot. For backwards compatibility, '2m' is used if not otherwise specified. Ignored for VMs with arch=aarch64 (ARM).
+OVMF EFI vars 的大小和类型。'4m' 较新且推荐使用，并且 Secure Boot 需要它。为保持向后兼容，如果未另行指定，则使用 '2m'。对于 arch=aarch64（ARM）的虚拟机会被忽略。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `format`=`<cloop | qcow | qcow2 | qed | raw | vmdk>` ;;
 
-The drive's backing file's data format.
+驱动器后端文件的数据格式。
 
 `pre-enrolled-keys`=`<boolean>` ('default =' `0`);;
 
-Use am EFI vars template with distribution-specific and Microsoft Standard keys enrolled, if used with 'efitype=4m'. Note that this will enable Secure Boot by default, though it can still be turned off from within the VM.
+在使用 'efitype=4m' 时，使用已注册发行版特定密钥和 Microsoft Standard keys 的 EFI vars 模板。请注意，这会默认启用 Secure Boot，但仍可在虚拟机内部关闭。
 
 `size`=`<DiskSize>` ;;
 
-Disk size. This is purely informational and has no effect.
+磁盘大小。此项仅供信息展示，没有实际影响。
 
 `freeze`: `<boolean>` ::
 
-Freeze CPU at startup (use 'c' monitor command to start execution).
+启动时冻结 CPU（使用 'c' monitor 命令开始执行）。
 
 `hookscript`: `<string>` ::
 
-Script that will be executed during various steps in the vms lifetime.
+在虚拟机生命周期的各个阶段执行的脚本。
 
 `hostpci[n]`: `[[host=]<HOSTPCIID[;HOSTPCIID2...]>] [,device-id=<hex id>] [,legacy-igd=<1|0>] [,mapping=<mapping-id>] [,mdev=<string>] [,pcie=<1|0>] [,rombar=<1|0>] [,romfile=<string>] [,sub-device-id=<hex id>] [,sub-vendor-id=<hex id>] [,vendor-id=<hex id>] [,x-vga=<1|0>] [,ramfb=<1|0>]` ::
 
-Map host PCI devices into guest.
+将主机 PCI 设备映射到客户机。
 +
-NOTE: This option allows direct access to host hardware. So it is no longer
-possible to migrate such machines - use with special care.
+NOTE: 此选项允许直接访问主机硬件。因此此类机器将
+无法再迁移，请特别谨慎使用。
 +
-CAUTION: Experimental! User reported problems with this option.
+CAUTION: 实验性功能！已有用户报告此选项存在问题。
 
 `device-id`=`<hex id>` ;;
 
-Override PCI device ID visible to guest
+覆盖客户机可见的 PCI device ID。
 
 `host`=`<HOSTPCIID[;HOSTPCIID2...]>` ;;
 
-Host PCI device pass through. The PCI ID of a host's PCI device or a list
-of PCI virtual functions of the host. HOSTPCIID syntax is:
+主机 PCI 设备直通。主机 PCI 设备的 PCI ID，或主机
+PCI virtual functions 列表。HOSTPCIID 语法为：
 +
 'bus:dev.func' (hexadecimal numbers)
 +
-You can use the 'lspci' command to list existing PCI devices.
+可以使用 'lspci' 命令列出现有 PCI 设备。
 +
-Either this or the 'mapping' key must be set.
+此项和 'mapping' 键必须至少设置一个。
 
 `legacy-igd`=`<boolean>` ('default =' `0`);;
 
-Pass this device in legacy IGD mode, making it the primary and exclusive graphics device in the VM. Requires 'pc-i440fx' machine type and VGA set to 'none'.
+以 legacy IGD 模式传递此设备，使其成为虚拟机中的主图形设备且为独占图形设备。需要 'pc-i440fx' 机器类型，并将 VGA 设置为 'none'。
 
 `mapping`=`<mapping-id>` ;;
 
-The ID of a cluster wide mapping. Either this or the default-key 'host' must be set.
+集群范围 mapping 的 ID。此项和默认键 'host' 必须至少设置一个。
 
 `mdev`=`<string>` ;;
 
-The type of mediated device to use.
-An instance of this type will be created on startup of the VM and
-will be cleaned up when the VM stops.
+要使用的 mediated device 类型。
+虚拟机启动时会创建此类型的一个实例，
+虚拟机停止时会清理该实例。
 
 `pcie`=`<boolean>` ('default =' `0`);;
 
-Choose the PCI-express bus (needs the 'q35' machine model).
+选择 PCI-express 总线（需要 'q35' 机器模型）。
 
 `rombar`=`<boolean>` ('default =' `1`);;
 
-Specify whether or not the device's ROM will be visible in the guest's memory map.
+指定设备 ROM 是否在客户机内存映射中可见。
 
 `romfile`=`<string>` ;;
 
-Custom pci device rom filename (must be located in /usr/share/kvm/).
+自定义 PCI 设备 ROM 文件名（必须位于 /usr/share/kvm/）。
 
 `sub-device-id`=`<hex id>` ;;
 
-Override PCI subsystem device ID visible to guest
+覆盖客户机可见的 PCI subsystem device ID。
 
 `sub-vendor-id`=`<hex id>` ;;
 
-Override PCI subsystem vendor ID visible to guest
+覆盖客户机可见的 PCI subsystem vendor ID。
 
 `vendor-id`=`<hex id>` ;;
 
-Override PCI vendor ID visible to guest
+覆盖客户机可见的 PCI vendor ID。
 
 `x-vga`=`<boolean>` ('default =' `0`);;
 
-Enable vfio-vga device support.
+启用 vfio-vga 设备支持。
 
 `ramfb`=`<boolean>` ('default =' `1`);;
 
-Enable vfio-pci device ramfb display support.
+启用 vfio-pci 设备 ramfb 显示支持。
 
 `hotplug`: `<string>` ('default =' `network,disk,usb`)::
 
-Selectively enable hotplug features. This is a comma separated list of hotplug features: 'network', 'disk', 'cpu', 'memory', 'usb' and 'cloudinit'. Use '0' to disable hotplug completely. Using '1' as value is an alias for the default `network,disk,usb`. USB hotplugging is possible for guests with machine version >= 7.1 and ostype l26 or windows > 7.
+选择性启用热插拔功能。这是以逗号分隔的热插拔功能列表：'network'、'disk'、'cpu'、'memory'、'usb' 和 'cloudinit'。使用 '0' 可完全禁用热插拔。值 '1' 是默认值 `network,disk,usb` 的别名。对于 machine version >= 7.1 且 ostype 为 l26 或 windows > 7 的客户机，可以使用 USB 热插拔。
 
 `hugepages`: `<1024 | 2 | any>` ::
 
-Enable/disable hugepages memory.
+启用/禁用 hugepages 内存。
 
 `ide[n]`: `[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,model=<model>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]` ::
 
-Use volume as IDE hard disk or CD-ROM (n is 0 to 3).
+将卷用作 IDE 硬盘或 CD-ROM（n 为 0 到 3）。
 
 `aio`=`<io_uring | native | threads>` ;;
 
-AIO type to use.
+要使用的 AIO 类型。
 
 `backup`=`<boolean>` ;;
 
-Whether the drive should be included when making backups.
+进行备份时是否应包含该驱动器。
 
 `bps`=`<bps>` ;;
 
-Maximum r/w speed in bytes per second.
+最大读/写速度，单位为字节每秒。
 
 `bps_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `bps_rd`=`<bps>` ;;
 
-Maximum read speed in bytes per second.
+最大读取速度，单位为字节每秒。
 
 `bps_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `bps_wr`=`<bps>` ;;
 
-Maximum write speed in bytes per second.
+最大写入速度，单位为字节每秒。
 
 `bps_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `cache`=`<directsync | none | unsafe | writeback | writethrough>` ;;
 
-The drive's cache mode
+驱动器的缓存模式。
 
 `cyls`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific cylinder count.
+强制驱动器物理几何参数使用指定柱面数。
 
 `detect_zeroes`=`<boolean>` ;;
 
-Controls whether to detect and try to optimize writes of zeroes.
+控制是否检测并尝试优化零写入。
 
 `discard`=`<ignore | on>` ;;
 
-Controls whether to pass discard/trim requests to the underlying storage.
+控制是否将 discard/trim 请求传递到底层存储。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `format`=`<cloop | qcow | qcow2 | qed | raw | vmdk>` ;;
 
-The drive's backing file's data format.
+驱动器后端文件的数据格式。
 
 `heads`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific head count.
+强制驱动器物理几何参数使用指定磁头数。
 
 `iops`=`<iops>` ;;
 
-Maximum r/w I/O in operations per second.
+最大读/写 I/O，单位为操作每秒。
 
 `iops_max`=`<iops>` ;;
 
-Maximum unthrottled r/w I/O pool in operations per second.
+最大未限速读/写 I/O 池，单位为操作每秒。
 
 `iops_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `iops_rd`=`<iops>` ;;
 
-Maximum read I/O in operations per second.
+最大读取 I/O，单位为操作每秒。
 
 `iops_rd_max`=`<iops>` ;;
 
-Maximum unthrottled read I/O pool in operations per second.
+最大未限速读取 I/O 池，单位为操作每秒。
 
 `iops_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `iops_wr`=`<iops>` ;;
 
-Maximum write I/O in operations per second.
+最大写入 I/O，单位为操作每秒。
 
 `iops_wr_max`=`<iops>` ;;
 
-Maximum unthrottled write I/O pool in operations per second.
+最大未限速写入 I/O 池，单位为操作每秒。
 
 `iops_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `mbps`=`<mbps>` ;;
 
-Maximum r/w speed in megabytes per second.
+最大读/写速度，单位为兆字节每秒。
 
 `mbps_max`=`<mbps>` ;;
 
-Maximum unthrottled r/w pool in megabytes per second.
+最大未限速读/写池，单位为兆字节每秒。
 
 `mbps_rd`=`<mbps>` ;;
 
-Maximum read speed in megabytes per second.
+最大读取速度，单位为兆字节每秒。
 
 `mbps_rd_max`=`<mbps>` ;;
 
-Maximum unthrottled read pool in megabytes per second.
+最大未限速读取池，单位为兆字节每秒。
 
 `mbps_wr`=`<mbps>` ;;
 
-Maximum write speed in megabytes per second.
+最大写入速度，单位为兆字节每秒。
 
 `mbps_wr_max`=`<mbps>` ;;
 
-Maximum unthrottled write pool in megabytes per second.
+最大未限速写入池，单位为兆字节每秒。
 
 `media`=`<cdrom | disk>` ('default =' `disk`);;
 
-The drive's media type.
+驱动器的介质类型。
 
 `model`=`<model>` ;;
 
-The drive's reported model name, url-encoded, up to 40 bytes long.
+驱动器报告的型号名称，经过 URL 编码，最长 40 字节。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Whether the drive should considered for replication jobs.
+该驱动器是否应纳入复制任务。
 
 `rerror`=`<ignore | report | stop>` ;;
 
-Read error action.
+读取错误时的操作。
 
 `secs`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific sector count.
+强制驱动器物理几何参数使用指定扇区数。
 
 `serial`=`<serial>` ;;
 
-The drive's reported serial number, url-encoded, up to 20 bytes long.
+驱动器报告的序列号，经过 URL 编码，最长 20 字节。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this locally-managed volume as available on all nodes.
+将此本地管理的卷标记为在所有节点上可用。
 +
-WARNING: This option does not share the volume automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享该卷，而是假定它已经被共享。
 
 `size`=`<DiskSize>` ;;
 
-Disk size. This is purely informational and has no effect.
+磁盘大小。此项仅供信息展示，没有实际影响。
 
 `snapshot`=`<boolean>` ;;
 
-Controls qemu's snapshot mode feature. If activated, changes made to the disk are temporary and will be discarded when the VM is shutdown.
+控制 qemu 的 snapshot mode 功能。如果启用，对磁盘所做的更改是临时的，并会在虚拟机关机时被丢弃。
 
 `ssd`=`<boolean>` ;;
 
-Whether to expose this drive as an SSD, rather than a rotational hard disk.
+是否将此驱动器暴露为 SSD，而不是旋转式硬盘。
 
 `trans`=`<auto | lba | none>` ;;
 
-Force disk geometry bios translation mode.
+强制磁盘几何参数 BIOS translation 模式。
 
 `werror`=`<enospc | ignore | report | stop>` ;;
 
-Write error action.
+写入错误时的操作。
 
 `wwn`=`<wwn>` ;;
 
-The drive's worldwide name, encoded as 16 bytes hex string, prefixed by '0x'.
+驱动器的 worldwide name，编码为 16 字节十六进制字符串，并以 '0x' 为前缀。
 
 `ipconfig[n]`: `[gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,ip=<IPv4Format/CIDR>] [,ip6=<IPv6Format/CIDR>]` ::
 
-cloud-init: Specify IP addresses and gateways for the corresponding interface.
+cloud-init：为对应接口指定 IP 地址和网关。
 +
-IP addresses use CIDR notation, gateways are optional but need an IP of the same type specified.
+IP 地址使用 CIDR 表示法；网关为可选项，但必须已指定同类型的 IP 地址。
 +
-The special string 'dhcp' can be used for IP addresses to use DHCP, in which case no explicit
-gateway should be provided.
-For IPv6 the special string 'auto' can be used to use stateless autoconfiguration. This requires
-cloud-init 19.4 or newer.
+IP 地址可以使用特殊字符串 'dhcp' 来启用 DHCP；在这种情况下
+不应提供显式网关。
+对于 IPv6，可以使用特殊字符串 'auto' 来启用无状态自动配置。这需要
+cloud-init 19.4 或更新版本。
 +
-If cloud-init is enabled and neither an IPv4 nor an IPv6 address is specified, it defaults to using
-dhcp on IPv4.
+如果启用了 cloud-init，且既未指定 IPv4 地址也未指定 IPv6 地址，则默认使用
+IPv4 dhcp。
 
 `gw`=`<GatewayIPv4>` ;;
 
-Default gateway for IPv4 traffic.
+IPv4 流量的默认网关。
 +
-NOTE: Requires option(s): `ip`
+NOTE: 需要选项：`ip`
 
 `gw6`=`<GatewayIPv6>` ;;
 
-Default gateway for IPv6 traffic.
+IPv6 流量的默认网关。
 +
-NOTE: Requires option(s): `ip6`
+NOTE: 需要选项：`ip6`
 
 `ip`=`<IPv4Format/CIDR>` ('default =' `dhcp`);;
 
-IPv4 address in CIDR format.
+CIDR 格式的 IPv4 地址。
 
 `ip6`=`<IPv6Format/CIDR>` ('default =' `dhcp`);;
 
-IPv6 address in CIDR format.
+CIDR 格式的 IPv6 地址。
 
 `ivshmem`: `size=<integer> [,name=<string>]` ::
 
-Inter-VM shared memory. Useful for direct communication between VMs, or to the host.
+虚拟机间共享内存。适用于虚拟机之间或虚拟机与主机之间的直接通信。
 
 `name`=`<string>` ;;
 
-The name of the file. Will be prefixed with 'pve-shm-'. Default is the VMID. Will be deleted when the VM is stopped.
+文件名称。会添加 'pve-shm-' 前缀。默认为 VMID。虚拟机停止时会删除该文件。
 
 `size`=`<integer> (1 - N)` ;;
 
-The size of the file in MB.
+文件大小，单位为 MB。
 
 `keephugepages`: `<boolean>` ('default =' `0`)::
 
-Use together with hugepages. If enabled, hugepages will not not be deleted after VM shutdown and can be used for subsequent starts.
+与 hugepages 配合使用。启用后，虚拟机关机后 hugepages 不会被删除，可用于后续启动。
 
 `keyboard`: `<da | de | de-ch | en-gb | en-us | es | fi | fr | fr-be | fr-ca | fr-ch | hu | is | it | ja | lt | mk | nl | no | pl | pt | pt-br | sl | sv | tr>` ::
 
-Keyboard layout for VNC server. This option is generally not required and is often better handled from within the guest OS.
+VNC 服务器的键盘布局。通常不需要此选项，更适合在客户机操作系统内部处理。
 
 `kvm`: `<boolean>` ('default =' `1`)::
 
-Enable/disable KVM hardware virtualization.
+启用/禁用 KVM 硬件虚拟化。
 
 `localtime`: `<boolean>` ::
 
-Set the real time clock (RTC) to local time. This is enabled by default if the `ostype` indicates a Microsoft Windows OS.
+将 real time clock（RTC）设置为本地时间。如果 `ostype` 表示 Microsoft Windows OS，则默认启用此项。
 
 `lock`: `<backup | clone | create | migrate | rollback | snapshot | snapshot-delete | suspended | suspending>` ::
 
-Lock/unlock the VM.
+锁定/解锁虚拟机。
 
 `machine`: `[[type=]<machine type>] [,enable-s3=<1|0>] [,enable-s4=<1|0>] [,viommu=<intel|virtio>]` ::
 
-Specify the QEMU machine.
+指定 QEMU machine。
 
 `enable-s3`=`<boolean>` ;;
 
-Enables S3 power state. Defaults to false beginning with machine types 9.2+pve1, true before.
+启用 S3 电源状态。从 machine types 9.2+pve1 开始默认为 false，之前默认为 true。
 
 `enable-s4`=`<boolean>` ;;
 
-Enables S4 power state. Defaults to false beginning with machine types 9.2+pve1, true before.
+启用 S4 电源状态。从 machine types 9.2+pve1 开始默认为 false，之前默认为 true。
 
 `type`=`<machine type>` ;;
 
-Specifies the QEMU machine type.
+指定 QEMU machine type。
 
 `viommu`=`<intel | virtio>` ;;
 
-Enable and set guest vIOMMU variant (Intel vIOMMU needs q35 to be set as machine type).
+启用并设置客户机 vIOMMU 变体（Intel vIOMMU 需要将 machine type 设置为 q35）。
 
 `memory`: `[current=]<integer>` ::
 
-Memory properties.
+内存属性。
 
 `current`=`<integer> (16 - N)` ('default =' `512`);;
 
-Current amount of online RAM for the VM in MiB. This is the maximum available memory when you use the balloon device.
+虚拟机当前在线 RAM 容量，单位为 MiB。使用 balloon 设备时，这是最大可用内存。
 
 `migrate_downtime`: `<number> (0 - N)` ('default =' `0.1`)::
 
-Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.
+设置迁移可容忍的最大停机时间（秒）。如果迁移最后阶段由于需要传输过多新写脏内存而无法收敛，该限制会逐步自动提高，直到迁移可以收敛。
 
 `migrate_speed`: `<integer> (0 - N)` ('default =' `0`)::
 
-Set maximum speed (in MB/s) for migrations. Value 0 is no limit.
+设置迁移最大速度（MB/s）。值 0 表示不限制。
 
 `name`: `<string>` ::
 
-Set a name for the VM. Only used on the configuration web interface.
+设置虚拟机名称。仅用于配置 Web 界面。
 
 `nameserver`: `<string>` ::
 
-cloud-init: Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
+cloud-init：设置容器的 DNS 服务器 IP 地址。创建时如果既未设置 searchdomain 也未设置 nameserver，则会自动使用主机上的设置。
 
 `net[n]`: `[model=]<enum> [,bridge=<bridge>] [,firewall=<1|0>] [,link_down=<1|0>] [,macaddr=<XX:XX:XX:XX:XX:XX>] [,mtu=<integer>] [,queues=<integer>] [,rate=<number>] [,tag=<integer>] [,trunks=<vlanid[;vlanid...]>] [,<model>=<macaddr>]` ::
 
-Specify network devices.
+指定网络设备。
 
 `bridge`=`<bridge>` ;;
 
-Bridge to attach the network device to. The Proxmox VE standard bridge
-is called 'vmbr0'.
+网络设备要连接到的 bridge。Proxmox VE 标准 bridge
+名为 'vmbr0'。
 +
-If you do not specify a bridge, we create a kvm user (NATed) network
-device, which provides DHCP and DNS services. The following addresses
-are used:
+如果未指定 bridge，系统会创建一个 kvm user（NATed）网络设备，
+并提供 DHCP 和 DNS 服务。使用以下地址：
 +
  10.0.2.2   Gateway
  10.0.2.3   DNS Server
  10.0.2.4   SMB Server
 +
-The DHCP server assign addresses to the guest starting from 10.0.2.15.
+DHCP 服务器会从 10.0.2.15 开始为客户机分配地址。
 
 `firewall`=`<boolean>` ;;
 
-Whether this interface should be protected by the firewall.
+此接口是否应受防火墙保护。
 
 `link_down`=`<boolean>` ;;
 
-Whether this interface should be disconnected (like pulling the plug).
+此接口是否应断开连接（类似拔掉网线）。
 
 `macaddr`=`<XX:XX:XX:XX:XX:XX>` ;;
 
-A common MAC address with the I/G (Individual/Group) bit not set.
+未设置 I/G（Individual/Group）位的普通 MAC 地址。
 
 `model`=`<e1000 | e1000-82540em | e1000-82544gc | e1000-82545em | e1000e | i82551 | i82557b | i82559er | ne2k_isa | ne2k_pci | pcnet | rtl8139 | virtio | vmxnet3>` ;;
 
-Network Card Model. The 'virtio' model provides the best performance with very low CPU overhead. If your guest does not support this driver, it is usually best to use 'e1000'.
+网卡模型。'virtio' 模型以很低的 CPU 开销提供最佳性能。如果客户机不支持此驱动，通常最好使用 'e1000'。
 
 `mtu`=`<integer> (1 - 65520)` ;;
 
-Force MTU, for VirtIO only. Set to '1' to use the bridge MTU
+强制 MTU，仅适用于 VirtIO。设置为 '1' 表示使用 bridge MTU。
 
 `queues`=`<integer> (0 - 64)` ;;
 
-Number of packet queues to be used on the device.
+设备上使用的数据包队列数量。
 
 `rate`=`<number> (0 - N)` ;;
 
-Rate limit in mbps (megabytes per second) as floating point number.
+速率限制，单位为 mbps（兆字节每秒），使用浮点数表示。
 
 `tag`=`<integer> (1 - 4094)` ;;
 
-VLAN tag to apply to packets on this interface.
+应用到此接口数据包的 VLAN tag。
 
 `trunks`=`<vlanid[;vlanid...]>` ;;
 
-VLAN trunks to pass through this interface.
+允许通过此接口的 VLAN trunks。
 
 `numa`: `<boolean>` ('default =' `0`)::
 
-Enable/disable NUMA.
+启用/禁用 NUMA。
 
 `numa[n]`: `cpus=<id[-id];...> [,hostnodes=<id[-id];...>] [,memory=<number>] [,policy=<preferred|bind|interleave>]` ::
 
-NUMA topology.
+NUMA 拓扑。
 
 `cpus`=`<id[-id];...>` ;;
 
-CPUs accessing this NUMA node.
+访问此 NUMA 节点的 CPU。
 
 `hostnodes`=`<id[-id];...>` ;;
 
-Host NUMA nodes to use.
+要使用的主机 NUMA 节点。
 
 `memory`=`<number>` ;;
 
-Amount of memory this NUMA node provides.
+此 NUMA 节点提供的内存量。
 
 `policy`=`<bind | interleave | preferred>` ;;
 
-NUMA allocation policy.
+NUMA 分配策略。
 
 `onboot`: `<boolean>` ('default =' `0`)::
 
-Specifies whether a VM will be started during system bootup.
+指定虚拟机是否在系统启动期间启动。
 
 `ostype`: `<l24 | l26 | other | solaris | w2k | w2k3 | w2k8 | win10 | win11 | win7 | win8 | wvista | wxp>` ::
 
-Specify guest operating system. This is used to enable special
-optimization/features for specific operating systems:
+指定客户机操作系统。用于为特定操作系统启用特殊
+优化/功能：
 +
 [horizontal]
-other;; unspecified OS
+other;; 未指定 OS
 wxp;; Microsoft Windows XP
 w2k;; Microsoft Windows 2000
 w2k3;; Microsoft Windows 2003
@@ -714,813 +713,812 @@ solaris;; Solaris/OpenSolaris/OpenIndiania kernel
 
 `parallel[n]`: `/dev/parport\d+|/dev/usb/lp\d+` ::
 
-Map host parallel devices (n is 0 to 2).
+映射主机并口设备（n 为 0 到 2）。
 +
-NOTE: This option allows direct access to host hardware. So it is no longer possible to migrate such
-machines - use with special care.
+NOTE: 此选项允许直接访问主机硬件。因此此类机器将无法再迁移，
+请特别谨慎使用。
 +
-CAUTION: Experimental! User reported problems with this option.
+CAUTION: 实验性功能！已有用户报告此选项存在问题。
 
 `protection`: `<boolean>` ('default =' `0`)::
 
-Sets the protection flag of the VM. This will disable the remove VM and remove disk operations.
+设置虚拟机的保护标志。这会禁用删除虚拟机和删除磁盘操作。
 
 `reboot`: `<boolean>` ('default =' `1`)::
 
-Allow reboot. If set to '0' the VM exit on reboot.
+允许重启。如果设置为 '0'，虚拟机会在重启时退出。
 
 `rng0`: `[source=]</dev/urandom|/dev/random|/dev/hwrng> [,max_bytes=<integer>] [,period=<integer>]` ::
 
-Configure a VirtIO-based Random Number Generator.
+配置基于 VirtIO 的随机数生成器。
 
 `max_bytes`=`<integer>` ('default =' `1024`);;
 
-Maximum bytes of entropy allowed to get injected into the guest every 'period' milliseconds. Use `0` to disable limiting (potentially dangerous!).
+每个 'period' 毫秒允许注入客户机的最大熵字节数。使用 `0` 禁用限制（可能有风险）。
 
 `period`=`<integer>` ('default =' `1000`);;
 
-Every 'period' milliseconds the entropy-injection quota is reset, allowing the guest to retrieve another 'max_bytes' of entropy.
+每隔 'period' 毫秒会重置熵注入配额，允许客户机再获取 'max_bytes' 的熵。
 
 `source`=`</dev/hwrng | /dev/random | /dev/urandom>` ;;
 
-The file on the host to gather entropy from. Using urandom does *not* decrease security in any meaningful way, as it's still seeded from real entropy, and the bytes provided will most likely be mixed with real entropy on the guest as well. '/dev/hwrng' can be used to pass through a hardware RNG from the host.
+主机上用于收集熵的文件。使用 urandom 在实际意义上*不会*降低安全性，因为它仍由真实熵播种，并且提供的字节很可能也会在客户机上与真实熵混合。'/dev/hwrng' 可用于从主机直通硬件 RNG。
 
 `sata[n]`: `[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>] [,wwn=<wwn>]` ::
 
-Use volume as SATA hard disk or CD-ROM (n is 0 to 5).
+将卷用作 SATA 硬盘或 CD-ROM（n 为 0 到 5）。
 
 `--nvme[n]` `[file=]<volume> [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,format=<enum>] [,heads=<integer>] [,import-from=<source volume>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,secs=<integer>] [,serial=<serial>]  [,size=<DiskSize>] [,snapshot=<1|0>]` ::
 
-Use volume as NVME hard disk or CD-ROM (n is 0 to 5). Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume. Use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
+将卷用作 NVME 硬盘或 CD-ROM（n 为 0 到 5）。使用特殊语法 STORAGE_ID:SIZE_IN_GiB 分配新卷。使用 STORAGE_ID:0 和 'import-from' 参数从现有卷导入。
 
 
 `aio`=`<io_uring | native | threads>` ;;
 
-AIO type to use.
+要使用的 AIO 类型。
 
 `backup`=`<boolean>` ;;
 
-Whether the drive should be included when making backups.
+进行备份时是否应包含该驱动器。
 
 `bps`=`<bps>` ;;
 
-Maximum r/w speed in bytes per second.
+最大读/写速度，单位为字节每秒。
 
 `bps_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `bps_rd`=`<bps>` ;;
 
-Maximum read speed in bytes per second.
+最大读取速度，单位为字节每秒。
 
 `bps_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `bps_wr`=`<bps>` ;;
 
-Maximum write speed in bytes per second.
+最大写入速度，单位为字节每秒。
 
 `bps_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `cache`=`<directsync | none | unsafe | writeback | writethrough>` ;;
 
-The drive's cache mode
+驱动器的缓存模式。
 
 `cyls`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific cylinder count.
+强制驱动器物理几何参数使用指定柱面数。
 
 `detect_zeroes`=`<boolean>` ;;
 
-Controls whether to detect and try to optimize writes of zeroes.
+控制是否检测并尝试优化零写入。
 
 `discard`=`<ignore | on>` ;;
 
-Controls whether to pass discard/trim requests to the underlying storage.
+控制是否将 discard/trim 请求传递到底层存储。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `format`=`<cloop | qcow | qcow2 | qed | raw | vmdk>` ;;
 
-The drive's backing file's data format.
+驱动器后端文件的数据格式。
 
 `heads`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific head count.
+强制驱动器物理几何参数使用指定磁头数。
 
 `iops`=`<iops>` ;;
 
-Maximum r/w I/O in operations per second.
+最大读/写 I/O，单位为操作每秒。
 
 `iops_max`=`<iops>` ;;
 
-Maximum unthrottled r/w I/O pool in operations per second.
+最大未限速读/写 I/O 池，单位为操作每秒。
 
 `iops_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `iops_rd`=`<iops>` ;;
 
-Maximum read I/O in operations per second.
+最大读取 I/O，单位为操作每秒。
 
 `iops_rd_max`=`<iops>` ;;
 
-Maximum unthrottled read I/O pool in operations per second.
+最大未限速读取 I/O 池，单位为操作每秒。
 
 `iops_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `iops_wr`=`<iops>` ;;
 
-Maximum write I/O in operations per second.
+最大写入 I/O，单位为操作每秒。
 
 `iops_wr_max`=`<iops>` ;;
 
-Maximum unthrottled write I/O pool in operations per second.
+最大未限速写入 I/O 池，单位为操作每秒。
 
 `iops_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `mbps`=`<mbps>` ;;
 
-Maximum r/w speed in megabytes per second.
+最大读/写速度，单位为兆字节每秒。
 
 `mbps_max`=`<mbps>` ;;
 
-Maximum unthrottled r/w pool in megabytes per second.
+最大未限速读/写池，单位为兆字节每秒。
 
 `mbps_rd`=`<mbps>` ;;
 
-Maximum read speed in megabytes per second.
+最大读取速度，单位为兆字节每秒。
 
 `mbps_rd_max`=`<mbps>` ;;
 
-Maximum unthrottled read pool in megabytes per second.
+最大未限速读取池，单位为兆字节每秒。
 
 `mbps_wr`=`<mbps>` ;;
 
-Maximum write speed in megabytes per second.
+最大写入速度，单位为兆字节每秒。
 
 `mbps_wr_max`=`<mbps>` ;;
 
-Maximum unthrottled write pool in megabytes per second.
+最大未限速写入池，单位为兆字节每秒。
 
 `media`=`<cdrom | disk>` ('default =' `disk`);;
 
-The drive's media type.
+驱动器的介质类型。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Whether the drive should considered for replication jobs.
+该驱动器是否应纳入复制任务。
 
 `rerror`=`<ignore | report | stop>` ;;
 
-Read error action.
+读取错误时的操作。
 
 `secs`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific sector count.
+强制驱动器物理几何参数使用指定扇区数。
 
 `serial`=`<serial>` ;;
 
-The drive's reported serial number, url-encoded, up to 20 bytes long.
+驱动器报告的序列号，经过 URL 编码，最长 20 字节。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this locally-managed volume as available on all nodes.
+将此本地管理的卷标记为在所有节点上可用。
 +
-WARNING: This option does not share the volume automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享该卷，而是假定它已经被共享。
 
 `size`=`<DiskSize>` ;;
 
-Disk size. This is purely informational and has no effect.
+磁盘大小。此项仅供信息展示，没有实际影响。
 
 `snapshot`=`<boolean>` ;;
 
-Controls qemu's snapshot mode feature. If activated, changes made to the disk are temporary and will be discarded when the VM is shutdown.
+控制 qemu 的 snapshot mode 功能。如果启用，对磁盘所做的更改是临时的，并会在虚拟机关机时被丢弃。
 
 `ssd`=`<boolean>` ;;
 
-Whether to expose this drive as an SSD, rather than a rotational hard disk.
+是否将此驱动器暴露为 SSD，而不是旋转式硬盘。
 
 `trans`=`<auto | lba | none>` ;;
 
-Force disk geometry bios translation mode.
+强制磁盘几何参数 BIOS translation 模式。
 
 `werror`=`<enospc | ignore | report | stop>` ;;
 
-Write error action.
+写入错误时的操作。
 
 `wwn`=`<wwn>` ;;
 
-The drive's worldwide name, encoded as 16 bytes hex string, prefixed by '0x'.
+驱动器的 worldwide name，编码为 16 字节十六进制字符串，并以 '0x' 为前缀。
 
 `scsi[n]`: `[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,product=<product>] [,queues=<integer>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,scsiblock=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,ssd=<1|0>] [,trans=<none|lba|auto>] [,vendor=<vendor>] [,werror=<enum>] [,wwn=<wwn>]` ::
 
-Use volume as SCSI hard disk or CD-ROM (n is 0 to 30).
+将卷用作 SCSI 硬盘或 CD-ROM（n 为 0 到 30）。
 
 `aio`=`<io_uring | native | threads>` ;;
 
-AIO type to use.
+要使用的 AIO 类型。
 
 `backup`=`<boolean>` ;;
 
-Whether the drive should be included when making backups.
+进行备份时是否应包含该驱动器。
 
 `bps`=`<bps>` ;;
 
-Maximum r/w speed in bytes per second.
+最大读/写速度，单位为字节每秒。
 
 `bps_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `bps_rd`=`<bps>` ;;
 
-Maximum read speed in bytes per second.
+最大读取速度，单位为字节每秒。
 
 `bps_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `bps_wr`=`<bps>` ;;
 
-Maximum write speed in bytes per second.
+最大写入速度，单位为字节每秒。
 
 `bps_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `cache`=`<directsync | none | unsafe | writeback | writethrough>` ;;
 
-The drive's cache mode
+驱动器的缓存模式。
 
 `cyls`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific cylinder count.
+强制驱动器物理几何参数使用指定柱面数。
 
 `detect_zeroes`=`<boolean>` ;;
 
-Controls whether to detect and try to optimize writes of zeroes.
+控制是否检测并尝试优化零写入。
 
 `discard`=`<ignore | on>` ;;
 
-Controls whether to pass discard/trim requests to the underlying storage.
+控制是否将 discard/trim 请求传递到底层存储。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `format`=`<cloop | qcow | qcow2 | qed | raw | vmdk>` ;;
 
-The drive's backing file's data format.
+驱动器后端文件的数据格式。
 
 `heads`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific head count.
+强制驱动器物理几何参数使用指定磁头数。
 
 `iops`=`<iops>` ;;
 
-Maximum r/w I/O in operations per second.
+最大读/写 I/O，单位为操作每秒。
 
 `iops_max`=`<iops>` ;;
 
-Maximum unthrottled r/w I/O pool in operations per second.
+最大未限速读/写 I/O 池，单位为操作每秒。
 
 `iops_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `iops_rd`=`<iops>` ;;
 
-Maximum read I/O in operations per second.
+最大读取 I/O，单位为操作每秒。
 
 `iops_rd_max`=`<iops>` ;;
 
-Maximum unthrottled read I/O pool in operations per second.
+最大未限速读取 I/O 池，单位为操作每秒。
 
 `iops_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `iops_wr`=`<iops>` ;;
 
-Maximum write I/O in operations per second.
+最大写入 I/O，单位为操作每秒。
 
 `iops_wr_max`=`<iops>` ;;
 
-Maximum unthrottled write I/O pool in operations per second.
+最大未限速写入 I/O 池，单位为操作每秒。
 
 `iops_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `iothread`=`<boolean>` ;;
 
-Whether to use iothreads for this drive
+是否为此驱动器使用 iothreads。
 
 `mbps`=`<mbps>` ;;
 
-Maximum r/w speed in megabytes per second.
+最大读/写速度，单位为兆字节每秒。
 
 `mbps_max`=`<mbps>` ;;
 
-Maximum unthrottled r/w pool in megabytes per second.
+最大未限速读/写池，单位为兆字节每秒。
 
 `mbps_rd`=`<mbps>` ;;
 
-Maximum read speed in megabytes per second.
+最大读取速度，单位为兆字节每秒。
 
 `mbps_rd_max`=`<mbps>` ;;
 
-Maximum unthrottled read pool in megabytes per second.
+最大未限速读取池，单位为兆字节每秒。
 
 `mbps_wr`=`<mbps>` ;;
 
-Maximum write speed in megabytes per second.
+最大写入速度，单位为兆字节每秒。
 
 `mbps_wr_max`=`<mbps>` ;;
 
-Maximum unthrottled write pool in megabytes per second.
+最大未限速写入池，单位为兆字节每秒。
 
 `media`=`<cdrom | disk>` ('default =' `disk`);;
 
-The drive's media type.
+驱动器的介质类型。
 
 `product`=`<product>` ;;
 
-The drive's product name, up to 16 bytes long.
+驱动器的 product 名称，最长 16 字节。
 
 `queues`=`<integer> (2 - N)` ;;
 
-Number of queues.
+队列数量。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Whether the drive should considered for replication jobs.
+该驱动器是否应纳入复制任务。
 
 `rerror`=`<ignore | report | stop>` ;;
 
-Read error action.
+读取错误时的操作。
 
 `ro`=`<boolean>` ;;
 
-Whether the drive is read-only.
+驱动器是否为只读。
 
 `scsiblock`=`<boolean>` ('default =' `0`);;
 
-whether to use scsi-block for full passthrough of host block device
+是否使用 scsi-block 对主机块设备进行完整直通。
 +
-WARNING: can lead to I/O errors in combination with low memory or high memory fragmentation on host
+WARNING: 与主机低内存或高内存碎片同时出现时，可能导致 I/O 错误。
 
 `secs`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific sector count.
+强制驱动器物理几何参数使用指定扇区数。
 
 `serial`=`<serial>` ;;
 
-The drive's reported serial number, url-encoded, up to 20 bytes long.
+驱动器报告的序列号，经过 URL 编码，最长 20 字节。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this locally-managed volume as available on all nodes.
+将此本地管理的卷标记为在所有节点上可用。
 +
-WARNING: This option does not share the volume automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享该卷，而是假定它已经被共享。
 
 `size`=`<DiskSize>` ;;
 
-Disk size. This is purely informational and has no effect.
+磁盘大小。此项仅供信息展示，没有实际影响。
 
 `snapshot`=`<boolean>` ;;
 
-Controls qemu's snapshot mode feature. If activated, changes made to the disk are temporary and will be discarded when the VM is shutdown.
+控制 qemu 的 snapshot mode 功能。如果启用，对磁盘所做的更改是临时的，并会在虚拟机关机时被丢弃。
 
 `ssd`=`<boolean>` ;;
 
-Whether to expose this drive as an SSD, rather than a rotational hard disk.
+是否将此驱动器暴露为 SSD，而不是旋转式硬盘。
 
 `trans`=`<auto | lba | none>` ;;
 
-Force disk geometry bios translation mode.
+强制磁盘几何参数 BIOS translation 模式。
 
 `vendor`=`<vendor>` ;;
 
-The drive's vendor name, up to 8 bytes long.
+驱动器的 vendor 名称，最长 8 字节。
 
 `werror`=`<enospc | ignore | report | stop>` ;;
 
-Write error action.
+写入错误时的操作。
 
 `wwn`=`<wwn>` ;;
 
-The drive's worldwide name, encoded as 16 bytes hex string, prefixed by '0x'.
+驱动器的 worldwide name，编码为 16 字节十六进制字符串，并以 '0x' 为前缀。
 
 `scsihw`: `<lsi | lsi53c810 | megasas | pvscsi | virtio-scsi-pci | virtio-scsi-single>` ('default =' `lsi`)::
 
-SCSI controller model
+SCSI 控制器模型。
 
 `searchdomain`: `<string>` ::
 
-cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
+cloud-init：设置容器的 DNS 搜索域。创建时如果既未设置 searchdomain 也未设置 nameserver，则会自动使用主机上的设置。
 
 `serial[n]`: `(/dev/.+|socket)` ::
 
-Create a serial device inside the VM (n is 0 to 3), and pass through a
-host serial device (i.e. /dev/ttyS0), or create a unix socket on the
-host side (use 'qm terminal' to open a terminal connection).
+在虚拟机内部创建串口设备（n 为 0 到 3），并直通
+主机串口设备（例如 /dev/ttyS0），或在
+主机端创建 unix socket（使用 'qm terminal' 打开终端连接）。
 +
-NOTE: If you pass through a host serial device, it is no longer possible to migrate such machines -
-use with special care.
+NOTE: 如果直通主机串口设备，此类机器将无法再迁移，
+请特别谨慎使用。
 +
-CAUTION: Experimental! User reported problems with this option.
+CAUTION: 实验性功能！已有用户报告此选项存在问题。
 
 `shares`: `<integer> (0 - 50000)` ('default =' `1000`)::
 
-Amount of memory shares for auto-ballooning. The larger the number is, the more memory this VM gets. Number is relative to weights of all other running VMs. Using zero disables auto-ballooning. Auto-ballooning is done by pvestatd.
+auto-ballooning 的内存 shares 数量。数值越大，该虚拟机获得的内存越多。该数值相对于所有其他正在运行虚拟机的权重。使用零会禁用 auto-ballooning。auto-ballooning 由 pvestatd 执行。
 
 `smbios1`: `[base64=<1|0>] [,family=<Base64 encoded string>] [,manufacturer=<Base64 encoded string>] [,product=<Base64 encoded string>] [,serial=<Base64 encoded string>] [,sku=<Base64 encoded string>] [,uuid=<UUID>] [,version=<Base64 encoded string>]` ::
 
-Specify SMBIOS type 1 fields.
+指定 SMBIOS type 1 字段。
 
 `base64`=`<boolean>` ;;
 
-Flag to indicate that the SMBIOS values are base64 encoded
+用于指示 SMBIOS 值已进行 base64 编码的标志。
 
 `family`=`<Base64 encoded string>` ;;
 
-Set SMBIOS1 family string.
+设置 SMBIOS1 family 字符串。
 
 `manufacturer`=`<Base64 encoded string>` ;;
 
-Set SMBIOS1 manufacturer.
+设置 SMBIOS1 manufacturer。
 
 `product`=`<Base64 encoded string>` ;;
 
-Set SMBIOS1 product ID.
+设置 SMBIOS1 product ID。
 
 `serial`=`<Base64 encoded string>` ;;
 
-Set SMBIOS1 serial number.
+设置 SMBIOS1 serial number。
 
 `sku`=`<Base64 encoded string>` ;;
 
-Set SMBIOS1 SKU string.
+设置 SMBIOS1 SKU 字符串。
 
 `uuid`=`<UUID>` ;;
 
-Set SMBIOS1 UUID.
+设置 SMBIOS1 UUID。
 
 `version`=`<Base64 encoded string>` ;;
 
-Set SMBIOS1 version.
+设置 SMBIOS1 version。
 
 `smp`: `<integer> (1 - N)` ('default =' `1`)::
 
-The number of CPUs. Please use option -sockets instead.
+CPU 数量。请改用 -sockets 选项。
 
 `sockets`: `<integer> (1 - N)` ('default =' `1`)::
 
-The number of CPU sockets.
+CPU sockets 数量。
 
 `spice_enhancements`: `[foldersharing=<1|0>] [,videostreaming=<off|all|filter>]` ::
 
-Configure additional enhancements for SPICE.
+配置 SPICE 的其他增强功能。
 
 `foldersharing`=`<boolean>` ('default =' `0`);;
 
-Enable folder sharing via SPICE. Needs Spice-WebDAV daemon installed in the VM.
+通过 SPICE 启用文件夹共享。需要在虚拟机中安装 Spice-WebDAV 守护进程。
 
 `videostreaming`=`<all | filter | off>` ('default =' `off`);;
 
-Enable video streaming. Uses compression for detected video streams.
+启用视频流。对检测到的视频流使用压缩。
 
 `sshkeys`: `<string>` ::
 
-cloud-init: Setup public SSH keys (one key per line, OpenSSH format).
+cloud-init：设置 SSH 公钥（每行一个密钥，OpenSSH 格式）。
 
 `startdate`: `(now | YYYY-MM-DD | YYYY-MM-DDTHH:MM:SS)` ('default =' `now`)::
 
-Set the initial date of the real time clock. Valid format for date are:'now' or '2006-06-17T16:01:21' or '2006-06-17'.
+设置 real time clock 的初始日期。有效日期格式为：'now'、'2006-06-17T16:01:21' 或 '2006-06-17'。
 
 `startup`: `[[order=]\d+] [,up=\d+] [,down=\d+] ` ::
 
-Startup and shutdown behavior. Order is a non-negative number defining the general startup order. Shutdown in done with reverse ordering. Additionally you can set the 'up' or 'down' delay in seconds, which specifies a delay to wait before the next VM is started or stopped.
+启动和关机行为。Order 是定义总体启动顺序的非负数。关机会按相反顺序执行。此外，可以设置 'up' 或 'down' 延迟（秒），用于指定启动或停止下一台虚拟机前等待的延迟。
 
 `tablet`: `<boolean>` ('default =' `1`)::
 
-Enable/disable the USB tablet device. This device is usually needed to allow absolute mouse positioning with VNC. Else the mouse runs out of sync with normal VNC clients. If you're running lots of console-only guests on one host, you may consider disabling this to save some context switches. This is turned off by default if you use spice (`qm set <vmid> --vga qxl`).
+启用/禁用 USB tablet 设备。通常需要此设备来允许 VNC 使用绝对鼠标定位。否则鼠标会与普通 VNC 客户端不同步。如果在一台主机上运行大量仅控制台客户机，可以考虑禁用此项以节省部分上下文切换。使用 spice（`qm set <vmid> --vga qxl`）时默认关闭。
 
 `tags`: `<string>` ::
 
-Tags of the VM. This is only meta information.
+虚拟机标签。此项仅为元信息。
 
 `tdf`: `<boolean>` ('default =' `0`)::
 
-Enable/disable time drift fix.
+启用/禁用时间漂移修正。
 
 `template`: `<boolean>` ('default =' `0`)::
 
-Enable/disable Template.
+启用/禁用模板。
 
 `tpmstate0`: `[file=]<volume> [,size=<DiskSize>] [,version=<v1.2|v2.0>]` ::
 
-Configure a Disk for storing TPM state. The format is fixed to 'raw'.
+配置用于存储 TPM state 的磁盘。格式固定为 'raw'。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `size`=`<DiskSize>` ;;
 
-Disk size. This is purely informational and has no effect.
+磁盘大小。此项仅供信息展示，没有实际影响。
 
 `version`=`<v1.2 | v2.0>` ('default =' `v1.2`);;
 
-The TPM interface version. v2.0 is newer and should be preferred. Note that this cannot be changed later on.
+TPM 接口版本。v2.0 较新，应优先使用。请注意，此项之后无法更改。
 
 `unused[n]`: `[file=]<volume>` ::
 
-Reference to unused volumes. This is used internally, and should not be modified manually.
+未使用卷的引用。此项供内部使用，不应手动修改。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `usb[n]`: `[[host=]<HOSTUSBDEVICE|spice>] [,mapping=<mapping-id>] [,usb3=<1|0>]` ::
 
-Configure an USB device (n is 0 to 4, for machine version >= 7.1 and ostype l26 or windows > 7, n can be up to 14).
+配置 USB 设备（n 为 0 到 4；对于 machine version >= 7.1 且 ostype 为 l26 或 windows > 7 的客户机，n 最大可为 14）。
 
 `host`=`<HOSTUSBDEVICE|spice>` ;;
 
-The Host USB device or port or the value 'spice'. HOSTUSBDEVICE syntax is:
+主机 USB 设备、端口，或值 'spice'。HOSTUSBDEVICE 语法为：
 +
  'bus-port(.port)*' (decimal numbers) or
  'vendor_id:product_id' (hexadecimal numbers) or
  'spice'
 +
-You can use the 'lsusb -t' command to list existing usb devices.
+可以使用 'lsusb -t' 命令列出现有 USB 设备。
 +
-NOTE: This option allows direct access to host hardware. So it is no longer possible to migrate such
-machines - use with special care.
+NOTE: 此选项允许直接访问主机硬件。因此此类机器将无法再迁移，
+请特别谨慎使用。
 +
-The value 'spice' can be used to add a usb redirection devices for spice.
+值 'spice' 可用于为 spice 添加 USB 重定向设备。
 +
-Either this or the 'mapping' key must be set.
+此项和 'mapping' 键必须至少设置一个。
 
 `mapping`=`<mapping-id>` ;;
 
-The ID of a cluster wide mapping. Either this or the default-key 'host' must be set.
+集群范围 mapping 的 ID。此项和默认键 'host' 必须至少设置一个。
 
 `usb3`=`<boolean>` ('default =' `0`);;
 
-Specifies whether if given host option is a USB3 device or port. For modern guests (machine version >= 7.1 and ostype l26 and windows > 7), this flag is irrelevant (all devices are plugged into a xhci controller).
+指定给定的 host 选项是否为 USB3 设备或端口。对于现代客户机（machine version >= 7.1 且 ostype 为 l26 和 windows > 7），此标志无关紧要（所有设备都会插入 xhci 控制器）。
 
 `vcpus`: `<integer> (1 - N)` ('default =' `0`)::
 
-Number of hotplugged vcpus.
+热插拔 vCPU 数量。
 
 `vga`: `[[type=]<enum>] [,clipboard=<vnc>] [,memory=<integer>]` ::
 
-Configure the VGA Hardware. If you want to use high resolution modes (>= 1280x1024x16) you may need to increase the vga memory option. Since QEMU 2.9 the default VGA display type is 'std' for all OS types besides some Windows versions (XP and older) which use 'cirrus'. The 'qxl' option enables the SPICE display server. For win* OS you can select how many independent displays you want, Linux guests can add displays them self.
-You can also run without any graphic card, using a serial device as terminal.
+配置 VGA 硬件。如果要使用高分辨率模式（>= 1280x1024x16），可能需要增加 vga memory 选项。自 QEMU 2.9 起，除某些使用 'cirrus' 的 Windows 版本（XP 及更早版本）外，所有 OS 类型的默认 VGA 显示类型均为 'std'。'qxl' 选项会启用 SPICE 显示服务器。对于 win* OS，可以选择所需的独立显示器数量；Linux 客户机可以自行添加显示器。
+也可以不使用任何显卡，而使用串口设备作为终端运行。
 
 `clipboard`=`<vnc>` ;;
 
-Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!
+启用特定剪贴板。如果未设置，会根据显示类型添加 SPICE 剪贴板。尚不支持带 VNC 剪贴板的迁移。
 
 `memory`=`<integer> (4 - 512)` ;;
 
-Sets the VGA memory (in MiB). Has no effect with serial display.
+设置 VGA 内存（MiB）。对串口显示无效。
 
 `type`=`<cirrus | none | qxl | qxl2 | qxl3 | qxl4 | serial0 | serial1 | serial2 | serial3 | std | virtio | virtio-gl | vmware>` ('default =' `std`);;
 
-Select the VGA type. Using type 'cirrus' is not recommended.
+选择 VGA 类型。不建议使用类型 'cirrus'。
 
 `virtio[n]`: `[file=]<volume> [,aio=<native|threads|io_uring>] [,backup=<1|0>] [,bps=<bps>] [,bps_max_length=<seconds>] [,bps_rd=<bps>] [,bps_rd_max_length=<seconds>] [,bps_wr=<bps>] [,bps_wr_max_length=<seconds>] [,cache=<enum>] [,cyls=<integer>] [,detect_zeroes=<1|0>] [,discard=<ignore|on>] [,format=<enum>] [,heads=<integer>] [,iops=<iops>] [,iops_max=<iops>] [,iops_max_length=<seconds>] [,iops_rd=<iops>] [,iops_rd_max=<iops>] [,iops_rd_max_length=<seconds>] [,iops_wr=<iops>] [,iops_wr_max=<iops>] [,iops_wr_max_length=<seconds>] [,iothread=<1|0>] [,mbps=<mbps>] [,mbps_max=<mbps>] [,mbps_rd=<mbps>] [,mbps_rd_max=<mbps>] [,mbps_wr=<mbps>] [,mbps_wr_max=<mbps>] [,media=<cdrom|disk>] [,replicate=<1|0>] [,rerror=<ignore|report|stop>] [,ro=<1|0>] [,secs=<integer>] [,serial=<serial>] [,shared=<1|0>] [,size=<DiskSize>] [,snapshot=<1|0>] [,trans=<none|lba|auto>] [,werror=<enum>]` ::
 
-Use volume as VIRTIO hard disk (n is 0 to 15).
+将卷用作 VIRTIO 硬盘（n 为 0 到 15）。
 
 `aio`=`<io_uring | native | threads>` ;;
 
-AIO type to use.
+要使用的 AIO 类型。
 
 `backup`=`<boolean>` ;;
 
-Whether the drive should be included when making backups.
+进行备份时是否应包含该驱动器。
 
 `bps`=`<bps>` ;;
 
-Maximum r/w speed in bytes per second.
+最大读/写速度，单位为字节每秒。
 
 `bps_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `bps_rd`=`<bps>` ;;
 
-Maximum read speed in bytes per second.
+最大读取速度，单位为字节每秒。
 
 `bps_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `bps_wr`=`<bps>` ;;
 
-Maximum write speed in bytes per second.
+最大写入速度，单位为字节每秒。
 
 `bps_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `cache`=`<directsync | none | unsafe | writeback | writethrough>` ;;
 
-The drive's cache mode
+驱动器的缓存模式。
 
 `cyls`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific cylinder count.
+强制驱动器物理几何参数使用指定柱面数。
 
 `detect_zeroes`=`<boolean>` ;;
 
-Controls whether to detect and try to optimize writes of zeroes.
+控制是否检测并尝试优化零写入。
 
 `discard`=`<ignore | on>` ;;
 
-Controls whether to pass discard/trim requests to the underlying storage.
+控制是否将 discard/trim 请求传递到底层存储。
 
 `file`=`<volume>` ;;
 
-The drive's backing volume.
+驱动器的后端卷。
 
 `format`=`<cloop | qcow | qcow2 | qed | raw | vmdk>` ;;
 
-The drive's backing file's data format.
+驱动器后端文件的数据格式。
 
 `heads`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific head count.
+强制驱动器物理几何参数使用指定磁头数。
 
 `iops`=`<iops>` ;;
 
-Maximum r/w I/O in operations per second.
+最大读/写 I/O，单位为操作每秒。
 
 `iops_max`=`<iops>` ;;
 
-Maximum unthrottled r/w I/O pool in operations per second.
+最大未限速读/写 I/O 池，单位为操作每秒。
 
 `iops_max_length`=`<seconds>` ;;
 
-Maximum length of I/O bursts in seconds.
+I/O burst 的最大长度，单位为秒。
 
 `iops_rd`=`<iops>` ;;
 
-Maximum read I/O in operations per second.
+最大读取 I/O，单位为操作每秒。
 
 `iops_rd_max`=`<iops>` ;;
 
-Maximum unthrottled read I/O pool in operations per second.
+最大未限速读取 I/O 池，单位为操作每秒。
 
 `iops_rd_max_length`=`<seconds>` ;;
 
-Maximum length of read I/O bursts in seconds.
+读取 I/O burst 的最大长度，单位为秒。
 
 `iops_wr`=`<iops>` ;;
 
-Maximum write I/O in operations per second.
+最大写入 I/O，单位为操作每秒。
 
 `iops_wr_max`=`<iops>` ;;
 
-Maximum unthrottled write I/O pool in operations per second.
+最大未限速写入 I/O 池，单位为操作每秒。
 
 `iops_wr_max_length`=`<seconds>` ;;
 
-Maximum length of write I/O bursts in seconds.
+写入 I/O burst 的最大长度，单位为秒。
 
 `iothread`=`<boolean>` ;;
 
-Whether to use iothreads for this drive
+是否为此驱动器使用 iothreads。
 
 `mbps`=`<mbps>` ;;
 
-Maximum r/w speed in megabytes per second.
+最大读/写速度，单位为兆字节每秒。
 
 `mbps_max`=`<mbps>` ;;
 
-Maximum unthrottled r/w pool in megabytes per second.
+最大未限速读/写池，单位为兆字节每秒。
 
 `mbps_rd`=`<mbps>` ;;
 
-Maximum read speed in megabytes per second.
+最大读取速度，单位为兆字节每秒。
 
 `mbps_rd_max`=`<mbps>` ;;
 
-Maximum unthrottled read pool in megabytes per second.
+最大未限速读取池，单位为兆字节每秒。
 
 `mbps_wr`=`<mbps>` ;;
 
-Maximum write speed in megabytes per second.
+最大写入速度，单位为兆字节每秒。
 
 `mbps_wr_max`=`<mbps>` ;;
 
-Maximum unthrottled write pool in megabytes per second.
+最大未限速写入池，单位为兆字节每秒。
 
 `media`=`<cdrom | disk>` ('default =' `disk`);;
 
-The drive's media type.
+驱动器的介质类型。
 
 `replicate`=`<boolean>` ('default =' `1`);;
 
-Whether the drive should considered for replication jobs.
+该驱动器是否应纳入复制任务。
 
 `rerror`=`<ignore | report | stop>` ;;
 
-Read error action.
+读取错误时的操作。
 
 `ro`=`<boolean>` ;;
 
-Whether the drive is read-only.
+驱动器是否为只读。
 
 `secs`=`<integer>` ;;
 
-Force the drive's physical geometry to have a specific sector count.
+强制驱动器物理几何参数使用指定扇区数。
 
 `serial`=`<serial>` ;;
 
-The drive's reported serial number, url-encoded, up to 20 bytes long.
+驱动器报告的序列号，经过 URL 编码，最长 20 字节。
 
 `shared`=`<boolean>` ('default =' `0`);;
 
-Mark this locally-managed volume as available on all nodes.
+将此本地管理的卷标记为在所有节点上可用。
 +
-WARNING: This option does not share the volume automatically, it assumes it is shared already!
+WARNING: 此选项不会自动共享该卷，而是假定它已经被共享。
 
 `size`=`<DiskSize>` ;;
 
-Disk size. This is purely informational and has no effect.
+磁盘大小。此项仅供信息展示，没有实际影响。
 
 `snapshot`=`<boolean>` ;;
 
-Controls qemu's snapshot mode feature. If activated, changes made to the disk are temporary and will be discarded when the VM is shutdown.
+控制 qemu 的 snapshot mode 功能。如果启用，对磁盘所做的更改是临时的，并会在虚拟机关机时被丢弃。
 
 `trans`=`<auto | lba | none>` ;;
 
-Force disk geometry bios translation mode.
+强制磁盘几何参数 BIOS translation 模式。
 
 `werror`=`<enospc | ignore | report | stop>` ;;
 
-Write error action.
+写入错误时的操作。
 
 `virtiofs[n]`: `[dirid=]<mapping-id> [,cache=<enum>] [,direct-io=<1|0>] [,expose-acl=<1|0>] [,expose-xattr=<1|0>]` ::
 
-Configuration for sharing a directory between host and guest using Virtio-fs.
+使用 Virtio-fs 在主机与客户机之间共享目录的配置。
 
 `cache`=`<always | auto | metadata | never>` ('default =' `auto`);;
 
-The caching policy the file system should use (auto, always, metadata, never).
+文件系统应使用的缓存策略（auto、always、metadata、never）。
 
 `direct-io`=`<boolean>` ('default =' `0`);;
 
-Honor the O_DIRECT flag passed down by guest applications.
+遵循客户机应用程序传递下来的 O_DIRECT 标志。
 
 `dirid`=`<mapping-id>` ;;
 
-Mapping identifier of the directory mapping to be shared with the guest. Also used as a mount tag inside the VM.
+要与客户机共享的目录 mapping 的标识符。也会用作虚拟机内部的 mount tag。
 
 `expose-acl`=`<boolean>` ('default =' `0`);;
 
-Enable support for POSIX ACLs (enabled ACL implies xattr) for this mount.
+为此挂载启用 POSIX ACL 支持（启用 ACL 意味着启用 xattr）。
 
 `expose-xattr`=`<boolean>` ('default =' `0`);;
 
-Enable support for extended attributes for this mount.
+为此挂载启用扩展属性支持。
 
 `vmgenid`: `<UUID>` ('default =' `1 (autogenerated)`)::
 
-The VM generation ID (vmgenid) device exposes a 128-bit integer value identifier to the guest OS. This allows to notify the guest operating system when the virtual machine is executed with a different configuration (e.g. snapshot execution or creation from a template). The guest operating system notices the change, and is then able to react as appropriate by marking its copies of distributed databases as dirty, re-initializing its random number generator, etc.
-Note that auto-creation only works when done through API/CLI create or update methods, but not when manually editing the config file.
+VM generation ID（vmgenid）设备会向客户机操作系统暴露一个 128 位整数值标识符。当虚拟机以不同配置执行时（例如执行快照或从模板创建），这可通知客户机操作系统。客户机操作系统感知到变化后，可以采取适当响应，例如将其分布式数据库副本标记为 dirty、重新初始化随机数生成器等。
+请注意，自动创建仅在通过 API/CLI 创建或更新方法执行时生效，手动编辑配置文件时不会生效。
 
 `vmstatestorage`: `<storage ID>` ::
 
-Default storage for VM state volumes/files.
+VM state 卷/文件的默认存储。
 
 `watchdog`: `[[model=]<i6300esb|ib700>] [,action=<enum>]` ::
 
-Create a virtual hardware watchdog device. Once enabled (by a guest action), the watchdog must be periodically polled by an agent inside the guest or else the watchdog will reset the guest (or execute the respective action specified)
+创建虚拟硬件 watchdog 设备。一旦由客户机操作启用，客户机内的 agent 必须定期轮询 watchdog，否则 watchdog 会重置客户机（或执行指定的相应操作）。
 
 `action`=`<debug | none | pause | poweroff | reset | shutdown>` ;;
 
-The action to perform if after activation the guest fails to poll the watchdog in time.
+激活后如果客户机未能及时轮询 watchdog，要执行的操作。
 
 `model`=`<i6300esb | ib700>` ('default =' `i6300esb`);;
 
-Watchdog type to emulate.
-
+要模拟的 watchdog 类型。

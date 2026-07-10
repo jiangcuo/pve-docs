@@ -1,12 +1,11 @@
 `enable`: `<boolean>` ('default =' `0`)::
 
-Enable/disable firewall rules.
+启用或禁用防火墙规则。
 
 `log_level_forward`: `<alert | crit | debug | emerg | err | info | nolog | notice | warning>` ::
 
-Log level for forwarded traffic.
+转发流量的日志级别。
 
 `policy_forward`: `<ACCEPT | DROP>` ::
 
-Forward policy.
-
+转发策略。

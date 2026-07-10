@@ -1,65 +1,53 @@
 [[storage_directory]]
-Directory Backend
------------------
+== 目录后端
 ifdef::wiki[]
 :pve-toplevel:
 :title: Storage: Directory
 endif::wiki[]
 
-Storage pool type: `dir`
+存储池类型：`dir`
 
-{pve} can use local directories or locally mounted shares for
-storage. A directory is a file level storage, so you can store any
-content type like virtual disk images, containers, templates, ISO images
-or backup files.
+{pve} 可以使用本地目录或本地挂载的共享作为存储。目录是一种文件级存储，
+因此可以存储虚拟磁盘镜像、容器、模板、ISO 镜像或备份文件等任何内容类型。
 
-NOTE: You can mount additional storages via standard linux `/etc/fstab`,
-and then define a directory storage for that mount point. This way you
-can use any file system supported by Linux.
+NOTE: 可以通过标准 Linux `/etc/fstab` 挂载其他存储，然后为该挂载点定义
+目录存储。通过这种方式，可以使用 Linux 支持的任何文件系统。
 
-This backend assumes that the underlying directory is POSIX
-compatible, but nothing else. This implies that you cannot create
-snapshots at the storage level. But there exists a workaround for VM
-images using the `qcow2` file format, because that format supports
-snapshots internally.
+该后端仅假定底层目录兼容 POSIX，不再要求其他特性。这意味着不能在存储层
+创建快照。但对于使用 `qcow2` 文件格式的虚拟机镜像存在一种替代方式，
+因为该格式内部支持快照。
 
-TIP: Some storage types do not support `O_DIRECT`, so you can't use
-cache mode `none` with such storages. Simply use cache mode
-`writeback` instead.
+TIP: 某些存储类型不支持 `O_DIRECT`，因此不能在这类存储上使用 `none`
+缓存模式。可改用 `writeback` 缓存模式。
 
-We use a predefined directory layout to store different content types
-into different sub-directories. This layout is used by all file level
-storage backends.
+系统使用预定义的目录布局，将不同内容类型存储到不同子目录中。所有文件级
+存储后端都会使用该布局。
 
-.Directory layout
+.目录布局
 [width="100%",cols="d,m",options="header"]
 |===========================================================
-|Content type        |Subdir
-|VM images           |`images/<VMID>/`
-|ISO images          |`template/iso/`
-|Container templates |`template/cache/`
-|Backup files        |`dump/`
-|Snippets            |`snippets/`
+|内容类型          |子目录
+|虚拟机镜像        |`images/<VMID>/`
+|ISO 镜像          |`template/iso/`
+|容器模板          |`template/cache/`
+|备份文件          |`dump/`
+|片段               |`snippets/`
 |===========================================================
 
 
-Configuration
-~~~~~~~~~~~~~
+=== 配置
 
-This backend supports all common storage properties, and adds two
-additional properties. The `path` property is used to specify the
-directory. This needs to be an absolute file system path.
+该后端支持所有通用存储属性，并额外增加两个属性。`path` 属性用于指定目录。
+该目录必须是绝对文件系统路径。
 
-The optional `content-dirs` property allows for the default layout
-to be changed. It consists of a comma-separated list of identifiers
-in the following format:
+可选的 `content-dirs` 属性允许更改默认布局。它由逗号分隔的标识符列表组成，
+格式如下：
 
  vtype=path
 
-Where `vtype` is one of the allowed content types for the storage, and
-`path` is a path relative to the mountpoint of the storage.
+其中 `vtype` 是该存储允许的内容类型之一，`path` 是相对于该存储挂载点的路径。
 
-.Configuration Example (`/etc/pve/storage.cfg`)
+.配置示例（`/etc/pve/storage.cfg`）
 ----
 dir: backup
         path /mnt/backup
@@ -69,88 +57,85 @@ dir: backup
         content-dirs backup=custom/backup/dir
 ----
 
-The above configuration defines a storage pool called `backup`. That pool can be
-used to store up to 7 regular backups (`keep-last=7`) and 3 protected backups
-per VM. The real path for the backup files is `/mnt/backup/custom/backup/dir/...`.
+上述配置定义了一个名为 `backup` 的存储池。该存储池可为每台虚拟机最多保存
+7 个普通备份（`keep-last=7`）和 3 个受保护备份。备份文件的实际路径为
+`/mnt/backup/custom/backup/dir/...`。
 
-File naming conventions
-~~~~~~~~~~~~~~~~~~~~~~~
+=== 文件命名约定
 
-This backend uses a well defined naming scheme for VM images:
+该后端对虚拟机镜像使用明确的命名方案：
 
  vm-<VMID>-<NAME>.<FORMAT>
  
 `<VMID>`::
 
-This specifies the owner VM.
+指定所属虚拟机。
 
 `<NAME>`::
 
-This can be an arbitrary name (`ascii`) without white space. The
-backend uses `disk-[N]` as default, where `[N]` is replaced by an
-integer to make the name unique.
+可以是不包含空白字符的任意名称（`ascii`）。后端默认使用 `disk-[N]`，
+其中 `[N]` 会替换为整数，以确保名称唯一。
 
 `<FORMAT>`::
 
-Specifies the image format (`raw|qcow2|vmdk`).
+指定镜像格式（`raw|qcow2|vmdk`）。
 
-When you create a VM template, all VM images are renamed to indicate
-that they are now read-only, and can be used as a base image for clones:
+创建虚拟机模板时，所有虚拟机镜像都会被重命名，以表示它们现在是只读的，
+并可作为克隆的基础镜像：
 
  base-<VMID>-<NAME>.<FORMAT>
 
-NOTE: Such base images are used to generate cloned images. So it is
-important that those files are read-only, and never get modified. The
-backend changes the access mode to `0444`, and sets the immutable flag
-(`chattr +i`) if the storage supports that.
+NOTE: 这类基础镜像用于生成克隆镜像。因此，确保这些文件只读且永不被修改
+非常重要。后端会将访问模式更改为 `0444`，并在存储支持时设置 immutable
+标志（`chattr +i`）。
 
 
-Storage Features
-~~~~~~~~~~~~~~~~
+=== 存储特性
 
-As mentioned above, most file systems do not support snapshots out
-of the box. To workaround that problem, this backend is able to use
-`qcow2` internal snapshot capabilities.
+如上所述，大多数文件系统本身不直接支持快照。为规避该问题，此后端可以使用
+`qcow2` 的内部快照能力。
 
-Same applies to clones. The backend uses the `qcow2` base image
-feature to create clones.
+克隆也是同样的情况。后端使用 `qcow2` 基础镜像功能来创建克隆。
 
-.Storage features for backend `dir`
+.后端 `dir` 的存储特性
 [width="100%",cols="m,m,3*d",options="header"]
 |==============================================================================
-|Content types                              |Image formats         |Shared |Snapshots |Clones
+|内容类型                                   |镜像格式              |共享 |快照  |克隆
 |images rootdir vztmpl iso backup snippets  |raw qcow2 vmdk subvol |no     |qcow2     |qcow2
 |==============================================================================
 
 
-Examples
-~~~~~~~~
+=== 示例
 
-Please use the following command to allocate a 4GB image on storage `local`:
+请使用以下命令在存储 `local` 上分配一个 4GB 镜像：
 
  # pvesm alloc local 100 vm-100-disk10.raw 4G
  Formatting '/var/lib/vz/images/100/vm-100-disk10.raw', fmt=raw size=4294967296
  successfully created 'local:100/vm-100-disk10.raw'
 
-NOTE: The image name must conform to above naming conventions.
+NOTE: 镜像名称必须符合上述命名约定。
 
-The real file system path is shown with:
+可以通过以下命令显示真实文件系统路径：
 
  # pvesm path local:100/vm-100-disk10.raw
  /var/lib/vz/images/100/vm-100-disk10.raw
 
-And you can remove the image with:
+可以使用以下命令删除该镜像：
 
  # pvesm free local:100/vm-100-disk10.raw
+
+常用命令示例：
+
+----
+pvesm status
+pvesm list local
+----
 
 
 ifdef::wiki[]
 
-See Also
-~~~~~~~~
+=== 另请参见
 
-* link:/wiki/Storage[Storage]
+* link:/wiki/Storage[存储]
 
 endif::wiki[]
-
-

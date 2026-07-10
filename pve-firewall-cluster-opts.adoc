@@ -1,36 +1,35 @@
 `ebtables`: `<boolean>` ('default =' `1`)::
 
-Enable ebtables rules cluster wide.
+在整个集群范围内启用 ebtables 规则。
 
 `enable`: `<integer> (0 - N)` ::
 
-Enable or disable the firewall cluster wide.
+在整个集群范围内启用或禁用防火墙。
 
 `log_ratelimit`: `[enable=]<1|0> [,burst=<integer>] [,rate=<rate>]` ::
 
-Log ratelimiting settings
+日志限速设置
 
 `burst`=`<integer> (0 - N)` ('default =' `5`);;
 
-Initial burst of packages which will always get logged before the rate is applied
+应用速率限制前始终会记录的初始突发包数量
 
 `enable`=`<boolean>` ('default =' `1`);;
 
-Enable or disable log rate limiting
+启用或禁用日志速率限制
 
 `rate`=`<rate>` ('default =' `1/second`);;
 
-Frequency with which the burst bucket gets refilled
+突发 bucket 重新填充的频率
 
 `policy_forward`: `<ACCEPT | DROP>` ::
 
-Forward policy.
+转发策略。
 
 `policy_in`: `<ACCEPT | DROP | REJECT>` ::
 
-Input policy.
+入站策略。
 
 `policy_out`: `<ACCEPT | DROP | REJECT>` ::
 
-Output policy.
-
+出站策略。

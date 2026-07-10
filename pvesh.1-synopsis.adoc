@@ -2,94 +2,100 @@
 
 *pvesh create* `<api_path>` `[OPTIONS]` `[FORMAT_OPTIONS]`
 
-Call API POST on <api_path>.
+对 <api_path> 调用 API POST。
 
 `<api_path>`: `<string>` ::
 
-API path.
+API 路径。
 
 `--noproxy` `<boolean>` ::
 
-Disable automatic proxying.
+禁用自动代理。
 
 *pvesh delete* `<api_path>` `[OPTIONS]` `[FORMAT_OPTIONS]`
 
-Call API DELETE on <api_path>.
+对 <api_path> 调用 API DELETE。
 
 `<api_path>`: `<string>` ::
 
-API path.
+API 路径。
 
 `--noproxy` `<boolean>` ::
 
-Disable automatic proxying.
+禁用自动代理。
 
 *pvesh get* `<api_path>` `[OPTIONS]` `[FORMAT_OPTIONS]`
 
-Call API GET on <api_path>.
+对 <api_path> 调用 API GET。
 
 `<api_path>`: `<string>` ::
 
-API path.
+API 路径。
 
 `--noproxy` `<boolean>` ::
 
-Disable automatic proxying.
+禁用自动代理。
 
 *pvesh help* `[OPTIONS]`
 
-Get help about specified command.
+获取指定命令的帮助。
 
 `--extra-args` `<array>` ::
 
-Shows help for a specific command
+显示特定命令的帮助。
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
 *pvesh ls* `<api_path>` `[OPTIONS]` `[FORMAT_OPTIONS]`
 
-List child objects on <api_path>.
+列出 <api_path> 下的子对象。
 
 `<api_path>`: `<string>` ::
 
-API path.
+API 路径。
 
 `--noproxy` `<boolean>` ::
 
-Disable automatic proxying.
+禁用自动代理。
 
 *pvesh set* `<api_path>` `[OPTIONS]` `[FORMAT_OPTIONS]`
 
-Call API PUT on <api_path>.
+对 <api_path> 调用 API PUT。
 
 `<api_path>`: `<string>` ::
 
-API path.
+API 路径。
 
 `--noproxy` `<boolean>` ::
 
-Disable automatic proxying.
+禁用自动代理。
 
 *pvesh usage* `<api_path>` `[OPTIONS]`
 
-print API usage information for <api_path>.
+打印 <api_path> 的 API 用法信息。
 
 `<api_path>`: `<string>` ::
 
-API path.
+API 路径。
 
 `--command` `<create | delete | get | set>` ::
 
-API command.
+API 命令。
 
 `--returns` `<boolean>` ::
 
-Including schema for returned data.
+包含返回数据的 schema。
 
 `--verbose` `<boolean>` ::
 
-Verbose output format.
+详细输出格式。
 
+.常用命令示例
 
+----
+pvesh get /nodes
+pvesh get /nodes/<node>/status
+pvesh ls /nodes/<node>
+----

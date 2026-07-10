@@ -1,29 +1,24 @@
 ifdef::manvolnum[]
-pve-ha-crm(8)
-=============
+= pve-ha-crm(8)
 :pve-toplevel:
 
-NAME
-----
+== NAME
 
-pve-ha-crm - PVE Cluster Resource Manager Daemon
+pve-ha-crm - PVE 集群资源管理器守护进程
 
 
-SYNOPSIS
---------
+== SYNOPSIS
 
 include::pve-ha-crm.8-synopsis.adoc[]
 
-DESCRIPTION
------------
+== DESCRIPTION
 endif::manvolnum[]
 
 ifndef::manvolnum[]
-Cluster Resource Manager Daemon
-================================
+= 集群资源管理器守护进程
 endif::manvolnum[]
 
-This is the Cluster Resource Manager Daemon.
+这是集群资源管理器守护进程。
 
 ifdef::manvolnum[]
 include::pve-copyright.adoc[]

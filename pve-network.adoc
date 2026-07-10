@@ -1,262 +1,180 @@
 [[sysadmin_network_configuration]]
-Network Configuration
----------------------
+== 网络配置
 ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-{pve} is using the Linux network stack. This provides a lot of flexibility on
-how to set up the network on the {pve} nodes. The configuration can be done
-either via the GUI, or by manually editing the file `/etc/network/interfaces`,
-which contains the whole network configuration. The  `interfaces(5)` manual
-page contains the complete format description. All {pve} tools try hard to keep
-direct user modifications, but using the GUI is still preferable, because it
-protects you from errors.
+{pve} 使用 Linux 网络栈。这使 {pve} 节点上的网络设置具备很高的灵活性。可以通过 GUI 完成配置，也可以手动编辑包含完整网络配置的 `/etc/network/interfaces` 文件。`interfaces(5)` 手册页包含完整的格式说明。所有 {pve} 工具都会尽量保留用户的直接修改，但仍然更建议使用 GUI，因为它可以帮助避免错误。
 
-A Linux bridge interface (commonly called 'vmbrX') is needed to connect guests
-to the underlying physical network. It can be thought of as a virtual switch
-which the guests and physical interfaces are connected to. This section provides
-some examples on how the network can be set up to accommodate different use cases
-like redundancy with a xref:sysadmin_network_bond['bond'],
-xref:sysadmin_network_vlan['vlans'] or
-xref:sysadmin_network_routed['routed'] and
-xref:sysadmin_network_masquerading['NAT'] setups.
+需要使用 Linux bridge 接口（通常称为 'vmbrX'）将客户机连接到底层物理网络。可以将其理解为一个虚拟交换机，客户机和物理接口都连接到该交换机。本节提供一些网络设置示例，以适配不同使用场景，例如通过 xref:sysadmin_network_bond['bond'] 实现冗余、使用 xref:sysadmin_network_vlan['vlans']，或采用 xref:sysadmin_network_routed['routed'] 与 xref:sysadmin_network_masquerading['NAT'] 配置。
 
-The xref:chapter_pvesdn[Software Defined Network] is an option for more complex
-virtual networks in {pve} clusters.
+xref:chapter_pvesdn[Software Defined Network] 可用于 {pve} 集群中更复杂的虚拟网络。
 
-WARNING: It's discouraged to use the traditional Debian tools `ifup` and `ifdown`
-if unsure, as they have some pitfalls like interrupting all guest traffic on
-`ifdown vmbrX` but not reconnecting those guest again when doing `ifup` on the
-same bridge later.
+WARNING: 如果不确定其影响，不建议使用传统 Debian 工具 `ifup` 和 `ifdown`，因为它们存在一些容易踩到的问题。例如执行 `ifdown vmbrX` 会中断所有客户机流量，但之后对同一 bridge 执行 `ifup` 时不会重新连接这些客户机。
 
-Apply Network Changes
-~~~~~~~~~~~~~~~~~~~~~
+=== 应用网络更改
 
-{pve} does not write changes directly to `/etc/network/interfaces`. Instead, we
-write into a temporary file called `/etc/network/interfaces.new`, this way you
-can do many related changes at once. This also allows to ensure your changes
-are correct before applying, as a wrong network configuration may render a node
-inaccessible.
+{pve} 不会将更改直接写入 `/etc/network/interfaces`。相反，系统会写入名为 `/etc/network/interfaces.new` 的临时文件，这样可以一次完成多项相关更改。这也允许在应用前确认更改是否正确，因为错误的网络配置可能导致节点无法访问。
 
-Live-Reload Network with ifupdown2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 使用 ifupdown2 实时重新加载网络
 
-With the recommended 'ifupdown2' package (default for new installations since
-{pve} 7.0), it is possible to apply network configuration changes without a
-reboot. If you change the network configuration via the GUI, you can click the
-'Apply Configuration' button. This will move changes from the staging
-`interfaces.new` file to `/etc/network/interfaces` and apply them live.
+使用推荐的 'ifupdown2' 软件包（自 {pve} 7.0 起为新安装的默认选择），可以在不重启的情况下应用网络配置更改。如果通过 GUI 修改网络配置，可以点击 'Apply Configuration' 按钮。该操作会将更改从暂存的 `interfaces.new` 文件移动到 `/etc/network/interfaces`，并实时应用。
 
-If you made manual changes directly to the `/etc/network/interfaces` file, you
-can apply them by running `ifreload -a`
+如果直接手动修改了 `/etc/network/interfaces` 文件，可以运行 `ifreload -a` 来应用这些更改。
 
-NOTE: If you installed {pve} on top of Debian, or upgraded to {pve} 7.0 from an
-older {pve} installation, make sure 'ifupdown2' is installed: `apt install
-ifupdown2`
+NOTE: 如果是在 Debian 之上安装 {pve}，或从较旧的 {pve} 安装升级到 {pve} 7.0，请确保已安装 'ifupdown2'：`apt install ifupdown2`
 
-Reboot Node to Apply
-^^^^^^^^^^^^^^^^^^^^
+==== 常用命令示例
 
-Another way to apply a new network configuration is to reboot the node.
-In that case the systemd service `pvenetcommit` will activate the staging
-`interfaces.new` file before the `networking` service will apply that
-configuration.
+查看当前网络接口配置：
 
-Naming Conventions
-~~~~~~~~~~~~~~~~~~
+----
+ip address show
+----
 
-We currently use the following naming conventions for device names:
+在使用 ifupdown2 的系统上实时重新加载网络配置：
 
-* Ethernet devices: `en*`, systemd network interface names. This naming scheme is
- used for new {pve} installations since version 5.0.
+----
+ifreload -a
+----
 
-* Ethernet devices: `eth[N]`, where 0 ≤ N (`eth0`, `eth1`, ...) This naming
-scheme is used for {pve} hosts which were installed before the 5.0
-release. When upgrading to 5.0, the names are kept as-is.
+==== 重启节点以应用
 
-* Bridge names: Commonly `vmbr[N]`, where 0 ≤ N ≤ 4094 (`vmbr0` - `vmbr4094`),
-but you can use any alphanumeric string that starts with a character and is at
-most 10 characters long.
+应用新网络配置的另一种方式是重启节点。在这种情况下，systemd 服务 `pvenetcommit` 会在 `networking` 服务应用配置前，先激活暂存的 `interfaces.new` 文件。
 
-* Bonds: `bond[N]`, where 0 ≤ N (`bond0`, `bond1`, ...)
+=== 命名约定
 
-* VLANs: Simply add the VLAN number to the device name,
-  separated by a period (`eno1.50`, `bond1.30`)
+当前设备名称使用以下命名约定：
 
-This makes it easier to debug networks problems, because the device
-name implies the device type.
+* Ethernet 设备：`en*`，即 systemd 网络接口名称。自 5.0 版本起，新的 {pve} 安装使用此命名方案。
+
+* Ethernet 设备：`eth[N]`，其中 0 ≤ N（`eth0`、`eth1` 等）。该命名方案用于 5.0 发布前安装的 {pve} 主机。升级到 5.0 时，名称会保持不变。
+
+* Bridge 名称：通常为 `vmbr[N]`，其中 0 ≤ N ≤ 4094（`vmbr0` - `vmbr4094`），但也可以使用任意以字符开头、最长 10 个字符的字母数字字符串。
+
+* Bonds：`bond[N]`，其中 0 ≤ N（`bond0`、`bond1` 等）。
+
+* VLAN：直接在设备名称后追加 VLAN 编号，并用句点分隔（`eno1.50`、`bond1.30`）。
+
+这样更容易调试网络问题，因为设备名称能够体现设备类型。
 
 [[systemd_network_interface_names]]
-Systemd Network Interface Names
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== Systemd 网络接口名称
 
-Systemd defines a versioned naming scheme for network device names. The
-scheme uses the two-character prefix `en` for Ethernet network devices. The
-next characters depends on the device driver, device location and other
-attributes. Some possible patterns are:
+Systemd 为网络设备名称定义了带版本的命名方案。该方案对 Ethernet 网络设备使用两个字符的前缀 `en`。后续字符取决于设备驱动、设备位置和其他属性。可能的模式包括：
 
-* `o<index>[n<phys_port_name>|d<dev_port>]` — devices on board
+* `o<index>[n<phys_port_name>|d<dev_port>]` — 板载设备
 
-* `s<slot>[f<function>][n<phys_port_name>|d<dev_port>]` — devices by hotplug id
+* `s<slot>[f<function>][n<phys_port_name>|d<dev_port>]` — 按热插拔 ID 标识的设备
 
-* `[P<domain>]p<bus>s<slot>[f<function>][n<phys_port_name>|d<dev_port>]` —
-devices by bus id
+* `[P<domain>]p<bus>s<slot>[f<function>][n<phys_port_name>|d<dev_port>]` — 按总线 ID 标识的设备
 
-* `x<MAC>` — devices by MAC address
+* `x<MAC>` — 按 MAC 地址标识的设备
 
-Some examples for the most common patterns are:
+以下是最常见模式的一些示例：
 
-* `eno1` — is the first on-board NIC
+* `eno1` — 第一块板载 NIC
 
-* `enp3s0f1` — is function 1 of the NIC on PCI bus 3, slot 0
+* `enp3s0f1` — PCI 总线 3、插槽 0 上 NIC 的功能 1
 
-For a full list of possible device name patterns, see the
+有关所有可能设备名称模式的完整列表，请参见
 https://manpages.debian.org/stable/systemd/systemd.net-naming-scheme.7.en.html[
-systemd.net-naming-scheme(7) manpage].
+systemd.net-naming-scheme(7) 手册页]。
 
-A new version of systemd may define a new version of the network device naming
-scheme, which it then uses by default. Consequently, updating to a newer
-systemd version, for example during a major {pve} upgrade, can change the names
-of network devices and require adjusting the network configuration. To avoid
-name changes due to a new version of the naming scheme, you can manually pin a
-particular naming scheme version (see
-xref:network_pin_naming_scheme_version[below]).
+新版本的 systemd 可能会定义新版网络设备命名方案，并默认使用该方案。因此，更新到较新的 systemd 版本时，例如进行 {pve} 大版本升级期间，网络设备名称可能发生变化，并需要调整网络配置。为避免因命名方案新版本导致名称变化，可以手动固定特定命名方案版本（见 xref:network_pin_naming_scheme_version[下文]）。
 
-However, even with a pinned naming scheme version, network device names can
-still change due to kernel or driver updates. In order to avoid name changes
-for a particular network device altogether, you can manually override its name
-using a link file (see xref:network_override_device_names[below]).
+但是，即使命名方案版本已固定，网络设备名称仍可能因内核或驱动更新而变化。要彻底避免特定网络设备名称变化，可以使用 link 文件手动覆盖其名称（见 xref:network_override_device_names[下文]）。
 
-For more information on network interface names, see
+有关网络接口名称的更多信息，请参见
 https://systemd.io/PREDICTABLE_INTERFACE_NAMES/[Predictable Network Interface
-Names].
+Names]。
 
 [[network_pin_naming_scheme_version]]
-Pinning a specific naming scheme version
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 固定特定命名方案版本
 
-You can pin a specific version of the naming scheme for network devices by
-adding the `net.naming-scheme=<version>` parameter to the
-xref:sysboot_edit_kernel_cmdline[kernel command line]. For a list of naming
-scheme versions, see the
+可以通过向 xref:sysboot_edit_kernel_cmdline[内核命令行] 添加 `net.naming-scheme=<version>` 参数，固定网络设备命名方案的特定版本。有关命名方案版本列表，请参见
 https://manpages.debian.org/stable/systemd/systemd.net-naming-scheme.7.en.html[
-systemd.net-naming-scheme(7) manpage].
+systemd.net-naming-scheme(7) 手册页]。
 
-For example, to pin the version `v252`, which is the latest naming scheme
-version for a fresh {pve} 8.0 installation, add the following kernel
-command-line parameter:
+例如，要固定版本 `v252`（这是全新安装 {pve} 8.0 时使用的最新命名方案版本），请添加以下内核命令行参数：
 
 ----
 net.naming-scheme=v252
 ----
 
-See also xref:sysboot_edit_kernel_cmdline[this section] on editing the kernel
-command line. You need to reboot for the changes to take effect.
+另请参见 xref:sysboot_edit_kernel_cmdline[本节]，了解如何编辑内核命令行。需要重启后更改才会生效。
 
 [[network_override_device_names]]
-Overriding network device names
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 覆盖网络设备名称
 
-Using the pve-network-interface-pinning Tool
-++++++++++++++++++++++++++++++++++++++++++++
+===== 使用 pve-network-interface-pinning 工具
 
-Proxmox VE provides a tool for automatically generating .link files for
-overriding the name of network devices. It also automatically replaces the
-occurences of the old interface name in the following files:
+Proxmox VE 提供了一个工具，可自动生成用于覆盖网络设备名称的 .link 文件。它还会自动替换以下文件中出现的旧接口名称：
 
 * `/etc/network/interfaces`
 * `/etc/pve/nodes/<nodename>/host.fw`
 * `/etc/pve/sdn/controllers.cfg`
 
-NOTE: Since the generated mapping is local to the node it is generated on,
-interface names contained in the Firewall Datacenter configuration
-(`/etc/pve/firewall/cluster.fw`) are **not** automatically updated.
+NOTE: 由于生成的映射只属于生成它的本地节点，Firewall Datacenter 配置（`/etc/pve/firewall/cluster.fw`）中包含的接口名称**不会**自动更新。
 
-The generated link files are stored in `/usr/local/lib/systemd/network`. For the
-configuration files a new file will be generated in the same place with a `.new`
-suffix. This way you can inspect the changes made to the configuration by
-using diff (or another diff viewer of your choice):
+生成的 link 文件存放在 `/usr/local/lib/systemd/network` 中。对于配置文件，会在相同位置生成带 `.new` 后缀的新文件。这样可以使用 diff（或你选择的其他 diff 查看器）检查对配置所做的更改：
 
 ----
 diff -y /etc/network/interfaces /etc/network/interfaces.new
 ----
 
-If you see any problematic changes or want to revert the changes made by the
-pinning tool **before rebooting**, simply delete all `.new` files and the
-respective link files from `/usr/local/lib/systemd/network`.
+如果发现任何有问题的更改，或希望在**重启前**撤销 pinning 工具所做的更改，只需删除所有 `.new` 文件以及 `/usr/local/lib/systemd/network` 中对应的 link 文件。
 
-The following command will generate a .link file for all physical network
-interfaces that do not yet have a .link file and update selected Proxmox VE
-configuration files (see above). The generated names will use the default prefix
-`nic`, so the resulting interface names will be `nic1`, `nic2`, ...
+以下命令会为尚未拥有 .link 文件的所有物理网络接口生成 .link 文件，并更新选定的 Proxmox VE 配置文件（见上文）。生成的名称将使用默认前缀 `nic`，因此得到的接口名称会是 `nic1`、`nic2` 等。
 
 ----
 pve-network-interface-pinning generate
 ----
 
-You can override the default prefix with the `--prefix` flag:
+可以使用 `--prefix` 标志覆盖默认前缀：
 
 ----
 pve-network-interface-pinning generate --prefix myprefix
 ----
 
-It is also possible to pin only a specific interface:
+也可以只固定特定接口：
 
 ----
 pve-network-interface-pinning generate --interface enp1s0
 ----
 
-When pinning a specific interface, you can specify the exact name that the
-interface should be pinned to:
+固定特定接口时，可以指定该接口应固定为的精确名称：
 
 ----
 pve-network-interface-pinning generate --interface enp1s0 --target-name if42
 ----
 
-In order to apply the changes made by `pve-network-interface-pinning` to the
-network configuration, the node needs to be rebooted.
+要将 `pve-network-interface-pinning` 所做更改应用到网络配置，需要重启节点。
 
 
-Manual method
-+++++++++++++
+===== 手动方法
 
-You can manually assign a name to a particular network device using a custom
+可以使用自定义
 https://manpages.debian.org/stable/udev/systemd.link.5.en.html[systemd.link
-file]. This overrides the name that would be assigned according to the latest
-network device naming scheme. This way, you can avoid naming changes due to
-kernel updates, driver updates or newer versions of the naming scheme.
+文件]为特定网络设备手动分配名称。这会覆盖按最新网络设备命名方案原本会分配的名称。通过这种方式，可以避免因内核更新、驱动更新或命名方案新版本导致名称变化。
 
-Custom link files should be placed in `/etc/systemd/network/` and named
-`<n>-<id>.link`, where `n` is a priority smaller than `99` and `id` is some
-identifier. A link file has two sections: `[Match]` determines which interfaces
-the file will apply to; `[Link]` determines how these interfaces should be
-configured, including their naming.
+自定义 link 文件应放在 `/etc/systemd/network/` 中，并命名为 `<n>-<id>.link`，其中 `n` 是小于 `99` 的优先级，`id` 是某个标识符。link 文件包含两个小节：`[Match]` 决定该文件应用到哪些接口；`[Link]` 决定这些接口应如何配置，包括其命名。
 
-To assign a name to a particular network device, you need a way to uniquely and
-permanently identify that device in the `[Match]` section. One possibility is
-to match the device's MAC address using the `MACAddress` option, as it is
-unlikely to change.
+要为特定网络设备分配名称，需要在 `[Match]` 小节中以唯一且持久的方式标识该设备。一种做法是使用 `MACAddress` 选项匹配设备的 MAC 地址，因为它通常不会变化。
 
-The `[Match]` section should also contain a `Type` option to make sure it only
-matches the expected physical interface, and not bridge/bond/VLAN interfaces
-with the same MAC address. In most setups, `Type` should be set to `ether` to
-match only Ethernet devices, but some setups may require other choices. See the
+`[Match]` 小节还应包含 `Type` 选项，以确保只匹配预期的物理接口，而不是具有相同 MAC 地址的 bridge/bond/VLAN 接口。在大多数配置中，`Type` 应设置为 `ether`，以便只匹配 Ethernet 设备，但某些配置可能需要其他选择。更多细节请参见
 https://manpages.debian.org/stable/udev/systemd.link.5.en.html[systemd.link(5)
-manpage] for more details.
+手册页]。
 
-Then, you can assign a name using the `Name` option in the `[Link]` section.
+然后，可以在 `[Link]` 小节中使用 `Name` 选项分配名称。
 
-Link files are copied to the `initramfs`, so it is recommended to refresh the
-`initramfs` after adding, modifying, or removing a link file:
+link 文件会被复制到 `initramfs`，因此建议在添加、修改或移除 link 文件后刷新 `initramfs`：
 
 ----
 # update-initramfs -u -k all
 ----
 
-For example, to assign the name `enwan0` to the Ethernet device with MAC
-address `aa:bb:cc:dd:ee:ff`, create a file
-`/etc/systemd/network/10-enwan0.link` with the following contents:
+例如，要将名称 `enwan0` 分配给 MAC 地址为 `aa:bb:cc:dd:ee:ff` 的 Ethernet 设备，请创建文件 `/etc/systemd/network/10-enwan0.link`，内容如下：
 
 ----
 [Match]
@@ -267,67 +185,38 @@ Type=ether
 Name=enwan0
 ----
 
-Do not forget to adjust `/etc/network/interfaces` to use the new name, and
-refresh your `initramfs` as described above. You need to reboot the node for
-the change to take effect.
+不要忘记调整 `/etc/network/interfaces` 以使用新名称，并按上文所述刷新 `initramfs`。需要重启节点后更改才会生效。
 
-NOTE: It is recommended to assign a name starting with `en` or `eth` so that
-{pve} recognizes the interface as a physical network device which can then be
-configured via the GUI. Also, you should ensure that the name will not clash
-with other interface names in the future. One possibility is to assign a name
-that does not match any name pattern that systemd uses for network interfaces
-(xref:systemd_network_interface_names[see above]), such as `enwan0` in the
-example above.
+NOTE: 建议分配以 `en` 或 `eth` 开头的名称，使 {pve} 能够将该接口识别为物理网络设备，并通过 GUI 进行配置。同时，应确保该名称未来不会与其他接口名称冲突。一种做法是分配一个不匹配 systemd 网络接口任何命名模式的名称（xref:systemd_network_interface_names[见上文]），例如上例中的 `enwan0`。
 
-For more information on link files, see the
+有关 link 文件的更多信息，请参见
 https://manpages.debian.org/stable/udev/systemd.link.5.en.html[systemd.link(5)
-manpage].
+手册页]。
 
-Choosing a network configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 选择网络配置
 
-Depending on your current network organization and your resources you can
-choose either a bridged, routed, or masquerading networking setup.
+可以根据当前网络组织方式和可用资源，选择 bridged、routed 或 masquerading 网络配置。
 
-{pve} server in a private LAN, using an external gateway to reach the internet
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 位于私有 LAN 中、通过外部网关访问互联网的 {pve} 服务器
 
-The *Bridged* model makes the most sense in this case, and this is also
-the default mode on new {pve} installations.
-Each of your Guest system will have a virtual interface attached to the
-{pve} bridge. This is similar in effect to having the Guest network card
-directly connected to a new switch on your LAN, the {pve} host playing the role
-of the switch.
+在这种情况下，*Bridged* 模型最合适，这也是新安装 {pve} 的默认模式。每个客户机系统都会有一个虚拟接口连接到 {pve} bridge。其效果类似于将客户机网卡直接连接到 LAN 中的一台新交换机，而 {pve} 主机承担该交换机的角色。
 
-{pve} server at hosting provider, with public IP ranges for Guests
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 位于托管服务提供商处、为客户机提供公网 IP 段的 {pve} 服务器
 
-For this setup, you can use either a *Bridged* or *Routed* model, depending on
-what your provider allows.
+对于这种配置，可以根据提供商允许的方式使用 *Bridged* 或 *Routed* 模型。
 
-{pve} server at hosting provider, with a single public IP address
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== 位于托管服务提供商处、只有单个公网 IP 地址的 {pve} 服务器
 
-In that case the only way to get outgoing network accesses for your guest
-systems is to use *Masquerading*. For incoming network access to your guests,
-you will need to configure *Port Forwarding*.
+在这种情况下，要让客户机系统访问外部网络，唯一方式是使用 *Masquerading*。如果需要外部访问客户机，则需要配置 *Port Forwarding*。
 
-For further flexibility, you can configure
-VLANs (IEEE 802.1q) and network bonding, also known as "link
-aggregation". That way it is possible to build complex and flexible
-virtual networks.
+为了获得更高灵活性，可以配置 VLAN（IEEE 802.1q）和网络 bonding，也称为 "link aggregation"。这样可以构建复杂且灵活的虚拟网络。
 
-Default Configuration using a Bridge
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用 Bridge 的默认配置
 
 [thumbnail="default-network-setup-bridge.svg"]
-Bridges are like physical network switches implemented in software.
-All virtual guests can share a single bridge, or you can create multiple
-bridges to separate network domains. Each host can have up to 4094 bridges.
+Bridge 类似于用软件实现的物理网络交换机。所有虚拟客户机可以共享一个 bridge，也可以创建多个 bridge 来隔离网络域。每台主机最多可以拥有 4094 个 bridge。
 
-The installation program creates a single bridge named `vmbr0`, which
-is connected to the first Ethernet card. The corresponding
-configuration in `/etc/network/interfaces` might look like this:
+安装程序会创建一个名为 `vmbr0` 的 bridge，并将其连接到第一块 Ethernet 网卡。`/etc/network/interfaces` 中的对应配置可能如下：
 
 ----
 auto lo
@@ -344,32 +233,19 @@ iface vmbr0 inet static
         bridge-fd 0
 ----
 
-Virtual machines behave as if they were directly connected to the
-physical network. The network, in turn, sees each virtual machine as
-having its own MAC, even though there is only one network cable
-connecting all of these VMs to the network.
+虚拟机的行为就像直接连接到物理网络一样。反过来，网络会将每台虚拟机视为拥有自己的 MAC，即使所有这些虚拟机实际只通过一根网络线缆连接到网络。
 
 [[sysadmin_network_routed]]
-Routed Configuration
-~~~~~~~~~~~~~~~~~~~~
+=== 路由配置
 
-Most hosting providers do not support the above setup. For security
-reasons, they disable networking as soon as they detect multiple MAC
-addresses on a single interface.
+大多数托管服务提供商不支持上述配置。出于安全原因，一旦检测到单个接口上存在多个 MAC 地址，它们就会禁用网络。
 
-TIP: Some providers allow you to register additional MACs through their
-management interface. This avoids the problem, but can be clumsy to
-configure because you need to register a MAC for each of your VMs.
+TIP: 某些提供商允许通过其管理界面注册额外 MAC。这可以避免该问题，但配置起来可能比较繁琐，因为需要为每台虚拟机注册一个 MAC。
 
-You can avoid the problem by ``routing'' all traffic via a single
-interface. This makes sure that all network packets use the same MAC
-address.
+可以通过将所有流量经由单个接口“路由”来避免该问题。这可以确保所有网络数据包都使用同一个 MAC 地址。
 
 [thumbnail="default-network-setup-routed.svg"]
-A common scenario is that you have a public IP (assume `198.51.100.5`
-for this example), and an additional IP block for your VMs
-(`203.0.113.16/28`). We recommend the following setup for such
-situations:
+常见场景是拥有一个公网 IP（本例假设为 `198.51.100.5`），并为虚拟机拥有一个额外 IP 段（`203.0.113.16/28`）。对于此类情况，建议使用以下配置：
 
 ----
 auto lo
@@ -393,13 +269,9 @@ iface vmbr0 inet static
 
 
 [[sysadmin_network_masquerading]]
-Masquerading (NAT) with `iptables`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 使用 `iptables` 的 Masquerading（NAT）
 
-Masquerading allows guests having only a private IP address to access the
-network by using the host IP address for outgoing traffic. Each outgoing
-packet is rewritten by `iptables` to appear as originating from the host,
-and responses are rewritten accordingly to be routed to the original sender.
+Masquerading 允许只有私有 IP 地址的客户机通过主机 IP 地址作为出站流量来源来访问网络。每个出站数据包都会由 `iptables` 重写，使其看起来像是源自主机；响应也会相应重写，以便路由回原始发送方。
 
 ----
 auto lo
@@ -424,19 +296,16 @@ iface vmbr0 inet static
         post-down iptables -t nat -D POSTROUTING -s '10.10.10.0/24' -o eno1 -j MASQUERADE
 ----
 
-NOTE: In some masquerade setups with firewall enabled, conntrack zones might be
-needed for outgoing connections. Otherwise the firewall could block outgoing
-connections since they will prefer the `POSTROUTING` of the VM bridge (and not
-`MASQUERADE`).
+NOTE: 在某些启用了防火墙的 masquerade 配置中，出站连接可能需要 conntrack zones。否则防火墙可能阻止出站连接，因为它们会优先匹配虚拟机 bridge 的 `POSTROUTING`，而不是 `MASQUERADE`。
 
-Adding these lines in the `/etc/network/interfaces` can fix this problem:
+在 `/etc/network/interfaces` 中添加以下行可以修复此问题：
 
 ----
 post-up   iptables -t raw -I PREROUTING -i fwbr+ -j CT --zone 1
 post-down iptables -t raw -D PREROUTING -i fwbr+ -j CT --zone 1
 ----
 
-For more information about this, refer to the following links:
+有关此问题的更多信息，请参考以下链接：
 
 https://commons.wikimedia.org/wiki/File:Netfilter-packet-flow.svg[Netfilter Packet Flow]
 
@@ -446,83 +315,37 @@ https://web.archive.org/web/20220610151210/https://blog.lobraun.de/2019/05/19/pr
 
 
 [[sysadmin_network_bond]]
-Linux Bond
-~~~~~~~~~~
+=== Linux Bond
 
-Bonding (also called NIC teaming or Link Aggregation) is a technique
-for binding multiple NIC's to a single network device.  It is possible
-to achieve different goals, like make the network fault-tolerant,
-increase the performance or both together.
+Bonding（也称为 NIC teaming 或 Link Aggregation）是一种将多个 NIC 绑定为单个网络设备的技术。它可以实现不同目标，例如提升网络容错能力、提高性能，或同时实现二者。
 
-High-speed hardware like Fibre Channel and the associated switching
-hardware can be quite expensive. By doing link aggregation, two NICs
-can appear as one logical interface, resulting in double speed. This
-is a native Linux kernel feature that is supported by most
-switches. If your nodes have multiple Ethernet ports, you can
-distribute your points of failure by running network cables to
-different switches and the bonded connection will failover to one
-cable or the other in case of network trouble.
+Fibre Channel 等高速硬件及其配套交换硬件可能非常昂贵。通过链路聚合，两块 NIC 可以呈现为一个逻辑接口，从而获得双倍速度。这是 Linux 内核原生功能，并受大多数交换机支持。如果节点有多个 Ethernet 端口，可以将网络线缆连接到不同交换机，以分散故障点；当网络出现问题时，bonded 连接会故障转移到其中一条线缆。
 
-Aggregated links can improve live-migration delays and improve the
-speed of replication of data between Proxmox VE Cluster nodes.
+聚合链路可以降低在线迁移延迟，并提高 Proxmox VE 集群节点之间的数据复制速度。
 
-There are 7 modes for bonding:
+Bonding 有 7 种模式：
 
-* *Round-robin (balance-rr):* Transmit network packets in sequential
-order from the first available network interface (NIC) slave through
-the last. This mode provides load balancing and fault tolerance.
+* *Round-robin (balance-rr):* 按顺序从第一个可用的从属网络接口（NIC）到最后一个接口传输网络数据包。该模式提供负载均衡和容错能力。
 
-* *Active-backup (active-backup):* Only one NIC slave in the bond is
-active. A different slave becomes active if, and only if, the active
-slave fails. The single logical bonded interface's MAC address is
-externally visible on only one NIC (port) to avoid distortion in the
-network switch. This mode provides fault tolerance.
+* *Active-backup (active-backup):* bond 中只有一个从属 NIC 处于活动状态。仅当活动从属接口失败时，另一个从属接口才会变为活动状态。单个逻辑 bonded 接口的 MAC 地址在外部只会出现在一个 NIC（端口）上，以避免网络交换机产生混乱。该模式提供容错能力。
 
-* *XOR (balance-xor):* Transmit network packets based on [(source MAC
-address XOR'd with destination MAC address) modulo NIC slave
-count]. This selects the same NIC slave for each destination MAC
-address. This mode provides load balancing and fault tolerance.
+* *XOR (balance-xor):* 根据 [(源 MAC 地址 XOR 目标 MAC 地址) modulo 从属 NIC 数量] 传输网络数据包。该模式会为每个目标 MAC 地址选择相同的从属 NIC，提供负载均衡和容错能力。
 
-* *Broadcast (broadcast):* Transmit network packets on all slave
-network interfaces. This mode provides fault tolerance.
+* *Broadcast (broadcast):* 在所有从属网络接口上传输网络数据包。该模式提供容错能力。
 
-* *IEEE 802.3ad Dynamic link aggregation (802.3ad)(LACP):* Creates
-aggregation groups that share the same speed and duplex
-settings. Utilizes all slave network interfaces in the active
-aggregator group according to the 802.3ad specification.
+* *IEEE 802.3ad Dynamic link aggregation (802.3ad)(LACP):* 创建共享相同速率和双工设置的聚合组。根据 802.3ad 规范使用活动聚合组中的所有从属网络接口。
 
-* *Adaptive transmit load balancing (balance-tlb):* Linux bonding
-driver mode that does not require any special network-switch
-support. The outgoing network packet traffic is distributed according
-to the current load (computed relative to the speed) on each network
-interface slave. Incoming traffic is received by one currently
-designated slave network interface. If this receiving slave fails,
-another slave takes over the MAC address of the failed receiving
-slave.
+* *Adaptive transmit load balancing (balance-tlb):* Linux bonding 驱动模式，不需要网络交换机提供任何特殊支持。出站网络数据包流量会按照每个从属网络接口当前负载（相对于速率计算）进行分配。入站流量由当前指定的一个从属网络接口接收。如果该接收从属接口失败，另一个从属接口会接管故障接收从属接口的 MAC 地址。
 
-* *Adaptive load balancing (balance-alb):* Includes balance-tlb plus receive
-load balancing (rlb) for IPV4 traffic, and does not require any
-special network switch support. The receive load balancing is achieved
-by ARP negotiation. The bonding driver intercepts the ARP Replies sent
-by the local system on their way out and overwrites the source
-hardware address with the unique hardware address of one of the NIC
-slaves in the single logical bonded interface such that different
-network-peers use different MAC addresses for their network packet
-traffic.
+* *Adaptive load balancing (balance-alb):* 包含 balance-tlb，并为 IPV4 流量提供接收负载均衡（rlb），不需要网络交换机提供任何特殊支持。接收负载均衡通过 ARP 协商实现。bonding 驱动会拦截本地系统发出的 ARP Replies，并将源硬件地址重写为单个逻辑 bonded 接口中某个从属 NIC 的唯一硬件地址，使不同网络对端使用不同 MAC 地址发送其网络数据包流量。
 
-If your switch supports the LACP (IEEE 802.3ad) protocol, then we recommend
-using the corresponding bonding mode (802.3ad). Otherwise you should generally
-use the active-backup mode.
+如果交换机支持 LACP（IEEE 802.3ad）协议，建议使用对应的 bonding 模式（802.3ad）。否则，通常应使用 active-backup 模式。
 
-For the cluster network (Corosync) we recommend configuring it with multiple
-networks. Corosync does not need a bond for network redundancy as it can switch
-between networks by itself, if one becomes unusable.
+对于集群网络（Corosync），建议配置多个网络。Corosync 不需要通过 bond 实现网络冗余，因为当某个网络不可用时，它可以自行在网络之间切换。
 
-The following bond configuration can be used as distributed/shared
-storage network. The benefit would be that you get more speed and the
-network will be fault-tolerant.
+以下 bond 配置可用作分布式/共享存储网络。其优势是可以获得更高速度，并让网络具备容错能力。
 
-.Example: Use bond with fixed IP address
+.示例：使用具有固定 IP 地址的 bond
 ----
 auto lo
 iface lo inet loopback
@@ -553,10 +376,9 @@ iface vmbr0 inet static
 
 
 [thumbnail="default-network-setup-bond.svg"]
-Another possibility is to use the bond directly as the bridge port.
-This can be used to make the guest network fault-tolerant.
+另一种做法是直接将 bond 用作 bridge port。这可用于让客户机网络具备容错能力。
 
-.Example: Use a bond as the bridge port
+.示例：将 bond 用作 bridge port
 ----
 auto lo
 iface lo inet loopback
@@ -584,62 +406,38 @@ iface vmbr0 inet static
 
 
 [[sysadmin_network_vlan]]
-VLAN 802.1Q
-~~~~~~~~~~~
+=== VLAN 802.1Q
 
-A virtual LAN (VLAN) is a broadcast domain that is partitioned and
-isolated in the network at layer two.  So it is possible to have
-multiple networks (4096) in a physical network, each independent of
-the other ones.
+虚拟 LAN（VLAN）是在网络二层进行划分和隔离的广播域。因此，可以在一个物理网络中拥有多个彼此独立的网络（4096 个）。
 
-Each VLAN network is identified by a number often called 'tag'.
-Network packages are then 'tagged' to identify which virtual network
-they belong to.
+每个 VLAN 网络由一个通常称为 'tag' 的数字标识。随后网络数据包会被“打标签”，用于标识其所属的虚拟网络。
 
 
-VLAN for Guest Networks
-^^^^^^^^^^^^^^^^^^^^^^^
+==== 客户机网络中的 VLAN
 
-{pve} supports this setup out of the box. You can specify the VLAN tag
-when you create a VM. The VLAN tag is part of the guest network
-configuration. The networking layer supports different modes to
-implement VLANs, depending on the bridge configuration:
+{pve} 原生支持此配置。创建虚拟机时可以指定 VLAN tag。VLAN tag 是客户机网络配置的一部分。根据 bridge 配置不同，网络层支持不同模式来实现 VLAN：
 
-* *VLAN awareness on the Linux bridge:*
-In this case, each guest's virtual network card is assigned to a VLAN tag,
-which is transparently supported by the Linux bridge.
-Trunk mode is also possible, but that makes configuration
-in the guest necessary.
+* *Linux bridge 上的 VLAN awareness:*
+在这种情况下，每个客户机的虚拟网卡都会分配一个 VLAN tag，并由 Linux bridge 透明支持。也可以使用 Trunk 模式，但这需要在客户机内进行配置。
 
-* *"traditional" VLAN on the Linux bridge:*
-In contrast to the VLAN awareness method, this method is not transparent
-and creates a VLAN device with associated bridge for each VLAN.
-That is, creating a guest on VLAN 5 for example, would create two
-interfaces eno1.5 and vmbr0v5, which would remain until a reboot occurs.
+* *Linux bridge 上的“传统” VLAN:*
+与 VLAN awareness 方法不同，此方法不是透明的，并会为每个 VLAN 创建一个 VLAN 设备及其关联 bridge。也就是说，例如在 VLAN 5 上创建客户机时，会创建 eno1.5 和 vmbr0v5 两个接口，并一直保留到发生重启。
 
 * *Open vSwitch VLAN:*
-This mode uses the OVS VLAN feature.
+此模式使用 OVS VLAN 功能。
 
-* *Guest configured VLAN:*
-VLANs are assigned inside the guest. In this case, the setup is
-completely done inside the guest and can not be influenced from the
-outside. The benefit is that you can use more than one VLAN on a
-single virtual NIC.
+* *客户机内配置的 VLAN:*
+VLAN 在客户机内部分配。在这种情况下，配置完全在客户机内完成，无法从外部影响。其优势是可以在单个虚拟 NIC 上使用多个 VLAN。
 
 
-VLAN on the Host
-^^^^^^^^^^^^^^^^
+==== 主机上的 VLAN
 
-To allow host communication with an isolated network. It is possible
-to apply VLAN tags to any network device (NIC, Bond, Bridge). In
-general, you should configure the VLAN on the interface with the least
-abstraction layers between itself and the physical NIC.
+为了允许主机与隔离网络通信，可以将 VLAN tag 应用到任意网络设备（NIC、Bond、Bridge）。一般来说，应在自身与物理 NIC 之间抽象层最少的接口上配置 VLAN。
 
-For example, in a default configuration where you want to place
-the host management address on a separate VLAN.
+例如，在默认配置中，如果希望将主机管理地址放在单独的 VLAN 上。
 
 
-.Example: Use VLAN 5 for the {pve} management IP with traditional Linux bridge
+.示例：使用传统 Linux bridge，将 VLAN 5 用于 {pve} 管理 IP
 ----
 auto lo
 iface lo inet loopback
@@ -664,7 +462,7 @@ iface vmbr0 inet manual
 
 ----
 
-.Example: Use VLAN 5 for the {pve} management IP with VLAN aware Linux bridge
+.示例：使用 VLAN aware Linux bridge，将 VLAN 5 用于 {pve} 管理 IP
 ----
 auto lo
 iface lo inet loopback
@@ -686,10 +484,9 @@ iface vmbr0 inet manual
         bridge-vids 2-4094
 ----
 
-The next example is the same setup but a bond is used to
-make this network fail-safe.
+下一个示例使用相同配置，但通过 bond 使该网络具备故障保护能力。
 
-.Example: Use VLAN 5 with bond0 for the {pve} management IP with traditional Linux bridge
+.示例：使用传统 Linux bridge，通过 bond0 上的 VLAN 5 配置 {pve} 管理 IP
 ----
 auto lo
 iface lo inet loopback
@@ -723,35 +520,27 @@ iface vmbr0 inet manual
 
 ----
 
-Disabling IPv6 on the Node
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 在节点上禁用 IPv6
 
-{pve} works correctly in all environments, irrespective of whether IPv6 is
-deployed or not. We recommend leaving all settings at the provided defaults.
+无论是否部署 IPv6，{pve} 都能在所有环境中正常工作。建议保留所有设置的默认值。
 
-Should you still need to disable support for IPv6 on your node, do so by
-creating an appropriate `sysctl.conf (5)` snippet file and setting the proper
+如果仍需在节点上禁用 IPv6 支持，请创建适当的 `sysctl.conf (5)` 片段文件，并设置正确的
 https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt[sysctls],
-for example adding `/etc/sysctl.d/disable-ipv6.conf` with content:
+例如添加内容如下的 `/etc/sysctl.d/disable-ipv6.conf`：
 
 ----
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 ----
 
-This method is preferred to disabling the loading of the IPv6 module on the
-https://www.kernel.org/doc/Documentation/networking/ipv6.rst[kernel commandline].
+相比在 https://www.kernel.org/doc/Documentation/networking/ipv6.rst[内核命令行] 中禁用 IPv6 模块加载，更推荐使用此方法。
 
 
-Disabling MAC Learning on a Bridge
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== 在 Bridge 上禁用 MAC Learning
 
-By default, MAC learning is enabled on a bridge to ensure a smooth experience
-with virtual guests and their networks.
+默认情况下，bridge 上会启用 MAC learning，以确保虚拟客户机及其网络获得平稳体验。
 
-But in some environments this can be undesired. Since {pve} 7.3 you can disable
-MAC learning on the bridge by setting the `bridge-disable-mac-learning 1`
-configuration on a bridge in `/etc/network/interfaces', for example:
+但在某些环境中，这可能并非期望行为。自 {pve} 7.3 起，可以在 `/etc/network/interfaces` 中为 bridge 设置 `bridge-disable-mac-learning 1` 配置，从而禁用该 bridge 上的 MAC learning，例如：
 
 ----
 # ...
@@ -766,9 +555,7 @@ iface vmbr0 inet static
         bridge-disable-mac-learning 1
 ----
 
-Once enabled, {pve} will manually add the configured MAC address from VMs and
-Containers to the bridges forwarding database to ensure that guest can still
-use the network - but only when they are using their actual MAC address.
+启用后，{pve} 会手动将虚拟机和容器中配置的 MAC 地址添加到 bridge 的 forwarding database，以确保客户机仍可使用网络，但前提是它们使用自身实际的 MAC 地址。
 
 ////
 TODO: explain IPv6 support?

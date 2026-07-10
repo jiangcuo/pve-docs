@@ -1,5 +1,4 @@
-Markdown Primer
-===============
+= Markdown 入门
 
 [quote, John Gruber, https://daringfireball.net/projects/markdown/]
 ____
@@ -8,22 +7,19 @@ to write using an easy-to-read, easy-to-write plain text format, then convert
 it to structurally valid XHTML (or HTML).
 ____
 
-The {pve} web interface has support for using Markdown to rendering rich text
-formatting in node and virtual guest notes.
+{pve} Web 界面支持使用 Markdown，在节点和虚拟客户机备注中渲染富文本格式。
 
-{pve} supports CommonMark with most extensions of GFM (GitHub Flavoured Markdown),
-like tables or task-lists.
+{pve} 支持 CommonMark，并支持 GFM（GitHub Flavoured Markdown）的大多数扩展，
+例如表格和任务列表。
 
 [[markdown_basics]]
 
-Markdown Basics
----------------
+== Markdown 基础
 
-Note that we only describe the basics here, please search the web for more
-extensive resources, for example on https://www.markdownguide.org/
+请注意，此处仅介绍基础知识。如需更完整的资料，请在网上查找，例如
+https://www.markdownguide.org/
 
-Headings
-~~~~~~~~
+=== 标题
 
 ----
 # This is a Heading h1
@@ -32,38 +28,33 @@ Headings
 ----
 
 
-Emphasis
-~~~~~~~~
+=== 强调
 
-Use `*text*` or `_text_` for emphasis.
+使用 `*text*` 或 `_text_` 表示强调。
 
-Use `**text**` or `__text__` for bold, heavy-weight text.
+使用 `**text**` 或 `__text__` 表示加粗的重点文本。
 
-Combinations are also possible, for example:
+也可以组合使用，例如：
 
 ----
 _You **can** combine them_
 ----
 
-Links
-~~~~~
+=== 链接
 
-You can use automatic detection of links, for example,
-`https://forum.proxmox.com/` would transform it into a clickable link.
+可以使用自动链接检测，例如 `https://forum.proxmox.com/` 会转换为可点击链接。
 
-You can also control the link text, for example:
+也可以控制链接文本，例如：
 
 ----
 Now, [the part in brackets will be the link text](https://forum.proxmox.com/).
 ----
 
-Lists
-~~~~~
+=== 列表
 
-Unordered Lists
-^^^^^^^^^^^^^^^
+==== 无序列表
 
-Use `*` or `-` for unordered lists, for example:
+使用 `*` 或 `-` 创建无序列表，例如：
 
 ----
 * Item 1
@@ -72,10 +63,9 @@ Use `*` or `-` for unordered lists, for example:
 * Item 2b
 ----
 
-Adding an indentation can be used to created nested lists.
+添加缩进可用于创建嵌套列表。
 
-Ordered Lists
-^^^^^^^^^^^^^
+==== 有序列表
 
 ----
 1. Item 1
@@ -85,14 +75,13 @@ Ordered Lists
   1. Item 3b
 ----
 
-NOTE: The integer of ordered lists does not need to be correct, they will be numbered automatically.
+NOTE: 有序列表中的数字不需要正确，最终会自动编号。
 
-Task Lists
-^^^^^^^^^^
+==== 任务列表
 
-Task list use a empty box `[ ]` for unfinished tasks and a box with an `X` for finished tasks.
+任务列表使用空框 `[ ]` 表示未完成任务，使用带 `X` 的框表示已完成任务。
 
-For example:
+例如：
 
 ----
 - [X] First task already done!
@@ -101,12 +90,10 @@ For example:
 - [ ] So is this one
 ----
 
-Tables
-~~~~~~
+=== 表格
 
-Tables use the pipe symbol `|` to separate columns, and `-` to separate the
-table header from the table body, in that separation one can also set the text
-alignment, making one column left-, center-, or right-aligned.
+表格使用管道符号 `|` 分隔列，并使用 `-` 分隔表头和表体；在该分隔行中还可以设置
+文本对齐方式，使某一列左对齐、居中或右对齐。
 
 ----
 | Left columns  | Right columns |  Some  | More | Cols.| Centering Works Too
@@ -118,13 +105,11 @@ alignment, making one column left-, center-, or right-aligned.
 | left rab      | right rab     | And    | Last | Here | The End            |
 ----
 
-Note that you do not need to align the columns nicely with white space, but that makes
-editing tables easier.
+请注意，不必使用空白字符将各列严格对齐，但这样会让表格编辑更容易。
 
-Block Quotes
-~~~~~~~~~~~~
+=== 块引用
 
-You can enter block quotes by prefixing a line with `>`, similar as in plain-text emails.
+可以通过在行首添加 `>` 输入块引用，类似纯文本电子邮件中的写法。
 
 ----
 > Markdown is a lightweight markup language with plain-text-formatting syntax,
@@ -135,27 +120,30 @@ You can enter block quotes by prefixing a line with `>`, similar as in plain-tex
 ----
 
 
-Code and Snippets
-~~~~~~~~~~~~~~~~~
+=== 代码和片段
 
-You can use backticks to avoid processing for a few word or paragraphs. That is useful for
-avoiding that a code or configuration hunk gets mistakenly interpreted as markdown.
+可以使用反引号避免处理少量词语或段落。这有助于避免代码或配置片段被误解释为
+Markdown。
 
-Inline code
-^^^^^^^^^^^
+==== 行内代码
 
-Surrounding part of a line with single backticks allows to write code inline,
-for examples:
+用单个反引号包围一行中的部分内容，可用于编写行内代码，例如：
 
 ----
 This hosts IP address is `10.0.0.1`.
 ----
 
-Whole blocks of code
-^^^^^^^^^^^^^^^^^^^^
+==== 整块代码
 
-For code blocks spanning several lines you can use triple-backticks to start
-and end such a block, for example:
+对于跨多行的代码块，可以使用三个反引号开始和结束该代码块，例如：
+
+.常用命令示例
+----
+```
+pveversion -v
+pvesh get /nodes
+```
+----
 
 ----
 ```
@@ -171,4 +159,3 @@ iface vmbr2 inet static
 
 ```
 ----
-
