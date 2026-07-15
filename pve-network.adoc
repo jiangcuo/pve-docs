@@ -22,7 +22,6 @@ WARNING: 如果不确定其影响，不建议使用传统 Debian 工具 `ifup` �
 
 如果直接手动修改了 `/etc/network/interfaces` 文件，可以运行 `ifreload -a` 来应用这些更改。
 
-NOTE: 如果是在 Debian 之上安装 {pve}，或从较旧的 {pve} 安装升级到 {pve} 7.0，请确保已安装 'ifupdown2'：`apt install ifupdown2`
 
 ==== 常用命令示例
 

@@ -4,7 +4,7 @@ ifdef::wiki[]
 :pve-toplevel:
 endif::wiki[]
 
-从以下地址下载安装程序 ISO 镜像：{website}en/downloads/proxmox-virtual-environment/iso
+从以下地址下载安装程序 ISO 镜像：https://www.lierfang.com
 
 {pve} 安装介质是一个混合 ISO 镜像，可通过两种方式使用：
 
@@ -16,7 +16,7 @@ endif::wiki[]
 
 === 将 USB 闪存盘准备为安装介质
 
-闪存盘至少需要有 1 GB 可用存储空间。
+闪存盘至少需要有 2 GB 可用存储空间。
 
 NOTE: 不要使用 UNetbootin。它不能配合 {pve} 安装镜像工作。
 
@@ -62,7 +62,7 @@ CAUTION: 务必非常谨慎，不要覆盖错误的磁盘。
 使用 `hdiutil` 的 convert 选项将 `.iso` 文件转换为 `.dmg` 格式，例如：
 
 ----
-# hdiutil convert proxmox-ve_*.iso -format UDRW -o proxmox-ve_*.dmg
+# hdiutil convert pxvirt_*.iso -format UDRW -o pxvirt_*.dmg
 ----
 
 TIP: macOS 通常会自动在输出文件名后添加 `.dmg`。
@@ -84,7 +84,7 @@ TIP: macOS 通常会自动在输出文件名后添加 `.dmg`。
 NOTE: 请将 X 替换为上一条命令显示的磁盘编号。
 
 ----
-# sudo dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX
+# sudo dd if=pxvirt_*.dmg bs=1M of=/dev/rdiskX
 ----
 
 NOTE: 上一条命令中有意使用 `rdiskX` 而不是 `diskX`，这样可以提升写入速度。

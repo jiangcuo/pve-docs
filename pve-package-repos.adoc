@@ -36,27 +36,22 @@ PXVIRT 软件包通过梨儿方 PXVIRT 仓库发布。请在每个 {pve} 节点�
 ----
 [pxvirt]
 name=Lierfang PxVirt Repo
-baseurl=https://ah1.mirrors.lierfang.com:8000/pxcloud/pxvirt/repo/openeuler/24.03/$basearch
+baseurl=https://mirrors.lierfang.com/pxcloud/pxvirt/repo/openeuler/24.03/$basearch
 enabled=1
 gpgcheck=1
-gpgkey=https://ah1.mirrors.lierfang.com:8000/pxcloud/lierfang.gpg
-username=testuser
-password=testusertestuser
+gpgkey=https://mirrors.lierfang.com/pxcloud/lierfang.gpg
 ----
 
-也可以使用以下命令写入该文件：
+也可以使用编辑器创建该文件：
 
 ----
-# tee /etc/yum.repos.d/pxvirt.repo > /dev/null <<'EOF'
+# editor /etc/yum.repos.d/pxvirt.repo
 [pxvirt]
 name=Lierfang PxVirt Repo
 baseurl=https://mirrors.lierfang.com/pxcloud/pxvirt/repo/openeuler/24.03/$basearch
 enabled=1
 gpgcheck=1
 gpgkey=https://mirrors.lierfang.com/pxcloud/lierfang.gpg
-username=testuser
-password=testusertestuser
-EOF
 ----
 
 配置完成后，刷新软件包元数据：
@@ -96,9 +91,9 @@ PXVIRT 仓库启用了 `gpgcheck=1`，DNF 会使用 `gpgkey` 指定的 GPG 公�
 # rpm --import https://mirrors.lierfang.com/pxcloud/lierfang.gpg
 ----
 
-
+ßß
 ==== 常用命令示例
-
+ß
 以下命令可用于刷新软件包索引、查看可升级软件包，并检查 {pve} 软件包版本：
 
 ----

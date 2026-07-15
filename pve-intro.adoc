@@ -150,6 +150,8 @@ License, version 3] 发布。这意味着你可以随时自由查看源代码，
 
 开源软件还有助于降低成本，并使核心基础架构不依赖单一厂商。
 
+Pxvirt 基于 Openeuler 发行版。将Proxmox VE原生软件包移植到国产的OS中，这意味着即便不用商业的操作系统，也可以拥有符合要求的超融合管理平台。
+
 
 == 使用 {pve} 的优势
 
@@ -227,6 +229,13 @@ enterprise repository 的访问。现在，任何 {pve} 订阅都包含对最稳
 footnote:[Migrate to Proxmox VE https://pve.proxmox.com/wiki/Migrate_to_Proxmox_VE]。
 此外，现在还可以在 Web 界面中从基于文件的存储直接导入 Open Virtualization
 Format（OVF/OVA）归档。
+
+== Pxvirt 项目历史
+2022 年，我们发行了基于pve 7.2的arm版本
+2023 年，我们发行了基于pve 8.0的loongarch64版本，同年我们和飞腾达成战略合作。
+2024 年，我们发行了飞腾专用版本
+2025 年，我们发行了基于openeuler的版本
+目前，Pxvirt已经支持4种主流架构，成为最受欢迎、功能最为健全的多架构超融合软件。
 
 include::howto-improve-pve-docs.adoc[]
 include::translation.adoc[]

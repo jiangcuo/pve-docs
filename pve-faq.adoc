@@ -139,7 +139,10 @@ PXVIRT 和 PVE 是什么关系？::
 
 PXVIRT 是基于 Proxmox VE 开源代码和相关生态组件适配、独立维护的虚拟化平台。
 它继承了 PVE 中经过验证的虚拟机、容器、集群、存储和 Web 管理等核心机制，
-同时面向 openEuler 和多架构环境进行适配、打包和扩展。
+同时面向 openEuler 和多架构环境进行适配、打包和扩展，属于Proxmox VE的衍生品，使用AGPL-3.0协议开源。
++
+您可以在https://github.com/jiangcuo/pxvirt 仓库中，获取我们的全部源码.
+从 https://gitea.lierfang.com/pxcloud/proxmox-rpms，获取我们的OpenEuler版本的全部源码。
 +
 PXVIRT 不是 Proxmox Server Solutions GmbH 的官方产品，也不隶属于 Proxmox 项目。
 Proxmox 和 Proxmox VE 是 Proxmox Server Solutions GmbH 的商标。

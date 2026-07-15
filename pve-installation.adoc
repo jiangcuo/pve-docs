@@ -203,9 +203,6 @@ WARNING: 不支持在任何硬件 RAID 之上使用 ZFS，这可能导致数据�
 
 . 使用 `root`（realm 'PAM'）用户名和安装期间选择的密码登录。
 
-. 上传订阅密钥以获得 Enterprise 仓库访问权限。否则，需要设置一个公开但测试较少
-  的软件包仓库，以获取安全修复、问题修复和新功能更新。
-
 . 检查 IP 配置和主机名。
 
 . 检查时区。
@@ -364,8 +361,8 @@ ifndef::wiki[]
 xref:sysadmin_package_repositories[配置仓库后]需要运行以下命令：
 
 ----
-# apt-get update
-# apt-get install proxmox-ve
+# dnf makecache
+# dnf install proxmox-ve
 ----
 
 在现有 OpenEuler 安装之上安装看似简单，但前提是基础系统已经正确安装，并且你清楚
@@ -374,17 +371,8 @@ xref:sysadmin_package_repositories[配置仓库后]需要运行以下命令：
 一般来说，这并不简单，尤其是在使用 LVM 或 ZFS 时。
 
 详细的逐步操作指南可在
-{webwiki-url}Install_Proxmox_VE_on_OpenEuler_12_Bookworm[wiki] 中找到。
 
-
-endif::wiki[]
-
-ifdef::wiki[]
-
-== 视频教程
-
-请在 https://www.youtube.com/proxmoxve[{pve} YouTube 频道]查看所有官方教程列表。
-
+https://docs.pxvirt.lierfang.com/zh/installfromopeneuler.html
 
 == 另请参阅
 

@@ -6,14 +6,16 @@ endif::manvolnum[]
 
 以下章节将重点介绍常见虚拟化任务，并说明 {pve} 在主机管理和运维方面的特定内容。
 
-{pve} 基于 https://www.debian.org/[Debian GNU/Linux]，并通过额外仓库提供 {pve}
-相关软件包。这意味着可以使用完整的 Debian 软件包体系，包括安全更新和错误修复。
-{pve} 提供基于 Ubuntu kernel 的自有 Linux kernel，并启用了所有必要的虚拟化和容器功能，
+Pxvirt 基于 https://www.openeuler.org/[OpenEuler GNU/Linux]，并通过额外仓库提供 {pve}
+相关软件包。这意味着可以使用完整的 OpenEuler 软件包体系，包括安全更新和错误修复。
+
+Pxvirt提供基于 OpenEuler kernel 的自有 Linux kernel，并启用了所有必要的虚拟化和容器功能，
 同时包含 https://zfsonlinux.org[ZFS] 以及若干额外硬件驱动。
 
-对于以下章节未涵盖的其他主题，请参考 Debian 文档。在线版
-https://debian-handbook.info/get[Debian Administrator\'s Handbook]
-对 Debian 操作系统进行了全面介绍（参见 xref:Hertzog13[]）。
+对于以下章节未涵盖的其他主题，请参考 OpenEuler 文档。在线版
+
+https://docs.openeuler.org/zh/
+
 
 ifdef::wiki[]
 
