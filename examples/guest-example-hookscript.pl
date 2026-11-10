@@ -54,8 +54,42 @@ if ($phase eq 'pre-start') {
 
     print "$vmid stopped. Doing cleanup.\n";
 
+} elsif ($phase eq 'guest-crash' || $phase eq 'guest-hang') {
+
+    # VM only: derived by qmeventd. 'guest-crash' needs machine version
+    # 10.0+pve2 or newer, 'guest-hang' the 'heartbeat' option. Like all phases except
+    # 'pre-start', this is only a notification, the exit code is ignored.
+    # Built-in reactions (screenshot, reset, ...) are configured with the
+    # 'vmhook' option and run after this script.
+
+    print "$vmid: $phase detected.\n";
+
+} elsif ($phase eq 'agent-lost' || $phase eq 'agent-recovered') {
+
+    # VM only: the guest agent stopped/resumed answering the heartbeat
+    # probes ('heartbeat' option).
+
+    print "$vmid: guest agent state changed ($phase).\n";
+
+} elsif ($phase eq 'pre-backup' || $phase eq 'post-backup' || $phase eq 'backup-failed') {
+
+    # VM only: around a backup of the guest.
+
+    print "$vmid: backup phase $phase.\n";
+
+} elsif ($phase eq 'pre-recovery' || $phase eq 'post-recovery') {
+
+    # VM only: before/after a 'vmhook' rule runs its first destructive
+    # action (snapshot, pause, reset, stop) and after the rule finished.
+
+    print "$vmid: vmhook recovery phase $phase.\n";
+
 } else {
-    die "got unknown phase '$phase'\n";
+
+    # More phases may be added in the future (see the 'Hookscripts'
+    # section of the documentation for the full list). Ignore the ones
+    # this script does not handle.
+
 }
 
 exit(0);

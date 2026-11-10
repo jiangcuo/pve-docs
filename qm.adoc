@@ -1997,6 +1997,142 @@ It will be called during various phases of the guests lifetime.
 For an example and documentation see the example script under
 `/usr/share/pve-docs/examples/guest-example-hookscript.pl`.
 
+The script is called as `<script> <vmid> <phase>`. Only the `pre-start` phase
+can abort an operation, by exiting with a code other than 0. All other phases
+are notifications, their exit code is ignored. A script should silently ignore
+phases it does not know, as new phases may be added in the future.
+
+Besides the classic `pre-start`, `post-start`, `pre-stop` and `post-stop`
+phases, the event daemon `qmeventd` reports the following phases of a VM. It
+collects the events of the running QEMU process, the results of the guest
+agent heartbeat (see xref:qm_event_monitoring[below]) and the operations done
+through {pve}, and derives composite events from them.
+
+[width="100%",options="header"]
+|===========================================================
+|Phase                  |Meaning
+2+^|*Run and power state*
+|`started`              |The QEMU process of the VM is running.
+|`guest-shutdown`       |The guest shut itself down.
+|`host-shutdown`        |The VM was shut down from the host (API, CLI).
+|`powerdown`            |An ACPI power button event was sent to the guest.
+|`guest-reboot`         |The guest rebooted itself.
+|`host-reset`           |The VM was reset from the host.
+|`pause`                |The VM was paused.
+|`resume`               |The VM was resumed.
+|`suspend`              |The guest entered a suspend-to-RAM state.
+|`suspend-disk`         |The guest entered a suspend-to-disk state.
+|`wakeup`               |The guest woke up from suspend.
+|`exited`               |The QEMU process of the VM exited.
+2+^|*Guest agent* (requires `heartbeat`)
+|`agent-up`             |The guest agent answered for the first time after (re)boot.
+|`agent-lost`           |The guest agent stopped answering.
+|`agent-recovered`      |A lost guest agent answers again.
+|`agent-no-response`    |The guest agent did not answer within `boot-timeout` after a (re)boot.
+2+^|*Composite events* (derived by `qmeventd`)
+|`guest-crash`          |The guest reported a crash (machine version `10.0+pve2` or newer).
+|`guest-hang`           |The guest agent is lost and the guest does no disk I/O.
+|`agent-fault`          |The guest agent is lost, but the guest still does disk I/O.
+|`boot-failed`          |The guest agent never answered since the last (re)boot.
+|`reboot-loop`          |The guest reset repeatedly in a short time.
+|`storage-fault`        |A disk of the VM got an I/O error.
+2+^|*Raw fault events*
+|`guest-panic`          |QEMU reported a guest panic.
+|`guest-crashloaded`    |The guest loaded a crash kernel after a panic.
+|`watchdog`             |A watchdog device of the VM fired.
+|`block-io-error`       |A disk of the VM reported an I/O error.
+2+^|*Backup and snapshot*
+|`pre-backup`           |A backup of the VM starts.
+|`post-backup`          |A backup of the VM finished successfully.
+|`backup-failed`        |A backup of the VM failed.
+|`pre-snapshot`         |A snapshot is about to be taken.
+|`post-snapshot`        |A snapshot was taken.
+|`pre-snapshot-delete`  |A snapshot is about to be deleted.
+|`post-snapshot-delete` |A snapshot was deleted.
+|`pre-rollback`         |The VM is about to be rolled back to a snapshot.
+|`post-rollback`        |The VM was rolled back to a snapshot.
+2+^|*Migration and other operations*
+|`pre-migrate`          |A migration of the VM starts (on the source node).
+|`post-migrate`         |A migration of the VM finished (on the source node).
+|`migrate-failed`       |A migration of the VM failed.
+|`migrate-in`           |The VM was migrated to this node (on the target node).
+|`pre-clone`            |The VM is about to be cloned.
+|`post-clone`           |The VM was cloned.
+|`post-restore`         |The VM was restored from a backup.
+|`pre-destroy`          |The VM is about to be destroyed.
+2+^|*Built-in recovery actions* (see `vmhook`)
+|`pre-recovery`         |A `vmhook` rule is about to run its first destructive action.
+|`post-recovery`        |A `vmhook` rule with destructive actions finished.
+|===========================================================
+
+[[qm_event_monitoring]]
+Event Monitoring and Built-in Actions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each event is passed to `qm event`, which first runs the hook script of the VM
+with the phase name and then the built-in actions configured in the `vmhook`
+option. The following VM options control which events are detected and how {pve}
+reacts on them.
+
+.Guest Agent Heartbeat
+
+----
+# qm set <vmid> --heartbeat 1,interval=10,timeout=3,failures=3,boot-timeout=300,hang-timeout=120
+----
+
+With `heartbeat` enabled, `qmeventd` probes the QEMU guest agent of the running
+VM every `interval` seconds, each probe may take up to `timeout` seconds. After
+`failures` consecutive failed probes the agent counts as lost. If the agent does
+not answer within `boot-timeout` seconds after a (re)boot, `agent-no-response`
+and, if it never answered since that boot, `boot-failed` are reported.
+
+A lost agent is reported as `agent-lost` at once. If the guest then does no
+disk I/O at all for `hang-timeout` seconds, it is reported as `guest-hang`; any
+disk I/O in that time means only the agent failed (`agent-fault`). This is an
+inference: an idle guest can be without disk I/O for a while, so do not set
+`hang-timeout` too low, especially if a `hang` rule resets the VM. The heartbeat
+requires the
+xref:qm_qemu_agent[QEMU Guest Agent] to be enabled with the `agent` option. The
+current state is shown as `heartbeat` in the VM status.
+
+.Crash Notification
+
+VMs with machine version `10.0+pve2` or newer have a `pvpanic-pci` device and,
+for Windows 8 and later, the Hyper-V crash MSRs, so a crashing guest is reported
+as `guest-crash`, for Windows including the bugcheck code. The guest keeps
+running after a crash (to write its crash dump, for example), use `vmhook` to
+react on it. VMs pinned to an older machine version keep their hardware. Linux
+guests report a panic through the `pvpanic` kernel driver, Windows through the
+Hyper-V crash MSRs without any driver.
+
+.Built-in Actions
+
+----
+# qm set <vmid> --vmhook crash=screenshot+snapshot+notify+reset,hang=screenshot+notify+reset,max-actions=3,window=3600,delay=5
+----
+
+The `vmhook` option maps events to an ordered list of actions, joined by `+`.
+Rules exist for `crash`, `hang`, `agent-fault`, `boot-failed`, `reboot-loop`,
+`storage-fault` and `watchdog`. The available actions are:
+
+* `log`: log the event and its data.
+* `screenshot`: save a screenshot of the VM display under
+`/var/lib/qemu-server/screenshots/`.
+* `snapshot`: take a snapshot of the VM.
+* `notify`: send a notification through the notification system, including
+the screenshot if one was taken before.
+* `pause`: pause the VM.
+* `reset`: reset the VM.
+* `stop`: stop the VM.
+
+The actions run `delay` seconds (default 5) after the event, for example to let
+the guest draw its crash screen. The destructive actions `snapshot`, `pause`,
+`reset` and `stop` are limited to `max-actions` (default 3) per `window` seconds
+(default 3600), so a guest that keeps crashing cannot loop forever. Once the
+limit is reached, only `log`, `screenshot` and `notify` run. Before the first
+destructive action of a rule, the hook script is called with the
+`pre-recovery` phase, and with `post-recovery` after the rule finished.
+
 [[qm_hibernate]]
 Hibernation
 -----------
